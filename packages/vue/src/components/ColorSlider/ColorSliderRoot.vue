@@ -1,6 +1,5 @@
 <script lang="ts">
 import type { Ref } from "vue";
-import type { SliderRootProps } from "reka-ui";
 import { createContext, SliderRoot, useForwardExpose } from "reka-ui";
 import "internationalized-color/css";
 import { Color } from "internationalized-color";
@@ -20,6 +19,8 @@ export interface ColorSliderRootProps {
   inverted?: boolean;
   /** The orientation of the slider. */
   orientation?: "horizontal" | "vertical";
+  /** When true, reflects the color's alpha channel as canvas opacity on the gradient. */
+  alpha?: boolean;
 }
 
 export type ColorSliderRootEmits = {
@@ -29,6 +30,8 @@ export type ColorSliderRootEmits = {
 
 export interface ColorSliderRootContext {
   colorRef: Ref<Color | undefined>;
+  alpha: Ref<boolean>;
+  channel: Ref<string>;
 }
 
 export const [injectColorSliderRootContext, provideColorSliderRootContext]
@@ -36,13 +39,14 @@ export const [injectColorSliderRootContext, provideColorSliderRootContext]
 </script>
 
 <script setup lang="ts">
-import { computed, shallowRef, watch } from "vue";
+import { computed, shallowRef, toRef, watch } from "vue";
 import { getChannelConfig, displayToCulori, culoriToDisplay } from "@urcolor/core";
 
 const props = withDefaults(defineProps<ColorSliderRootProps>(), {
   colorSpace: "hsl",
   channel: "h",
   disabled: false,
+  alpha: false,
 });
 const emit = defineEmits<ColorSliderRootEmits>();
 
@@ -61,12 +65,18 @@ watch(() => props.modelValue, (val) => {
   if (parsed) colorRef.value = parsed;
 });
 
-const channelConfig = computed(() => getChannelConfig(props.colorSpace, props.channel));
+const isAlpha = computed(() => props.channel === "alpha");
+
+const alphaConfig = { key: "alpha", label: "Alpha", min: 0, max: 100, step: 1, format: "percentage" as const, culoriMin: 0, culoriMax: 1 };
+const channelConfig = computed(() => isAlpha.value ? alphaConfig : getChannelConfig(props.colorSpace, props.channel));
 
 // Extract display value from Color for the internal slider
 const internalValue = computed<number[]>({
   get() {
     if (!colorRef.value || !channelConfig.value) return [channelConfig.value?.min ?? 0];
+    if (isAlpha.value) {
+      return [Math.round((colorRef.value.alpha ?? 1) * 100)];
+    }
     const converted = colorRef.value.to(props.colorSpace);
     if (!converted) return [channelConfig.value.min];
     const raw = converted.get(props.channel, 0);
@@ -74,13 +84,20 @@ const internalValue = computed<number[]>({
   },
   set(val: number[]) {
     if (!colorRef.value || !channelConfig.value || val[0] === undefined) return;
-    const culoriVal = displayToCulori(channelConfig.value, val[0]);
-    const newColor = colorRef.value.set({
-      mode: props.colorSpace,
-      [props.channel]: culoriVal,
-    });
-    colorRef.value = newColor;
-    emit("update:modelValue", newColor);
+    let newColor: Color | undefined;
+    if (isAlpha.value) {
+      newColor = colorRef.value.set({ alpha: val[0] / 100 });
+    } else {
+      const culoriVal = displayToCulori(channelConfig.value, val[0]);
+      newColor = colorRef.value.set({
+        mode: props.colorSpace,
+        [props.channel]: culoriVal,
+      });
+    }
+    if (newColor) {
+      colorRef.value = newColor;
+      emit("update:modelValue", newColor);
+    }
   },
 });
 
@@ -90,7 +107,7 @@ function handleValueCommit() {
   }
 }
 
-provideColorSliderRootContext({ colorRef });
+provideColorSliderRootContext({ colorRef, alpha: toRef(props, "alpha"), channel: toRef(props, "channel") });
 </script>
 
 <template>

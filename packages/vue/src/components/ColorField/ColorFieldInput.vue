@@ -31,7 +31,7 @@ function onInput(event: Event) {
 
 function onFocus(event: FocusEvent) {
   const target = event.target as HTMLInputElement;
-  nextTick(() => target.select());
+  nextTick(() => target.select()).catch(() => {});
 }
 
 function onBlur() {

@@ -2,11 +2,10 @@
 import type { Ref } from "vue";
 import type { PrimitiveProps } from "reka-ui";
 import { createContext, useDirection, useForwardExpose, VisuallyHidden } from "reka-ui";
-import { useVModel } from "@vueuse/core";
-import { computed, ref, shallowRef, toRaw, toRefs, watch } from "vue";
+import { computed, ref, shallowRef, toRefs, watch } from "vue";
 import "internationalized-color/css";
 import { Color } from "internationalized-color";
-import { colorSpaces, getChannelConfig, displayToCulori, culoriToDisplay } from "@urcolor/core";
+import { colorSpaces, getChannelConfig, displayToCulori, culoriToDisplay, type ChannelConfig } from "@urcolor/core";
 import type { ActiveDirection } from "./utils";
 import { useCollection, useFormControl, ARROW_KEYS, getClosestThumbIndex, hasMinStepsBetweenValues, linearScale, snapToStep } from "./utils";
 
@@ -34,10 +33,10 @@ export interface ColorAreaRootProps extends /* @vue-ignore */ PrimitiveProps {
   invertedY?: boolean;
   /** The color space mode to work in (e.g. 'hsl', 'oklch'). */
   colorSpace?: string;
-  /** Which channel maps to the X axis (e.g. 's' for HSL saturation). */
-  xChannel?: string;
-  /** Which channel maps to the Y axis (e.g. 'l' for HSL lightness). */
-  yChannel?: string;
+  /** Which channel maps to the X axis (e.g. 's' for HSL saturation, or 'alpha' for opacity). */
+  channelX?: string;
+  /** Which channel maps to the Y axis (e.g. 'l' for HSL lightness, or 'alpha' for opacity). */
+  channelY?: string;
   /** The minimum permitted steps between multiple thumbs on the X axis. */
   minXStepsBetweenThumbs?: number;
   /** The minimum permitted steps between multiple thumbs on the Y axis. */
@@ -49,6 +48,8 @@ export interface ColorAreaRootProps extends /* @vue-ignore */ PrimitiveProps {
    * @defaultValue 'overflow'
    */
   thumbAlignment?: ThumbAlignment;
+  /** When true, the gradient will render with alpha transparency (checkerboard + opacity). @defaultValue false */
+  alpha?: boolean;
 }
 
 export type ColorAreaRootEmits = {
@@ -73,6 +74,12 @@ export interface ColorAreaRootContext {
   isSlidingFromLeft: Ref<boolean>;
   isSlidingFromTop: Ref<boolean>;
   thumbAlignment: Ref<ThumbAlignment>;
+  colorSpace: Ref<string>;
+  xChannelKey: Ref<string>;
+  yChannelKey: Ref<string>;
+  colorRef: Readonly<Ref<Color | undefined>>;
+  dir: Ref<Direction>;
+  alpha: Ref<boolean>;
 }
 
 export const [injectColorAreaRootContext, provideColorAreaRootContext]
@@ -94,6 +101,7 @@ const props = withDefaults(defineProps<ColorAreaRootProps>(), {
   minXStepsBetweenThumbs: 0,
   minYStepsBetweenThumbs: 0,
   thumbAlignment: "overflow",
+  alpha: false,
   as: "span",
 });
 const emits = defineEmits<ColorAreaRootEmits>();
@@ -111,12 +119,26 @@ const { forwardRef, currentElement } = useForwardExpose();
 const isFormControl = useFormControl(currentElement);
 const { CollectionSlot } = useCollection({ isProvider: true });
 
+// Alpha channel config (display 0-100, culori 0-1)
+const ALPHA_CONFIG: ChannelConfig = {
+  key: "alpha",
+  label: "Alpha",
+  min: 0,
+  max: 100,
+  step: 1,
+  format: "percentage",
+  culoriMin: 0,
+  culoriMax: 1,
+};
+
 // Resolve default xChannel/yChannel from colorSpace
 const spaceConfig = computed(() => colorSpaces[props.colorSpace]);
-const xChannelKey = computed(() => props.xChannel ?? spaceConfig.value?.channels[0]?.key ?? "h");
-const yChannelKey = computed(() => props.yChannel ?? spaceConfig.value?.channels[1]?.key ?? "s");
-const xConfig = computed(() => getChannelConfig(props.colorSpace, xChannelKey.value));
-const yConfig = computed(() => getChannelConfig(props.colorSpace, yChannelKey.value));
+const xChannelKey = computed(() => props.channelX ?? spaceConfig.value?.channels[0]?.key ?? "h");
+const yChannelKey = computed(() => props.channelY ?? spaceConfig.value?.channels[1]?.key ?? "s");
+const xIsAlpha = computed(() => xChannelKey.value === "alpha");
+const yIsAlpha = computed(() => yChannelKey.value === "alpha");
+const xConfig = computed(() => xIsAlpha.value ? ALPHA_CONFIG : getChannelConfig(props.colorSpace, xChannelKey.value));
+const yConfig = computed(() => yIsAlpha.value ? ALPHA_CONFIG : getChannelConfig(props.colorSpace, yChannelKey.value));
 
 const minX = computed(() => xConfig.value?.min ?? 0);
 const maxX = computed(() => xConfig.value?.max ?? 100);
@@ -146,8 +168,8 @@ function colorToDisplayValues(color: Color | undefined): number[][] {
   if (!color || !xConfig.value || !yConfig.value) return [[minX.value, minY.value]];
   const converted = color.to(props.colorSpace);
   if (!converted) return [[minX.value, minY.value]];
-  const rawX = converted.get(xChannelKey.value, 0);
-  const rawY = converted.get(yChannelKey.value, 0);
+  const rawX = xIsAlpha.value ? (color.alpha ?? 1) : converted.get(xChannelKey.value, 0);
+  const rawY = yIsAlpha.value ? (color.alpha ?? 1) : converted.get(yChannelKey.value, 0);
   return [[culoriToDisplay(xConfig.value, rawX), culoriToDisplay(yConfig.value, rawY)]];
 }
 
@@ -168,11 +190,13 @@ function displayValuesToColor(vals: number[][]): Color | undefined {
   if (!vals[0] || !colorRef.value || !xConfig.value || !yConfig.value) return undefined;
   const culoriX = displayToCulori(xConfig.value, vals[0][0] ?? 0);
   const culoriY = displayToCulori(yConfig.value, vals[0][1] ?? 0);
-  return colorRef.value.set({
-    mode: props.colorSpace,
-    [xChannelKey.value]: culoriX,
-    [yChannelKey.value]: culoriY,
-  });
+  const channelUpdates: Record<string, number> = {};
+  if (!xIsAlpha.value) channelUpdates[xChannelKey.value] = culoriX;
+  if (!yIsAlpha.value) channelUpdates[yChannelKey.value] = culoriY;
+  let result = colorRef.value.set({ mode: props.colorSpace, ...channelUpdates });
+  if (xIsAlpha.value) result = result.set({ alpha: culoriX });
+  if (yIsAlpha.value) result = result.set({ alpha: culoriY });
+  return result;
 }
 
 const currentModelValue = computed(() => Array.isArray(internalValue.value) ? [...internalValue.value] : []);
@@ -378,6 +402,12 @@ provideColorAreaRootContext({
   isSlidingFromLeft,
   isSlidingFromTop,
   thumbAlignment,
+  colorSpace: computed(() => props.colorSpace),
+  xChannelKey,
+  yChannelKey,
+  colorRef,
+  dir,
+  alpha: computed(() => props.alpha),
 });
 </script>
 

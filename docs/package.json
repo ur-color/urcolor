@@ -10,11 +10,15 @@
   },
   "devDependencies": {
     "@iconify/vue": "^5.0.0",
+    "@tailwindcss/vite": "^4.1.18",
+    "shiki": "^3.22.0",
+    "tailwindcss": "^4.1.18",
     "vitepress": "^1",
     "vue": "^3"
   },
   "dependencies": {
     "@urcolor/core": "workspace:*",
-    "@urcolor/vue": "workspace:*"
+    "@urcolor/vue": "workspace:*",
+    "gsap": "^3.12.7"
   }
 }

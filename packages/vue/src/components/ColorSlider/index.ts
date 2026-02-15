@@ -20,3 +20,7 @@ export {
   default as ColorSliderGradient,
   type ColorSliderGradientProps,
 } from "./ColorSliderGradient.vue";
+export {
+  default as ColorSliderCheckerboard,
+  type ColorSliderCheckerboardProps,
+} from "./ColorSliderCheckerboard.vue";

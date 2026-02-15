@@ -14,20 +14,14 @@ export interface ColorAreaGradientProps extends /* @vue-ignore */ PrimitiveProps
   bottomRight?: string;
   /** When set to a non-RGB color space, uses 2D canvas with perceptual interpolation in that space instead of WebGL (sRGB). */
   interpolationSpace?: string;
-  /** Base color for channel-based rendering. When set along with colorSpace/xChannel/yChannel, renders by sampling each pixel directly instead of bilinear interpolation. */
-  baseColor?: string;
-  /** Color space for channel-based rendering. */
-  colorSpace?: string;
-  /** X-axis channel key for channel-based rendering. */
-  xChannel?: string;
-  /** Y-axis channel key for channel-based rendering. */
-  yChannel?: string;
+  /** When true, renders a checkerboard pattern behind the gradient to visualize alpha transparency. */
+  alpha?: boolean;
 }
 </script>
 
 <script setup lang="ts">
 import "internationalized-color/css";
-import { ref, watch, onBeforeUnmount } from "vue";
+import { ref, watch, computed, onBeforeUnmount } from "vue";
 import { useResizeObserver } from "@vueuse/core";
 import { useForwardExpose, Primitive } from "reka-ui";
 import { Color } from "internationalized-color";
@@ -43,6 +37,19 @@ const rootContext = injectColorAreaRootContext();
 useForwardExpose();
 
 const canvasRef = ref<HTMLCanvasElement | null>(null);
+
+// Determine if either axis is alpha
+const xIsAlpha = computed(() => rootContext.xChannelKey.value === "alpha");
+const yIsAlpha = computed(() => rootContext.yChannelKey.value === "alpha");
+const hasAlphaAxis = computed(() => xIsAlpha.value || yIsAlpha.value);
+
+// Canvas opacity: reflect color's alpha when alpha prop is enabled (but not when axis IS alpha)
+const canvasOpacity = computed(() => {
+  if ((props.alpha || rootContext.alpha.value) && !hasAlphaAxis.value) {
+    return rootContext.colorRef.value?.alpha ?? 1;
+  }
+  return 1;
+});
 
 function renderToCanvas(canvas: HTMLCanvasElement, pixels: Uint8ClampedArray, sampleW: number, sampleH: number) {
   const ctx = canvas.getContext("2d");
@@ -76,55 +83,95 @@ function render() {
   const slidingFromLeft = rootContext.isSlidingFromLeft.value;
   const slidingFromTop = rootContext.isSlidingFromTop.value;
 
-  // Channel-based rendering mode
-  if (props.baseColor && props.colorSpace && props.xChannel && props.yChannel) {
-    const base = Color.parse(props.baseColor);
-    if (!base) return;
+  // Channel-based rendering mode: read from root context
+  const colorSpace = rootContext.colorSpace.value;
+  const xChannel = rootContext.xChannelKey.value;
+  const yChannel = rootContext.yChannelKey.value;
+  const baseColorObj = rootContext.colorRef.value;
 
-    const xCfg = getChannelConfig(props.colorSpace, props.xChannel);
-    const yCfg = getChannelConfig(props.colorSpace, props.yChannel);
-    if (!xCfg || !yCfg) return;
+  // If we have corner colors, use bilinear mode
+  if (props.topLeft || props.topRight || props.bottomLeft || props.bottomRight) {
+    const tl = Color.parse(props.topLeft ?? "black");
+    const tr = Color.parse(props.topRight ?? "black");
+    const bl = Color.parse(props.bottomLeft ?? "black");
+    const br = Color.parse(props.bottomRight ?? "black");
 
-    const xMinVal = xCfg.culoriMin ?? xCfg.min;
-    const xMaxVal = xCfg.culoriMax ?? xCfg.max;
-    const yMinVal = yCfg.culoriMin ?? yCfg.min;
-    const yMaxVal = yCfg.culoriMax ?? yCfg.max;
+    if (!tl || !tr || !bl || !br) return;
 
-    const sampleW = 64;
-    const sampleH = 64;
-    const pixels = sampleChannelGrid(
-      base, props.colorSpace,
-      props.xChannel, props.yChannel,
-      slidingFromLeft ? xMinVal : xMaxVal, slidingFromLeft ? xMaxVal : xMinVal,
-      slidingFromTop ? yMinVal : yMaxVal, slidingFromTop ? yMaxVal : yMinVal,
-      sampleW, sampleH,
-    );
-    renderToCanvas(canvas, pixels, sampleW, sampleH);
+    const [ctl, ctr, cbl, cbr] = (() => {
+      let [a, b, c, d] = [tl, tr, bl, br];
+      if (!slidingFromLeft) [a, b, c, d] = [b, a, d, c];
+      if (!slidingFromTop) [a, b, c, d] = [c, d, a, b];
+      return [a, b, c, d];
+    })();
+
+    if (props.interpolationSpace) {
+      const sampleW = 64;
+      const sampleH = 64;
+      const pixels = sampleBilinearGrid(ctl, ctr, cbl, cbr, sampleW, sampleH, props.interpolationSpace, hasAlphaAxis.value);
+      renderToCanvas(canvas, pixels, sampleW, sampleH);
+    } else {
+      drawGradient(canvas, ctl, ctr, cbl, cbr, hasAlphaAxis.value);
+    }
     return;
   }
 
-  const tl = Color.parse(props.topLeft ?? "black");
-  const tr = Color.parse(props.topRight ?? "black");
-  const bl = Color.parse(props.bottomLeft ?? "black");
-  const br = Color.parse(props.bottomRight ?? "black");
+  // Channel-based rendering from root context
+  if (baseColorObj && colorSpace) {
+    // Resolve the actual channel keys for sampling (skip alpha axes)
+    const effectiveXChannel = xIsAlpha.value ? null : xChannel;
+    const effectiveYChannel = yIsAlpha.value ? null : yChannel;
 
-  if (!tl || !tr || !bl || !br) return;
+    // We need at least one real channel axis to sample
+    const realChannel = effectiveXChannel ?? effectiveYChannel;
+    if (!realChannel) return;
 
-  // Swap corners based on axis direction
-  const [ctl, ctr, cbl, cbr] = (() => {
-    let [a, b, c, d] = [tl, tr, bl, br];
-    if (!slidingFromLeft) [a, b, c, d] = [b, a, d, c];
-    if (!slidingFromTop) [a, b, c, d] = [c, d, a, b];
-    return [a, b, c, d];
-  })();
+    if (effectiveXChannel && effectiveYChannel) {
+      // Both axes are real channels — standard 2D channel sampling
+      const xCfg = getChannelConfig(colorSpace, effectiveXChannel);
+      const yCfg = getChannelConfig(colorSpace, effectiveYChannel);
+      if (!xCfg || !yCfg) return;
 
-  if (props.interpolationSpace) {
-    const sampleW = 64;
-    const sampleH = 64;
-    const pixels = sampleBilinearGrid(ctl, ctr, cbl, cbr, sampleW, sampleH, props.interpolationSpace);
-    renderToCanvas(canvas, pixels, sampleW, sampleH);
-  } else {
-    drawGradient(canvas, ctl, ctr, cbl, cbr);
+      const xMinVal = xCfg.culoriMin ?? xCfg.min;
+      const xMaxVal = xCfg.culoriMax ?? xCfg.max;
+      const yMinVal = yCfg.culoriMin ?? yCfg.min;
+      const yMaxVal = yCfg.culoriMax ?? yCfg.max;
+
+      const sampleW = 64;
+      const sampleH = 64;
+      const pixels = sampleChannelGrid(
+        baseColorObj, colorSpace,
+        effectiveXChannel, effectiveYChannel,
+        slidingFromLeft ? xMinVal : xMaxVal, slidingFromLeft ? xMaxVal : xMinVal,
+        slidingFromTop ? yMinVal : yMaxVal, slidingFromTop ? yMaxVal : yMinVal,
+        sampleW, sampleH, hasAlphaAxis.value,
+      );
+      renderToCanvas(canvas, pixels, sampleW, sampleH);
+    } else {
+      // One axis is alpha — render a 1D channel gradient on the non-alpha axis
+      const channelKey = effectiveXChannel ?? effectiveYChannel!;
+      const cfg = getChannelConfig(colorSpace, channelKey);
+      if (!cfg) return;
+
+      const cMin = cfg.culoriMin ?? cfg.min;
+      const cMax = cfg.culoriMax ?? cfg.max;
+
+      const isXReal = !!effectiveXChannel;
+      const sampleW = isXReal ? 64 : 1;
+      const sampleH = isXReal ? 1 : 64;
+
+      // Sample along the real channel axis
+      const slidingForward = isXReal ? slidingFromLeft : slidingFromTop;
+
+      const pixels = sampleChannelGrid(
+        baseColorObj, colorSpace,
+        channelKey, channelKey,
+        slidingForward ? cMin : cMax, slidingForward ? cMax : cMin,
+        slidingForward ? cMin : cMax, slidingForward ? cMax : cMin,
+        isXReal ? sampleW : 1, isXReal ? 1 : sampleH,
+      );
+      renderToCanvas(canvas, pixels, isXReal ? sampleW : 1, isXReal ? 1 : sampleH);
+    }
   }
 }
 
@@ -133,7 +180,13 @@ useResizeObserver(canvasRef, () => {
 });
 
 watch(
-  () => [props.topLeft, props.topRight, props.bottomLeft, props.bottomRight, props.interpolationSpace, props.baseColor, props.colorSpace, props.xChannel, props.yChannel, rootContext.isSlidingFromLeft.value, rootContext.isSlidingFromTop.value],
+  () => [
+    props.topLeft, props.topRight, props.bottomLeft, props.bottomRight,
+    props.interpolationSpace,
+    rootContext.colorSpace.value, rootContext.xChannelKey.value, rootContext.yChannelKey.value,
+    rootContext.colorRef.value,
+    rootContext.isSlidingFromLeft.value, rootContext.isSlidingFromTop.value,
+  ],
   () => render(),
   { flush: "post" },
 );
@@ -157,7 +210,7 @@ onBeforeUnmount(() => {
   >
     <canvas
       ref="canvasRef"
-      style="position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none;"
+      :style="{ position: 'absolute', inset: '0', width: '100%', height: '100%', pointerEvents: 'none', opacity: canvasOpacity }"
     />
     <slot />
   </Primitive>

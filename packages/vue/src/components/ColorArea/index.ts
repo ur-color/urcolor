@@ -29,5 +29,9 @@ export {
   type ColorAreaGradientProps,
 } from "./ColorAreaGradient.vue";
 export {
+  default as ColorAreaCheckerboard,
+  type ColorAreaCheckerboardProps,
+} from "./ColorAreaCheckerboard.vue";
+export {
   type ActiveDirection,
 } from "./utils";

@@ -1,5 +1,5 @@
 <script lang="ts">
-import type { Ref, Ref as VueRef } from "vue";
+import type { Ref } from "vue";
 import type { PrimitiveProps } from "reka-ui";
 import { createContext, Primitive, useForwardExpose, VisuallyHidden } from "reka-ui";
 import "internationalized-color/css";
@@ -60,7 +60,7 @@ export const [injectColorFieldRootContext, provideColorFieldRootContext]
 
 <script setup lang="ts">
 import { computed, ref, shallowRef, toRefs, watch } from "vue";
-import { getChannelConfig, displayToCulori, culoriToDisplay } from "@urcolor/core";
+import { getChannelConfig, displayToCulori, culoriToDisplay, type ChannelConfig } from "@urcolor/core";
 import { clamp, snapToStep, useFormControl } from "../ColorArea/utils";
 
 const props = withDefaults(defineProps<ColorFieldRootProps>(), {
@@ -91,7 +91,9 @@ watch(() => props.modelValue, (val) => {
   if (parsed) colorRef.value = parsed;
 });
 
-const channelConfig = computed(() => getChannelConfig(props.colorSpace, props.channel));
+const isAlpha = computed(() => props.channel === "alpha");
+const alphaConfig: ChannelConfig = { key: "alpha", label: "Alpha", min: 0, max: 100, step: 1, format: "percentage", culoriMin: 0, culoriMax: 1 };
+const channelConfig = computed(() => isAlpha.value ? alphaConfig : getChannelConfig(props.colorSpace, props.channel));
 
 // Resolve effective min/max/step/format from props or config
 const effectiveMin = computed(() => props.min ?? channelConfig.value?.min ?? 0);
@@ -108,10 +110,14 @@ function getDisplayValue(): number | undefined {
   if (!colorRef.value) return undefined;
   if (isHexMode.value) {
     // Convert color to integer: 0xRRGGBB
-    const hex = colorRef.value.toHex().replace(/^#/, "");
+    const hex = colorRef.value.toHex()?.replace(/^#/, "");
+    if (!hex) return undefined;
     return Number.parseInt(hex.slice(0, 6), 16);
   }
   if (!channelConfig.value) return undefined;
+  if (isAlpha.value) {
+    return Math.round((colorRef.value.alpha ?? 1) * 100);
+  }
   const converted = colorRef.value.to(props.colorSpace);
   if (!converted) return undefined;
   const raw = converted.get(props.channel, 0);
@@ -135,6 +141,9 @@ function rebuildColor(displayVal: number): Color | undefined {
     return Color.parse(hexStr) ?? undefined;
   }
   if (!channelConfig.value) return undefined;
+  if (isAlpha.value) {
+    return colorRef.value.set({ alpha: displayVal / 100 });
+  }
   const culoriVal = displayToCulori(channelConfig.value, displayVal);
   return colorRef.value.set({
     mode: props.colorSpace,
@@ -148,7 +157,7 @@ function formatValue(val: number | undefined): string {
   if (val === undefined) return "";
   switch (effectiveFormat.value) {
     case "degree":
-      return `${val}deg`;
+      return `${val}°`;
     case "percentage":
       return `${val}%`;
     case "hex":
@@ -163,7 +172,7 @@ function parseValue(text: string): number | undefined {
   if (trimmed === "") return undefined;
   switch (effectiveFormat.value) {
     case "degree":
-      return Number.parseFloat(trimmed.replace(/deg$/i, ""));
+      return Number.parseFloat(trimmed.replace(/[°]$|deg$/i, ""));
     case "percentage":
       return Number.parseFloat(trimmed.replace(/%$/, ""));
     case "hex": {

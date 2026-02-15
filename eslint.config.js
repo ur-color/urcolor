@@ -3,9 +3,19 @@ import js from "@eslint/js";
 import stylistic from "@stylistic/eslint-plugin";
 import importX from "eslint-plugin-import-x";
 import vue from "eslint-plugin-vue";
+import unusedImports from "eslint-plugin-unused-imports";
+import tailwindcss from "eslint-plugin-better-tailwindcss";
 import tseslint from "typescript-eslint";
 
 export default [
+  {
+    ...tailwindcss.configs.recommended,
+    settings: {
+      "better-tailwindcss": {
+        entryPoint: "docs/.vitepress/theme/custom.css",
+      },
+    },
+  },
   js.configs.recommended,
   ...tseslint.configs.recommendedTypeChecked,
   ...vue.configs["flat/recommended"],
@@ -18,6 +28,9 @@ export default [
     braceStyle: "1tbs",
   }),
   {
+    plugins: {
+      "unused-imports": unusedImports,
+    },
     languageOptions: {
       parserOptions: {
         projectService: true,
@@ -56,6 +69,9 @@ export default [
       "@typescript-eslint/no-unsafe-member-access": "off",
       "@typescript-eslint/no-unsafe-return": "off",
       "@typescript-eslint/no-unnecessary-type-assertion": "warn",
+      "@typescript-eslint/no-unused-vars": "off",
+      "unused-imports/no-unused-imports": "error",
+      "unused-imports/no-unused-vars": ["warn", { vars: "all", varsIgnorePattern: "^_", args: "after-used", argsIgnorePattern: "^_" }],
       "@typescript-eslint/require-await": "off",
     },
   },
@@ -88,6 +104,10 @@ export default [
     },
   },
   {
-    ignores: ["node_modules/", "dist/", ".nuxt/", ".output/", "bun.lock", "docs/"],
+    files: ["docs/**/*.vue", "docs/**/*.ts"],
+    ...tseslint.configs.disableTypeChecked,
+  },
+  {
+    ignores: ["node_modules/", "dist/", ".nuxt/", ".output/", "bun.lock", "docs/.vitepress/dist/", "docs/.vitepress/cache/", "**/*.md"],
   },
 ];

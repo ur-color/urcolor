@@ -75,14 +75,14 @@ function initGL(canvas: HTMLCanvasElement): GradientProgram {
   };
 }
 
-function colorToVec4(color: Color): [number, number, number, number] {
+function colorToVec4(color: Color, alpha = false): [number, number, number, number] {
   const rgb = color.to("rgb");
   if (!rgb) throw new Error(`Cannot convert ${color.mode} to rgb`);
   return [
     rgb.get("r", 0),
     rgb.get("g", 0),
     rgb.get("b", 0),
-    rgb.alpha ?? 1,
+    alpha ? (rgb.alpha ?? 1) : 1,
   ];
 }
 
@@ -175,6 +175,7 @@ export function drawLinearGradient(
   canvas: HTMLCanvasElement,
   colors: Color[],
   vertical = false,
+  alpha = false,
 ): void {
   if (colors.length < 2 || colors.length > 16) {
     throw new Error("drawLinearGradient requires 2–16 color stops");
@@ -203,7 +204,7 @@ export function drawLinearGradient(
   for (let i = 0; i < colors.length; i++) {
     const color = colors[i];
     if (!color) continue;
-    const vec = colorToVec4(color);
+    const vec = colorToVec4(color, alpha);
     colorData[i * 4] = vec[0];
     colorData[i * 4 + 1] = vec[1];
     colorData[i * 4 + 2] = vec[2];
@@ -254,6 +255,7 @@ export function sampleBilinearGrid(
   w: number,
   h: number,
   space: string,
+  alpha = false,
 ): Uint8ClampedArray {
   const data = new Uint8ClampedArray(w * h * 4);
   for (let y = 0; y < h; y++) {
@@ -272,7 +274,7 @@ export function sampleBilinearGrid(
       data[idx] = Math.round(Math.max(0, Math.min(1, rgb.get("r", 0))) * 255);
       data[idx + 1] = Math.round(Math.max(0, Math.min(1, rgb.get("g", 0))) * 255);
       data[idx + 2] = Math.round(Math.max(0, Math.min(1, rgb.get("b", 0))) * 255);
-      data[idx + 3] = Math.round((rgb.alpha ?? 1) * 255);
+      data[idx + 3] = alpha ? Math.round((rgb.alpha ?? 1) * 255) : 255;
     }
   }
   return data;
@@ -294,6 +296,7 @@ export function sampleChannelGrid(
   yMax: number,
   w: number,
   h: number,
+  alpha = false,
 ): Uint8ClampedArray {
   const data = new Uint8ClampedArray(w * h * 4);
   for (let y = 0; y < h; y++) {
@@ -314,7 +317,7 @@ export function sampleChannelGrid(
       data[idx] = Math.round(Math.max(0, Math.min(1, rgb.get("r", 0))) * 255);
       data[idx + 1] = Math.round(Math.max(0, Math.min(1, rgb.get("g", 0))) * 255);
       data[idx + 2] = Math.round(Math.max(0, Math.min(1, rgb.get("b", 0))) * 255);
-      data[idx + 3] = Math.round((rgb.alpha ?? 1) * 255);
+      data[idx + 3] = alpha ? Math.round((rgb.alpha ?? 1) * 255) : 255;
     }
   }
   return data;
@@ -343,6 +346,7 @@ export function drawGradient(
   topRight: Color,
   bottomLeft: Color,
   bottomRight: Color,
+  alpha = false,
 ): void {
   let prog = cache.get(canvas);
   if (!prog) {
@@ -361,10 +365,10 @@ export function drawGradient(
   }
   gl.viewport(0, 0, w, h);
 
-  gl.uniform4fv(uTL, colorToVec4(topLeft));
-  gl.uniform4fv(uTR, colorToVec4(topRight));
-  gl.uniform4fv(uBL, colorToVec4(bottomLeft));
-  gl.uniform4fv(uBR, colorToVec4(bottomRight));
+  gl.uniform4fv(uTL, colorToVec4(topLeft, alpha));
+  gl.uniform4fv(uTR, colorToVec4(topRight, alpha));
+  gl.uniform4fv(uBL, colorToVec4(bottomLeft, alpha));
+  gl.uniform4fv(uBR, colorToVec4(bottomRight, alpha));
 
   gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 }

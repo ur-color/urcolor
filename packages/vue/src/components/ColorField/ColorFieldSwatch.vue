@@ -1,16 +1,12 @@
 <script lang="ts">
-import type { PrimitiveProps } from "reka-ui";
+import type { ColorSwatchRootProps } from "../ColorSwatch/ColorSwatchRoot.vue";
 
-export interface ColorFieldSwatchProps extends /* @vue-ignore */ PrimitiveProps {
-  as?: string;
-  asChild?: boolean;
-  /** The color to display. Applied as --color-field-swatch CSS variable. */
-  color?: string;
-}
+export interface ColorFieldSwatchProps extends /* @vue-ignore */ ColorSwatchRootProps {}
 </script>
 
 <script setup lang="ts">
-import { Primitive, useForwardExpose } from "reka-ui";
+import { useForwardExpose } from "reka-ui";
+import ColorSwatchRoot from "../ColorSwatch/ColorSwatchRoot.vue";
 
 const props = withDefaults(defineProps<ColorFieldSwatchProps>(), {
   as: "span",
@@ -20,11 +16,13 @@ useForwardExpose();
 </script>
 
 <template>
-  <Primitive
+  <ColorSwatchRoot
     :as="as"
     :as-child="asChild"
-    :style="{ '--color-field-swatch': color }"
+    :model-value="modelValue"
+    :checker-size="checkerSize"
+    :alpha="alpha"
   >
     <slot />
-  </Primitive>
+  </ColorSwatchRoot>
 </template>

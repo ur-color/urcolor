@@ -1,3 +1,5 @@
+@import "tailwindcss";
+
 :root {
   --vp-c-brand-1: #ff6090;
   --vp-c-brand-2: #ff4081;
@@ -16,6 +18,18 @@
   --vp-home-hero-name-background: linear-gradient(135deg, #ff4081, #e91e6e);
 }
 
+.VPNavBarTitle .title > span {
+  display: none;
+}
+
+.is-home .VPContent .VPDoc .container .content {
+  padding: 0;
+}
+
+.is-home .VPContent .VPDoc .container .content .content-container {
+  max-width: 100%;
+}
+
 .dark {
   --vp-c-brand-1: #ff6090;
   --vp-c-brand-2: #ff4081;
@@ -30,4 +44,32 @@
   --vp-button-brand-text: #1a1a2e;
   --vp-button-brand-hover-text: #1a1a2e;
   --vp-button-brand-active-text: #1a1a2e;
+}
+
+.VPNav .VPNavBar {
+  background: color-mix(
+    in srgb,
+    var(--vp-c-bg) calc(var(--nav-bg-opacity, 0) * 70%),
+    transparent
+  ) !important;
+  backdrop-filter: blur(calc(var(--nav-bg-opacity, 0) * 16px));
+  border-top: none !important;
+  border-bottom: 1px solid
+    color-mix(
+      in srgb,
+      var(--vp-c-divider) calc(var(--nav-bg-opacity, 0) * 30%),
+      transparent
+    ) !important;
+  transition: backdrop-filter 0.3s ease;
+}
+
+.VPNav .VPNavBar .divider,
+.VPNav .VPNavBar .divider-line {
+  opacity: var(--nav-bg-opacity, 0);
+  transition: opacity 0.3s ease;
+  background: color-mix(
+    in srgb,
+    var(--vp-c-divider) 40%,
+    transparent
+  ) !important;
 }

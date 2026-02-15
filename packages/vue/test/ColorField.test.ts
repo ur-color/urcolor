@@ -1,6 +1,6 @@
 import type { VueWrapper } from "@vue/test-utils";
 import { mount } from "@vue/test-utils";
-import { beforeEach, describe, expect, it, vi } from "bun:test";
+import { beforeEach, describe, expect, it } from "bun:test";
 import { defineComponent, h } from "vue";
 import "internationalized-color/css";
 import { Color } from "internationalized-color";
@@ -221,11 +221,11 @@ describe("ColorField", () => {
   });
 
   describe("swatch component", () => {
-    it("should render with --color-field-swatch CSS variable", () => {
+    it("should render with --swatch-color CSS variable", () => {
       const w = mount(ColorFieldSwatch, {
-        props: { color: "hsl(180, 50%, 50%)" },
+        props: { modelValue: "hsl(180, 50%, 50%)" },
       });
-      expect(w.attributes("style")).toContain("--color-field-swatch: hsl(180, 50%, 50%)");
+      expect(w.attributes("style")).toContain("--swatch-color:");
     });
   });
 

@@ -15,11 +15,12 @@ export interface ColorSliderGradientProps extends /* @vue-ignore */ PrimitivePro
 
 <script setup lang="ts">
 import "internationalized-color/css";
-import { ref, watch, onBeforeUnmount } from "vue";
+import { ref, computed, watch, onBeforeUnmount } from "vue";
 import { useResizeObserver } from "@vueuse/core";
 import { useForwardExpose, Primitive } from "reka-ui";
 import { Color } from "internationalized-color";
 import { drawLinearGradient, interpolateStops } from "@urcolor/core";
+import { injectColorSliderRootContext } from "./ColorSliderRoot.vue";
 
 const props = withDefaults(defineProps<ColorSliderGradientProps>(), {
   as: "span",
@@ -27,6 +28,17 @@ const props = withDefaults(defineProps<ColorSliderGradientProps>(), {
 });
 
 useForwardExpose();
+
+const rootContext = injectColorSliderRootContext();
+
+const isAlphaChannel = computed(() => rootContext.channel.value === "alpha");
+
+const canvasOpacity = computed(() => {
+  if (rootContext.alpha.value && !isAlphaChannel.value) {
+    return rootContext.colorRef.value?.alpha ?? 1;
+  }
+  return 1;
+});
 
 const canvasRef = ref<HTMLCanvasElement | null>(null);
 
@@ -42,9 +54,9 @@ function render() {
   if (props.interpolationSpace) {
     // Interpolate in the target space, generating sRGB stops
     const interpolated = interpolateStops(colors, 32, props.interpolationSpace);
-    drawLinearGradient(canvas, interpolated, props.vertical);
+    drawLinearGradient(canvas, interpolated, props.vertical, isAlphaChannel.value);
   } else {
-    drawLinearGradient(canvas, colors, props.vertical);
+    drawLinearGradient(canvas, colors, props.vertical, isAlphaChannel.value);
   }
 }
 
@@ -76,7 +88,7 @@ onBeforeUnmount(() => {
   >
     <canvas
       ref="canvasRef"
-      style="position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none;"
+      :style="{ position: 'absolute', inset: '0', width: '100%', height: '100%', pointerEvents: 'none', opacity: canvasOpacity }"
     />
     <slot />
   </Primitive>

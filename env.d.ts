@@ -1,3 +1,8 @@
+declare module "*?raw" {
+  const content: string;
+  export default content;
+}
+
 declare module "culori/fn" {
   export const parse: any;
   export const converter: any;

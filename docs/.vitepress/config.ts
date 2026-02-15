@@ -1,9 +1,10 @@
 import { defineConfig } from "vitepress";
-
+import tailwindcss from "@tailwindcss/vite";
 export default defineConfig({
   title: "urcolor",
   description: "Universal color picker component library",
   vite: {
+    plugins: [tailwindcss()],
     resolve: {
       dedupe: ["vue"],
     },
@@ -31,12 +32,17 @@ export default defineConfig({
           text: "Components",
           items: [
             { text: "Overview", link: "/components/" },
+            { text: "Preview", link: "/components/vue/preview" },
           ],
         },
         {
           text: "Vue",
           items: [
             { text: "ColorArea", link: "/components/vue/color-area" },
+            { text: "ColorSlider", link: "/components/vue/color-slider" },
+            { text: "ColorField", link: "/components/vue/color-field" },
+            { text: "ColorSwatch", link: "/components/vue/color-swatch" },
+            { text: "ColorSwatchGroup", link: "/components/vue/color-swatch-group" },
           ],
         },
       ],
