@@ -1,0 +1,12 @@
+/* Override VitePress dark/light toggle icons with Lucide icons */
+.VPSwitchAppearance .vpi-sun {
+  --icon: url("https://api.iconify.design/lucide/sun.svg");
+  -webkit-mask-image: var(--icon);
+  mask-image: var(--icon);
+}
+
+.VPSwitchAppearance .vpi-moon {
+  --icon: url("https://api.iconify.design/lucide/moon.svg");
+  -webkit-mask-image: var(--icon);
+  mask-image: var(--icon);
+}

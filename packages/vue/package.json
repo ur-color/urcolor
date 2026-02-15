@@ -1,0 +1,21 @@
+{
+  "name": "@urcolor/vue",
+  "version": "0.0.1",
+  "type": "module",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "exports": {
+    ".": {
+      "import": "./src/index.ts",
+      "types": "./src/index.ts"
+    }
+  },
+  "dependencies": {
+    "@urcolor/core": "workspace:*",
+    "internationalized-color": "*",
+    "reka-ui": "^2.8.0"
+  },
+  "peerDependencies": {
+    "vue": "^3"
+  }
+}

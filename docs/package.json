@@ -1,0 +1,20 @@
+{
+  "name": "@urcolor/docs",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vitepress dev",
+    "build": "vitepress build",
+    "preview": "vitepress preview"
+  },
+  "devDependencies": {
+    "@iconify/vue": "^5.0.0",
+    "vitepress": "^1",
+    "vue": "^3"
+  },
+  "dependencies": {
+    "@urcolor/core": "workspace:*",
+    "@urcolor/vue": "workspace:*"
+  }
+}

@@ -1,0 +1,370 @@
+import "internationalized-color/css";
+import { Color } from "internationalized-color";
+
+const VERTEX_SHADER = `
+attribute vec2 a_position;
+varying vec2 v_uv;
+void main() {
+  v_uv = a_position * 0.5 + 0.5;
+  gl_Position = vec4(a_position, 0.0, 1.0);
+}
+`;
+
+const FRAGMENT_SHADER = `
+precision highp float;
+varying vec2 v_uv;
+uniform vec4 u_tl; // top-left
+uniform vec4 u_tr; // top-right
+uniform vec4 u_bl; // bottom-left
+uniform vec4 u_br; // bottom-right
+
+void main() {
+  // Bilinear interpolation in whatever color space the uniforms are in.
+  // u_tl/tr/bl/br hold [c0, c1, c2, alpha] of 4 corners.
+  // We interpolate in that space, then the result is written as gl_FragColor
+  // (which the caller must ensure is sRGB after conversion).
+  vec4 top = mix(u_tl, u_tr, v_uv.x);
+  vec4 bot = mix(u_bl, u_br, v_uv.x);
+  vec4 c = mix(top, bot, 1.0 - v_uv.y);
+  gl_FragColor = vec4(c.rgb, c.a);
+}
+`;
+
+interface GradientProgram {
+  gl: WebGLRenderingContext;
+  program: WebGLProgram;
+  uTL: WebGLUniformLocation;
+  uTR: WebGLUniformLocation;
+  uBL: WebGLUniformLocation;
+  uBR: WebGLUniformLocation;
+}
+
+function initGL(canvas: HTMLCanvasElement): GradientProgram {
+  const gl = canvas.getContext("webgl", { antialias: false, premultipliedAlpha: false });
+  if (!gl) throw new Error("WebGL not supported");
+
+  const vs = gl.createShader(gl.VERTEX_SHADER)!;
+  gl.shaderSource(vs, VERTEX_SHADER);
+  gl.compileShader(vs);
+
+  const fs = gl.createShader(gl.FRAGMENT_SHADER)!;
+  gl.shaderSource(fs, FRAGMENT_SHADER);
+  gl.compileShader(fs);
+
+  const program = gl.createProgram();
+  gl.attachShader(program, vs);
+  gl.attachShader(program, fs);
+  gl.linkProgram(program);
+  gl.useProgram(program);
+
+  // Full-screen quad
+  const buf = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
+  const aPos = gl.getAttribLocation(program, "a_position");
+  gl.enableVertexAttribArray(aPos);
+  gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
+
+  return {
+    gl,
+    program,
+    uTL: gl.getUniformLocation(program, "u_tl")!,
+    uTR: gl.getUniformLocation(program, "u_tr")!,
+    uBL: gl.getUniformLocation(program, "u_bl")!,
+    uBR: gl.getUniformLocation(program, "u_br")!,
+  };
+}
+
+function colorToVec4(color: Color): [number, number, number, number] {
+  const rgb = color.to("rgb");
+  if (!rgb) throw new Error(`Cannot convert ${color.mode} to rgb`);
+  return [
+    rgb.get("r", 0),
+    rgb.get("g", 0),
+    rgb.get("b", 0),
+    rgb.alpha ?? 1,
+  ];
+}
+
+const LINEAR_FRAGMENT_SHADER = `
+precision highp float;
+varying vec2 v_uv;
+
+const int MAX_STOPS = 16;
+uniform vec4 u_colors[MAX_STOPS];
+uniform float u_positions[MAX_STOPS];
+uniform int u_count;
+uniform int u_vertical;
+
+void main() {
+  float t = u_vertical == 1 ? 1.0 - v_uv.y : v_uv.x;
+  vec4 color = u_colors[0];
+  for (int i = 1; i < MAX_STOPS; i++) {
+    if (i >= u_count) break;
+    if (t >= u_positions[i - 1] && t <= u_positions[i]) {
+      float f = (t - u_positions[i - 1]) / (u_positions[i] - u_positions[i - 1]);
+      color = mix(u_colors[i - 1], u_colors[i], f);
+      break;
+    }
+    if (t > u_positions[i]) {
+      color = u_colors[i];
+    }
+  }
+  gl_FragColor = vec4(color.rgb, color.a);
+}
+`;
+
+interface LinearGradientProgram {
+  gl: WebGLRenderingContext;
+  program: WebGLProgram;
+  uColors: WebGLUniformLocation;
+  uPositions: WebGLUniformLocation;
+  uCount: WebGLUniformLocation;
+  uVertical: WebGLUniformLocation;
+}
+
+function initLinearGL(canvas: HTMLCanvasElement): LinearGradientProgram {
+  const gl = canvas.getContext("webgl", { antialias: false, premultipliedAlpha: false });
+  if (!gl) throw new Error("WebGL not supported");
+
+  const vs = gl.createShader(gl.VERTEX_SHADER)!;
+  gl.shaderSource(vs, VERTEX_SHADER);
+  gl.compileShader(vs);
+
+  const fs = gl.createShader(gl.FRAGMENT_SHADER)!;
+  gl.shaderSource(fs, LINEAR_FRAGMENT_SHADER);
+  gl.compileShader(fs);
+
+  const program = gl.createProgram();
+  gl.attachShader(program, vs);
+  gl.attachShader(program, fs);
+  gl.linkProgram(program);
+  gl.useProgram(program);
+
+  const buf = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
+  const aPos = gl.getAttribLocation(program, "a_position");
+  gl.enableVertexAttribArray(aPos);
+  gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
+
+  return {
+    gl,
+    program,
+    uColors: gl.getUniformLocation(program, "u_colors")!,
+    uPositions: gl.getUniformLocation(program, "u_positions")!,
+    uCount: gl.getUniformLocation(program, "u_count")!,
+    uVertical: gl.getUniformLocation(program, "u_vertical")!,
+  };
+}
+
+const linearCache = new WeakMap<HTMLCanvasElement, LinearGradientProgram>();
+
+/**
+ * Draw a smooth linear gradient on a canvas using WebGL.
+ *
+ * Colors are interpolated in sRGB space on the GPU.
+ * All input colors can be in any color space — they are converted to
+ * sRGB before being sent to the shader.
+ *
+ * @param canvas - The target canvas element.
+ * @param colors - Array of color stops (2–16 colors).
+ * @param vertical - If true, gradient runs top-to-bottom instead of left-to-right.
+ */
+export function drawLinearGradient(
+  canvas: HTMLCanvasElement,
+  colors: Color[],
+  vertical = false,
+): void {
+  if (colors.length < 2 || colors.length > 16) {
+    throw new Error("drawLinearGradient requires 2–16 color stops");
+  }
+
+  let prog = linearCache.get(canvas);
+  if (!prog) {
+    prog = initLinearGL(canvas);
+    linearCache.set(canvas, prog);
+  }
+  const { gl, uColors, uPositions, uCount, uVertical } = prog;
+
+  const dpr = typeof devicePixelRatio !== "undefined" ? devicePixelRatio : 1;
+  const w = Math.round(canvas.clientWidth * dpr);
+  const h = Math.round(canvas.clientHeight * dpr);
+  if (canvas.width !== w || canvas.height !== h) {
+    canvas.width = w;
+    canvas.height = h;
+  }
+  gl.viewport(0, 0, w, h);
+
+  const MAX_STOPS = 16;
+  const colorData = new Float32Array(MAX_STOPS * 4);
+  const posData = new Float32Array(MAX_STOPS);
+
+  for (let i = 0; i < colors.length; i++) {
+    const color = colors[i];
+    if (!color) continue;
+    const vec = colorToVec4(color);
+    colorData[i * 4] = vec[0];
+    colorData[i * 4 + 1] = vec[1];
+    colorData[i * 4 + 2] = vec[2];
+    colorData[i * 4 + 3] = vec[3];
+    posData[i] = i / (colors.length - 1);
+  }
+
+  gl.uniform4fv(uColors, colorData);
+  gl.uniform1fv(uPositions, posData);
+  gl.uniform1i(uCount, colors.length);
+  gl.uniform1i(uVertical, vertical ? 1 : 0);
+
+  gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+}
+
+/**
+ * Interpolate between an array of colors in a given color space,
+ * producing `steps` intermediate sRGB Color values.
+ */
+export function interpolateStops(colors: Color[], steps: number, space: string): Color[] {
+  if (colors.length < 2) return [...colors];
+  const result: Color[] = [];
+  for (let i = 0; i < steps; i++) {
+    const t = i / (steps - 1);
+    const segment = t * (colors.length - 1);
+    const idx = Math.min(Math.floor(segment), colors.length - 2);
+    const localT = segment - idx;
+    const a = colors[idx]!;
+    const b = colors[idx + 1]!;
+    const mixed = a.mix(b, localT, space);
+    if (mixed) {
+      const rgb = mixed.to("rgb");
+      result.push(rgb ?? mixed);
+    }
+  }
+  return result;
+}
+
+/**
+ * Sample a bilinear grid in a target color space, outputting RGBA pixels.
+ * The four corner colors are interpolated in `space`, then converted to sRGB.
+ */
+export function sampleBilinearGrid(
+  tl: Color,
+  tr: Color,
+  bl: Color,
+  br: Color,
+  w: number,
+  h: number,
+  space: string,
+): Uint8ClampedArray {
+  const data = new Uint8ClampedArray(w * h * 4);
+  for (let y = 0; y < h; y++) {
+    const vy = y / (h - 1);
+    for (let x = 0; x < w; x++) {
+      const vx = x / (w - 1);
+      // Bilinear: mix top-left/top-right, bottom-left/bottom-right, then mix results
+      const topMix = tl.mix(tr, vx, space);
+      const botMix = bl.mix(br, vx, space);
+      if (!topMix || !botMix) continue;
+      const final = topMix.mix(botMix, vy, space);
+      if (!final) continue;
+      const rgb = final.to("rgb");
+      if (!rgb) continue;
+      const idx = (y * w + x) * 4;
+      data[idx] = Math.round(Math.max(0, Math.min(1, rgb.get("r", 0))) * 255);
+      data[idx + 1] = Math.round(Math.max(0, Math.min(1, rgb.get("g", 0))) * 255);
+      data[idx + 2] = Math.round(Math.max(0, Math.min(1, rgb.get("b", 0))) * 255);
+      data[idx + 3] = Math.round((rgb.alpha ?? 1) * 255);
+    }
+  }
+  return data;
+}
+
+/**
+ * Sample a 2D grid by directly computing color values for each (x, y) position.
+ * Unlike sampleBilinearGrid which interpolates 4 corners, this evaluates the
+ * actual color at each grid point — essential for cyclic channels like hue.
+ */
+export function sampleChannelGrid(
+  baseColor: Color,
+  colorSpace: string,
+  xChannel: string,
+  yChannel: string,
+  xMin: number,
+  xMax: number,
+  yMin: number,
+  yMax: number,
+  w: number,
+  h: number,
+): Uint8ClampedArray {
+  const data = new Uint8ClampedArray(w * h * 4);
+  for (let y = 0; y < h; y++) {
+    const vy = y / (h - 1);
+    const yVal = yMin + vy * (yMax - yMin);
+    for (let x = 0; x < w; x++) {
+      const vx = x / (w - 1);
+      const xVal = xMin + vx * (xMax - xMin);
+      const c = baseColor.set({
+        mode: colorSpace,
+        [xChannel]: xVal,
+        [yChannel]: yVal,
+      });
+      if (!c) continue;
+      const rgb = c.to("rgb");
+      if (!rgb) continue;
+      const idx = (y * w + x) * 4;
+      data[idx] = Math.round(Math.max(0, Math.min(1, rgb.get("r", 0))) * 255);
+      data[idx + 1] = Math.round(Math.max(0, Math.min(1, rgb.get("g", 0))) * 255);
+      data[idx + 2] = Math.round(Math.max(0, Math.min(1, rgb.get("b", 0))) * 255);
+      data[idx + 3] = Math.round((rgb.alpha ?? 1) * 255);
+    }
+  }
+  return data;
+}
+
+const cache = new WeakMap<HTMLCanvasElement, GradientProgram>();
+
+/**
+ * Draw a smooth bilinear gradient on a canvas using WebGL.
+ *
+ * The four corner colors are interpolated in sRGB space on the GPU.
+ * All input colors can be in any color space — they are converted to
+ * sRGB before being sent to the shader.
+ *
+ * The canvas is resized to match its CSS layout size × devicePixelRatio.
+ *
+ * @param canvas - The target canvas element.
+ * @param topLeft - Color for the top-left corner.
+ * @param topRight - Color for the top-right corner.
+ * @param bottomLeft - Color for the bottom-left corner.
+ * @param bottomRight - Color for the bottom-right corner.
+ */
+export function drawGradient(
+  canvas: HTMLCanvasElement,
+  topLeft: Color,
+  topRight: Color,
+  bottomLeft: Color,
+  bottomRight: Color,
+): void {
+  let prog = cache.get(canvas);
+  if (!prog) {
+    prog = initGL(canvas);
+    cache.set(canvas, prog);
+  }
+  const { gl, uTL, uTR, uBL, uBR } = prog;
+
+  // Match canvas resolution to CSS size
+  const dpr = typeof devicePixelRatio !== "undefined" ? devicePixelRatio : 1;
+  const w = Math.round(canvas.clientWidth * dpr);
+  const h = Math.round(canvas.clientHeight * dpr);
+  if (canvas.width !== w || canvas.height !== h) {
+    canvas.width = w;
+    canvas.height = h;
+  }
+  gl.viewport(0, 0, w, h);
+
+  gl.uniform4fv(uTL, colorToVec4(topLeft));
+  gl.uniform4fv(uTR, colorToVec4(topRight));
+  gl.uniform4fv(uBL, colorToVec4(bottomLeft));
+  gl.uniform4fv(uBR, colorToVec4(bottomRight));
+
+  gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+}
