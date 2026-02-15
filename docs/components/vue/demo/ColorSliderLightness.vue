@@ -42,9 +42,9 @@ function onColorUpdate(c: Color | undefined) {
     class="w-full"
     @update:model-value="onColorUpdate"
   >
-    <ColorSliderTrack as="div" class="relative h-4 rounded-lg overflow-hidden">
+    <ColorSliderTrack as="div" class="relative h-6 rounded-lg overflow-hidden">
       <ColorSliderGradient as="div" class="absolute inset-0 rounded-lg" :colors="gradientColors" />
-      <ColorSliderThumb class="block size-4 rounded-full bg-white border-2 border-white shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_2px_4px_rgba(0,0,0,0.3)] outline-none focus-visible:shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_0_0_3px_rgba(66,153,225,0.6)]" aria-label="Lightness" />
+      <ColorSliderThumb class="block size-6 rounded-full bg-white border-[2.5px] border-white shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_2px_4px_rgba(0,0,0,0.3)] outline-none focus-visible:shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_0_0_3px_rgba(66,153,225,0.6)]" aria-label="Lightness" />
     </ColorSliderTrack>
   </ColorSliderRoot>
 </template>

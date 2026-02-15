@@ -96,7 +96,7 @@ const browserLanguages = usePreferredLanguages();
 const defaultLocale = computed(() => {
   for (const lang of browserLanguages.value) {
     const code = lang?.split("-")[0]?.toLowerCase();
-    if (code && localeOptions.some((l) => l.code === code)) return code;
+    if (code && localeOptions.some(l => l.code === code)) return code;
   }
   return "en";
 });
@@ -168,13 +168,13 @@ watch(colorSpace, () => {
 // Prevent both selects from having the same channel
 watch(selectedXChannel, (val) => {
   if (val === selectedYChannel.value) {
-    const other = channelsWithAlpha.value.find((ch) => ch.key !== val);
+    const other = channelsWithAlpha.value.find(ch => ch.key !== val);
     if (other) selectedYChannel.value = other.key;
   }
 });
 watch(selectedYChannel, (val) => {
   if (val === selectedXChannel.value) {
-    const other = channelsWithAlpha.value.find((ch) => ch.key !== val);
+    const other = channelsWithAlpha.value.find(ch => ch.key !== val);
     if (other) selectedXChannel.value = other.key;
   }
 });
@@ -225,127 +225,396 @@ const colorName = computed(() => {
 });
 
 const currentLocaleOption = computed(() =>
-  localeOptions.find((l) => l.code === selectedLocale.value) ?? localeOptions[0]
+  localeOptions.find(l => l.code === selectedLocale.value) ?? localeOptions[0],
 );
 
 const spaceKeys = Object.keys(colorSpaces);
 </script>
 
 <template>
-  <div class="grid grid-cols-[auto_1fr] gap-3 items-center p-6 border border-(--vp-c-divider) rounded-lg bg-(--vp-c-bg-alt)">
-    <!-- Row 1: [empty] [X channel + invert ... color space selector] -->
-    <div class="flex justify-center items-center"></div>
+  <div
+    class="
+      preview-grid grid grid-cols-[auto_1fr] items-center gap-3 rounded-lg
+      border border-(--vp-c-divider) bg-(--vp-c-bg-alt) p-6
+      max-md:p-4
+    "
+  >
+    <!-- Mobile-only top row: color name, language, color space -->
+    <div
+      class="
+        hidden items-center gap-2 col-span-2 flex-wrap
+        max-md:flex
+      "
+    >
+      <code
+        class="
+          box-border inline-flex h-8 items-center rounded-md border
+          border-(--vp-c-divider) bg-(--vp-c-bg) px-3 py-1.5 font-mono
+          text-[13px] whitespace-nowrap text-(--vp-c-brand-1,#3451b2)
+        "
+        :dir="rtlLocales.has(selectedLocale) ? 'rtl' : 'ltr'"
+      >{{ colorName }}</code>
+      <div class="flex items-center gap-2 ml-auto">
+        <SelectRoot v-model="selectedLocale">
+          <SelectTrigger
+            class="
+              box-border inline-flex h-8 max-w-[92px] shrink-0 cursor-pointer
+              items-center justify-between gap-0.5 overflow-hidden rounded-md
+              border! border-(--vp-c-divider)! bg-(--vp-c-bg) px-2! py-1
+              text-[13px]
+            "
+            aria-label="Language"
+          >
+            <SelectValue>{{ currentLocaleOption.flag }} {{ currentLocaleOption.label }}</SelectValue>
+            <SelectIcon class="size-3.5 shrink-0 text-(--vp-c-text-2)">
+              <Icon icon="lucide:chevron-down" />
+            </SelectIcon>
+          </SelectTrigger>
+          <SelectPortal>
+            <SelectContent
+              class="select-content"
+              position="popper"
+              :side-offset="4"
+              :body-lock="false"
+            >
+              <SelectViewport class="max-h-[200px] overflow-y-auto">
+                <SelectItem
+                  v-for="loc in localeOptions"
+                  :key="loc.code"
+                  :value="loc.code"
+                  class="
+                    cursor-pointer rounded-md px-2.5 py-1.5 text-[13px]
+                    outline-none
+                    hover:bg-(--vp-c-bg-soft)
+                    data-highlighted:bg-(--vp-c-bg-soft)
+                    data-[state=checked]:font-semibold
+                  "
+                >
+                  <SelectItemText>{{ loc.flag }} {{ loc.label }}</SelectItemText>
+                </SelectItem>
+              </SelectViewport>
+            </SelectContent>
+          </SelectPortal>
+        </SelectRoot>
+        <SelectRoot v-model="colorSpace">
+          <SelectTrigger
+            class="
+              box-border inline-flex h-8 w-[120px] shrink-0 cursor-pointer
+              items-center justify-between gap-1 overflow-hidden rounded-md
+              border! border-(--vp-c-divider)! bg-(--vp-c-bg) px-2! py-1
+              text-[13px]
+            "
+            aria-label="Color space"
+          >
+            <SelectValue placeholder="Select space" />
+            <SelectIcon class="size-3.5 shrink-0 text-(--vp-c-text-2)">
+              <Icon icon="lucide:chevron-down" />
+            </SelectIcon>
+          </SelectTrigger>
+          <SelectPortal>
+            <SelectContent
+              class="select-content"
+              position="popper"
+              :side-offset="4"
+              :body-lock="false"
+            >
+              <SelectViewport class="max-h-[200px] overflow-y-auto">
+                <SelectItem
+                  v-for="key in spaceKeys"
+                  :key="key"
+                  :value="key"
+                  class="
+                    cursor-pointer rounded-md px-2.5 py-1.5 text-[13px]
+                    outline-none
+                    hover:bg-(--vp-c-bg-soft)
+                    data-highlighted:bg-(--vp-c-bg-soft)
+                    data-[state=checked]:font-semibold
+                  "
+                >
+                  <SelectItemText>{{ colorSpaces[key]?.label }}</SelectItemText>
+                </SelectItem>
+              </SelectViewport>
+            </SelectContent>
+          </SelectPortal>
+        </SelectRoot>
+      </div>
+    </div>
+
+    <!-- Row 1 (desktop) / Row 2 (mobile): [XY svg] [X channel + invert ... color name/lang/space] -->
+    <div class="flex items-center justify-center">
+      <span class="text-sm text-(--vp-c-text-2)">
+        <svg
+          width="34"
+          height="34"
+          viewBox="0 0 34 34"
+          style="display:inline-block;vertical-align:middle;"
+        >
+          <line
+            x1="4"
+            y1="4"
+            x2="30"
+            y2="30"
+            stroke="currentColor"
+            style="opacity: 0.25;"
+            stroke-width="1.5"
+          />
+          <text
+            x="7.5"
+            y="27"
+            font-size="12"
+            text-anchor="middle"
+            dominant-baseline="middle"
+            fill="currentColor"
+            font-family="inherit"
+          >Y</text>
+          <text
+            x="26"
+            y="13"
+            font-size="12"
+            text-anchor="middle"
+            dominant-baseline="middle"
+            fill="currentColor"
+            font-family="inherit"
+          >X</text>
+        </svg>
+      </span>
+    </div>
     <div class="flex items-center justify-between">
       <div class="flex items-center gap-2">
-        <Label id="label-x" class="text-sm font-medium" @click="(($refs.toggleGroupX as HTMLElement)?.querySelector('button:not(:disabled)') as HTMLElement | null)?.focus()">X</Label>
         <TooltipProvider :delay-duration="300">
-        <ToggleGroupRoot ref="toggleGroupX" v-model="selectedXChannel" type="single" class="inline-flex border border-(--vp-c-divider) rounded-md overflow-hidden" aria-labelledby="label-x">
-          <TooltipRoot v-for="ch in channelsWithAlpha" :key="ch.key">
-            <TooltipTrigger as-child>
-              <ToggleGroupItem
-                :value="ch.key"
-                :disabled="ch.key === selectedYChannel"
-                :data-active="ch.key === selectedXChannel ? '' : undefined"
-                class="size-[30px] p-0 border-none border-r border-r-(--vp-c-divider) last:border-r-0 bg-(--vp-c-bg) text-[13px] font-medium cursor-pointer text-(color:--vp-c-text-2) disabled:text-[color:var(--vp-c-text-3,#8e8e93)] disabled:line-through disabled:bg-(--vp-c-bg-alt) disabled:cursor-default"
-              >
-                {{ ch.label.charAt(0).toUpperCase() }}
-              </ToggleGroupItem>
-            </TooltipTrigger>
-            <TooltipPortal>
-              <TooltipContent class="tooltip-content" :side-offset="5">{{ ch.label }}</TooltipContent>
-            </TooltipPortal>
-          </TooltipRoot>
-        </ToggleGroupRoot>
+          <ToggleGroupRoot
+            ref="toggleGroupX"
+            v-model="selectedXChannel"
+            type="single"
+            class="
+              inline-flex overflow-hidden rounded-md border
+              border-(--vp-c-divider)
+            "
+          >
+            <TooltipRoot
+              v-for="ch in channelsWithAlpha"
+              :key="ch.key"
+            >
+              <TooltipTrigger as-child>
+                <ToggleGroupItem
+                  :value="ch.key"
+                  :disabled="ch.key === selectedYChannel"
+                  :data-active="ch.key === selectedXChannel ? '' : undefined"
+                  class="
+                    size-[30px] cursor-pointer border-r border-none
+                    border-r-(--vp-c-divider) bg-(--vp-c-bg) p-0 text-[13px]
+                    font-medium text-(--vp-c-text-2)
+                    last:border-r-0
+                    disabled:cursor-default disabled:bg-(--vp-c-bg-alt)
+                    disabled:text-(--vp-c-text-3,#8e8e93) disabled:line-through
+                  "
+                >
+                  {{ ch.label.charAt(0).toUpperCase() }}
+                </ToggleGroupItem>
+              </TooltipTrigger>
+              <TooltipPortal>
+                <TooltipContent
+                  class="tooltip-content"
+                  :side-offset="5"
+                >
+                  {{ ch.label }}
+                </TooltipContent>
+              </TooltipPortal>
+            </TooltipRoot>
+          </ToggleGroupRoot>
         </TooltipProvider>
         <TooltipProvider>
           <TooltipRoot>
             <TooltipTrigger as-child>
-              <Toggle v-model="invertedX" :data-active="invertedX ? '' : undefined" aria-label="Invert X axis" class="size-8 border border-(--vp-c-divider) rounded-md bg-(--vp-c-bg) text-[13px] font-medium cursor-pointer text-(color:--vp-c-text-2)">I</Toggle>
+              <Toggle
+                v-model="invertedX"
+                :data-active="invertedX ? '' : undefined"
+                aria-label="Invert X axis"
+                class="
+                  size-8 cursor-pointer rounded-md border
+                  border-(--vp-c-divider) bg-(--vp-c-bg) text-[13px] font-medium
+                  text-(--vp-c-text-2)
+                "
+              >
+                I
+              </Toggle>
             </TooltipTrigger>
             <TooltipPortal>
-              <TooltipContent class="tooltip-content" :side-offset="5">Invert X</TooltipContent>
+              <TooltipContent
+                class="tooltip-content"
+                :side-offset="5"
+              >
+                Invert X
+              </TooltipContent>
             </TooltipPortal>
           </TooltipRoot>
         </TooltipProvider>
       </div>
-      <div class="flex items-center gap-2 shrink-0">
-        <code class="inline-flex items-center text-[13px] font-mono text-[color:var(--vp-c-brand-1,#3451b2)] bg-(--vp-c-bg) px-3 py-1.5 rounded-md border border-(--vp-c-divider) whitespace-nowrap h-8 box-border" :dir="rtlLocales.has(selectedLocale) ? 'rtl' : 'ltr'">{{ colorName }}</code>
+      <div class="flex shrink-0 items-center gap-2 max-md:hidden">
+        <code
+          class="
+            box-border inline-flex h-8 items-center rounded-md border
+            border-(--vp-c-divider) bg-(--vp-c-bg) px-3 py-1.5 font-mono
+            text-[13px] whitespace-nowrap text-(--vp-c-brand-1,#3451b2)
+          "
+          :dir="rtlLocales.has(selectedLocale) ? 'rtl' : 'ltr'"
+        >{{ colorName }}</code>
         <SelectRoot v-model="selectedLocale">
-          <SelectTrigger class="inline-flex items-center gap-0.5 px-2! py-1 h-8 border! border-(--vp-c-divider)! rounded-md overflow-hidden bg-(--vp-c-bg) text-[13px] cursor-pointer max-w-[92px] justify-between shrink-0 box-border" aria-label="Language">
+          <SelectTrigger
+            class="
+              box-border inline-flex h-8 max-w-[92px] shrink-0 cursor-pointer
+              items-center justify-between gap-0.5 overflow-hidden rounded-md
+              border! border-(--vp-c-divider)! bg-(--vp-c-bg) px-2! py-1
+              text-[13px]
+            "
+            aria-label="Language"
+          >
             <SelectValue>{{ currentLocaleOption.flag }} {{ currentLocaleOption.label }}</SelectValue>
-            <SelectIcon class="size-3.5 text-(color:--vp-c-text-2) shrink-0">
+            <SelectIcon class="size-3.5 shrink-0 text-(--vp-c-text-2)">
               <Icon icon="lucide:chevron-down" />
             </SelectIcon>
           </SelectTrigger>
           <SelectPortal>
-          <SelectContent class="select-content" position="popper" :side-offset="4" :body-lock="false">
-            <SelectViewport class="max-h-[200px] overflow-y-auto">
-              <SelectItem
-                v-for="loc in localeOptions"
-                :key="loc.code"
-                :value="loc.code"
-                class="px-2.5 py-1.5 rounded-md text-[13px] cursor-pointer outline-none hover:bg-(--vp-c-bg-soft) data-[highlighted]:bg-(--vp-c-bg-soft) data-[state=checked]:font-semibold"
-              >
-                <SelectItemText>{{ loc.flag }} {{ loc.label }}</SelectItemText>
-              </SelectItem>
-            </SelectViewport>
-          </SelectContent>
+            <SelectContent
+              class="select-content"
+              position="popper"
+              :side-offset="4"
+              :body-lock="false"
+            >
+              <SelectViewport class="max-h-[200px] overflow-y-auto">
+                <SelectItem
+                  v-for="loc in localeOptions"
+                  :key="loc.code"
+                  :value="loc.code"
+                  class="
+                    cursor-pointer rounded-md px-2.5 py-1.5 text-[13px]
+                    outline-none
+                    hover:bg-(--vp-c-bg-soft)
+                    data-highlighted:bg-(--vp-c-bg-soft)
+                    data-[state=checked]:font-semibold
+                  "
+                >
+                  <SelectItemText>{{ loc.flag }} {{ loc.label }}</SelectItemText>
+                </SelectItem>
+              </SelectViewport>
+            </SelectContent>
           </SelectPortal>
         </SelectRoot>
         <SelectRoot v-model="colorSpace">
-          <SelectTrigger class="inline-flex items-center gap-1 px-2! py-1 h-8 border! border-(--vp-c-divider)! rounded-md overflow-hidden bg-(--vp-c-bg) text-[13px] cursor-pointer w-[120px] justify-between shrink-0 box-border" aria-label="Color space">
+          <SelectTrigger
+            class="
+              box-border inline-flex h-8 w-[120px] shrink-0 cursor-pointer
+              items-center justify-between gap-1 overflow-hidden rounded-md
+              border! border-(--vp-c-divider)! bg-(--vp-c-bg) px-2! py-1
+              text-[13px]
+            "
+            aria-label="Color space"
+          >
             <SelectValue placeholder="Select space" />
-            <SelectIcon class="size-3.5 text-(color:--vp-c-text-2) shrink-0">
+            <SelectIcon class="size-3.5 shrink-0 text-(--vp-c-text-2)">
               <Icon icon="lucide:chevron-down" />
             </SelectIcon>
           </SelectTrigger>
           <SelectPortal>
-          <SelectContent class="select-content" position="popper" :side-offset="4" :body-lock="false">
-            <SelectViewport class="max-h-[200px] overflow-y-auto">
-              <SelectItem
-                v-for="key in spaceKeys"
-                :key="key"
-                :value="key"
-                class="px-2.5 py-1.5 rounded-md text-[13px] cursor-pointer outline-none hover:bg-(--vp-c-bg-soft) data-[highlighted]:bg-(--vp-c-bg-soft) data-[state=checked]:font-semibold"
-              >
-                <SelectItemText>{{ colorSpaces[key]?.label }}</SelectItemText>
-              </SelectItem>
-            </SelectViewport>
-          </SelectContent>
+            <SelectContent
+              class="select-content"
+              position="popper"
+              :side-offset="4"
+              :body-lock="false"
+            >
+              <SelectViewport class="max-h-[200px] overflow-y-auto">
+                <SelectItem
+                  v-for="key in spaceKeys"
+                  :key="key"
+                  :value="key"
+                  class="
+                    cursor-pointer rounded-md px-2.5 py-1.5 text-[13px]
+                    outline-none
+                    hover:bg-(--vp-c-bg-soft)
+                    data-highlighted:bg-(--vp-c-bg-soft)
+                    data-[state=checked]:font-semibold
+                  "
+                >
+                  <SelectItemText>{{ colorSpaces[key]?.label }}</SelectItemText>
+                </SelectItem>
+              </SelectViewport>
+            </SelectContent>
           </SelectPortal>
         </SelectRoot>
       </div>
     </div>
 
     <!-- Row 2: [Y channel vertical] [ColorArea] -->
-    <div class="flex flex-col gap-2 justify-center items-center self-start">
-      <Label id="label-y" class="text-sm font-medium" @click="(($refs.toggleGroupY as HTMLElement)?.querySelector('button:not(:disabled)') as HTMLElement | null)?.focus()">Y</Label>
+    <div
+      class="flex flex-col items-center justify-center gap-2 self-start"
+    >
       <TooltipProvider :delay-duration="300">
-      <ToggleGroupRoot ref="toggleGroupY" v-model="selectedYChannel" type="single" orientation="vertical" class="inline-flex flex-col border border-(--vp-c-divider) rounded-md overflow-hidden" aria-labelledby="label-y">
-        <TooltipRoot v-for="ch in channelsWithAlpha" :key="ch.key">
-          <TooltipTrigger as-child>
-            <ToggleGroupItem
-              :value="ch.key"
-              :disabled="ch.key === selectedXChannel"
-              :data-active="ch.key === selectedYChannel ? '' : undefined"
-              class="size-[30px] p-0 border-none border-b border-b-(--vp-c-divider) last:border-b-0 bg-(--vp-c-bg) text-[13px] font-medium cursor-pointer text-(color:--vp-c-text-2) disabled:text-[color:var(--vp-c-text-3,#8e8e93)] disabled:line-through disabled:bg-(--vp-c-bg-alt) disabled:cursor-default"
-            >
-              {{ ch.label.charAt(0).toUpperCase() }}
-            </ToggleGroupItem>
-          </TooltipTrigger>
-          <TooltipPortal>
-            <TooltipContent class="tooltip-content" side="left" :side-offset="5">{{ ch.label }}</TooltipContent>
-          </TooltipPortal>
-        </TooltipRoot>
-      </ToggleGroupRoot>
+        <ToggleGroupRoot
+          ref="toggleGroupY"
+          v-model="selectedYChannel"
+          type="single"
+          orientation="vertical"
+          class="
+            inline-flex flex-col overflow-hidden rounded-md border
+            border-(--vp-c-divider)
+          "
+        >
+          <TooltipRoot
+            v-for="ch in channelsWithAlpha"
+            :key="ch.key"
+          >
+            <TooltipTrigger as-child>
+              <ToggleGroupItem
+                :value="ch.key"
+                :disabled="ch.key === selectedXChannel"
+                :data-active="ch.key === selectedYChannel ? '' : undefined"
+                class="
+                  size-[30px] cursor-pointer border-b border-none
+                  border-b-(--vp-c-divider) bg-(--vp-c-bg) p-0 text-[13px]
+                  font-medium text-(--vp-c-text-2)
+                  last:border-b-0
+                  disabled:cursor-default disabled:bg-(--vp-c-bg-alt)
+                  disabled:text-(--vp-c-text-3,#8e8e93) disabled:line-through
+                "
+              >
+                {{ ch.label.charAt(0).toUpperCase() }}
+              </ToggleGroupItem>
+            </TooltipTrigger>
+            <TooltipPortal>
+              <TooltipContent
+                class="tooltip-content"
+                side="left"
+                :side-offset="5"
+              >
+                {{ ch.label }}
+              </TooltipContent>
+            </TooltipPortal>
+          </TooltipRoot>
+        </ToggleGroupRoot>
       </TooltipProvider>
       <TooltipProvider>
         <TooltipRoot>
           <TooltipTrigger as-child>
-            <Toggle v-model="invertedY" :data-active="invertedY ? '' : undefined" aria-label="Invert Y axis" class="size-8 border border-(--vp-c-divider) rounded-md bg-(--vp-c-bg) text-[13px] font-medium cursor-pointer text-(color:--vp-c-text-2)">I</Toggle>
+            <Toggle
+              v-model="invertedY"
+              :data-active="invertedY ? '' : undefined"
+              aria-label="Invert Y axis"
+              class="
+                size-8 cursor-pointer rounded-md border border-(--vp-c-divider)
+                bg-(--vp-c-bg) text-[13px] font-medium text-(--vp-c-text-2)
+              "
+            >
+              I
+            </Toggle>
           </TooltipTrigger>
           <TooltipPortal>
-            <TooltipContent class="tooltip-content" side="left" :side-offset="5">Invert Y</TooltipContent>
+            <TooltipContent
+              class="tooltip-content"
+              side="left"
+              :side-offset="5"
+            >
+              Invert Y
+            </TooltipContent>
           </TooltipPortal>
         </TooltipRoot>
       </TooltipProvider>
@@ -363,22 +632,49 @@ const spaceKeys = Object.keys(colorSpaces);
       :aria-label="`Color picker, selected: ${colorName}`"
       @update:model-value="onColorUpdate"
     >
-      <ColorAreaTrack as="div" class="relative w-full h-[200px] rounded-lg overflow-clip cursor-crosshair touch-none">
+      <ColorAreaTrack
+        as="div"
+        class="
+          relative h-[200px] w-full cursor-crosshair touch-none overflow-clip
+          rounded-lg
+        "
+      >
         <ColorAreaCheckerboard />
         <ColorAreaGradient
           as="div"
           class="absolute inset-0"
         />
-        <ColorAreaThumb as="div" class="absolute size-5 [transform:var(--reka-slider-area-thumb-transform)]">
-          <ColorAreaThumbX as="div" class="absolute inset-0 size-5 rounded-full border-2 border-white shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_2px_4px_rgba(0,0,0,0.3)] outline-none focus-visible:shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_0_0_3px_rgba(66,153,225,0.6)]" :aria-label="`Color: ${colorName}`" />
-          <ColorAreaThumbY as="div" class="opacity-0 size-0 pointer-events-none" />
+        <ColorAreaThumb
+          as="div"
+          class="absolute size-5 transform-(--reka-slider-area-thumb-transform)"
+        >
+          <ColorAreaThumbX
+            as="div"
+            class="
+              absolute inset-0 size-5 rounded-full border-2 border-white
+              shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_2px_4px_rgba(0,0,0,0.3)]
+              outline-none
+              focus-visible:shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_0_0_3px_rgba(66,153,225,0.6)]
+            "
+            :aria-label="`Color: ${colorName}`"
+          />
+          <ColorAreaThumbY
+            as="div"
+            class="pointer-events-none size-0 opacity-0"
+          />
         </ColorAreaThumb>
       </ColorAreaTrack>
     </ColorAreaRoot>
 
     <!-- N-channel slider rows: [label] [slider] -->
-    <template v-for="ch in sliderChannels" :key="ch.key">
-      <Label :for="`slider-${ch.key}`" class="flex justify-center items-center text-sm font-medium">{{ ch.label.charAt(0).toUpperCase() }}</Label>
+    <template
+      v-for="ch in sliderChannels"
+      :key="ch.key"
+    >
+      <Label
+        :for="`slider-${ch.key}`"
+        class="flex items-center justify-center text-sm font-medium"
+      >{{ ch.label.charAt(0).toUpperCase() }}</Label>
       <ColorSliderRoot
         :model-value="color"
         :color-space="colorSpace"
@@ -387,15 +683,34 @@ const spaceKeys = Object.keys(colorSpaces);
         as="div"
         @update:model-value="onColorUpdate"
       >
-        <ColorSliderTrack as="div" class="relative h-4 rounded-lg overflow-hidden">
-          <ColorSliderGradient as="div" class="absolute inset-0 rounded-lg" :colors="getSliderColors(ch.key)" />
-          <ColorSliderThumb :id="`slider-${ch.key}`" class="block size-4 rounded-full bg-white border-2 border-white shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_2px_4px_rgba(0,0,0,0.3)] outline-none focus-visible:shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_0_0_3px_rgba(66,153,225,0.6)]" :aria-label="`${ch.label} slider, color: ${colorName}`" />
+        <ColorSliderTrack
+          as="div"
+          class="relative h-6 overflow-hidden rounded-lg"
+        >
+          <ColorSliderGradient
+            as="div"
+            class="absolute inset-0 rounded-lg"
+            :colors="getSliderColors(ch.key)"
+          />
+          <ColorSliderThumb
+            :id="`slider-${ch.key}`"
+            class="
+              block size-6 rounded-full border-[2.5px] border-white bg-white
+              shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_2px_4px_rgba(0,0,0,0.3)]
+              outline-none
+              focus-visible:shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_0_0_3px_rgba(66,153,225,0.6)]
+            "
+            :aria-label="`${ch.label} slider, color: ${colorName}`"
+          />
         </ColorSliderTrack>
       </ColorSliderRoot>
     </template>
 
     <!-- Alpha slider row -->
-    <Label for="slider-alpha" class="flex justify-center items-center text-sm font-medium">A</Label>
+    <Label
+      for="slider-alpha"
+      class="flex items-center justify-center text-sm font-medium"
+    >A</Label>
     <ColorSliderRoot
       :model-value="color"
       :color-space="colorSpace"
@@ -404,55 +719,168 @@ const spaceKeys = Object.keys(colorSpaces);
       as="div"
       @update:model-value="onColorUpdate"
     >
-      <ColorSliderTrack as="div" class="relative h-4 rounded-lg overflow-hidden">
+      <ColorSliderTrack
+        as="div"
+        class="relative h-6 overflow-hidden rounded-lg"
+      >
         <ColorSliderCheckerboard />
-        <ColorSliderGradient as="div" class="absolute inset-0 rounded-lg" :colors="getSliderColors('alpha')" />
-        <ColorSliderThumb id="slider-alpha" class="block size-4 rounded-full bg-white border-2 border-white shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_2px_4px_rgba(0,0,0,0.3)] outline-none focus-visible:shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_0_0_3px_rgba(66,153,225,0.6)]" :aria-label="`Alpha slider, color: ${colorName}`" />
+        <ColorSliderGradient
+          as="div"
+          class="absolute inset-0 rounded-lg"
+          :colors="getSliderColors('alpha')"
+        />
+        <ColorSliderThumb
+          id="slider-alpha"
+          class="
+            block size-6 rounded-full border-[2.5px] border-white bg-white
+            shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_2px_4px_rgba(0,0,0,0.3)]
+            outline-none
+            focus-visible:shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_0_0_3px_rgba(66,153,225,0.6)]
+          "
+          :aria-label="`Alpha slider, color: ${colorName}`"
+        />
       </ColorSliderTrack>
     </ColorSliderRoot>
 
     <!-- Last row: [swatch] [hex field + N-channel fields] -->
-    <ColorSwatchRoot :model-value="color" :alpha="true" class="color-swatch block w-full aspect-square rounded-lg border border-(--vp-c-divider) self-end relative overflow-hidden" />
-    <div class="flex items-end gap-2">
-      <div class="flex flex-col gap-1 flex-1">
-        <Label for="field-hex" class="text-xs font-semibold text-(color:--vp-c-text-2)">Hex</Label>
+    <ColorSwatchRoot
+      :model-value="color"
+      :alpha="true"
+      class="
+        color-swatch relative block aspect-square w-full self-end
+        overflow-hidden rounded-lg border border-(--vp-c-divider)
+      "
+    />
+    <div
+      class="flex flex-wrap items-end gap-2"
+    >
+      <div
+        class="min-w-[100px] flex flex-1 flex-col gap-1"
+      >
+        <Label
+          for="field-hex"
+          class="text-xs font-semibold text-(--vp-c-text-2)"
+        >Hex</Label>
         <ColorFieldRoot
           :model-value="color"
           color-space="hex"
           channel="hex"
           format="hex"
-          class="color-field-root flex items-center border border-(--vp-c-divider) rounded-md overflow-hidden bg-(--vp-c-bg)"
+          class="
+            color-field-root flex items-center overflow-hidden rounded-md border
+            border-(--vp-c-divider) bg-(--vp-c-bg)
+          "
           @update:model-value="onColorUpdate"
         >
-          <ColorFieldInput id="field-hex" class="flex-1 min-w-0 w-0 py-1 px-2 border-none bg-transparent text-left text-[13px] font-mono text-(color:--vp-c-text-1) outline-none" />
+          <ColorFieldInput
+            id="field-hex"
+            class="
+              w-0 min-w-0 flex-1 border-none bg-transparent px-2 py-1 text-left
+              font-mono text-[13px] text-(--vp-c-text-1) outline-none
+            "
+          />
         </ColorFieldRoot>
       </div>
-      <div class="flex flex-col gap-1 flex-1">
-        <Label for="field-alpha" class="text-xs font-semibold text-(color:--vp-c-text-2)">A</Label>
+      <div class="min-w-[100px] flex flex-1 flex-col gap-1">
+        <Label
+          for="field-alpha"
+          class="text-xs font-semibold text-(--vp-c-text-2)"
+        >A</Label>
         <ColorFieldRoot
           :model-value="color"
           :color-space="colorSpace"
           channel="alpha"
-          class="color-field-root flex items-center border border-(--vp-c-divider) rounded-md overflow-hidden bg-(--vp-c-bg)"
+          class="
+            color-field-root flex items-center overflow-hidden rounded-md border
+            border-(--vp-c-divider) bg-(--vp-c-bg)
+          "
           @update:model-value="onColorUpdate"
         >
-          <ColorFieldDecrement class="flex items-center justify-center size-8 border-none bg-transparent text-(color:--vp-c-text-2) cursor-pointer text-lg leading-none select-none shrink-0 border-r border-r-(--vp-c-divider) hover:not-disabled:bg-(--vp-c-bg-soft) hover:not-disabled:text-(color:--vp-c-text-1) disabled:opacity-30 disabled:cursor-default">&minus;</ColorFieldDecrement>
-          <ColorFieldInput id="field-alpha" class="flex-1 min-w-0 w-0 px-0.5 py-1 border-none bg-transparent text-center text-[13px] font-mono text-(color:--vp-c-text-1) outline-none" />
-          <ColorFieldIncrement class="flex items-center justify-center size-8 border-none bg-transparent text-(color:--vp-c-text-2) cursor-pointer text-lg leading-none select-none shrink-0 border-l border-l-(--vp-c-divider) hover:not-disabled:bg-(--vp-c-bg-soft) hover:not-disabled:text-(color:--vp-c-text-1) disabled:opacity-30 disabled:cursor-default">+</ColorFieldIncrement>
+          <ColorFieldDecrement
+            class="
+              flex size-8 shrink-0 cursor-pointer items-center justify-center
+              border-r border-none border-r-(--vp-c-divider) bg-transparent
+              text-lg leading-none text-(--vp-c-text-2) select-none
+              hover:not-disabled:bg-(--vp-c-bg-soft)
+              hover:not-disabled:text-(--vp-c-text-1)
+              disabled:cursor-default disabled:opacity-30
+            "
+          >
+            &minus;
+          </ColorFieldDecrement>
+          <ColorFieldInput
+            id="field-alpha"
+            class="
+              w-0 min-w-0 flex-1 border-none bg-transparent px-0.5 py-1
+              text-center font-mono text-[13px] text-(--vp-c-text-1)
+              outline-none
+            "
+          />
+          <ColorFieldIncrement
+            class="
+              flex size-8 shrink-0 cursor-pointer items-center justify-center
+              border-l border-none border-l-(--vp-c-divider) bg-transparent
+              text-lg leading-none text-(--vp-c-text-2) select-none
+              hover:not-disabled:bg-(--vp-c-bg-soft)
+              hover:not-disabled:text-(--vp-c-text-1)
+              disabled:cursor-default disabled:opacity-30
+            "
+          >
+            +
+          </ColorFieldIncrement>
         </ColorFieldRoot>
       </div>
-      <div v-for="ch in channels" :key="ch.key" class="flex flex-col gap-1 flex-1">
-        <Label :for="`field-${ch.key}`" class="text-xs font-semibold text-(color:--vp-c-text-2)">{{ ch.label.charAt(0).toUpperCase() }}</Label>
+      <div
+        v-for="ch in channels"
+        :key="ch.key"
+        class="min-w-[100px] flex flex-1 flex-col gap-1"
+      >
+        <Label
+          :for="`field-${ch.key}`"
+          class="text-xs font-semibold text-(--vp-c-text-2)"
+        >{{ ch.label.charAt(0).toUpperCase() }}</Label>
         <ColorFieldRoot
           :model-value="color"
           :color-space="colorSpace"
           :channel="ch.key"
-          class="color-field-root flex items-center border border-(--vp-c-divider) rounded-md overflow-hidden bg-(--vp-c-bg)"
+          class="
+            color-field-root flex items-center overflow-hidden rounded-md border
+            border-(--vp-c-divider) bg-(--vp-c-bg)
+          "
           @update:model-value="onColorUpdate"
         >
-          <ColorFieldDecrement class="flex items-center justify-center size-8 border-none bg-transparent text-(color:--vp-c-text-2) cursor-pointer text-lg leading-none select-none shrink-0 border-r border-r-(--vp-c-divider) hover:not-disabled:bg-(--vp-c-bg-soft) hover:not-disabled:text-(color:--vp-c-text-1) disabled:opacity-30 disabled:cursor-default">&minus;</ColorFieldDecrement>
-          <ColorFieldInput :id="`field-${ch.key}`" class="flex-1 min-w-0 w-0 px-0.5 py-1 border-none bg-transparent text-center text-[13px] font-mono text-(color:--vp-c-text-1) outline-none" />
-          <ColorFieldIncrement class="flex items-center justify-center size-8 border-none bg-transparent text-(color:--vp-c-text-2) cursor-pointer text-lg leading-none select-none shrink-0 border-l border-l-(--vp-c-divider) hover:not-disabled:bg-(--vp-c-bg-soft) hover:not-disabled:text-(color:--vp-c-text-1) disabled:opacity-30 disabled:cursor-default">+</ColorFieldIncrement>
+          <ColorFieldDecrement
+            class="
+              flex size-8 shrink-0 cursor-pointer items-center justify-center
+              border-r border-none border-r-(--vp-c-divider) bg-transparent
+              text-lg leading-none text-(--vp-c-text-2) select-none
+              hover:not-disabled:bg-(--vp-c-bg-soft)
+              hover:not-disabled:text-(--vp-c-text-1)
+              disabled:cursor-default disabled:opacity-30
+            "
+          >
+            &minus;
+          </ColorFieldDecrement>
+          <ColorFieldInput
+            :id="`field-${ch.key}`"
+            class="
+              w-0 min-w-0 flex-1 border-none bg-transparent px-0.5 py-1
+              text-center font-mono text-[13px] text-(--vp-c-text-1)
+              outline-none
+            "
+          />
+          <ColorFieldIncrement
+            class="
+              flex size-8 shrink-0 cursor-pointer items-center justify-center
+              border-l border-none border-l-(--vp-c-divider) bg-transparent
+              text-lg leading-none text-(--vp-c-text-2) select-none
+              hover:not-disabled:bg-(--vp-c-bg-soft)
+              hover:not-disabled:text-(--vp-c-text-1)
+              disabled:cursor-default disabled:opacity-30
+            "
+          >
+            +
+          </ColorFieldIncrement>
         </ColorFieldRoot>
       </div>
     </div>

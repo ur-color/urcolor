@@ -143,6 +143,7 @@ const features = [
   margin: 0 auto;
   padding: 180px 24px 80px;
   text-align: center;
+  overflow-x: hidden;
 }
 
 .hero-content,
@@ -157,7 +158,7 @@ const features = [
 }
 
 .hero-title {
-  font-size: clamp(3rem, 8vw, 5.5rem);
+  font-size: clamp(2rem, 8vw, 5.5rem);
   font-weight: 800;
   line-height: 1.1;
   letter-spacing: -0.02em;
@@ -206,7 +207,7 @@ const features = [
 }
 
 .hero-tagline {
-  font-size: 1.5rem;
+  font-size: clamp(1rem, 4vw, 1.5rem);
   color: var(--vp-c-text-2);
   margin-bottom: 32px;
 }
