@@ -7,6 +7,7 @@
     "docs"
   ],
   "scripts": {
+    "build": "bun run --cwd packages/core build && bun run --cwd packages/vue build",
     "docs:dev": "bun run --cwd docs dev",
     "docs:build": "bun run --cwd docs build",
     "docs:preview": "bun run --cwd docs preview",
@@ -33,6 +34,8 @@
     "reka-ui": "^2.8.0",
     "tailwindcss": "^4.1.18",
     "typescript-eslint": "^8.55.0",
+    "unplugin-vue": "^7.1.1",
+    "vite": "^7.3.1",
     "vue": "3.5.17",
     "vue-tsc": "^3.2.4"
   },
