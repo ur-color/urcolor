@@ -79,6 +79,7 @@ function renderToCanvas(canvas: HTMLCanvasElement, pixels: Uint8ClampedArray, sa
   if (!offCtx) return;
   offCtx.putImageData(imageData, 0, 0);
 
+  ctx.clearRect(0, 0, w, h);
   ctx.imageSmoothingEnabled = true;
   ctx.imageSmoothingQuality = "high";
   ctx.drawImage(offscreen, 0, 0, w, h);
@@ -178,7 +179,7 @@ function render() {
       );
       renderToCanvas(canvas, pixels, sampleW, sampleH);
     } else {
-      // One axis is alpha — render a 1D channel gradient on the non-alpha axis
+      // One axis is alpha — render a 2D grid: real channel on one axis, alpha on the other
       const channelKey = effectiveXChannel ?? effectiveYChannel!;
       const cfg = getChannelConfig(colorSpace, channelKey);
       if (!cfg) return;
@@ -187,20 +188,46 @@ function render() {
       const cMax = cfg.culoriMax ?? cfg.max;
 
       const isXReal = !!effectiveXChannel;
-      const sampleW = isXReal ? 64 : 1;
-      const sampleH = isXReal ? 1 : 64;
+      const sampleW = 64;
+      const sampleH = 64;
 
-      // Sample along the real channel axis
-      const slidingForward = isXReal ? slidingFromLeft : slidingFromTop;
+      const slidingForwardReal = isXReal ? slidingFromLeft : slidingFromTop;
+      const slidingForwardAlpha = isXReal ? slidingFromTop : slidingFromLeft;
 
-      const pixels = sampleChannelGrid(
-        overriddenBase, colorSpace,
-        channelKey, channelKey,
-        slidingForward ? cMin : cMax, slidingForward ? cMax : cMin,
-        slidingForward ? cMin : cMax, slidingForward ? cMax : cMin,
-        isXReal ? sampleW : 1, isXReal ? 1 : sampleH,
-      );
-      renderToCanvas(canvas, pixels, isXReal ? sampleW : 1, isXReal ? 1 : sampleH);
+      // Sample a 2D grid: one axis is the real channel, the other is alpha (0–1)
+      const realMin = slidingForwardReal ? cMin : cMax;
+      const realMax = slidingForwardReal ? cMax : cMin;
+      const alphaMin = slidingForwardAlpha ? 0 : 1;
+      const alphaMax = slidingForwardAlpha ? 1 : 0;
+
+      const data = new Uint8ClampedArray(sampleW * sampleH * 4);
+      for (let y = 0; y < sampleH; y++) {
+        const vy = y / (sampleH - 1);
+        for (let x = 0; x < sampleW; x++) {
+          const vx = x / (sampleW - 1);
+
+          const realVal = isXReal
+            ? realMin + vx * (realMax - realMin)
+            : realMin + vy * (realMax - realMin);
+          const alphaVal = isXReal
+            ? alphaMin + vy * (alphaMax - alphaMin)
+            : alphaMin + vx * (alphaMax - alphaMin);
+
+          const c = overriddenBase.set({
+            mode: colorSpace,
+            [channelKey]: realVal,
+          });
+          if (!c) continue;
+          const rgb = c.to("rgb");
+          if (!rgb) continue;
+          const idx = (y * sampleW + x) * 4;
+          data[idx] = Math.round(Math.max(0, Math.min(1, rgb.get("r", 0))) * 255);
+          data[idx + 1] = Math.round(Math.max(0, Math.min(1, rgb.get("g", 0))) * 255);
+          data[idx + 2] = Math.round(Math.max(0, Math.min(1, rgb.get("b", 0))) * 255);
+          data[idx + 3] = Math.round(Math.max(0, Math.min(1, alphaVal)) * 255);
+        }
+      }
+      renderToCanvas(canvas, data, sampleW, sampleH);
     }
   }
 }
