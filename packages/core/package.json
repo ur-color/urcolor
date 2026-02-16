@@ -18,6 +18,31 @@
     "build:js": "bun build ./src/index.ts --outdir ./dist --format esm",
     "build:types": "tsc --declaration --emitDeclarationOnly --outDir dist --project tsconfig.build.json"
   },
+  "keywords": [
+    "color",
+    "color-picker",
+    "color-space",
+    "gradient",
+    "webgl",
+    "hsl",
+    "oklch",
+    "oklab",
+    "display-p3",
+    "color-conversion"
+  ],
+  "author": {
+    "name": "GrandMagus",
+    "url": "https://github.com/GrandMagus02"
+  },
+  "homepage": "https://urcolor.vercel.app/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ur-color/urcolor",
+    "directory": "packages/core"
+  },
+  "bugs": {
+    "url": "https://github.com/ur-color/urcolor/issues"
+  },
   "dependencies": {
     "internationalized-color": "*"
   }

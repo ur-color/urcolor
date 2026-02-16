@@ -18,6 +18,32 @@
     "build:js": "vite build",
     "build:types": "vue-tsc --declaration --emitDeclarationOnly --outDir dist --project tsconfig.build.json"
   },
+  "keywords": [
+    "color",
+    "color-picker",
+    "vue",
+    "vue3",
+    "headless",
+    "accessible",
+    "color-space",
+    "oklch",
+    "hsl",
+    "color-swatch",
+    "color-slider"
+  ],
+  "author": {
+    "name": "GrandMagus",
+    "url": "https://github.com/GrandMagus02"
+  },
+  "homepage": "https://urcolor.vercel.app/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ur-color/urcolor",
+    "directory": "packages/vue"
+  },
+  "bugs": {
+    "url": "https://github.com/ur-color/urcolor/issues"
+  },
   "dependencies": {
     "@urcolor/core": "workspace:*",
     "internationalized-color": "*",
