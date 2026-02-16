@@ -78,14 +78,34 @@ function onFieldUpdate(c: Color | undefined) {
           aria-label="Color picker"
           @update:model-value="onColorUpdate"
         >
-          <ColorAreaTrack as="div" class="hero-area-track">
+          <ColorAreaTrack
+            as="div"
+            class="hero-area-track"
+          >
             <ColorAreaGradient
               as="div"
               class="absolute inset-0"
             />
-            <ColorAreaThumb as="div" class="absolute size-6 transform-(--reka-slider-area-thumb-transform)">
-              <ColorAreaThumbX as="div" class="absolute inset-0 size-6 rounded-full border-[2.5px] border-white shadow-[0_0_0_1px_rgba(0,0,0,0.2),0_2px_8px_rgba(0,0,0,0.3)] outline-none focus-visible:shadow-[0_0_0_1px_rgba(0,0,0,0.2),0_0_0_3px_rgba(255,64,129,0.5)]" />
-              <ColorAreaThumbY as="div" class="opacity-0 size-0 pointer-events-none" />
+            <ColorAreaThumb
+              as="div"
+              class="
+                absolute size-6 transform-(--reka-slider-area-thumb-transform)
+              "
+            >
+              <ColorAreaThumbX
+                as="div"
+                class="
+                  absolute inset-0 size-6 rounded-full border-[2.5px]
+                  border-white
+                  shadow-[0_0_0_1px_rgba(0,0,0,0.2),0_2px_8px_rgba(0,0,0,0.3)]
+                  outline-none
+                  focus-visible:shadow-[0_0_0_1px_rgba(0,0,0,0.2),0_0_0_3px_rgba(255,64,129,0.5)]
+                "
+              />
+              <ColorAreaThumbY
+                as="div"
+                class="pointer-events-none size-0 opacity-0"
+              />
             </ColorAreaThumb>
           </ColorAreaTrack>
         </ColorAreaRoot>
@@ -94,8 +114,15 @@ function onFieldUpdate(c: Color | undefined) {
       <!-- Cell 2: Color Swatches -->
       <div class="hero-cell-swatches">
         <div class="hero-demo-swatch-block">
-          <ColorSwatchRoot :model-value="color" class="hero-demo-swatch" />
-          <ColorSwatchRoot :model-value="color" alpha class="hero-demo-swatch" />
+          <ColorSwatchRoot
+            :model-value="color"
+            class="hero-demo-swatch"
+          />
+          <ColorSwatchRoot
+            :model-value="color"
+            alpha
+            class="hero-demo-swatch"
+          />
         </div>
       </div>
 
@@ -109,9 +136,24 @@ function onFieldUpdate(c: Color | undefined) {
           as="div"
           @update:model-value="onColorUpdate"
         >
-          <ColorSliderTrack as="div" class="hero-slider-track">
-            <ColorSliderGradient as="div" class="absolute inset-0 rounded-lg" :colors="getSliderColors('h')" />
-            <ColorSliderThumb class="block size-5 rounded-full bg-white border-[2.5px] border-white shadow-[0_0_0_1px_rgba(0,0,0,0.2),0_2px_6px_rgba(0,0,0,0.25)] outline-none focus-visible:shadow-[0_0_0_1px_rgba(0,0,0,0.2),0_0_0_3px_rgba(255,64,129,0.5)]" aria-label="Hue" />
+          <ColorSliderTrack
+            as="div"
+            class="hero-slider-track"
+          >
+            <ColorSliderGradient
+              as="div"
+              class="absolute inset-0 rounded-lg"
+              :colors="getSliderColors('h')"
+            />
+            <ColorSliderThumb
+              class="
+                block size-5 rounded-full border-[2.5px] border-white bg-white
+                shadow-[0_0_0_1px_rgba(0,0,0,0.2),0_2px_6px_rgba(0,0,0,0.25)]
+                outline-none
+                focus-visible:shadow-[0_0_0_1px_rgba(0,0,0,0.2),0_0_0_3px_rgba(255,64,129,0.5)]
+              "
+              aria-label="Hue"
+            />
           </ColorSliderTrack>
         </ColorSliderRoot>
 
@@ -123,9 +165,24 @@ function onFieldUpdate(c: Color | undefined) {
           as="div"
           @update:model-value="onColorUpdate"
         >
-          <ColorSliderTrack as="div" class="hero-slider-track">
-            <ColorSliderGradient as="div" class="absolute inset-0 rounded-lg" :colors="getSliderColors('s')" />
-            <ColorSliderThumb class="block size-5 rounded-full bg-white border-[2.5px] border-white shadow-[0_0_0_1px_rgba(0,0,0,0.2),0_2px_6px_rgba(0,0,0,0.25)] outline-none focus-visible:shadow-[0_0_0_1px_rgba(0,0,0,0.2),0_0_0_3px_rgba(255,64,129,0.5)]" aria-label="Saturation" />
+          <ColorSliderTrack
+            as="div"
+            class="hero-slider-track"
+          >
+            <ColorSliderGradient
+              as="div"
+              class="absolute inset-0 rounded-lg"
+              :colors="getSliderColors('s')"
+            />
+            <ColorSliderThumb
+              class="
+                block size-5 rounded-full border-[2.5px] border-white bg-white
+                shadow-[0_0_0_1px_rgba(0,0,0,0.2),0_2px_6px_rgba(0,0,0,0.25)]
+                outline-none
+                focus-visible:shadow-[0_0_0_1px_rgba(0,0,0,0.2),0_0_0_3px_rgba(255,64,129,0.5)]
+              "
+              aria-label="Saturation"
+            />
           </ColorSliderTrack>
         </ColorSliderRoot>
 
@@ -137,9 +194,24 @@ function onFieldUpdate(c: Color | undefined) {
           as="div"
           @update:model-value="onColorUpdate"
         >
-          <ColorSliderTrack as="div" class="hero-slider-track">
-            <ColorSliderGradient as="div" class="absolute inset-0 rounded-lg" :colors="getSliderColors('v')" />
-            <ColorSliderThumb class="block size-5 rounded-full bg-white border-[2.5px] border-white shadow-[0_0_0_1px_rgba(0,0,0,0.2),0_2px_6px_rgba(0,0,0,0.25)] outline-none focus-visible:shadow-[0_0_0_1px_rgba(0,0,0,0.2),0_0_0_3px_rgba(255,64,129,0.5)]" aria-label="Value" />
+          <ColorSliderTrack
+            as="div"
+            class="hero-slider-track"
+          >
+            <ColorSliderGradient
+              as="div"
+              class="absolute inset-0 rounded-lg"
+              :colors="getSliderColors('v')"
+            />
+            <ColorSliderThumb
+              class="
+                block size-5 rounded-full border-[2.5px] border-white bg-white
+                shadow-[0_0_0_1px_rgba(0,0,0,0.2),0_2px_6px_rgba(0,0,0,0.25)]
+                outline-none
+                focus-visible:shadow-[0_0_0_1px_rgba(0,0,0,0.2),0_0_0_3px_rgba(255,64,129,0.5)]
+              "
+              aria-label="Value"
+            />
           </ColorSliderTrack>
         </ColorSliderRoot>
 
@@ -151,9 +223,24 @@ function onFieldUpdate(c: Color | undefined) {
           as="div"
           @update:model-value="onColorUpdate"
         >
-          <ColorSliderTrack as="div" class="hero-slider-track hero-alpha-track">
-            <ColorSliderGradient as="div" class="absolute inset-0 rounded-lg" :colors="alphaGradientColors" />
-            <ColorSliderThumb class="block size-5 rounded-full bg-white border-[2.5px] border-white shadow-[0_0_0_1px_rgba(0,0,0,0.2),0_2px_6px_rgba(0,0,0,0.25)] outline-none focus-visible:shadow-[0_0_0_1px_rgba(0,0,0,0.2),0_0_0_3px_rgba(255,64,129,0.5)]" aria-label="Alpha" />
+          <ColorSliderTrack
+            as="div"
+            class="hero-slider-track hero-alpha-track"
+          >
+            <ColorSliderGradient
+              as="div"
+              class="absolute inset-0 rounded-lg"
+              :colors="alphaGradientColors"
+            />
+            <ColorSliderThumb
+              class="
+                block size-5 rounded-full border-[2.5px] border-white bg-white
+                shadow-[0_0_0_1px_rgba(0,0,0,0.2),0_2px_6px_rgba(0,0,0,0.25)]
+                outline-none
+                focus-visible:shadow-[0_0_0_1px_rgba(0,0,0,0.2),0_0_0_3px_rgba(255,64,129,0.5)]
+              "
+              aria-label="Alpha"
+            />
           </ColorSliderTrack>
         </ColorSliderRoot>
       </div>
@@ -168,7 +255,11 @@ function onFieldUpdate(c: Color | undefined) {
           class="hero-field-hex"
           @update:model-value="onFieldUpdate"
         >
-          <ColorFieldInput as="input" class="hero-field-input hero-field-input-hex" aria-label="Hex color" />
+          <ColorFieldInput
+            as="input"
+            class="hero-field-input hero-field-input-hex"
+            aria-label="Hex color"
+          />
         </ColorFieldRoot>
 
         <div class="hero-field-row">
@@ -181,7 +272,11 @@ function onFieldUpdate(c: Color | undefined) {
             @update:model-value="onFieldUpdate"
           >
             <label class="hero-field-label">H</label>
-            <ColorFieldInput as="input" class="hero-field-input" aria-label="Hue" />
+            <ColorFieldInput
+              as="input"
+              class="hero-field-input"
+              aria-label="Hue"
+            />
           </ColorFieldRoot>
           <ColorFieldRoot
             :model-value="color"
@@ -192,7 +287,11 @@ function onFieldUpdate(c: Color | undefined) {
             @update:model-value="onFieldUpdate"
           >
             <label class="hero-field-label">S</label>
-            <ColorFieldInput as="input" class="hero-field-input" aria-label="Saturation" />
+            <ColorFieldInput
+              as="input"
+              class="hero-field-input"
+              aria-label="Saturation"
+            />
           </ColorFieldRoot>
           <ColorFieldRoot
             :model-value="color"
@@ -203,7 +302,11 @@ function onFieldUpdate(c: Color | undefined) {
             @update:model-value="onFieldUpdate"
           >
             <label class="hero-field-label">V</label>
-            <ColorFieldInput as="input" class="hero-field-input" aria-label="Value" />
+            <ColorFieldInput
+              as="input"
+              class="hero-field-input"
+              aria-label="Value"
+            />
           </ColorFieldRoot>
           <ColorFieldRoot
             :model-value="color"
@@ -214,7 +317,11 @@ function onFieldUpdate(c: Color | undefined) {
             @update:model-value="onFieldUpdate"
           >
             <label class="hero-field-label">A</label>
-            <ColorFieldInput as="input" class="hero-field-input" aria-label="Alpha" />
+            <ColorFieldInput
+              as="input"
+              class="hero-field-input"
+              aria-label="Alpha"
+            />
           </ColorFieldRoot>
         </div>
       </div>
@@ -271,6 +378,7 @@ function onFieldUpdate(c: Color | undefined) {
   grid-column: 2;
   grid-row: 2;
   display: flex;
+  justify-content: space-between;
   flex-direction: column;
   gap: 8px;
   width: 192px;

@@ -73,3 +73,18 @@
     transparent
   ) !important;
 }
+
+.VPNavBar.screen-open {
+  background: color-mix(in srgb, var(--vp-c-bg) 70%, transparent) !important;
+  backdrop-filter: blur(16px);
+}
+
+.VPNavScreen {
+  background: color-mix(in srgb, var(--vp-c-bg) 70%, transparent) !important;
+  backdrop-filter: blur(16px);
+}
+
+.VPNavScreenAppearance {
+  background: color-mix(in srgb, var(--vp-c-bg) 70%, transparent) !important;
+  backdrop-filter: blur(16px);
+}

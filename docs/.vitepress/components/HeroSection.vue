@@ -2,6 +2,7 @@
 import { ref, onMounted, onUnmounted } from "vue";
 import HeroDemo from "./HeroDemo.vue";
 import HeroBgCanvas from "./HeroBgCanvas.vue";
+import FeaturesGrid from "./FeaturesGrid.vue";
 import UrSymbol from "../assets/symbol.svg?raw";
 
 const words = ["Favorite", "Perfect", "Dream", "Next", "True"];
@@ -79,28 +80,6 @@ onUnmounted(() => {
   ctx?.tl?.kill();
 });
 
-const features = [
-  {
-    title: "Headless Components",
-    details: "Unstyled, accessible color picker primitives — build any design on top.",
-    span: 2,
-  },
-  {
-    title: "Any Color Space",
-    details: "Support for sRGB, HSL, HSB, LCH, OKLCH, and more via @internationalized/color.",
-    span: 1,
-  },
-  {
-    title: "WebGL Gradients",
-    details: "GPU-accelerated canvas gradients for any two-channel color area combination.",
-    span: 1,
-  },
-  {
-    title: "Multi-Framework",
-    details: "Vue support today, with React, Svelte, Angular, and more planned.",
-    span: 2,
-  },
-];
 </script>
 
 <template>
@@ -122,17 +101,7 @@ const features = [
       <HeroDemo />
     </div>
 
-    <div class="feature-grid">
-      <div
-        v-for="(f, i) in features"
-        :key="i"
-        class="feature-card"
-        :class="{ 'span-2': f.span === 2 }"
-      >
-        <h3 class="feature-title">{{ f.title }}</h3>
-        <p class="feature-details">{{ f.details }}</p>
-      </div>
-    </div>
+    <FeaturesGrid />
   </div>
 </template>
 
@@ -147,8 +116,7 @@ const features = [
 }
 
 .hero-content,
-.hero-demo-perspective,
-.feature-grid {
+.hero-demo-perspective {
   position: relative;
   z-index: 1;
 }
@@ -256,55 +224,9 @@ const features = [
   will-change: transform;
 }
 
-.feature-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
-  text-align: left;
-}
-
-.feature-card {
-  padding: 24px;
-  border-radius: 16px;
-  background: color-mix(in srgb, var(--vp-c-bg-soft) 40%, transparent);
-  backdrop-filter: blur(16px);
-  border: 1px solid color-mix(in srgb, var(--vp-c-text-1) 15%, transparent);
-  transition: border-color 0.2s ease;
-}
-
-.feature-card:hover {
-  border-color: color-mix(in srgb, var(--vp-c-brand-1) 30%, transparent);
-}
-
-.feature-card.span-2 {
-  grid-column: span 2;
-}
-
-.feature-title {
-  font-size: 16px;
-  font-weight: 700;
-  margin-bottom: 8px;
-  color: var(--vp-c-text-1);
-}
-
-.feature-details {
-  font-size: 14px;
-  color: var(--vp-c-text-2);
-  line-height: 1.5;
-}
-
 @media (max-width: 768px) {
   .hero-section {
     padding: 72px 16px 48px;
   }
-
-  .feature-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .feature-card.span-2 {
-    grid-column: span 1;
-  }
-
 }
 </style>
