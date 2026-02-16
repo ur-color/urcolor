@@ -5,7 +5,41 @@ import HeroBgCanvas from "./HeroBgCanvas.vue";
 import FeaturesGrid from "./FeaturesGrid.vue";
 import LogoSymbol from "./LogoSymbol.vue";
 
-const words = ["Favorite", "Perfect", "Dream", "Next", "True"];
+const words = [
+  "Favorite",
+  "Perfect",
+  "Dream",
+  "Next",
+  "True",
+  "Colorful",
+  "Vivid",
+  "Harmonious",
+  "Elegant",
+  "Accessible",
+  "Flexible",
+  "Composable",
+  "Universal",
+  "Customizable",
+  "Consistent",
+  "Interactive",
+  "Modern",
+  "Palette",
+  "Picker",
+  "Slider",
+  "Swatch",
+  "Tints",
+  "Shades",
+  "Gradients",
+  "Transforms",
+  "Contrast",
+  "Utilities",
+  "Accessible UI",
+  "Intuitive",
+  "Smart",
+  "Effortless",
+  "Expressive",
+  "Precise",
+];
 const currentWord = ref(words[0]);
 const wordWidth = ref("auto");
 const wordEl = ref<HTMLElement>();
