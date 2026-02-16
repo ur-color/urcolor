@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from "vue";
+import "internationalized-color/css";
 import { ColorSwatchGroupRoot, ColorSwatchGroupItem } from "@urcolor/vue";
 
 const colors = [
@@ -34,7 +35,7 @@ const selected = ref<string[]>([colors[0]!]);
         "
       />
     </ColorSwatchGroupRoot>
-    <p class="text-sm text-gray-500">
+    <p class="text-sm text-(--vp-c-text-2)">
       Selected: <code>{{ selected[0] ?? 'none' }}</code>
     </p>
   </div>

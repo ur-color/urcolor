@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { shallowRef } from "vue";
+import "internationalized-color/css";
 import { Color } from "internationalized-color";
 import { ColorSwatchRoot } from "@urcolor/vue";
 

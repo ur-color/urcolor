@@ -16,18 +16,57 @@ const channels = computed(() => colorSpaces["hsl"]?.channels ?? []);
 
 <template>
   <div class="flex items-start gap-4">
-    <div class="flex-1 flex gap-2 flex-wrap">
-      <div v-for="ch in channels" :key="ch.key" class="flex flex-col gap-1 flex-1 min-w-[80px]">
-        <Label :for="`field-${ch.key}`" class="text-xs font-semibold text-(color:--vp-c-text-2)">{{ ch.label }}</Label>
+    <div class="flex flex-1 flex-wrap gap-2">
+      <div
+        v-for="ch in channels"
+        :key="ch.key"
+        class="flex min-w-[80px] flex-1 flex-col gap-1"
+      >
+        <Label
+          :for="`field-${ch.key}`"
+          class="text-xs font-semibold text-(--vp-c-text-2)"
+        >{{ ch.label }}</Label>
         <ColorFieldRoot
           v-model="color"
           color-space="hsl"
           :channel="ch.key"
-          class="flex items-center border border-(--vp-c-divider) rounded-md overflow-hidden bg-(--vp-c-bg)"
+          class="
+            flex items-center overflow-hidden rounded-md border
+            border-(--vp-c-divider) bg-(--vp-c-bg)
+          "
         >
-          <ColorFieldDecrement class="flex items-center justify-center size-8 border-none bg-transparent text-(color:--vp-c-text-2) cursor-pointer text-lg leading-none select-none shrink-0 border-r border-r-(--vp-c-divider) hover:not-disabled:bg-(--vp-c-bg-soft) hover:not-disabled:text-(color:--vp-c-text-1) disabled:opacity-30 disabled:cursor-default">&minus;</ColorFieldDecrement>
-          <ColorFieldInput :id="`field-${ch.key}`" class="flex-1 min-w-0 w-0 px-0.5 py-1 border-none bg-transparent text-center text-[13px] font-mono text-(color:--vp-c-text-1) outline-none" />
-          <ColorFieldIncrement class="flex items-center justify-center size-8 border-none bg-transparent text-(color:--vp-c-text-2) cursor-pointer text-lg leading-none select-none shrink-0 border-l border-l-(--vp-c-divider) hover:not-disabled:bg-(--vp-c-bg-soft) hover:not-disabled:text-(color:--vp-c-text-1) disabled:opacity-30 disabled:cursor-default">+</ColorFieldIncrement>
+          <ColorFieldDecrement
+            class="
+              flex size-8 shrink-0 cursor-pointer items-center justify-center
+              border-r border-none border-r-(--vp-c-divider) bg-transparent
+              text-lg leading-none text-(--vp-c-text-2) select-none
+              hover:not-disabled:bg-(--vp-c-bg-soft)
+              hover:not-disabled:text-(--vp-c-text-1)
+              disabled:cursor-default disabled:opacity-30
+            "
+          >
+            &minus;
+          </ColorFieldDecrement>
+          <ColorFieldInput
+            :id="`field-${ch.key}`"
+            class="
+              w-0 min-w-0 flex-1 border-none bg-transparent px-0.5 py-1
+              text-center font-mono text-[13px] text-(--vp-c-text-1)
+              outline-none
+            "
+          />
+          <ColorFieldIncrement
+            class="
+              flex size-8 shrink-0 cursor-pointer items-center justify-center
+              border-l border-none border-l-(--vp-c-divider) bg-transparent
+              text-lg leading-none text-(--vp-c-text-2) select-none
+              hover:not-disabled:bg-(--vp-c-bg-soft)
+              hover:not-disabled:text-(--vp-c-text-1)
+              disabled:cursor-default disabled:opacity-30
+            "
+          >
+            +
+          </ColorFieldIncrement>
         </ColorFieldRoot>
       </div>
     </div>

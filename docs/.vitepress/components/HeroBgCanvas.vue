@@ -4,13 +4,11 @@ import { useData } from "vitepress";
 
 const canvasRef = ref<HTMLCanvasElement>();
 const { isDark } = useData();
-let cleanup: (() => void) | null = null;
-
 function initWebGL(canvas: HTMLCanvasElement) {
   const gl = canvas.getContext("webgl", { alpha: true, premultipliedAlpha: false });
   if (!gl) return null;
 
-  const vsSource = `attribute vec2 a_position;void main(){gl_Position=vec4(a_position,0,1);}`;
+  const vsSource = "attribute vec2 a_position;void main(){gl_Position=vec4(a_position,0,1);}";
   const fsSource = `
 precision mediump float;
 uniform vec2 u_resolution;
@@ -130,7 +128,11 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <canvas ref="canvasRef" class="hero-bg-canvas" aria-hidden="true"></canvas>
+  <canvas
+    ref="canvasRef"
+    class="hero-bg-canvas"
+    aria-hidden="true"
+  />
 </template>
 
 <style scoped>

@@ -27,6 +27,17 @@ export default defineConfig({
             { text: "Installation", link: "/guide/installation" },
           ],
         },
+        {
+          text: "Vue Tutorials",
+          items: [
+            { text: "Introduction", link: "/guide/vue/" },
+            { text: "Color Area", link: "/guide/vue/color-area" },
+            { text: "Color Slider", link: "/guide/vue/color-slider" },
+            { text: "Color Field", link: "/guide/vue/color-field" },
+            { text: "Color Swatch", link: "/guide/vue/color-swatch" },
+            { text: "Color Swatch Group", link: "/guide/vue/color-swatch-group" },
+          ],
+        },
       ],
       "/components/": [
         {
@@ -39,11 +50,11 @@ export default defineConfig({
         {
           text: "Vue",
           items: [
-            { text: "ColorArea", link: "/components/vue/color-area" },
-            { text: "ColorSlider", link: "/components/vue/color-slider" },
-            { text: "ColorField", link: "/components/vue/color-field" },
-            { text: "ColorSwatch", link: "/components/vue/color-swatch" },
-            { text: "ColorSwatchGroup", link: "/components/vue/color-swatch-group" },
+            { text: "Color Area", link: "/components/vue/color-area" },
+            { text: "Color Slider", link: "/components/vue/color-slider" },
+            { text: "Color Field", link: "/components/vue/color-field" },
+            { text: "Color Swatch", link: "/components/vue/color-swatch" },
+            { text: "Color Swatch Group", link: "/components/vue/color-swatch-group" },
           ],
         },
       ],

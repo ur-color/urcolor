@@ -16,9 +16,17 @@ const color = shallowRef(Color.parse("hsl(210, 80%, 50%)")!);
       color-space="hex"
       channel="hex"
       format="hex"
-      class="flex items-center h-8 px-3 border border-(--vp-c-divider) rounded-md overflow-hidden bg-(--vp-c-bg)"
+      class="
+        flex h-8 items-center overflow-hidden rounded-md border
+        border-(--vp-c-divider) bg-(--vp-c-bg) px-3
+      "
     >
-      <ColorFieldInput class="flex-1 min-w-0 px-3 py-1.5 border-none bg-transparent text-[13px] font-mono text-(color:--vp-c-text-1) outline-none" />
+      <ColorFieldInput
+        class="
+          min-w-0 flex-1 border-none bg-transparent px-3 py-1.5 font-mono
+          text-[13px] text-(--vp-c-text-1) outline-none
+        "
+      />
     </ColorFieldRoot>
   </div>
 </template>

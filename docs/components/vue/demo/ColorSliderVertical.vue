@@ -27,14 +27,25 @@ function onColorUpdate(c: Color | undefined) {
     class="h-[150px] w-auto"
     @update:model-value="onColorUpdate"
   >
-    <ColorSliderTrack as="div" class="relative w-6 h-full rounded-lg overflow-hidden">
+    <ColorSliderTrack
+      as="div"
+      class="relative h-full w-6 overflow-hidden rounded-lg"
+    >
       <ColorSliderGradient
         as="div"
         class="absolute inset-0 rounded-lg"
         :colors="['red', 'yellow', 'lime', 'cyan', 'blue', 'magenta', 'red']"
         :vertical="true"
       />
-      <ColorSliderThumb class="block size-6 rounded-full bg-white border-[2.5px] border-white shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_2px_4px_rgba(0,0,0,0.3)] outline-none focus-visible:shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_0_0_3px_rgba(66,153,225,0.6)]" aria-label="Hue (vertical)" />
+      <ColorSliderThumb
+        class="
+          block size-6 rounded-full border-[2.5px] border-white bg-white
+          shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_2px_4px_rgba(0,0,0,0.3)]
+          outline-none
+          focus-visible:shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_0_0_3px_rgba(66,153,225,0.6)]
+        "
+        aria-label="Hue (vertical)"
+      />
     </ColorSliderTrack>
   </ColorSliderRoot>
 </template>

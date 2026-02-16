@@ -3,7 +3,7 @@ import { ref, onMounted, onUnmounted } from "vue";
 import HeroDemo from "./HeroDemo.vue";
 import HeroBgCanvas from "./HeroBgCanvas.vue";
 import FeaturesGrid from "./FeaturesGrid.vue";
-import UrSymbol from "../assets/symbol.svg?raw";
+import LogoSymbol from "./LogoSymbol.vue";
 
 const words = ["Favorite", "Perfect", "Dream", "Next", "True"];
 const currentWord = ref(words[0]);
@@ -60,7 +60,7 @@ onMounted(async () => {
 
   // 3D scroll effect
   if (perspectiveEl.value) {
-    gsap.set(perspectiveEl.value, { rotateX: -24, transformPerspective: 1000 });
+    gsap.set(perspectiveEl.value, { rotateX: -36, transformPerspective: 1000 });
     gsap.to(perspectiveEl.value, {
       rotateX: 0,
       ease: "none",
@@ -87,17 +87,40 @@ onUnmounted(() => {
     <HeroBgCanvas />
     <div class="hero-content">
       <h1 class="hero-title">
-        <span class="hero-ur-symbol" v-html="UrSymbol"></span> <span class="hero-word-wrapper" :style="{ width: wordWidth }"><span ref="wordEl" class="hero-word">{{ currentWord }}</span></span> Color
-        <span ref="measureEl" class="hero-word-measure" aria-hidden="true"></span>
+        <span class="hero-ur-symbol">
+          <LogoSymbol />
+        </span> <span
+          class="hero-word-wrapper"
+          :style="{ width: wordWidth }"
+        ><span
+          ref="wordEl"
+          class="hero-word"
+        >{{ currentWord }}</span></span> Color
+        <span
+          ref="measureEl"
+          class="hero-word-measure"
+          aria-hidden="true"
+        />
       </h1>
-      <p class="hero-tagline">Universal color picker component library</p>
+      <p class="hero-tagline">
+        Universal color picker component library
+      </p>
       <div class="hero-actions">
-        <a href="/guide/" class="hero-btn hero-btn-brand">Get Started</a>
-        <a href="/components/" class="hero-btn hero-btn-alt">Components</a>
+        <a
+          href="/guide/"
+          class="hero-btn hero-btn-brand"
+        >Get Started</a>
+        <a
+          href="/components/"
+          class="hero-btn hero-btn-alt"
+        >Components</a>
       </div>
     </div>
 
-    <div ref="perspectiveEl" class="hero-demo-perspective">
+    <div
+      ref="perspectiveEl"
+      class="hero-demo-perspective"
+    >
       <HeroDemo />
     </div>
 

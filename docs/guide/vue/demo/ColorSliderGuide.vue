@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { shallowRef } from "vue";
+import "internationalized-color/css";
 import { Color } from "internationalized-color";
 import {
   ColorSliderRoot,
@@ -9,30 +10,23 @@ import {
 } from "@urcolor/vue";
 
 const color = shallowRef<Color>(Color.parse("hsl(210, 80%, 50%)")!);
-
-function onColorUpdate(c: Color | undefined) {
-  if (c) {
-    color.value = c;
-  }
-}
 </script>
 
 <template>
   <ColorSliderRoot
-    :model-value="color"
+    v-model="color"
     color-space="hsl"
     channel="h"
     as="div"
     class="w-full"
-    @update:model-value="onColorUpdate"
   >
     <ColorSliderTrack
       as="div"
-      class="relative h-6 overflow-hidden rounded-lg"
+      class="relative h-6 overflow-hidden rounded-xl"
     >
       <ColorSliderGradient
         as="div"
-        class="absolute inset-0 rounded-lg"
+        class="absolute inset-0 rounded-xl"
         :colors="['red', 'yellow', 'lime', 'cyan', 'blue', 'magenta', 'red']"
       />
       <ColorSliderThumb

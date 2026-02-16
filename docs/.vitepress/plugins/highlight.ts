@@ -1,6 +1,6 @@
-import { createHighlighter, type Highlighter } from "shiki";
 import { resolve, dirname } from "node:path";
 import { readFile } from "node:fs/promises";
+import { createHighlighter, type Highlighter } from "shiki";
 import type { Plugin } from "vite";
 
 const SUFFIX = "?highlight";
@@ -17,17 +17,17 @@ export function highlightPlugin(): Plugin {
         langs: ["vue"],
       });
     },
-    async transform(code, id) {
+    async transform(code, _id) {
       // Intercept .vue files imported with ?highlight query before Vue plugin
       // by rewriting the import specifiers in the importer
       if (!code.includes(SUFFIX)) return;
 
       const rewritten = code.replace(
         new RegExp(
-          `(from\\s+['"])([^'"]+)\\?highlight(['"])`,
-          "g"
+          "(from\\s+['\"])([^'\"]+)\\?highlight(['\"])",
+          "g",
         ),
-        (_, pre, path, post) => `${pre}virtual:highlight:${path}${post}`
+        (_, pre, path, post) => `${pre}virtual:highlight:${path}${post}`,
       );
       if (rewritten === code) return;
       return { code: rewritten, map: null };

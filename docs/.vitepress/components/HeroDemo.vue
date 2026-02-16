@@ -40,8 +40,6 @@ function getSliderColors(channelKey: string): string[] {
   return colors;
 }
 
-const selectedColorCss = computed(() => color.value.toString() ?? "black");
-
 const alphaGradientColors = computed(() => {
   const transparent = color.value.set({ alpha: 0 });
   const opaque = color.value.set({ alpha: 1 });

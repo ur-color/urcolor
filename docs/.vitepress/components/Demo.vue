@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue";
+import { ref, onMounted } from "vue";
 import { Icon } from "@iconify/vue";
 import { codeToHtml } from "shiki";
 
@@ -10,6 +10,7 @@ const props = defineProps<{
 
 const showCode = ref(false);
 const highlightedCode = ref("");
+const codeEl = ref<HTMLElement>();
 
 onMounted(async () => {
   if (props.code) {
@@ -21,26 +22,47 @@ onMounted(async () => {
       },
       defaultColor: false,
     });
+    if (codeEl.value) codeEl.value.innerHTML = highlightedCode.value;
   }
 });
 </script>
 
 <template>
-  <div class="border border-(--vp-c-divider) rounded-lg overflow-hidden my-4">
-    <div class="p-6 bg-(--vp-c-bg-alt)">
+  <div class="my-4 overflow-hidden rounded-lg border border-(--vp-c-divider)">
+    <div class="bg-(--vp-c-bg-alt) p-6">
       <slot />
     </div>
-    <div class="flex items-center justify-between border-t border-(--vp-c-divider) px-3 py-2 bg-(--vp-c-bg)">
-      <span v-if="props.description" class="text-(color:--vp-c-text-3) text-[13px]">{{ props.description }}</span>
+    <div
+      class="
+        flex items-center justify-between border-t border-(--vp-c-divider)
+        bg-(--vp-c-bg) px-3 py-2
+      "
+    >
+      <span
+        v-if="props.description"
+        class="text-[13px] text-(--vp-c-text-3)"
+      >{{ props.description }}</span>
       <button
-        class="flex items-center justify-center p-1.5 border-none bg-transparent text-(color:--vp-c-text-2) cursor-pointer rounded ml-auto hover:text-(color:--vp-c-text-1) hover:bg-(--vp-c-bg-soft)"
+        class="
+          ml-auto flex cursor-pointer items-center justify-center rounded-sm
+          border-none bg-transparent p-1.5 text-(--vp-c-text-2)
+          hover:bg-(--vp-c-bg-soft) hover:text-(--vp-c-text-1)
+        "
         :aria-label="showCode ? 'Hide code' : 'Show code'"
         @click="showCode = !showCode"
       >
-        <Icon icon="lucide:code" :width="18" :height="18" />
+        <Icon
+          icon="lucide:code"
+          :width="18"
+          :height="18"
+        />
       </button>
     </div>
-    <div v-show="showCode" class="demo-code border-t border-(--vp-c-divider)" v-html="highlightedCode" />
+    <div
+      v-show="showCode"
+      ref="codeEl"
+      class="demo-code border-t border-(--vp-c-divider)"
+    />
   </div>
 </template>
 

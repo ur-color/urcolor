@@ -25,7 +25,13 @@ const selected = ref<string[]>([]);
         v-for="color in colors"
         :key="color"
         :value="color"
-        class="size-10 rounded-lg cursor-pointer transition-shadow outline-2 outline-offset-2 outline-transparent data-[state=on]:outline-(--vp-c-brand-2) focus:outline-none focus-visible:outline-(--vp-c-brand-2)"
+        class="
+          size-10 cursor-pointer rounded-lg outline-2 outline-offset-2
+          outline-transparent transition-shadow
+          focus:outline-none
+          focus-visible:outline-(--vp-c-brand-2)
+          data-[state=on]:outline-(--vp-c-brand-2)!
+        "
       />
     </ColorSwatchGroupRoot>
     <p class="text-sm text-gray-500">

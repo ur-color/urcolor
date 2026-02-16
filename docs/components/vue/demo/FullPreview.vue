@@ -186,6 +186,7 @@ const sliderChannels = computed(() => channels.value);
 
 // Generate slider gradient colors for each slider channel
 function getSliderColors(channelKey: string): string[] {
+  if (!color.value) return ["black", "white"];
   if (channelKey === "alpha") {
     const steps = 7;
     const colors: string[] = [];
@@ -208,10 +209,6 @@ function getSliderColors(channelKey: string): string[] {
   }
   return colors;
 }
-
-const selectedColorCss = computed(() => {
-  return color.value.toHex() ?? "black";
-});
 
 function onColorUpdate(c: Color | undefined) {
   if (c) {
@@ -242,7 +239,7 @@ const spaceKeys = Object.keys(colorSpaces);
     <!-- Mobile-only top row: color name, language, color space -->
     <div
       class="
-        hidden items-center gap-2 col-span-2 flex-wrap
+        col-span-2 hidden flex-wrap items-center gap-2
         max-md:flex
       "
     >
@@ -254,7 +251,7 @@ const spaceKeys = Object.keys(colorSpaces);
         "
         :dir="rtlLocales.has(selectedLocale) ? 'rtl' : 'ltr'"
       >{{ colorName }}</code>
-      <div class="flex items-center gap-2 ml-auto">
+      <div class="ml-auto flex items-center gap-2">
         <SelectRoot v-model="selectedLocale">
           <SelectTrigger
             class="
@@ -450,7 +447,12 @@ const spaceKeys = Object.keys(colorSpaces);
           </TooltipRoot>
         </TooltipProvider>
       </div>
-      <div class="flex shrink-0 items-center gap-2 max-md:hidden">
+      <div
+        class="
+          flex shrink-0 items-center gap-2
+          max-md:hidden
+        "
+      >
         <code
           class="
             box-border inline-flex h-8 items-center rounded-md border
@@ -755,7 +757,7 @@ const spaceKeys = Object.keys(colorSpaces);
       class="flex flex-wrap items-end gap-2"
     >
       <div
-        class="min-w-[100px] flex flex-1 flex-col gap-1"
+        class="flex min-w-[100px] flex-1 flex-col gap-1"
       >
         <Label
           for="field-hex"
@@ -781,7 +783,7 @@ const spaceKeys = Object.keys(colorSpaces);
           />
         </ColorFieldRoot>
       </div>
-      <div class="min-w-[100px] flex flex-1 flex-col gap-1">
+      <div class="flex min-w-[100px] flex-1 flex-col gap-1">
         <Label
           for="field-alpha"
           class="text-xs font-semibold text-(--vp-c-text-2)"
@@ -833,7 +835,7 @@ const spaceKeys = Object.keys(colorSpaces);
       <div
         v-for="ch in channels"
         :key="ch.key"
-        class="min-w-[100px] flex flex-1 flex-col gap-1"
+        class="flex min-w-[100px] flex-1 flex-col gap-1"
       >
         <Label
           :for="`field-${ch.key}`"
