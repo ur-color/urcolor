@@ -2,9 +2,7 @@
 import type { ColorSwatchRootProps } from "../ColorSwatch/ColorSwatchRoot.vue";
 import type { PrimitiveProps } from "reka-ui";
 
-export interface ColorSwatchGroupItemProps
-  extends /* @vue-ignore */ PrimitiveProps,
-    Pick<ColorSwatchRootProps, "checkerSize" | "alpha"> {
+export interface ColorSwatchGroupItemProps extends PrimitiveProps, Pick<ColorSwatchRootProps, "checkerSize" | "alpha"> {
   as?: string;
   asChild?: boolean;
   /** The color value. Serves as both the selection value and the displayed color. */
@@ -42,7 +40,11 @@ function handleClick() {
 </script>
 
 <template>
-  <RovingFocusItem v-if="context.rovingFocus.value" as-child :focusable="!isDisabled">
+  <RovingFocusItem
+    v-if="context.rovingFocus.value"
+    as-child
+    :focusable="!isDisabled"
+  >
     <ColorSwatchRoot
       :ref="forwardRef"
       :as="as"

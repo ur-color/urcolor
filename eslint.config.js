@@ -94,6 +94,13 @@ export default [
         Element: "readonly",
         ResizeObserver: "readonly",
         ResizeObserverEntry: "readonly",
+        HTMLCanvasElement: "readonly",
+        OffscreenCanvas: "readonly",
+        performance: "readonly",
+        requestAnimationFrame: "readonly",
+        cancelAnimationFrame: "readonly",
+        devicePixelRatio: "readonly",
+        window: "readonly",
       },
     },
     rules: {
@@ -108,6 +115,12 @@ export default [
     ...tseslint.configs.disableTypeChecked,
   },
   {
-    ignores: ["node_modules/", "dist/", ".nuxt/", ".output/", "bun.lock", "docs/.vitepress/dist/", "docs/.vitepress/cache/", "**/*.md"],
+    files: ["docs/**/*.vue"],
+    rules: {
+      "better-tailwindcss/no-unknown-classes": "off",
+    },
+  },
+  {
+    ignores: ["node_modules/", "**/dist/", ".nuxt/", ".output/", "bun.lock", "docs/.vitepress/dist/", "docs/.vitepress/cache/", "**/*.md", "**/*.d.ts"],
   },
 ];

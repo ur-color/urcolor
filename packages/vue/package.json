@@ -2,13 +2,21 @@
   "name": "@urcolor/vue",
   "version": "0.0.1",
   "type": "module",
-  "main": "src/index.ts",
-  "types": "src/index.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "import": "./src/index.ts",
-      "types": "./src/index.ts"
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
     }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "bun run build:js && bun run build:types",
+    "build:js": "vite build",
+    "build:types": "vue-tsc --declaration --emitDeclarationOnly --outDir dist --project tsconfig.build.json"
   },
   "dependencies": {
     "@urcolor/core": "workspace:*",
@@ -17,5 +25,8 @@
   },
   "peerDependencies": {
     "vue": "^3"
+  },
+  "devDependencies": {
+    "vite": "^7.3.1"
   }
 }

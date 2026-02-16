@@ -8,7 +8,7 @@ export interface ColorFieldSwatchProps extends /* @vue-ignore */ ColorSwatchRoot
 import { useForwardExpose } from "reka-ui";
 import ColorSwatchRoot from "../ColorSwatch/ColorSwatchRoot.vue";
 
-const props = withDefaults(defineProps<ColorFieldSwatchProps>(), {
+const _props = withDefaults(defineProps<ColorFieldSwatchProps>(), {
   as: "span",
 });
 

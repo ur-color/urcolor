@@ -1,7 +1,7 @@
 <script lang="ts">
 import type { Ref } from "vue";
 import type { PrimitiveProps } from "reka-ui";
-import { createContext } from "reka-ui";
+import { createContext, Primitive, useForwardExpose, useDirection, RovingFocusGroup } from "reka-ui";
 
 export type SelectionType = "single" | "multiple";
 
@@ -38,13 +38,12 @@ export interface ColorSwatchGroupContext {
   changeModelValue: (value: string) => void;
 }
 
-export const [injectColorSwatchGroupContext, provideColorSwatchGroupContext] =
-  createContext<ColorSwatchGroupContext>("ColorSwatchGroupRoot");
+export const [injectColorSwatchGroupContext, provideColorSwatchGroupContext]
+  = createContext<ColorSwatchGroupContext>("ColorSwatchGroupRoot");
 </script>
 
 <script setup lang="ts">
 import { computed, ref, toRefs, watch } from "vue";
-import { Primitive, useForwardExpose, useDirection, RovingFocusGroup } from "reka-ui";
 
 const props = withDefaults(defineProps<ColorSwatchGroupRootProps>(), {
   as: "div",
@@ -58,7 +57,7 @@ const props = withDefaults(defineProps<ColorSwatchGroupRootProps>(), {
 
 const emits = defineEmits<ColorSwatchGroupRootEmits>();
 const { disabled, dir: propDir } = toRefs(props);
-const dir = useDirection(propDir);
+const resolvedDir = useDirection(propDir);
 const { forwardRef } = useForwardExpose();
 
 const internalValue = ref<string[]>(props.modelValue ?? props.defaultValue);
@@ -76,7 +75,7 @@ function changeModelValue(value: string) {
     next = internalValue.value.includes(value) ? [] : [value];
   } else {
     next = internalValue.value.includes(value)
-      ? internalValue.value.filter((v) => v !== value)
+      ? internalValue.value.filter(v => v !== value)
       : [...internalValue.value, value];
   }
   internalValue.value = next;
@@ -97,7 +96,7 @@ provideColorSwatchGroupContext({
     v-if="rovingFocus"
     as-child
     :orientation="orientation"
-    :dir="dir"
+    :dir="resolvedDir"
     :loop="loop"
   >
     <Primitive
@@ -105,7 +104,7 @@ provideColorSwatchGroupContext({
       :as="as"
       :as-child="asChild"
       role="group"
-      :dir="dir"
+      :dir="resolvedDir"
       :data-orientation="orientation"
     >
       <slot />
@@ -118,7 +117,7 @@ provideColorSwatchGroupContext({
     :as="as"
     :as-child="asChild"
     role="group"
-    :dir="dir"
+    :dir="resolvedDir"
     :data-orientation="orientation"
   >
     <slot />
