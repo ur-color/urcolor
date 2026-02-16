@@ -9,7 +9,7 @@
   "scripts": {
     "build": "bun run --cwd packages/core build && bun run --cwd packages/vue build",
     "docs:dev": "bun run --cwd docs dev",
-    "docs:build": "bun run --cwd docs build",
+    "docs:build": "bun run build && bun run --cwd docs build",
     "docs:preview": "bun run --cwd docs preview",
     "lint": "eslint . && vue-tsc --noEmit",
     "lint:fix": "eslint . --fix && vue-tsc --noEmit"
