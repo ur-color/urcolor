@@ -14,8 +14,13 @@ export interface ColorAreaGradientProps extends /* @vue-ignore */ PrimitiveProps
   bottomRight?: string;
   /** When set to a non-RGB color space, uses 2D canvas with perceptual interpolation in that space instead of WebGL (sRGB). */
   interpolationSpace?: string;
-  /** When true, renders a checkerboard pattern behind the gradient to visualize alpha transparency. */
-  alpha?: boolean;
+  /**
+   * Lock specific channels to fixed values in the gradient.
+   * - `{ alpha: 1 }` (default) — lock alpha to 1
+   * - `{ s: 1, v: 1 }` — lock saturation and value
+   * - `false` — no overrides, gradient reflects all channels from current color
+   */
+  channelOverrides?: Record<string, number> | false;
 }
 </script>
 
@@ -30,6 +35,7 @@ import { injectColorAreaRootContext } from "./ColorAreaRoot.vue";
 
 const props = withDefaults(defineProps<ColorAreaGradientProps>(), {
   as: "span",
+  channelOverrides: () => ({ alpha: 1 }),
 });
 
 const rootContext = injectColorAreaRootContext();
@@ -43,9 +49,11 @@ const xIsAlpha = computed(() => rootContext.xChannelKey.value === "alpha");
 const yIsAlpha = computed(() => rootContext.yChannelKey.value === "alpha");
 const hasAlphaAxis = computed(() => xIsAlpha.value || yIsAlpha.value);
 
-// Canvas opacity: reflect color's alpha when alpha prop is enabled (but not when axis IS alpha)
+// Canvas opacity: reflect color's alpha when overrides don't include alpha (and axis isn't alpha)
 const canvasOpacity = computed(() => {
-  if ((props.alpha || rootContext.alpha.value) && !hasAlphaAxis.value) {
+  if (hasAlphaAxis.value) return 1;
+  const overrides = props.channelOverrides as Record<string, number> | false;
+  if (overrides === false || (typeof overrides === "object" && overrides.alpha === undefined)) {
     return rootContext.colorRef.value?.alpha ?? 1;
   }
   return 1;
@@ -74,6 +82,25 @@ function renderToCanvas(canvas: HTMLCanvasElement, pixels: Uint8ClampedArray, sa
   ctx.imageSmoothingEnabled = true;
   ctx.imageSmoothingQuality = "high";
   ctx.drawImage(offscreen, 0, 0, w, h);
+}
+
+function applyOverrides(baseColor: Color, colorSpace: string): Color {
+  const overrides: Record<string, number> | false = props.channelOverrides as any;
+  if (!overrides) return baseColor;
+
+  const channelUpdates: Record<string, number> = {};
+  let result = baseColor;
+  for (const [k, v] of Object.entries(overrides)) {
+    if (k === "alpha") {
+      result = result.set({ alpha: v });
+    } else {
+      channelUpdates[k] = v;
+    }
+  }
+  if (Object.keys(channelUpdates).length > 0) {
+    result = result.set({ mode: colorSpace, ...channelUpdates });
+  }
+  return result;
 }
 
 function render() {
@@ -118,6 +145,9 @@ function render() {
 
   // Channel-based rendering from root context
   if (baseColorObj && colorSpace) {
+    // Apply channel overrides to the base color before sampling
+    const overriddenBase = applyOverrides(baseColorObj, colorSpace);
+
     // Resolve the actual channel keys for sampling (skip alpha axes)
     const effectiveXChannel = xIsAlpha.value ? null : xChannel;
     const effectiveYChannel = yIsAlpha.value ? null : yChannel;
@@ -140,7 +170,7 @@ function render() {
       const sampleW = 64;
       const sampleH = 64;
       const pixels = sampleChannelGrid(
-        baseColorObj, colorSpace,
+        overriddenBase, colorSpace,
         effectiveXChannel, effectiveYChannel,
         slidingFromLeft ? xMinVal : xMaxVal, slidingFromLeft ? xMaxVal : xMinVal,
         slidingFromTop ? yMinVal : yMaxVal, slidingFromTop ? yMaxVal : yMinVal,
@@ -164,7 +194,7 @@ function render() {
       const slidingForward = isXReal ? slidingFromLeft : slidingFromTop;
 
       const pixels = sampleChannelGrid(
-        baseColorObj, colorSpace,
+        overriddenBase, colorSpace,
         channelKey, channelKey,
         slidingForward ? cMin : cMax, slidingForward ? cMax : cMin,
         slidingForward ? cMin : cMax, slidingForward ? cMax : cMin,
@@ -182,7 +212,7 @@ useResizeObserver(canvasRef, () => {
 watch(
   () => [
     props.topLeft, props.topRight, props.bottomLeft, props.bottomRight,
-    props.interpolationSpace,
+    props.interpolationSpace, props.channelOverrides,
     rootContext.colorSpace.value, rootContext.xChannelKey.value, rootContext.yChannelKey.value,
     rootContext.colorRef.value,
     rootContext.isSlidingFromLeft.value, rootContext.isSlidingFromTop.value,

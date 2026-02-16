@@ -19,8 +19,6 @@ export interface ColorSliderRootProps {
   inverted?: boolean;
   /** The orientation of the slider. */
   orientation?: "horizontal" | "vertical";
-  /** When true, reflects the color's alpha channel as canvas opacity on the gradient. */
-  alpha?: boolean;
 }
 
 export type ColorSliderRootEmits = {
@@ -30,8 +28,8 @@ export type ColorSliderRootEmits = {
 
 export interface ColorSliderRootContext {
   colorRef: Ref<Color | undefined>;
-  alpha: Ref<boolean>;
   channel: Ref<string>;
+  colorSpace: Ref<string>;
 }
 
 export const [injectColorSliderRootContext, provideColorSliderRootContext]
@@ -46,7 +44,6 @@ const props = withDefaults(defineProps<ColorSliderRootProps>(), {
   colorSpace: "hsl",
   channel: "h",
   disabled: false,
-  alpha: false,
 });
 const emit = defineEmits<ColorSliderRootEmits>();
 
@@ -107,7 +104,7 @@ function handleValueCommit() {
   }
 }
 
-provideColorSliderRootContext({ colorRef, alpha: toRef(props, "alpha"), channel: toRef(props, "channel") });
+provideColorSliderRootContext({ colorRef, channel: toRef(props, "channel"), colorSpace: toRef(props, "colorSpace") });
 </script>
 
 <template>

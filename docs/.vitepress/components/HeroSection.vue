@@ -100,17 +100,28 @@ onMounted(async () => {
   font-size: 15px;
   font-weight: 600;
   text-decoration: none;
-  transition: all 0.2s ease;
 }
 
 .hero-btn-brand {
+  position: relative;
+  overflow: hidden;
   background: color-mix(in srgb, var(--vp-c-brand-2) 80%, transparent);
   backdrop-filter: blur(12px);
   color: var(--vp-button-brand-text);
 }
 
-.hero-btn-brand:hover {
+.hero-btn-brand::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  mix-blend-mode: soft-light;
   background: color-mix(in srgb, var(--vp-c-brand-1) 90%, transparent);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.hero-btn-brand:hover::after {
+  opacity: 1;
 }
 
 .hero-btn-alt {
@@ -118,6 +129,7 @@ onMounted(async () => {
   color: var(--vp-c-text-1);
   background: color-mix(in srgb, var(--vp-c-bg-soft) 40%, transparent);
   backdrop-filter: blur(12px);
+  transition: all 0.2s ease;
 }
 
 .hero-btn-alt:hover {

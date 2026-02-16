@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { shallowRef, computed } from "vue";
-import { usePreferredLanguages } from "@vueuse/core";
+import { shallowRef, computed, watch } from "vue";
+import { usePreferredLanguages, useCssVar } from "@vueuse/core";
+import { useBrandHue } from "../composables/useBrandHue";
 import { Color, nameColor, useLocale } from "internationalized-color";
 import * as allLocales from "internationalized-color/locales";
-import { getChannelConfig } from "@urcolor/core";
 import {
   ColorAreaRoot,
   ColorAreaTrack,
@@ -40,28 +40,6 @@ const colorName = computed(() => nameColor(color.value, browserLocale.value)?.na
 
 const color = shallowRef<Color>(Color.create("hsv", { h: 328, s: 1, v: 1 }));
 
-function getSliderColors(channelKey: string): string[] {
-  const cfg = getChannelConfig("hsv", channelKey);
-  if (!cfg) return ["black", "white"];
-  const steps = 12;
-  const colors: string[] = [];
-  const cMin = cfg.culoriMin ?? cfg.min;
-  const cMax = cfg.culoriMax ?? cfg.max;
-  for (let i = 0; i < steps; i++) {
-    const t = i / (steps - 1);
-    const val = cMin + t * (cMax - cMin);
-    const c = color.value.set({ mode: "hsv", [channelKey]: val });
-    if (c) colors.push(c.toString() ?? "black");
-  }
-  return colors;
-}
-
-const alphaGradientColors = computed(() => {
-  const transparent = color.value.set({ alpha: 0 });
-  const opaque = color.value.set({ alpha: 1 });
-  return [transparent?.toString() ?? "transparent", opaque?.toString() ?? "black"];
-});
-
 function onColorUpdate(c: Color | undefined) {
   if (c) {
     color.value = c;
@@ -73,6 +51,23 @@ function onFieldUpdate(c: Color | undefined) {
     color.value = c;
   }
 }
+
+const brandHue = useBrandHue();
+const brand1 = useCssVar("--vp-c-brand-1");
+const brand2 = useCssVar("--vp-c-brand-2");
+const brand3 = useCssVar("--vp-c-brand-3");
+const brandSoft = useCssVar("--vp-c-brand-soft");
+const heroNameBg = useCssVar("--vp-home-hero-name-background");
+
+watch(color, (c) => {
+  const h = c.get("h") as number;
+  brandHue.value = h;
+  brand1.value = `hsl(${h}, 100%, 69%)`;
+  brand2.value = `hsl(${h}, 100%, 63%)`;
+  brand3.value = `hsl(${h}, 82%, 52%)`;
+  brandSoft.value = `hsla(${h}, 100%, 63%, 0.14)`;
+  heroNameBg.value = `linear-gradient(135deg, hsl(${h}, 100%, 63%), hsl(${h}, 82%, 52%))`;
+}, { immediate: true });
 
 </script>
 
@@ -104,21 +99,19 @@ function onFieldUpdate(c: Color | undefined) {
               as="div"
               class="
                 absolute size-6 transform-(--reka-slider-area-thumb-transform)
+                rounded-full border-[2.5px] border-white
+                shadow-[0_0_0_1px_rgba(0,0,0,0.2),0_2px_8px_rgba(0,0,0,0.3)]
+                outline-none
+                focus-visible:shadow-[0_0_0_1px_rgba(0,0,0,0.2),0_0_0_3px_rgba(255,64,129,0.5)]
               "
             >
               <ColorAreaThumbX
                 as="div"
-                class="
-                  absolute inset-0 size-6 rounded-full border-[2.5px]
-                  border-white
-                  shadow-[0_0_0_1px_rgba(0,0,0,0.2),0_2px_8px_rgba(0,0,0,0.3)]
-                  outline-none
-                  focus-visible:shadow-[0_0_0_1px_rgba(0,0,0,0.2),0_0_0_3px_rgba(255,64,129,0.5)]
-                "
+                class="outline-none"
               />
               <ColorAreaThumbY
                 as="div"
-                class="pointer-events-none size-0 opacity-0"
+                class="outline-none"
               />
             </ColorAreaThumb>
           </ColorAreaTrack>
@@ -157,7 +150,7 @@ function onFieldUpdate(c: Color | undefined) {
             <ColorSliderGradient
               as="div"
               class="absolute inset-0 rounded-lg"
-              :colors="getSliderColors('h')"
+              :channel-overrides="{ s: 1, v: 1, alpha: 1 }"
             />
             <ColorSliderThumb
               class="
@@ -186,7 +179,7 @@ function onFieldUpdate(c: Color | undefined) {
             <ColorSliderGradient
               as="div"
               class="absolute inset-0 rounded-lg"
-              :colors="getSliderColors('s')"
+              :channel-overrides="{ alpha: 1 }"
             />
             <ColorSliderThumb
               class="
@@ -215,7 +208,7 @@ function onFieldUpdate(c: Color | undefined) {
             <ColorSliderGradient
               as="div"
               class="absolute inset-0 rounded-lg"
-              :colors="getSliderColors('v')"
+              :channel-overrides="{ alpha: 1 }"
             />
             <ColorSliderThumb
               class="
@@ -244,7 +237,7 @@ function onFieldUpdate(c: Color | undefined) {
             <ColorSliderGradient
               as="div"
               class="absolute inset-0 rounded-lg"
-              :colors="alphaGradientColors"
+              :channel-overrides="false"
             />
             <ColorSliderThumb
               class="

@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, watch } from "vue";
 import { useData } from "vitepress";
+import { useBrandHue } from "../composables/useBrandHue";
 
 const canvasRef = ref<HTMLCanvasElement>();
 const { isDark } = useData();
+const brandHue = useBrandHue();
 function initWebGL(canvas: HTMLCanvasElement) {
   const gl = canvas.getContext("webgl", { alpha: true, premultipliedAlpha: false });
   if (!gl) return null;
@@ -15,12 +17,20 @@ uniform vec2 u_resolution;
 uniform float u_time;
 uniform vec3 u_bg;
 uniform float u_intensity;
+uniform float u_hue;
+vec3 hsl2rgb(float h,float s,float l){
+  vec3 k=mod(vec3(0,8,4)+h/30.0,12.0);
+  float a=s*min(l,1.0-l);
+  return vec3(l-a*max(-1.0,min(min(k.x-3.0,9.0-k.x),1.0)),
+              l-a*max(-1.0,min(min(k.y-3.0,9.0-k.y),1.0)),
+              l-a*max(-1.0,min(min(k.z-3.0,9.0-k.z),1.0)));
+}
 void main(){
   vec2 uv=gl_FragCoord.xy/u_resolution;
   float t=u_time*0.3;
-  vec3 c1=vec3(1.0,0.376,0.565);
-  vec3 c2=vec3(1.0,0.251,0.506);
-  vec3 c3=vec3(0.212,0.773,0.816);
+  vec3 c1=hsl2rgb(u_hue,1.0,0.69);
+  vec3 c2=hsl2rgb(u_hue,1.0,0.63);
+  vec3 c3=hsl2rgb(u_hue+180.0,0.82,0.52);
   float m1=sin(uv.x*3.0+t)*0.5+0.5;
   float m2=cos(uv.y*2.5-t*0.7)*0.5+0.5;
   float m3=sin((uv.x+uv.y)*2.0+t*0.5)*0.5+0.5;
@@ -55,6 +65,7 @@ void main(){
   const uTime = gl.getUniformLocation(prog, "u_time");
   const uBg = gl.getUniformLocation(prog, "u_bg");
   const uIntensity = gl.getUniformLocation(prog, "u_intensity");
+  const uHue = gl.getUniformLocation(prog, "u_hue");
 
   // Dark: #16161a → (0.086, 0.086, 0.102), Light: #f6f6f7 → (0.965, 0.965, 0.969)
   const darkBg = [0.086, 0.086, 0.102] as const;
@@ -66,9 +77,16 @@ void main(){
   let currentIntensity = isDark.value ? darkIntensity : lightIntensity;
   let targetIntensity = currentIntensity;
 
+  let currentHue = 328;
+  let targetHue = 328;
+
   function setTheme(dark: boolean) {
     targetBg = dark ? [...darkBg] : [...lightBg];
     targetIntensity = dark ? darkIntensity : lightIntensity;
+  }
+
+  function setHue(hue: number) {
+    targetHue = hue;
   }
 
   let raf = 0;
@@ -92,10 +110,14 @@ void main(){
       currentBg[i] += (targetBg[i] - currentBg[i]) * 0.12;
     }
     currentIntensity += (targetIntensity - currentIntensity) * 0.12;
+    // Lerp hue via shortest angular path
+    let dh = ((targetHue - currentHue + 540) % 360) - 180;
+    currentHue = (currentHue + dh * 0.12 + 360) % 360;
     gl!.uniform2f(uRes, canvas.width, canvas.height);
     gl!.uniform1f(uTime, t);
     gl!.uniform3f(uBg, currentBg[0], currentBg[1], currentBg[2]);
     gl!.uniform1f(uIntensity, currentIntensity);
+    gl!.uniform1f(uHue, currentHue);
     gl!.drawArrays(gl!.TRIANGLE_STRIP, 0, 4);
     raf = requestAnimationFrame(render);
   }
@@ -103,6 +125,7 @@ void main(){
 
   return {
     setTheme,
+    setHue,
     destroy() {
       cancelAnimationFrame(raf);
       ro.disconnect();
@@ -120,6 +143,10 @@ onMounted(() => {
 
 watch(isDark, (dark) => {
   instance?.setTheme(dark);
+});
+
+watch(brandHue, (hue) => {
+  instance?.setHue(hue);
 });
 
 onUnmounted(() => {

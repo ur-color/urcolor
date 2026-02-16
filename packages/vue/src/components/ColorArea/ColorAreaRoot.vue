@@ -48,8 +48,6 @@ export interface ColorAreaRootProps extends /* @vue-ignore */ PrimitiveProps {
    * @defaultValue 'overflow'
    */
   thumbAlignment?: ThumbAlignment;
-  /** When true, the gradient will render with alpha transparency (checkerboard + opacity). @defaultValue false */
-  alpha?: boolean;
 }
 
 export type ColorAreaRootEmits = {
@@ -79,7 +77,6 @@ export interface ColorAreaRootContext {
   yChannelKey: Ref<string>;
   colorRef: Readonly<Ref<Color | undefined>>;
   dir: Ref<Direction>;
-  alpha: Ref<boolean>;
 }
 
 export const [injectColorAreaRootContext, provideColorAreaRootContext]
@@ -101,7 +98,6 @@ const props = withDefaults(defineProps<ColorAreaRootProps>(), {
   minXStepsBetweenThumbs: 0,
   minYStepsBetweenThumbs: 0,
   thumbAlignment: "overflow",
-  alpha: false,
   as: "span",
 });
 const emits = defineEmits<ColorAreaRootEmits>();
@@ -407,7 +403,6 @@ provideColorAreaRootContext({
   yChannelKey,
   colorRef,
   dir,
-  alpha: computed(() => props.alpha),
 });
 </script>
 

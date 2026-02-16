@@ -138,7 +138,7 @@ onUnmounted(() => {
 .hero-title {
   font-size: clamp(2rem, 8vw, 5.5rem);
   font-weight: 800;
-  line-height: 1.1;
+  line-height: 1.2;
   letter-spacing: -0.02em;
   margin-bottom: 16px;
 }
@@ -159,7 +159,8 @@ onUnmounted(() => {
 
 .hero-word-wrapper {
   display: inline-block;
-  overflow: hidden;
+  overflow-x: clip;
+  overflow-y: visible;
   vertical-align: bottom;
   transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   text-align: center;
