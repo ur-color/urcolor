@@ -14,45 +14,52 @@ const features = [
     title: "74 Languages",
     details:
       "Full internationalization powered by the internationalized-color package.",
+    href: "/guide/features#languages",
   },
   {
     icon: Accessibility,
     title: "Accessible",
     details:
       "WAI-ARIA color picker pattern with full keyboard and screen reader support.",
+    href: "/guide/features#accessible",
   },
   {
     icon: Blocks,
     title: "Multi-Framework",
     details:
       "Vue support today, with React, Svelte, Angular, and more planned.",
+    href: "/guide/features#multi-framework",
   },
   {
     icon: Paintbrush,
     title: "Unstyled",
     details:
       "Headless, renderless primitives — bring your own design system.",
+    href: "/guide/features#unstyled",
   },
   {
     icon: Zap,
     title: "Fast",
     details:
       "GPU-accelerated WebGL gradients and zero-dependency runtime performance.",
+    href: "/guide/features#fast",
   },
   {
     icon: Palette,
     title: "Any Color Space",
     details:
       "sRGB, HSL, HSB, LCH, OKLCH, and more via culori package.",
+    href: "/guide/features#color-spaces",
   },
 ];
 </script>
 
 <template>
   <div class="feature-grid">
-    <div
+    <a
       v-for="(f, i) in features"
       :key="i"
+      :href="f.href"
       class="feature-card"
     >
       <component
@@ -66,7 +73,7 @@ const features = [
       <p class="feature-details">
         {{ f.details }}
       </p>
-    </div>
+    </a>
   </div>
 </template>
 
@@ -79,6 +86,9 @@ const features = [
 }
 
 .feature-card {
+  display: block;
+  text-decoration: none;
+  color: inherit;
   padding: 24px;
   border-radius: 16px;
   background: color-mix(in srgb, var(--vp-c-bg-soft) 40%, transparent);
