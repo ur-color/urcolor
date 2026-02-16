@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { shallowRef, computed } from "vue";
-import { Color } from "internationalized-color";
+import { usePreferredLanguages } from "@vueuse/core";
+import { Color, nameColor, useLocale } from "internationalized-color";
+import * as allLocales from "internationalized-color/locales";
 import { getChannelConfig } from "@urcolor/core";
 import {
   ColorAreaRoot,
@@ -21,6 +23,20 @@ import {
   ColorFieldInput,
 } from "../../../packages/vue/src/components/ColorField";
 import { ColorSwatchRoot } from "../../../packages/vue/src/components/ColorSwatch";
+
+// Register all locales
+Object.values(allLocales).forEach(useLocale);
+
+// Detect browser locale
+const browserLanguages = usePreferredLanguages();
+const browserLocale = computed(() => {
+  for (const lang of browserLanguages.value) {
+    const code = lang?.split("-")[0]?.toLowerCase();
+    if (code) return code;
+  }
+  return "en";
+});
+const colorName = computed(() => nameColor(color.value, browserLocale.value)?.name ?? "unknown");
 
 const color = shallowRef<Color>(Color.create("hsv", { h: 328, s: 1, v: 1 }));
 
@@ -245,6 +261,9 @@ function onFieldUpdate(c: Color | undefined) {
 
       <!-- Cell 4: Hex Field & Channel Fields -->
       <div class="hero-cell-fields">
+        <div class="hero-field-name">
+          {{ colorName }}
+        </div>
         <ColorFieldRoot
           :model-value="color"
           color-space="hsv"
@@ -368,6 +387,7 @@ function onFieldUpdate(c: Color | undefined) {
   grid-row: 2;
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
   gap: 10px;
   min-width: 0;
 }
@@ -378,7 +398,7 @@ function onFieldUpdate(c: Color | undefined) {
   display: flex;
   justify-content: space-between;
   flex-direction: column;
-  gap: 8px;
+  gap: 0;
   width: 192px;
 }
 
@@ -415,6 +435,14 @@ function onFieldUpdate(c: Color | undefined) {
 .hero-demo-swatch {
   flex: 1;
   width: 100%;
+}
+
+.hero-field-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--vp-c-text-1);
+  text-transform: capitalize;
+  letter-spacing: 0.05em;
 }
 
 .hero-field-hex {
@@ -455,7 +483,7 @@ function onFieldUpdate(c: Color | undefined) {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
+  gap: 0;
 }
 
 .hero-field-label {
