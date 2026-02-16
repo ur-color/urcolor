@@ -2,6 +2,7 @@
 import { ref, shallowRef, computed, watch } from "vue";
 import { usePreferredLanguages } from "@vueuse/core";
 import "internationalized-color/css";
+import "internationalized-color/css";
 import { Color, useLocale, nameColor } from "internationalized-color";
 import * as allLocales from "internationalized-color/locales";
 
@@ -648,22 +649,15 @@ const spaceKeys = Object.keys(colorSpaces);
         />
         <ColorAreaThumb
           as="div"
-          class="absolute size-5 transform-(--reka-slider-area-thumb-transform)"
+          class="
+            absolute size-5 transform-(--reka-slider-area-thumb-transform)
+            rounded-full border-2 border-white
+            shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_2px_4px_rgba(0,0,0,0.3)]
+          "
+          :aria-label="`Color: ${colorName}`"
         >
-          <ColorAreaThumbX
-            as="div"
-            class="
-              absolute inset-0 size-5 rounded-full border-2 border-white
-              shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_2px_4px_rgba(0,0,0,0.3)]
-              outline-none
-              focus-visible:shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_0_0_3px_rgba(66,153,225,0.6)]
-            "
-            :aria-label="`Color: ${colorName}`"
-          />
-          <ColorAreaThumbY
-            as="div"
-            class="pointer-events-none size-0 opacity-0"
-          />
+          <ColorAreaThumbX class="outline-none" />
+          <ColorAreaThumbY class="outline-none" />
         </ColorAreaThumb>
       </ColorAreaTrack>
     </ColorAreaRoot>

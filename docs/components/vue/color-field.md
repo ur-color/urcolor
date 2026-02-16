@@ -5,27 +5,23 @@ A numeric input component for editing individual color channels, with optional i
 ## Examples
 
 <script setup>
-import Demo from '../../.vitepress/components/Demo.vue'
 import ColorFieldHex from './demo/ColorFieldHex.vue'
 import ColorFieldHSL from './demo/ColorFieldHSL.vue'
-
-import ColorFieldHexCode from './demo/ColorFieldHex.vue?raw'
-import ColorFieldHSLCode from './demo/ColorFieldHSL.vue?raw'
 </script>
 
 ### Hex Input
 
-<Demo description="Hex color input" :code="ColorFieldHexCode">
-  <ColorFieldHex />
-</Demo>
+<ColorFieldHex />
+
+<<< @/components/vue/demo/ColorFieldHex.vue
 
 ### HSL Channel Fields
 
 HSL channel inputs with increment/decrement buttons.
 
-<Demo description="HSL channel inputs with step buttons" :code="ColorFieldHSLCode">
-  <ColorFieldHSL />
-</Demo>
+<ColorFieldHSL />
+
+<<< @/components/vue/demo/ColorFieldHSL.vue
 
 ## Usage
 

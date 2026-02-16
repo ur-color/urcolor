@@ -5,29 +5,25 @@ A group of color swatches with toggle-group selection behavior. Supports single 
 ## Examples
 
 <script setup>
-import Demo from '../../.vitepress/components/Demo.vue'
 import ColorSwatchGroupBasic from './demo/ColorSwatchGroupBasic.vue'
 import ColorSwatchGroupMultiple from './demo/ColorSwatchGroupMultiple.vue'
-
-import ColorSwatchGroupBasicCode from './demo/ColorSwatchGroupBasic.vue?raw'
-import ColorSwatchGroupMultipleCode from './demo/ColorSwatchGroupMultiple.vue?raw'
 </script>
 
 ### Single Selection
 
 Click a swatch to select it. Clicking the selected swatch deselects it.
 
-<Demo description="Single selection swatch group" :code="ColorSwatchGroupBasicCode">
-  <ColorSwatchGroupBasic />
-</Demo>
+<ColorSwatchGroupBasic />
+
+<<< @/components/vue/demo/ColorSwatchGroupBasic.vue
 
 ### Multiple Selection
 
 Toggle any number of swatches independently.
 
-<Demo description="Multiple selection swatch group" :code="ColorSwatchGroupMultipleCode">
-  <ColorSwatchGroupMultiple />
-</Demo>
+<ColorSwatchGroupMultiple />
+
+<<< @/components/vue/demo/ColorSwatchGroupMultiple.vue
 
 ## Usage
 

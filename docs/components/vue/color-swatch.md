@@ -5,19 +5,16 @@ A color preview element that displays a color with a checkerboard background for
 ## Examples
 
 <script setup>
-import Demo from '../../.vitepress/components/Demo.vue'
 import ColorSwatchBasic from './demo/ColorSwatchBasic.vue'
-
-import ColorSwatchBasicCode from './demo/ColorSwatchBasic.vue?raw'
 </script>
 
 ### Basic
 
 A set of color swatches, including one with alpha transparency.
 
-<Demo description="Color swatches with alpha support" :code="ColorSwatchBasicCode">
-  <ColorSwatchBasic />
-</Demo>
+<ColorSwatchBasic />
+
+<<< @/components/vue/demo/ColorSwatchBasic.vue
 
 ## Usage
 

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { shallowRef, computed } from "vue";
 import { Color } from "internationalized-color";
+import "internationalized-color/css";
 import { getChannelConfig } from "@urcolor/core";
 import {
   ColorSliderRoot,

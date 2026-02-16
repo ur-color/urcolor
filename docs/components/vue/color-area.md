@@ -5,29 +5,25 @@ A 2D slider component for selecting values across two axes, ideal for color pick
 ## Examples
 
 <script setup>
-import Demo from '../../.vitepress/components/Demo.vue'
 import ColorAreaHSL from './demo/ColorAreaHSL.vue'
 import ColorAreaOKLCh from './demo/ColorAreaOKLCh.vue'
-
-import ColorAreaHSLCode from './demo/ColorAreaHSL.vue?raw'
-import ColorAreaOKLChCode from './demo/ColorAreaOKLCh.vue?raw'
 </script>
 
 ### HSL
 
 HSL color area with Hue on X and Saturation on Y.
 
-<Demo description="HSL color area with Hue × Saturation" :code="ColorAreaHSLCode">
-  <ColorAreaHSL />
-</Demo>
+<ColorAreaHSL />
+
+<<< @/components/vue/demo/ColorAreaHSL.vue
 
 ### OKLCh
 
 OKLCh color area with Chroma on X and Lightness on Y.
 
-<Demo description="OKLCh color area with Chroma × Lightness" :code="ColorAreaOKLChCode">
-  <ColorAreaOKLCh />
-</Demo>
+<ColorAreaOKLCh />
+
+<<< @/components/vue/demo/ColorAreaOKLCh.vue
 
 ## Usage
 
@@ -73,7 +69,7 @@ function onColorUpdate(c) {
 
 ### With Alpha
 
-Use the `alpha` prop on `ColorAreaRoot` to reflect the color's alpha channel as opacity on the gradient. Add `ColorAreaCheckerboard` behind the gradient to visualize transparency.
+Pass `:channel-overrides="false"` on `ColorAreaGradient` to reflect the color's alpha channel as opacity on the gradient. Add `ColorAreaCheckerboard` behind the gradient to visualize transparency.
 
 ```vue
 <template>
@@ -82,12 +78,11 @@ Use the `alpha` prop on `ColorAreaRoot` to reflect the color's alpha channel as 
     color-space="hsl"
     channel-x="s"
     channel-y="l"
-    alpha
     @update:model-value="onColorUpdate"
   >
     <ColorAreaTrack>
       <ColorAreaCheckerboard />
-      <ColorAreaGradient />
+      <ColorAreaGradient :channel-overrides="false" />
       <ColorAreaThumb>
         <ColorAreaThumbX />
         <ColorAreaThumbY />
@@ -110,7 +105,6 @@ The root container that manages slider state.
 | `colorSpace` | `string` | `'hsl'` | Color space mode (e.g. `'hsl'`, `'oklch'`). |
 | `channelX` | `string` | Auto | Channel for the X axis (e.g. `'s'`, `'alpha'`). Auto-derived from color space. |
 | `channelY` | `string` | Auto | Channel for the Y axis (e.g. `'l'`, `'alpha'`). Auto-derived from color space. |
-| `alpha` | `boolean` | `false` | When true, the gradient renders with the color's alpha as opacity. |
 | `disabled` | `boolean` | `false` | Disables interaction. |
 | `dir` | `'ltr' \| 'rtl'` | — | Reading direction. |
 | `invertedX` | `boolean` | `false` | Invert X axis. |
@@ -139,7 +133,7 @@ Renders a 2D gradient canvas for the color area. Automatically samples the gradi
 | `bottomLeft` | `string` | — | Override: color for the bottom-left corner. |
 | `bottomRight` | `string` | — | Override: color for the bottom-right corner. |
 | `interpolationSpace` | `string` | — | Color space for perceptual interpolation (e.g. `'oklch'`). |
-| `alpha` | `boolean` | — | Override: render gradient with alpha opacity. Inherits from root if not set. |
+| `channelOverrides` | `Record<string, number> \| false` | `{ alpha: 1 }` | Lock specific channels to fixed values in the gradient. Set to `false` to reflect all channels from current color including alpha. E.g. `{ s: 1, v: 1, alpha: 1 }` for an immutable hue gradient in HSV. |
 
 ### ColorAreaCheckerboard
 
