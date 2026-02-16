@@ -1,96 +1,16 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from "vue";
+import { ref, onMounted } from "vue";
 import HeroDemo from "./HeroDemo.vue";
 import HeroBgCanvas from "./HeroBgCanvas.vue";
 import FeaturesGrid from "./FeaturesGrid.vue";
-import LogoSymbol from "./LogoSymbol.vue";
+import HeroTitle from "./HeroTitle.vue";
 
-const words = [
-  "Favorite",
-  "Perfect",
-  "Dream",
-  "Next",
-  "True",
-  "Colorful",
-  "Vivid",
-  "Harmonious",
-  "Elegant",
-  "Accessible",
-  "Flexible",
-  "Composable",
-  "Universal",
-  "Customizable",
-  "Consistent",
-  "Interactive",
-  "Modern",
-  "Palette",
-  "Picker",
-  "Slider",
-  "Swatch",
-  "Tints",
-  "Shades",
-  "Gradients",
-  "Transforms",
-  "Contrast",
-  "Utilities",
-  "Accessible UI",
-  "Intuitive",
-  "Smart",
-  "Effortless",
-  "Expressive",
-  "Precise",
-];
-const currentWord = ref(words[0]);
-const wordWidth = ref("auto");
-const wordEl = ref<HTMLElement>();
-const measureEl = ref<HTMLElement>();
 const perspectiveEl = ref<HTMLElement>();
-let ctx: any;
-
-function measureWord(word: string) {
-  if (!measureEl.value) return;
-  measureEl.value.textContent = word;
-  return measureEl.value.offsetWidth;
-}
 
 onMounted(async () => {
   const gsap = (await import("gsap")).default;
   const { ScrollTrigger } = await import("gsap/ScrollTrigger");
   gsap.registerPlugin(ScrollTrigger);
-
-  // Set initial width
-  wordWidth.value = measureWord(words[0]) + "px";
-
-  // Word cycling animation
-  let wordIndex = 0;
-  const tl = gsap.timeline({ repeat: -1, repeatDelay: 0.5 });
-
-  function addWordCycle() {
-    const nextIndex = (wordIndex + 1) % words.length;
-    const nextWord = words[nextIndex];
-    tl.to(wordEl.value!, {
-      duration: 0.4,
-      opacity: 0,
-      y: -20,
-      ease: "power2.in",
-      onComplete: () => {
-        wordIndex = nextIndex;
-        currentWord.value = nextWord;
-        wordWidth.value = measureWord(nextWord) + "px";
-      },
-    }).to(wordEl.value!, {
-      duration: 0.4,
-      opacity: 1,
-      y: 0,
-      ease: "power2.out",
-    }).to({}, { duration: 1.5 });
-    wordIndex = nextIndex;
-  }
-
-  for (let i = 0; i < words.length; i++) {
-    addWordCycle();
-  }
-  wordIndex = 0;
 
   // 3D scroll effect
   if (perspectiveEl.value) {
@@ -106,36 +26,14 @@ onMounted(async () => {
       },
     });
   }
-
-  ctx = { tl };
 });
-
-onUnmounted(() => {
-  ctx?.tl?.kill();
-});
-
 </script>
 
 <template>
   <div class="hero-section">
     <HeroBgCanvas />
     <div class="hero-content">
-      <h1 class="hero-title">
-        <span class="hero-ur-symbol">
-          <LogoSymbol />
-        </span> <span
-          class="hero-word-wrapper"
-          :style="{ width: wordWidth }"
-        ><span
-          ref="wordEl"
-          class="hero-word"
-        >{{ currentWord }}</span></span> Color
-        <span
-          ref="measureEl"
-          class="hero-word-measure"
-          aria-hidden="true"
-        />
-      </h1>
+      <HeroTitle />
       <p class="hero-tagline">
         Universal color picker component library
       </p>
@@ -180,55 +78,6 @@ onUnmounted(() => {
 
 .hero-content {
   margin-bottom: 80px;
-}
-
-.hero-title {
-  font-size: clamp(2rem, 8vw, 5.5rem);
-  font-weight: 800;
-  line-height: 1.1;
-  letter-spacing: -0.02em;
-  margin-bottom: 16px;
-}
-
-.hero-ur-symbol {
-  display: inline-block;
-  vertical-align: baseline;
-}
-
-.hero-ur-symbol :deep(svg) {
-  height: 0.8em;
-  width: auto;
-  vertical-align: baseline;
-  position: relative;
-  top: 0.065em;
-  right: -0.1em;
-}
-
-.hero-word-wrapper {
-  display: inline-block;
-  overflow: hidden;
-  vertical-align: bottom;
-  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  text-align: center;
-}
-
-.hero-word {
-  display: inline-block;
-  background: linear-gradient(135deg, var(--vp-c-brand-2), var(--vp-c-brand-2));
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  white-space: nowrap;
-}
-
-.hero-word-measure {
-  position: absolute;
-  visibility: hidden;
-  pointer-events: none;
-  font-size: inherit;
-  font-weight: inherit;
-  letter-spacing: inherit;
-  white-space: nowrap;
 }
 
 .hero-tagline {
