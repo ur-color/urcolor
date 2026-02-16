@@ -76,6 +76,7 @@ import {
   ColorSwatchGroupRoot,
   ColorSwatchGroupItem, // [!code ++]
 } from "@urcolor/vue";
+import { Check } from "lucide-vue-next"; // [!code ++]
 
 const colors = [
   "hsl(210, 80%, 50%)",
@@ -93,17 +94,22 @@ const selected = ref<string[]>([colors[0]!]);
     type="single"
     class="flex items-center gap-2"
   >
-    <!-- [!code ++:9] -->
+    <!-- [!code ++:15] -->
     <ColorSwatchGroupItem
       v-for="color in colors"
       :key="color"
       :value="color"
       class="
-        size-10 cursor-pointer rounded-lg outline-2 outline-offset-2
-        outline-transparent
-        data-[state=on]:outline-(--vp-c-brand-2)!
+        size-10 cursor-pointer rounded-lg
+        flex items-center justify-center
+        outline-none
       "
-    />
+    >
+      <Check
+        class="size-5 text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)] transition-opacity duration-150"
+        :class="selected.includes(color) ? 'opacity-100' : 'opacity-0'"
+      />
+    </ColorSwatchGroupItem>
   </ColorSwatchGroupRoot>
 </template>
 ```

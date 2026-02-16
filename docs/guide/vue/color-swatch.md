@@ -86,11 +86,12 @@ Customize the checkerboard pattern size with `checker-size` (in pixels):
 
 Render a palette by looping over an array of colors:
 
-```vue{6-11,13,17-27}
+```vue{6-7,13,15,19-35}
 <script setup lang="ts">
 import { shallowRef } from "vue";
 import { Color } from "internationalized-color";
 import { ColorSwatchRoot } from "@urcolor/vue";
+import { Check } from "lucide-vue-next";
 
 const colors = [
   Color.parse("hsl(210, 80%, 50%)")!,
@@ -110,12 +111,16 @@ const selected = shallowRef(colors[0]);
       :model-value="color"
       alpha
       class="
-        size-10 cursor-pointer rounded-lg outline-2 outline-offset-2
-        outline-transparent
+        size-10 cursor-pointer rounded-lg
+        flex items-center justify-center
       "
-      :class="{ 'outline-(--vp-c-brand-2)!': selected === color }"
       @click="selected = color"
-    />
+    >
+      <Check
+        class="size-5 text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)] transition-opacity duration-150"
+        :class="selected === color ? 'opacity-100' : 'opacity-0'"
+      />
+    </ColorSwatchRoot>
   </div>
 </template>
 ```

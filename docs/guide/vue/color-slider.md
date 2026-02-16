@@ -78,7 +78,7 @@ const color = shallowRef(Color.parse("hsl(210, 80%, 50%)")!);
   >
     <!-- [!code ++:8] -->
     <ColorSliderTrack
-      class="relative h-6 overflow-hidden rounded-xl"
+      class="relative h-5 overflow-hidden rounded-xl"
     >
       <ColorSliderGradient
         class="absolute inset-0 rounded-xl"
@@ -116,7 +116,7 @@ const color = shallowRef(Color.parse("hsl(210, 80%, 50%)")!);
     channel="h"
   >
     <ColorSliderTrack
-      class="relative h-6 overflow-hidden rounded-xl"
+      class="relative h-5 overflow-hidden rounded-xl"
     >
       <ColorSliderGradient
         class="absolute inset-0 rounded-xl"
@@ -125,9 +125,8 @@ const color = shallowRef(Color.parse("hsl(210, 80%, 50%)")!);
       <!-- [!code ++:8] -->
       <ColorSliderThumb
         class="
-          block size-6 rounded-full border-[2.5px] border-white bg-white
+          block size-5 rounded-full border-[2.5px] border-white bg-white
           shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_2px_4px_rgba(0,0,0,0.3)]
-          outline-none
           focus-visible:shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_0_0_3px_rgba(66,153,225,0.6)]
         "
         aria-label="Hue"
@@ -187,7 +186,7 @@ Switch the `channel` prop to control different color properties. For example, a 
     channel="l"
   >
     <ColorSliderTrack
-      class="relative h-6 overflow-hidden rounded-xl"
+      class="relative h-5 overflow-hidden rounded-xl"
     >
       <ColorSliderGradient
         class="absolute inset-0 rounded-xl"

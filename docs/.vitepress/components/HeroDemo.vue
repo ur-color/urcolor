@@ -98,7 +98,7 @@ watch(color, (c) => {
             <ColorAreaThumb
               as="div"
               class="
-                absolute size-6 transform-(--reka-slider-area-thumb-transform)
+                absolute size-5 transform-(--reka-slider-area-thumb-transform)
                 rounded-full border-[2.5px] border-white
                 shadow-[0_0_0_1px_rgba(0,0,0,0.2),0_2px_8px_rgba(0,0,0,0.3)]
                 outline-none
@@ -156,7 +156,6 @@ watch(color, (c) => {
               class="
                 block size-5 rounded-full border-[2.5px] border-white bg-white
                 shadow-[0_0_0_1px_rgba(0,0,0,0.2),0_2px_6px_rgba(0,0,0,0.25)]
-                outline-none
                 focus-visible:shadow-[0_0_0_1px_rgba(0,0,0,0.2),0_0_0_3px_rgba(255,64,129,0.5)]
               "
               aria-label="Hue"
@@ -185,7 +184,6 @@ watch(color, (c) => {
               class="
                 block size-5 rounded-full border-[2.5px] border-white bg-white
                 shadow-[0_0_0_1px_rgba(0,0,0,0.2),0_2px_6px_rgba(0,0,0,0.25)]
-                outline-none
                 focus-visible:shadow-[0_0_0_1px_rgba(0,0,0,0.2),0_0_0_3px_rgba(255,64,129,0.5)]
               "
               aria-label="Saturation"
@@ -214,7 +212,6 @@ watch(color, (c) => {
               class="
                 block size-5 rounded-full border-[2.5px] border-white bg-white
                 shadow-[0_0_0_1px_rgba(0,0,0,0.2),0_2px_6px_rgba(0,0,0,0.25)]
-                outline-none
                 focus-visible:shadow-[0_0_0_1px_rgba(0,0,0,0.2),0_0_0_3px_rgba(255,64,129,0.5)]
               "
               aria-label="Value"
@@ -243,7 +240,6 @@ watch(color, (c) => {
               class="
                 block size-5 rounded-full border-[2.5px] border-white bg-white
                 shadow-[0_0_0_1px_rgba(0,0,0,0.2),0_2px_6px_rgba(0,0,0,0.25)]
-                outline-none
                 focus-visible:shadow-[0_0_0_1px_rgba(0,0,0,0.2),0_0_0_3px_rgba(255,64,129,0.5)]
               "
               aria-label="Alpha"
@@ -407,8 +403,8 @@ watch(color, (c) => {
 
 .hero-slider-track {
   position: relative;
-  height: 20px;
-  border-radius: 10px;
+  height: 1.25rem;
+  border-radius: 0.75rem;
   overflow: hidden;
 }
 

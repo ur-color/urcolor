@@ -22,7 +22,7 @@ const color = shallowRef<Color>(Color.parse("hsl(210, 80%, 50%)")!);
   >
     <ColorSliderTrack
       as="div"
-      class="relative h-6 overflow-hidden rounded-xl"
+      class="relative h-5 overflow-hidden rounded-xl"
     >
       <ColorSliderGradient
         as="div"
@@ -31,9 +31,8 @@ const color = shallowRef<Color>(Color.parse("hsl(210, 80%, 50%)")!);
       />
       <ColorSliderThumb
         class="
-          block size-6 rounded-full border-[2.5px] border-white bg-white
+          block size-5 rounded-full border-[2.5px] border-white bg-white
           shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_2px_4px_rgba(0,0,0,0.3)]
-          outline-none
           focus-visible:shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_0_0_3px_rgba(66,153,225,0.6)]
         "
         aria-label="Hue"

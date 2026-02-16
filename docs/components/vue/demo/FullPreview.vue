@@ -2,7 +2,6 @@
 import { ref, shallowRef, computed, watch } from "vue";
 import { usePreferredLanguages } from "@vueuse/core";
 import "internationalized-color/css";
-import "internationalized-color/css";
 import { Color, useLocale, nameColor } from "internationalized-color";
 import * as allLocales from "internationalized-color/locales";
 
@@ -125,6 +124,7 @@ import {
   TooltipProvider,
 } from "reka-ui";
 import { Icon } from "@iconify/vue";
+import FullPreviewOverrides from "./FullPreviewOverrides.vue";
 import {
   ColorAreaRoot,
   ColorAreaTrack,
@@ -226,156 +226,41 @@ const currentLocaleOption = computed(() =>
   localeOptions.find(l => l.code === selectedLocale.value) ?? localeOptions[0],
 );
 
+// Channel override refs for each gradient
+const areaOverrides = ref<Record<string, number>>({ });
+const sliderOverrides = ref<Record<string, Record<string, number>>>({});
+const alphaSliderOverrides = ref<Record<string, number>>({ });
+
+// Initialize slider overrides when color space changes
+watch(colorSpace, () => {
+  const init: Record<string, Record<string, number>> = {};
+  for (const ch of channels.value) {
+    init[ch.key] = { };
+  }
+  sliderOverrides.value = init;
+}, { immediate: true });
+
 const spaceKeys = Object.keys(colorSpaces);
 </script>
 
 <template>
   <div
     class="
-      preview-grid grid grid-cols-[auto_1fr] items-center gap-3 rounded-lg
+      preview-grid grid grid-cols-[auto_1fr] items-center gap-3 rounded-xl
       border border-(--vp-c-divider) bg-(--vp-c-bg-alt) p-6
       max-md:p-4
     "
   >
-    <!-- Mobile-only top row: color name, language, color space -->
-    <div
-      class="
-        col-span-2 hidden flex-wrap items-center gap-2
-        max-md:flex
-      "
-    >
-      <code
-        class="
-          box-border inline-flex h-8 items-center rounded-md border
-          border-(--vp-c-divider) bg-(--vp-c-bg) px-3 py-1.5 font-mono
-          text-[13px] whitespace-nowrap text-(--vp-c-brand-1,#3451b2)
-        "
-        :dir="rtlLocales.has(selectedLocale) ? 'rtl' : 'ltr'"
-      >{{ colorName }}</code>
-      <div class="ml-auto flex items-center gap-2">
-        <SelectRoot v-model="selectedLocale">
-          <SelectTrigger
-            class="
-              box-border inline-flex h-8 max-w-[92px] shrink-0 cursor-pointer
-              items-center justify-between gap-0.5 overflow-hidden rounded-md
-              border! border-(--vp-c-divider)! bg-(--vp-c-bg) px-2! py-1
-              text-[13px]
-            "
-            aria-label="Language"
-          >
-            <SelectValue>{{ currentLocaleOption.flag }} {{ currentLocaleOption.label }}</SelectValue>
-            <SelectIcon class="size-3.5 shrink-0 text-(--vp-c-text-2)">
-              <Icon icon="lucide:chevron-down" />
-            </SelectIcon>
-          </SelectTrigger>
-          <SelectPortal>
-            <SelectContent
-              class="select-content"
-              position="popper"
-              :side-offset="4"
-              :body-lock="false"
-            >
-              <SelectViewport class="max-h-[200px] overflow-y-auto">
-                <SelectItem
-                  v-for="loc in localeOptions"
-                  :key="loc.code"
-                  :value="loc.code"
-                  class="
-                    cursor-pointer rounded-md px-2.5 py-1.5 text-[13px]
-                    outline-none
-                    hover:bg-(--vp-c-bg-soft)
-                    data-highlighted:bg-(--vp-c-bg-soft)
-                    data-[state=checked]:font-semibold
-                  "
-                >
-                  <SelectItemText>{{ loc.flag }} {{ loc.label }}</SelectItemText>
-                </SelectItem>
-              </SelectViewport>
-            </SelectContent>
-          </SelectPortal>
-        </SelectRoot>
-        <SelectRoot v-model="colorSpace">
-          <SelectTrigger
-            class="
-              box-border inline-flex h-8 w-[120px] shrink-0 cursor-pointer
-              items-center justify-between gap-1 overflow-hidden rounded-md
-              border! border-(--vp-c-divider)! bg-(--vp-c-bg) px-2! py-1
-              text-[13px]
-            "
-            aria-label="Color space"
-          >
-            <SelectValue placeholder="Select space" />
-            <SelectIcon class="size-3.5 shrink-0 text-(--vp-c-text-2)">
-              <Icon icon="lucide:chevron-down" />
-            </SelectIcon>
-          </SelectTrigger>
-          <SelectPortal>
-            <SelectContent
-              class="select-content"
-              position="popper"
-              :side-offset="4"
-              :body-lock="false"
-            >
-              <SelectViewport class="max-h-[200px] overflow-y-auto">
-                <SelectItem
-                  v-for="key in spaceKeys"
-                  :key="key"
-                  :value="key"
-                  class="
-                    cursor-pointer rounded-md px-2.5 py-1.5 text-[13px]
-                    outline-none
-                    hover:bg-(--vp-c-bg-soft)
-                    data-highlighted:bg-(--vp-c-bg-soft)
-                    data-[state=checked]:font-semibold
-                  "
-                >
-                  <SelectItemText>{{ colorSpaces[key]?.label }}</SelectItemText>
-                </SelectItem>
-              </SelectViewport>
-            </SelectContent>
-          </SelectPortal>
-        </SelectRoot>
-      </div>
-    </div>
-
-    <!-- Row 1 (desktop) / Row 2 (mobile): [XY svg] [X channel + invert ... color name/lang/space] -->
+    <!-- Row 1: [XY svg] [X channel + invert ... color space] -->
     <div class="flex items-center justify-center">
-      <span class="text-sm text-(--vp-c-text-2)">
-        <svg
-          width="34"
-          height="34"
-          viewBox="0 0 34 34"
-          style="display:inline-block;vertical-align:middle;"
-        >
-          <line
-            x1="4"
-            y1="4"
-            x2="30"
-            y2="30"
-            stroke="currentColor"
-            style="opacity: 0.25;"
-            stroke-width="1.5"
-          />
-          <text
-            x="7.5"
-            y="27"
-            font-size="12"
-            text-anchor="middle"
-            dominant-baseline="middle"
-            fill="currentColor"
-            font-family="inherit"
-          >Y</text>
-          <text
-            x="26"
-            y="13"
-            font-size="12"
-            text-anchor="middle"
-            dominant-baseline="middle"
-            fill="currentColor"
-            font-family="inherit"
-          >X</text>
-        </svg>
-      </span>
+      <ColorSwatchRoot
+        :model-value="color"
+        :alpha="true"
+        class="
+          color-swatch relative block aspect-square w-full self-end
+          overflow-hidden rounded-md border border-(--vp-c-divider)!
+        "
+      />
     </div>
     <div class="flex items-center justify-between">
       <div class="flex items-center gap-2">
@@ -400,11 +285,12 @@ const spaceKeys = Object.keys(colorSpaces);
                   :data-active="ch.key === selectedXChannel ? '' : undefined"
                   class="
                     size-[30px] cursor-pointer border-r border-none
-                    border-r-(--vp-c-divider) bg-(--vp-c-bg) p-0 text-[13px]
+                    border-r-(--vp-c-divider) bg-(--vp-c-bg) p-0
+                    font-(family-name:--vp-font-family-mono)! text-[13px]
                     font-medium text-(--vp-c-text-2)
                     last:border-r-0
                     disabled:cursor-default disabled:bg-(--vp-c-bg-alt)
-                    disabled:text-(--vp-c-text-3,#8e8e93) disabled:line-through
+                    disabled:text-(--vp-c-text-3,#8e8e93)! disabled:line-through
                   "
                 >
                   {{ ch.label.charAt(0).toUpperCase() }}
@@ -429,9 +315,10 @@ const spaceKeys = Object.keys(colorSpaces);
                 :data-active="invertedX ? '' : undefined"
                 aria-label="Invert X axis"
                 class="
-                  size-8 cursor-pointer rounded-md border
-                  border-(--vp-c-divider) bg-(--vp-c-bg) text-[13px] font-medium
-                  text-(--vp-c-text-2)
+                  size-8 cursor-pointer rounded-md border!
+                  border-(--vp-c-divider)! bg-(--vp-c-bg)
+                  font-(family-name:--vp-font-family-mono)! text-[13px]
+                  font-medium text-(--vp-c-text-2)
                 "
               >
                 I
@@ -449,67 +336,14 @@ const spaceKeys = Object.keys(colorSpaces);
         </TooltipProvider>
       </div>
       <div
-        class="
-          flex shrink-0 items-center gap-2
-          max-md:hidden
-        "
+        class="flex shrink-0 items-center gap-2"
       >
-        <code
-          class="
-            box-border inline-flex h-8 items-center rounded-md border
-            border-(--vp-c-divider) bg-(--vp-c-bg) px-3 py-1.5 font-mono
-            text-[13px] whitespace-nowrap text-(--vp-c-brand-1,#3451b2)
-          "
-          :dir="rtlLocales.has(selectedLocale) ? 'rtl' : 'ltr'"
-        >{{ colorName }}</code>
-        <SelectRoot v-model="selectedLocale">
-          <SelectTrigger
-            class="
-              box-border inline-flex h-8 max-w-[92px] shrink-0 cursor-pointer
-              items-center justify-between gap-0.5 overflow-hidden rounded-md
-              border! border-(--vp-c-divider)! bg-(--vp-c-bg) px-2! py-1
-              text-[13px]
-            "
-            aria-label="Language"
-          >
-            <SelectValue>{{ currentLocaleOption.flag }} {{ currentLocaleOption.label }}</SelectValue>
-            <SelectIcon class="size-3.5 shrink-0 text-(--vp-c-text-2)">
-              <Icon icon="lucide:chevron-down" />
-            </SelectIcon>
-          </SelectTrigger>
-          <SelectPortal>
-            <SelectContent
-              class="select-content"
-              position="popper"
-              :side-offset="4"
-              :body-lock="false"
-            >
-              <SelectViewport class="max-h-[200px] overflow-y-auto">
-                <SelectItem
-                  v-for="loc in localeOptions"
-                  :key="loc.code"
-                  :value="loc.code"
-                  class="
-                    cursor-pointer rounded-md px-2.5 py-1.5 text-[13px]
-                    outline-none
-                    hover:bg-(--vp-c-bg-soft)
-                    data-highlighted:bg-(--vp-c-bg-soft)
-                    data-[state=checked]:font-semibold
-                  "
-                >
-                  <SelectItemText>{{ loc.flag }} {{ loc.label }}</SelectItemText>
-                </SelectItem>
-              </SelectViewport>
-            </SelectContent>
-          </SelectPortal>
-        </SelectRoot>
         <SelectRoot v-model="colorSpace">
           <SelectTrigger
             class="
-              box-border inline-flex h-8 w-[120px] shrink-0 cursor-pointer
-              items-center justify-between gap-1 overflow-hidden rounded-md
-              border! border-(--vp-c-divider)! bg-(--vp-c-bg) px-2! py-1
-              text-[13px]
+              box-border inline-flex h-8 shrink-0 cursor-pointer items-center
+              justify-between gap-1 overflow-hidden rounded-md border!
+              border-(--vp-c-divider)! bg-(--vp-c-bg) px-2! py-1 text-[13px]
             "
             aria-label="Color space"
           >
@@ -573,11 +407,12 @@ const spaceKeys = Object.keys(colorSpaces);
                 :data-active="ch.key === selectedYChannel ? '' : undefined"
                 class="
                   size-[30px] cursor-pointer border-b border-none
-                  border-b-(--vp-c-divider) bg-(--vp-c-bg) p-0 text-[13px]
+                  border-b-(--vp-c-divider) bg-(--vp-c-bg) p-0
+                  font-(family-name:--vp-font-family-mono)! text-[13px]
                   font-medium text-(--vp-c-text-2)
                   last:border-b-0
                   disabled:cursor-default disabled:bg-(--vp-c-bg-alt)
-                  disabled:text-(--vp-c-text-3,#8e8e93) disabled:line-through
+                  disabled:text-(--vp-c-text-3,#8e8e93)! disabled:line-through
                 "
               >
                 {{ ch.label.charAt(0).toUpperCase() }}
@@ -603,8 +438,10 @@ const spaceKeys = Object.keys(colorSpaces);
               :data-active="invertedY ? '' : undefined"
               aria-label="Invert Y axis"
               class="
-                size-8 cursor-pointer rounded-md border border-(--vp-c-divider)
-                bg-(--vp-c-bg) text-[13px] font-medium text-(--vp-c-text-2)
+                size-8 cursor-pointer rounded-md border!
+                border-(--vp-c-divider)! bg-(--vp-c-bg)
+                font-(family-name:--vp-font-family-mono)! text-[13px]
+                font-medium text-(--vp-c-text-2)
               "
             >
               I
@@ -639,18 +476,19 @@ const spaceKeys = Object.keys(colorSpaces);
         as="div"
         class="
           relative h-[200px] w-full cursor-crosshair touch-none overflow-clip
-          rounded-lg
+          rounded-xl
         "
       >
         <ColorAreaCheckerboard />
         <ColorAreaGradient
           as="div"
           class="absolute inset-0"
+          :channel-overrides="areaOverrides"
         />
         <ColorAreaThumb
           as="div"
           class="
-            absolute size-5 transform-(--reka-slider-area-thumb-transform)
+            absolute size-6 transform-(--reka-slider-area-thumb-transform)
             rounded-full border-2 border-white
             shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_2px_4px_rgba(0,0,0,0.3)]
           "
@@ -681,19 +519,20 @@ const spaceKeys = Object.keys(colorSpaces);
       >
         <ColorSliderTrack
           as="div"
-          class="relative h-6 overflow-hidden rounded-lg"
+          class="relative h-5 overflow-hidden rounded-xl"
         >
+          <ColorSliderCheckerboard />
           <ColorSliderGradient
             as="div"
-            class="absolute inset-0 rounded-lg"
+            class="absolute inset-0 rounded-xl"
             :colors="getSliderColors(ch.key)"
+            :channel-overrides="sliderOverrides[ch.key] ?? { alpha: 1 }"
           />
           <ColorSliderThumb
             :id="`slider-${ch.key}`"
             class="
-              block size-6 rounded-full border-[2.5px] border-white bg-white
+              block size-5 rounded-full border-[2.5px] border-white bg-white
               shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_2px_4px_rgba(0,0,0,0.3)]
-              outline-none
               focus-visible:shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_0_0_3px_rgba(66,153,225,0.6)]
             "
             :aria-label="`${ch.label} slider, color: ${colorName}`"
@@ -717,13 +556,14 @@ const spaceKeys = Object.keys(colorSpaces);
     >
       <ColorSliderTrack
         as="div"
-        class="relative h-6 overflow-hidden rounded-lg"
+        class="relative h-5 overflow-hidden rounded-xl"
       >
         <ColorSliderCheckerboard />
         <ColorSliderGradient
           as="div"
-          class="absolute inset-0 rounded-lg"
+          class="absolute inset-0 rounded-xl"
           :colors="getSliderColors('alpha')"
+          :channel-overrides="alphaSliderOverrides"
         />
         <ColorSliderThumb
           id="slider-alpha"
@@ -738,15 +578,9 @@ const spaceKeys = Object.keys(colorSpaces);
       </ColorSliderTrack>
     </ColorSliderRoot>
 
-    <!-- Last row: [swatch] [hex field + N-channel fields] -->
-    <ColorSwatchRoot
-      :model-value="color"
-      :alpha="true"
-      class="
-        color-swatch relative block aspect-square w-full self-end
-        overflow-hidden rounded-lg border border-(--vp-c-divider)
-      "
-    />
+    <!-- Fields row: [swatch] [hex field + N-channel fields] -->
+    <div />
+
     <div
       class="flex flex-wrap items-end gap-2"
     >
@@ -880,7 +714,80 @@ const spaceKeys = Object.keys(colorSpaces);
         </ColorFieldRoot>
       </div>
     </div>
+
+    <!-- Bottom row: [locale select] [color name] -->
+    <div />
+    <div
+      class="flex items-center justify-between gap-2"
+    >
+      <code
+        class="
+          box-border inline-flex h-8 w-full items-center rounded-md border
+          border-(--vp-c-divider) bg-(--vp-c-bg) px-3 py-1.5 font-mono
+          text-[13px] whitespace-nowrap text-(--vp-c-brand-1,#3451b2)
+        "
+        :dir="rtlLocales.has(selectedLocale) ? 'rtl' : 'ltr'"
+      >{{ colorName }}</code>
+      <SelectRoot v-model="selectedLocale">
+        <SelectTrigger
+          class="
+            box-border inline-flex h-8 max-w-[92px] shrink-0 cursor-pointer
+            items-center justify-between gap-0.5 overflow-hidden rounded-md
+            border! border-(--vp-c-divider)! bg-(--vp-c-bg) px-2! py-1
+            text-[13px]
+          "
+          aria-label="Language"
+        >
+          <SelectValue>{{ currentLocaleOption.flag }} {{ currentLocaleOption.label }}</SelectValue>
+          <SelectIcon class="size-3.5 shrink-0 text-(--vp-c-text-2)">
+            <Icon icon="lucide:chevron-down" />
+          </SelectIcon>
+        </SelectTrigger>
+        <SelectPortal>
+          <SelectContent
+            class="select-content"
+            position="popper"
+            :side-offset="4"
+            :body-lock="false"
+          >
+            <SelectViewport class="max-h-[200px] overflow-y-auto">
+              <SelectItem
+                v-for="loc in localeOptions"
+                :key="loc.code"
+                :value="loc.code"
+                class="
+                  cursor-pointer rounded-md px-2.5 py-1.5 text-[13px]
+                  outline-none
+                  hover:bg-(--vp-c-bg-soft)
+                  data-highlighted:bg-(--vp-c-bg-soft)
+                  data-[state=checked]:font-semibold
+                "
+              >
+                <SelectItemText>{{ loc.flag }} {{ loc.label }}</SelectItemText>
+              </SelectItem>
+            </SelectViewport>
+          </SelectContent>
+        </SelectPortal>
+      </SelectRoot>
+    </div>
   </div>
+
+  <FullPreviewOverrides
+    :color="color"
+    :color-space="colorSpace"
+    :channels="channels"
+    :area-overrides="areaOverrides"
+    :slider-overrides="sliderOverrides"
+    :alpha-slider-overrides="alphaSliderOverrides"
+    class="
+      mt-4 hidden rounded-xl border border-(--vp-c-divider) bg-(--vp-c-bg-alt)
+      p-6
+      max-md:p-4
+    "
+    @update:area-overrides="areaOverrides = $event"
+    @update:slider-overrides="sliderOverrides = $event"
+    @update:alpha-slider-overrides="alphaSliderOverrides = $event"
+  />
 </template>
 
 <style>

@@ -42,6 +42,7 @@ const wordWidth = ref("auto");
 const wordEl = ref<HTMLElement>();
 const measureEl = ref<HTMLElement>();
 let gsapRef: any;
+let unmounted = false;
 
 function measureWord(word: string) {
   if (!measureEl.value) return;
@@ -81,22 +82,24 @@ onMounted(async () => {
   }
 
   function cycleWord() {
+    if (unmounted || !wordEl.value) return;
     const nextWord = getNextWord();
-    gsap.to(wordEl.value!, {
+    gsap.to(wordEl.value, {
       duration: 0.4,
       opacity: 0,
       y: -20,
       ease: "power2.in",
       onComplete: () => {
+        if (unmounted || !wordEl.value) return;
         currentWord.value = nextWord;
         wordWidth.value = measureWord(nextWord) + "px";
-        gsap.to(wordEl.value!, {
+        gsap.to(wordEl.value, {
           duration: 0.4,
           opacity: 1,
           y: 0,
           ease: "power2.out",
           onComplete: () => {
-            gsap.delayedCall(1.5, cycleWord);
+            if (!unmounted) gsap.delayedCall(1.5, cycleWord);
           },
         });
       },
@@ -109,8 +112,10 @@ onMounted(async () => {
 });
 
 onUnmounted(() => {
-  if (gsapRef && wordEl.value) {
-    gsapRef.killTweensOf(wordEl.value);
+  unmounted = true;
+  if (gsapRef) {
+    gsapRef.globalTimeline.clear();
+    if (wordEl.value) gsapRef.killTweensOf(wordEl.value);
   }
 });
 </script>
