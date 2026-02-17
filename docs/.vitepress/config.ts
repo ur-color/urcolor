@@ -1,11 +1,17 @@
 import { defineConfig } from "vitepress";
 import tailwindcss from "@tailwindcss/vite";
+import path from "node:path";
+
 export default defineConfig({
   title: "urcolor",
   description: "Universal color picker component library",
   vite: {
     plugins: [tailwindcss()],
     resolve: {
+      alias: {
+        "@urcolor/core": path.resolve(__dirname, "../../packages/core/src/index.ts"),
+        "@urcolor/vue": path.resolve(__dirname, "../../packages/vue/src/index.ts"),
+      },
       dedupe: ["vue"],
     },
     optimizeDeps: {
@@ -55,6 +61,9 @@ export default defineConfig({
             { text: "Color Field", link: "/components/vue/color-field" },
             { text: "Color Swatch", link: "/components/vue/color-swatch" },
             { text: "Color Swatch Group", link: "/components/vue/color-swatch-group" },
+            { text: "Color Wheel", link: "/components/vue/color-wheel" },
+            { text: "Color Triangle", link: "/components/vue/color-triangle" },
+            { text: "Color Ring", link: "/components/vue/color-ring" },
           ],
         },
       ],

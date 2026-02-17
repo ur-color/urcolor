@@ -1,5 +1,6 @@
 import type { StorybookConfig } from "@storybook/vue3-vite";
 import tailwindcss from "@tailwindcss/vite";
+import path from "node:path";
 
 const config: StorybookConfig = {
   stories: ["../src/**/*.stories.@(ts|tsx)"],
@@ -21,6 +22,13 @@ const config: StorybookConfig = {
       }),
       tailwindcss(),
     ];
+    config.resolve = {
+      ...config.resolve,
+      alias: {
+        ...config.resolve?.alias,
+        "@urcolor/core": path.resolve(__dirname, "../../core/src/index.ts"),
+      },
+    };
     return config;
   },
 };

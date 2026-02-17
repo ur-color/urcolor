@@ -28,6 +28,8 @@ export declare function sampleBilinearGrid(tl: Color, tr: Color, bl: Color, br: 
  * actual color at each grid point — essential for cyclic channels like hue.
  */
 export declare function sampleChannelGrid(baseColor: Color, colorSpace: string, xChannel: string, yChannel: string, xMin: number, xMax: number, yMin: number, yMax: number, w: number, h: number, alpha?: boolean): Uint8ClampedArray;
+import type { Point } from "./geometry";
+export declare function sampleTriangleGrid(baseColor: Color, colorSpace: string, xChannel: string, yChannel: string, xMin: number, xMax: number, yMin: number, yMax: number, v0: Point, v1: Point, v2: Point, w: number, h: number, alpha?: boolean, zChannel?: string, zMin?: number, zMax?: number): Uint8ClampedArray;
 /**
  * Draw a smooth bilinear gradient on a canvas using WebGL.
  *
@@ -44,3 +46,5 @@ export declare function sampleChannelGrid(baseColor: Color, colorSpace: string, 
  * @param bottomRight - Color for the bottom-right corner.
  */
 export declare function drawGradient(canvas: HTMLCanvasElement, topLeft: Color, topRight: Color, bottomLeft: Color, bottomRight: Color, alpha?: boolean, mirrorX?: boolean, mirrorY?: boolean): void;
+export declare function samplePolarGrid(baseColor: Color, colorSpace: string, angleChannel: string, radiusChannel: string, angleMin: number, angleMax: number, radiusMin: number, radiusMax: number, w: number, h: number, startAngle?: number, alpha?: boolean): Uint8ClampedArray;
+export declare function sampleConicRing(baseColor: Color, colorSpace: string, channel: string, channelMin: number, channelMax: number, w: number, h: number, startAngle?: number, alpha?: boolean): Uint8ClampedArray;

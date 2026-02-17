@@ -1,5 +1,6 @@
 import "internationalized-color/css";
 import { Color } from "internationalized-color";
+import { barycentricCoords, type Point } from "./geometry";
 
 const VERTEX_SHADER = `
 attribute vec2 a_position;
@@ -333,6 +334,156 @@ export function sampleChannelGrid(
         [xChannel]: xVal,
         [yChannel]: yVal,
       });
+      if (!c) continue;
+      const rgb = c.to("rgb");
+      if (!rgb) continue;
+      const idx = (y * w + x) * 4;
+      data[idx] = Math.round(Math.max(0, Math.min(1, rgb.get("r", 0))) * 255);
+      data[idx + 1] = Math.round(Math.max(0, Math.min(1, rgb.get("g", 0))) * 255);
+      data[idx + 2] = Math.round(Math.max(0, Math.min(1, rgb.get("b", 0))) * 255);
+      data[idx + 3] = alpha ? Math.round((rgb.alpha ?? 1) * 255) : 255;
+    }
+  }
+  return data;
+}
+
+export function sampleTriangleGrid(
+  baseColor: Color,
+  colorSpace: string,
+  xChannel: string,
+  yChannel: string,
+  xMin: number,
+  xMax: number,
+  yMin: number,
+  yMax: number,
+  v0: Point,
+  v1: Point,
+  v2: Point,
+  w: number,
+  h: number,
+  alpha = false,
+  zChannel?: string,
+  zMin?: number,
+  zMax?: number,
+): Uint8ClampedArray {
+  const threeChannel = zChannel != null && zMin != null && zMax != null;
+  const data = new Uint8ClampedArray(w * h * 4);
+  for (let py = 0; py < h; py++) {
+    const ny = py / (h - 1);
+    for (let px = 0; px < w; px++) {
+      const nx = px / (w - 1);
+      const { u, v, w: bw } = barycentricCoords(nx, ny, v0, v1, v2);
+      const cu = Math.max(0, u);
+      const cv = Math.max(0, v);
+      const cw = Math.max(0, bw);
+      const sum = cu + cv + cw;
+      const nu2 = cu / sum;
+      const nv = cv / sum;
+      const nw = cw / sum;
+
+      let xVal: number, yVal: number;
+      const updates: Record<string, number> = {};
+
+      if (threeChannel) {
+        // 3-channel mode: v0→(xMax,yMin,zMin), v1→(xMin,yMax,zMin), v2→(xMin,yMin,zMax)
+        xVal = nu2 * xMax + (1 - nu2) * xMin;
+        yVal = nv * yMax + (1 - nv) * yMin;
+        const zVal = nw * zMax! + (1 - nw) * zMin!;
+        updates[xChannel] = xVal;
+        updates[yChannel] = yVal;
+        updates[zChannel!] = zVal;
+      } else {
+        // 2-channel mode: v0→(xMax,yMax), v1→(xMin,yMax), v2→(xMin,yMin)
+        xVal = nu2 * xMax + nv * xMin + nw * xMin;
+        yVal = nu2 * yMax + nv * yMax + nw * yMin;
+        updates[xChannel] = xVal;
+        updates[yChannel] = yVal;
+      }
+
+      const c = baseColor.set({ mode: colorSpace, ...updates });
+      if (!c) continue;
+      const rgb = c.to("rgb");
+      if (!rgb) continue;
+      const idx = (py * w + px) * 4;
+      data[idx] = Math.round(Math.max(0, Math.min(1, rgb.get("r", 0))) * 255);
+      data[idx + 1] = Math.round(Math.max(0, Math.min(1, rgb.get("g", 0))) * 255);
+      data[idx + 2] = Math.round(Math.max(0, Math.min(1, rgb.get("b", 0))) * 255);
+      data[idx + 3] = alpha ? Math.round((rgb.alpha ?? 1) * 255) : 255;
+    }
+  }
+  return data;
+}
+
+export function samplePolarGrid(
+  baseColor: Color,
+  colorSpace: string,
+  angleChannel: string,
+  radiusChannel: string,
+  angleMin: number,
+  angleMax: number,
+  radiusMin: number,
+  radiusMax: number,
+  w: number,
+  h: number,
+  startAngle = 0,
+  alpha = false,
+): Uint8ClampedArray {
+  const data = new Uint8ClampedArray(w * h * 4);
+  const cx = (w - 1) / 2;
+  const cy = (h - 1) / 2;
+  const startRad = (startAngle * Math.PI) / 180;
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      const dx = (x - cx) / cx;
+      const dy = (y - cy) / cy;
+      const r = Math.min(1, Math.sqrt(dx * dx + dy * dy));
+      let angle = Math.atan2(dy, dx) - startRad;
+      if (angle < 0) angle += 2 * Math.PI;
+      const angleFrac = angle / (2 * Math.PI);
+      const angleVal = angleMin + angleFrac * (angleMax - angleMin);
+      const radiusVal = radiusMin + r * (radiusMax - radiusMin);
+      const c = baseColor.set({
+        mode: colorSpace,
+        [angleChannel]: angleVal,
+        [radiusChannel]: radiusVal,
+      });
+      if (!c) continue;
+      const rgb = c.to("rgb");
+      if (!rgb) continue;
+      const idx = (y * w + x) * 4;
+      data[idx] = Math.round(Math.max(0, Math.min(1, rgb.get("r", 0))) * 255);
+      data[idx + 1] = Math.round(Math.max(0, Math.min(1, rgb.get("g", 0))) * 255);
+      data[idx + 2] = Math.round(Math.max(0, Math.min(1, rgb.get("b", 0))) * 255);
+      data[idx + 3] = alpha ? Math.round((rgb.alpha ?? 1) * 255) : 255;
+    }
+  }
+  return data;
+}
+
+export function sampleConicRing(
+  baseColor: Color,
+  colorSpace: string,
+  channel: string,
+  channelMin: number,
+  channelMax: number,
+  w: number,
+  h: number,
+  startAngle = 0,
+  alpha = false,
+): Uint8ClampedArray {
+  const data = new Uint8ClampedArray(w * h * 4);
+  const cx = (w - 1) / 2;
+  const cy = (h - 1) / 2;
+  const startRad = (startAngle * Math.PI) / 180;
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      const dx = (x - cx) / cx;
+      const dy = (y - cy) / cy;
+      let angle = Math.atan2(dy, dx) - startRad;
+      if (angle < 0) angle += 2 * Math.PI;
+      const frac = angle / (2 * Math.PI);
+      const val = channelMin + frac * (channelMax - channelMin);
+      const c = baseColor.set({ mode: colorSpace, [channel]: val });
       if (!c) continue;
       const rgb = c.to("rgb");
       if (!rgb) continue;
