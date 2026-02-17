@@ -2,7 +2,6 @@
 import type { Ref } from "vue";
 import type { PrimitiveProps } from "reka-ui";
 import { createContext, Primitive, useForwardExpose, VisuallyHidden } from "reka-ui";
-import "internationalized-color/css";
 import { Color } from "internationalized-color";
 
 export interface ColorFieldRootProps extends /* @vue-ignore */ PrimitiveProps {

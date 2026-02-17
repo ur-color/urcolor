@@ -48,7 +48,7 @@ const gradients = computed<GradientEntry[]>(() => {
       id: "area",
       label: "Area",
       overrides: props.areaOverrides,
-      update: (o) => emit("update:areaOverrides", o),
+      update: o => emit("update:areaOverrides", o),
     },
   ];
   for (const ch of props.channels) {
@@ -56,7 +56,7 @@ const gradients = computed<GradientEntry[]>(() => {
       id: `slider-${ch.key}`,
       label: `${ch.label} Slider`,
       overrides: props.sliderOverrides[ch.key] ?? { alpha: 1 },
-      update: (o) =>
+      update: o =>
         emit("update:sliderOverrides", {
           ...props.sliderOverrides,
           [ch.key]: o,
@@ -67,7 +67,7 @@ const gradients = computed<GradientEntry[]>(() => {
     id: "alpha-slider",
     label: "Alpha Slider",
     overrides: props.alphaSliderOverrides,
-    update: (o) => emit("update:alphaSliderOverrides", o),
+    update: o => emit("update:alphaSliderOverrides", o),
   });
   return entries;
 });
@@ -144,15 +144,18 @@ function onFieldUpdate(
             <CheckboxRoot
               :checked="isChannelEnabled(gradient, ch.key)"
               class="
-                box-border! flex! size-[18px]! shrink-0! cursor-pointer! appearance-none!
-                items-center! justify-center! rounded! border! border-solid!
-                border-(--vp-c-divider)! bg-(--vp-c-bg)! p-0!
+                box-border! flex! size-[18px]! shrink-0! cursor-pointer!
+                appearance-none! items-center! justify-center! rounded-sm!
+                border! border-solid! border-(--vp-c-divider)! bg-(--vp-c-bg)!
+                p-0!
                 data-[state=checked]:border-(--vp-c-brand-1,#3451b2)!
                 data-[state=checked]:bg-(--vp-c-brand-1,#3451b2)!
               "
               @update:checked="toggleChannel(gradient, ch.key)"
             >
-              <CheckboxIndicator class="flex items-center justify-center text-white">
+              <CheckboxIndicator
+                class="flex items-center justify-center text-white"
+              >
                 <Icon
                   icon="lucide:check"
                   class="size-3"
@@ -170,8 +173,8 @@ function onFieldUpdate(
             :channel="ch.key"
             :disabled="!isChannelEnabled(gradient, ch.key)"
             class="
-              color-field-root flex items-center overflow-hidden rounded-md border
-              border-(--vp-c-divider) bg-(--vp-c-bg)
+              color-field-root flex items-center overflow-hidden rounded-md
+              border border-(--vp-c-divider) bg-(--vp-c-bg)
               aria-disabled:opacity-40
             "
             @update:model-value="(c: any) => onFieldUpdate(gradient, ch.key, c)"

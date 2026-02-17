@@ -2,22 +2,35 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Vitest - Docs",
+      "name": "Docs (VitePress)",
       "type": "node",
       "request": "launch",
+      "cwd": "${workspaceFolder}/docs",
       "runtimeExecutable": "bun",
-      "runtimeArgs": ["run", "--cwd", "docs", "vitest", "--no-coverage"],
+      "runtimeArgs": [
+        "run",
+        "dev"
+      ],
       "console": "integratedTerminal",
-      "cwd": "${workspaceFolder}"
+      "skipFiles": [
+        "<node_internals>/**"
+      ]
     },
     {
-      "name": "Vitest Current File - Docs",
+      "name": "Storybook (Vue)",
       "type": "node",
       "request": "launch",
+      "cwd": "${workspaceFolder}/packages/vue",
       "runtimeExecutable": "bun",
-      "runtimeArgs": ["run", "--cwd", "docs", "vitest", "--no-coverage", "${relativeFile}"],
+      "runtimeArgs": [
+        "run",
+        "storybook",
+        "--ci"
+      ],
       "console": "integratedTerminal",
-      "cwd": "${workspaceFolder}"
+      "skipFiles": [
+        "<node_internals>/**"
+      ]
     }
   ]
 }

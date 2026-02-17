@@ -1,7 +1,6 @@
 <script lang="ts">
 import type { Ref } from "vue";
 import { createContext, SliderRoot, useForwardExpose } from "reka-ui";
-import "internationalized-color/css";
 import { Color } from "internationalized-color";
 
 export interface ColorSliderRootProps {
@@ -30,6 +29,8 @@ export interface ColorSliderRootContext {
   colorRef: Ref<Color | undefined>;
   channel: Ref<string>;
   colorSpace: Ref<string>;
+  orientation: Ref<"horizontal" | "vertical">;
+  inverted: Ref<boolean>;
 }
 
 export const [injectColorSliderRootContext, provideColorSliderRootContext]
@@ -38,6 +39,7 @@ export const [injectColorSliderRootContext, provideColorSliderRootContext]
 
 <script setup lang="ts">
 import { computed, shallowRef, toRef, watch } from "vue";
+
 import { getChannelConfig, displayToCulori, culoriToDisplay } from "@urcolor/core";
 
 const props = withDefaults(defineProps<ColorSliderRootProps>(), {
@@ -55,7 +57,9 @@ function parseColor(v: Color | string | null | undefined): Color | undefined {
   return Color.parse(v) ?? undefined;
 }
 
-const colorRef = shallowRef<Color | undefined>(parseColor(props.modelValue));
+const DEFAULT_COLOR = Color.parse("hsl(210, 80%, 50%)")!;
+
+const colorRef = shallowRef<Color | undefined>(parseColor(props.modelValue) ?? DEFAULT_COLOR);
 
 watch(() => props.modelValue, (val) => {
   const parsed = parseColor(val);
@@ -104,7 +108,9 @@ function handleValueCommit() {
   }
 }
 
-provideColorSliderRootContext({ colorRef, channel: toRef(props, "channel"), colorSpace: toRef(props, "colorSpace") });
+const orientationRef = computed(() => props.orientation ?? "horizontal");
+const invertedRef = computed(() => props.inverted ?? false);
+provideColorSliderRootContext({ colorRef, channel: toRef(props, "channel"), colorSpace: toRef(props, "colorSpace"), orientation: orientationRef, inverted: invertedRef });
 </script>
 
 <template>

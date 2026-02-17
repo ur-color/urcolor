@@ -17,15 +17,15 @@ uniform vec4 u_tl; // top-left
 uniform vec4 u_tr; // top-right
 uniform vec4 u_bl; // bottom-left
 uniform vec4 u_br; // bottom-right
+uniform int u_mirrorX;
+uniform int u_mirrorY;
 
 void main() {
-  // Bilinear interpolation in whatever color space the uniforms are in.
-  // u_tl/tr/bl/br hold [c0, c1, c2, alpha] of 4 corners.
-  // We interpolate in that space, then the result is written as gl_FragColor
-  // (which the caller must ensure is sRGB after conversion).
-  vec4 top = mix(u_tl, u_tr, v_uv.x);
-  vec4 bot = mix(u_bl, u_br, v_uv.x);
-  vec4 c = mix(top, bot, 1.0 - v_uv.y);
+  float ux = u_mirrorX == 1 ? 1.0 - v_uv.x : v_uv.x;
+  float uy = u_mirrorY == 1 ? v_uv.y : 1.0 - v_uv.y;
+  vec4 top = mix(u_tl, u_tr, ux);
+  vec4 bot = mix(u_bl, u_br, ux);
+  vec4 c = mix(top, bot, uy);
   gl_FragColor = vec4(c.rgb, c.a);
 }
 `;
@@ -37,6 +37,8 @@ interface GradientProgram {
   uTR: WebGLUniformLocation;
   uBL: WebGLUniformLocation;
   uBR: WebGLUniformLocation;
+  uMirrorX: WebGLUniformLocation;
+  uMirrorY: WebGLUniformLocation;
 }
 
 function initGL(canvas: HTMLCanvasElement): GradientProgram {
@@ -72,6 +74,8 @@ function initGL(canvas: HTMLCanvasElement): GradientProgram {
     uTR: gl.getUniformLocation(program, "u_tr")!,
     uBL: gl.getUniformLocation(program, "u_bl")!,
     uBR: gl.getUniformLocation(program, "u_br")!,
+    uMirrorX: gl.getUniformLocation(program, "u_mirrorX")!,
+    uMirrorY: gl.getUniformLocation(program, "u_mirrorY")!,
   };
 }
 
@@ -94,10 +98,19 @@ const int MAX_STOPS = 16;
 uniform vec4 u_colors[MAX_STOPS];
 uniform float u_positions[MAX_STOPS];
 uniform int u_count;
-uniform int u_vertical;
+uniform float u_angle;
+uniform int u_mirrorX;
+uniform int u_mirrorY;
 
 void main() {
-  float t = u_vertical == 1 ? 1.0 - v_uv.y : v_uv.x;
+  float ux = u_mirrorX == 1 ? 1.0 - v_uv.x : v_uv.x;
+  float uy = u_mirrorY == 1 ? 1.0 - v_uv.y : v_uv.y;
+  // Rotate UV around center by angle (in radians)
+  vec2 centered = vec2(ux, uy) - 0.5;
+  float cosA = cos(u_angle);
+  float sinA = sin(u_angle);
+  float rotated = centered.x * cosA + centered.y * sinA;
+  float t = rotated + 0.5;
   vec4 color = u_colors[0];
   for (int i = 1; i < MAX_STOPS; i++) {
     if (i >= u_count) break;
@@ -120,7 +133,9 @@ interface LinearGradientProgram {
   uColors: WebGLUniformLocation;
   uPositions: WebGLUniformLocation;
   uCount: WebGLUniformLocation;
-  uVertical: WebGLUniformLocation;
+  uAngle: WebGLUniformLocation;
+  uMirrorX: WebGLUniformLocation;
+  uMirrorY: WebGLUniformLocation;
 }
 
 function initLinearGL(canvas: HTMLCanvasElement): LinearGradientProgram {
@@ -154,7 +169,9 @@ function initLinearGL(canvas: HTMLCanvasElement): LinearGradientProgram {
     uColors: gl.getUniformLocation(program, "u_colors")!,
     uPositions: gl.getUniformLocation(program, "u_positions")!,
     uCount: gl.getUniformLocation(program, "u_count")!,
-    uVertical: gl.getUniformLocation(program, "u_vertical")!,
+    uAngle: gl.getUniformLocation(program, "u_angle")!,
+    uMirrorX: gl.getUniformLocation(program, "u_mirrorX")!,
+    uMirrorY: gl.getUniformLocation(program, "u_mirrorY")!,
   };
 }
 
@@ -169,13 +186,15 @@ const linearCache = new WeakMap<HTMLCanvasElement, LinearGradientProgram>();
  *
  * @param canvas - The target canvas element.
  * @param colors - Array of color stops (2–16 colors).
- * @param vertical - If true, gradient runs top-to-bottom instead of left-to-right.
+ * @param angle - Rotation angle in degrees (0 = left-to-right, 90 = top-to-bottom). Values are normalized to 0–360.
  */
 export function drawLinearGradient(
   canvas: HTMLCanvasElement,
   colors: Color[],
-  vertical = false,
+  angle = 0,
   alpha = false,
+  mirrorX = false,
+  mirrorY = false,
 ): void {
   if (colors.length < 2 || colors.length > 16) {
     throw new Error("drawLinearGradient requires 2–16 color stops");
@@ -186,7 +205,7 @@ export function drawLinearGradient(
     prog = initLinearGL(canvas);
     linearCache.set(canvas, prog);
   }
-  const { gl, uColors, uPositions, uCount, uVertical } = prog;
+  const { gl, uColors, uPositions, uCount, uAngle, uMirrorX, uMirrorY } = prog;
 
   const dpr = typeof devicePixelRatio !== "undefined" ? devicePixelRatio : 1;
   const w = Math.round(canvas.clientWidth * dpr);
@@ -215,7 +234,11 @@ export function drawLinearGradient(
   gl.uniform4fv(uColors, colorData);
   gl.uniform1fv(uPositions, posData);
   gl.uniform1i(uCount, colors.length);
-  gl.uniform1i(uVertical, vertical ? 1 : 0);
+  // Normalize angle to 0–360, convert to radians
+  const normalizedAngle = ((angle % 360) + 360) % 360;
+  gl.uniform1f(uAngle, (normalizedAngle * Math.PI) / 180);
+  gl.uniform1i(uMirrorX, mirrorX ? 1 : 0);
+  gl.uniform1i(uMirrorY, mirrorY ? 1 : 0);
 
   gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 }
@@ -347,13 +370,15 @@ export function drawGradient(
   bottomLeft: Color,
   bottomRight: Color,
   alpha = false,
+  mirrorX = false,
+  mirrorY = false,
 ): void {
   let prog = cache.get(canvas);
   if (!prog) {
     prog = initGL(canvas);
     cache.set(canvas, prog);
   }
-  const { gl, uTL, uTR, uBL, uBR } = prog;
+  const { gl, uTL, uTR, uBL, uBR, uMirrorX, uMirrorY } = prog;
 
   // Match canvas resolution to CSS size
   const dpr = typeof devicePixelRatio !== "undefined" ? devicePixelRatio : 1;
@@ -369,6 +394,8 @@ export function drawGradient(
   gl.uniform4fv(uTR, colorToVec4(topRight, alpha));
   gl.uniform4fv(uBL, colorToVec4(bottomLeft, alpha));
   gl.uniform4fv(uBR, colorToVec4(bottomRight, alpha));
+  gl.uniform1i(uMirrorX, mirrorX ? 1 : 0);
+  gl.uniform1i(uMirrorY, mirrorY ? 1 : 0);
 
   gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 }

@@ -23,9 +23,8 @@ import { Primitive } from "reka-ui";
 import { ARROW_KEYS, PAGE_KEYS } from "./utils";
 import { injectColorAreaRootContext } from "./ColorAreaRoot.vue";
 
-const props = withDefaults(defineProps<ColorAreaImplProps>(), {
-  as: "span",
-});
+const props = withDefaults(defineProps<ColorAreaImplProps>(), { as: "div" });
+
 const emits = defineEmits<ColorAreaImplEmits>();
 const rootContext = injectColorAreaRootContext();
 </script>

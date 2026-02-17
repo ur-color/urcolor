@@ -3,7 +3,6 @@ import type { Ref } from "vue";
 import type { PrimitiveProps } from "reka-ui";
 import { createContext, useDirection, useForwardExpose, VisuallyHidden } from "reka-ui";
 import { computed, ref, shallowRef, toRefs, watch } from "vue";
-import "internationalized-color/css";
 import { Color } from "internationalized-color";
 import { colorSpaces, getChannelConfig, displayToCulori, culoriToDisplay, type ChannelConfig } from "@urcolor/core";
 import type { ActiveDirection } from "./utils";

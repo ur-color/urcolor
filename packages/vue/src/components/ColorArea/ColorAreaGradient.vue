@@ -44,6 +44,10 @@ useForwardExpose();
 
 const canvasRef = ref<HTMLCanvasElement | null>(null);
 
+// Mirror flags derived from sliding direction
+const mirrorX = computed(() => !rootContext.isSlidingFromLeft.value);
+const mirrorY = computed(() => !rootContext.isSlidingFromTop.value);
+
 // Determine if either axis is alpha
 const xIsAlpha = computed(() => rootContext.xChannelKey.value === "alpha");
 const yIsAlpha = computed(() => rootContext.yChannelKey.value === "alpha");
@@ -52,7 +56,7 @@ const hasAlphaAxis = computed(() => xIsAlpha.value || yIsAlpha.value);
 // Canvas opacity: reflect color's alpha when overrides don't include alpha (and axis isn't alpha)
 const canvasOpacity = computed(() => {
   if (hasAlphaAxis.value) return 1;
-  const overrides = props.channelOverrides as Record<string, number> | false;
+  const overrides = props.channelOverrides;
   if (overrides === false || (typeof overrides === "object" && overrides.alpha === undefined)) {
     return rootContext.colorRef.value?.alpha ?? 1;
   }
@@ -126,20 +130,21 @@ function render() {
 
     if (!tl || !tr || !bl || !br) return;
 
-    const [ctl, ctr, cbl, cbr] = (() => {
-      let [a, b, c, d] = [tl, tr, bl, br];
-      if (!slidingFromLeft) [a, b, c, d] = [b, a, d, c];
-      if (!slidingFromTop) [a, b, c, d] = [c, d, a, b];
-      return [a, b, c, d];
-    })();
-
     if (props.interpolationSpace) {
+      // CPU path: swap corners for mirroring
+      const [ctl, ctr, cbl, cbr] = (() => {
+        let [a, b, c, d] = [tl, tr, bl, br];
+        if (!slidingFromLeft) [a, b, c, d] = [b, a, d, c];
+        if (!slidingFromTop) [a, b, c, d] = [c, d, a, b];
+        return [a, b, c, d];
+      })();
       const sampleW = 64;
       const sampleH = 64;
       const pixels = sampleBilinearGrid(ctl, ctr, cbl, cbr, sampleW, sampleH, props.interpolationSpace, hasAlphaAxis.value);
       renderToCanvas(canvas, pixels, sampleW, sampleH);
     } else {
-      drawGradient(canvas, ctl, ctr, cbl, cbr, hasAlphaAxis.value);
+      // WebGL path: use mirror uniforms
+      drawGradient(canvas, tl, tr, bl, br, hasAlphaAxis.value, mirrorX.value, mirrorY.value);
     }
     return;
   }

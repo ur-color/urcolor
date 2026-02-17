@@ -38,8 +38,8 @@ const channels = computed(() => colorSpaces["hsl"]?.channels ?? []);
         <ColorFieldDecrement
           class="
             flex size-8 shrink-0 cursor-pointer items-center justify-center
-            border-none bg-transparent text-lg leading-none
-            text-(--vp-c-text-2) select-none
+            border-none bg-transparent text-lg leading-none text-(--vp-c-text-2)
+            select-none
             hover:not-disabled:bg-(--vp-c-bg-soft)
             hover:not-disabled:text-(--vp-c-text-1)
             disabled:cursor-default disabled:opacity-30
@@ -51,15 +51,14 @@ const channels = computed(() => colorSpaces["hsl"]?.channels ?? []);
           :id="`guide-field-${ch.key}`"
           class="
             w-0 min-w-0 flex-1 border-none bg-transparent px-0.5 py-1
-            text-center font-mono text-[13px] text-(--vp-c-text-1)
-            outline-none
+            text-center font-mono text-[13px] text-(--vp-c-text-1) outline-none
           "
         />
         <ColorFieldIncrement
           class="
             flex size-8 shrink-0 cursor-pointer items-center justify-center
-            border-none bg-transparent text-lg leading-none
-            text-(--vp-c-text-2) select-none
+            border-none bg-transparent text-lg leading-none text-(--vp-c-text-2)
+            select-none
             hover:not-disabled:bg-(--vp-c-bg-soft)
             hover:not-disabled:text-(--vp-c-text-1)
             disabled:cursor-default disabled:opacity-30

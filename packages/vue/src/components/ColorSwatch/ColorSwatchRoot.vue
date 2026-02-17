@@ -1,6 +1,5 @@
 <script lang="ts">
 import type { PrimitiveProps } from "reka-ui";
-import "internationalized-color/css";
 import { Color } from "internationalized-color";
 
 export interface ColorSwatchRootProps extends /* @vue-ignore */ PrimitiveProps {

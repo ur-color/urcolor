@@ -16,7 +16,9 @@
   "scripts": {
     "build": "bun run build:js && bun run build:types",
     "build:js": "vite build",
-    "build:types": "vue-tsc --declaration --emitDeclarationOnly --outDir dist --project tsconfig.build.json"
+    "build:types": "vue-tsc --declaration --emitDeclarationOnly --outDir dist --project tsconfig.build.json",
+    "storybook": "storybook dev -p 6874",
+    "build-storybook": "storybook build"
   },
   "keywords": [
     "color",
@@ -53,6 +55,15 @@
     "vue": "^3"
   },
   "devDependencies": {
+    "@storybook/addon-essentials": "^8",
+    "@storybook/addon-interactions": "^8",
+    "@storybook/builder-vite": "^8",
+    "@storybook/test": "^8",
+    "@storybook/vue3": "^8",
+    "@storybook/vue3-vite": "^8",
+    "@tailwindcss/vite": "^4.1.18",
+    "storybook": "^8",
+    "tailwindcss": "^4.1.18",
     "vite": "^7.3.1"
   }
 }

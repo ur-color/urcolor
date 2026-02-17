@@ -6,8 +6,8 @@ export interface ColorSliderGradientProps extends /* @vue-ignore */ PrimitivePro
   asChild?: boolean;
   /** Array of color stops. When omitted, auto-computes from the slider's channel and current color. */
   colors?: string[];
-  /** If true, gradient runs top-to-bottom instead of left-to-right. */
-  vertical?: boolean;
+  /** Rotation angle in degrees (0 = left-to-right, 90 = top-to-bottom). Values are normalized to 0–360. When using vertical orientation, defaults to 90. */
+  angle?: number;
   /** When set to a non-RGB color space, interpolates stops in that space for perceptual accuracy. */
   interpolationSpace?: string;
   /**
@@ -31,7 +31,6 @@ import { injectColorSliderRootContext } from "./ColorSliderRoot.vue";
 
 const props = withDefaults(defineProps<ColorSliderGradientProps>(), {
   as: "span",
-  vertical: false,
   channelOverrides: () => ({ alpha: 1 }),
 });
 
@@ -39,10 +38,20 @@ useForwardExpose();
 
 const rootContext = injectColorSliderRootContext();
 
+// Resolve effective angle: use prop if provided, otherwise 90 for vertical orientation, 0 for horizontal
+const effectiveAngle = computed(() => {
+  if (props.angle !== undefined) return props.angle;
+  return rootContext.orientation.value === "vertical" ? 90 : 0;
+});
+
+// Mirror the gradient when inverted: mirrorX for horizontal, mirrorY for vertical
+const effectiveMirrorX = computed(() => rootContext.orientation.value === "horizontal" && rootContext.inverted.value);
+const effectiveMirrorY = computed(() => rootContext.orientation.value === "vertical" && rootContext.inverted.value);
+
 const isAlphaChannel = computed(() => rootContext.channel.value === "alpha");
 
 const canvasOpacity = computed(() => {
-  const overrides = props.channelOverrides as Record<string, number> | false;
+  const overrides = props.channelOverrides;
   // If overrides is false or doesn't include alpha, reflect color's alpha (unless this IS the alpha channel)
   if (isAlphaChannel.value) return 1;
   if (overrides === false || !overrides.alpha) {
@@ -60,7 +69,7 @@ const autoColors = computed<Color[] | null>(() => {
   const colorSpace = rootContext.colorSpace.value;
   if (!color) return null;
 
-  const overrides = props.channelOverrides as Record<string, number> | false;
+  const overrides = props.channelOverrides;
 
   if (isAlphaChannel.value) {
     // Alpha slider: gradient from transparent to opaque
@@ -131,11 +140,17 @@ function render() {
     return;
   }
 
+  // Mirror at data level (like ColorArea) — reverse the color stops when inverted
+  const shouldMirror = effectiveMirrorX.value || effectiveMirrorY.value;
+  if (shouldMirror) {
+    colors = [...colors].reverse();
+  }
+
   if (props.interpolationSpace) {
     const interpolated = interpolateStops(colors, 32, props.interpolationSpace);
-    drawLinearGradient(canvas, interpolated, props.vertical, isAlphaChannel.value);
+    drawLinearGradient(canvas, interpolated, effectiveAngle.value, isAlphaChannel.value);
   } else {
-    drawLinearGradient(canvas, colors, props.vertical, isAlphaChannel.value);
+    drawLinearGradient(canvas, colors, effectiveAngle.value, isAlphaChannel.value);
   }
 }
 
@@ -144,7 +159,7 @@ useResizeObserver(canvasRef, () => {
 });
 
 watch(
-  () => [props.colors, props.vertical, props.interpolationSpace, props.channelOverrides, autoColors.value],
+  () => [props.colors, effectiveAngle.value, effectiveMirrorX.value, effectiveMirrorY.value, props.interpolationSpace, props.channelOverrides, autoColors.value],
   () => render(),
   { flush: "post", deep: true },
 );

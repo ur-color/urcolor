@@ -11,7 +11,7 @@ import { Color } from "internationalized-color";
  * @param colors - Array of color stops (2–16 colors).
  * @param vertical - If true, gradient runs top-to-bottom instead of left-to-right.
  */
-export declare function drawLinearGradient(canvas: HTMLCanvasElement, colors: Color[], vertical?: boolean, alpha?: boolean): void;
+export declare function drawLinearGradient(canvas: HTMLCanvasElement, colors: Color[], angle?: number, alpha?: boolean, mirrorX?: boolean, mirrorY?: boolean): void;
 /**
  * Interpolate between an array of colors in a given color space,
  * producing `steps` intermediate sRGB Color values.
@@ -43,4 +43,4 @@ export declare function sampleChannelGrid(baseColor: Color, colorSpace: string, 
  * @param bottomLeft - Color for the bottom-left corner.
  * @param bottomRight - Color for the bottom-right corner.
  */
-export declare function drawGradient(canvas: HTMLCanvasElement, topLeft: Color, topRight: Color, bottomLeft: Color, bottomRight: Color, alpha?: boolean): void;
+export declare function drawGradient(canvas: HTMLCanvasElement, topLeft: Color, topRight: Color, bottomLeft: Color, bottomRight: Color, alpha?: boolean, mirrorX?: boolean, mirrorY?: boolean): void;

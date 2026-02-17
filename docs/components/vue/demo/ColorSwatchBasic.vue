@@ -22,14 +22,14 @@ const selected = shallowRef(colors[0]);
       :key="i"
       :model-value="color"
       alpha
-      class="
-        size-10 cursor-pointer rounded-lg
-        flex items-center justify-center
-      "
+      class="flex size-10 cursor-pointer items-center justify-center rounded-lg"
       @click="selected = color"
     >
       <Check
-        class="size-5 text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)] transition-opacity duration-150"
+        class="
+          size-5 text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]
+          transition-opacity duration-150
+        "
         :class="selected === color ? 'opacity-100' : 'opacity-0'"
       />
     </ColorSwatchRoot>

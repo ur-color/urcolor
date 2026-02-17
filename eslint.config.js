@@ -121,6 +121,6 @@ export default [
     },
   },
   {
-    ignores: ["node_modules/", "**/dist/", ".nuxt/", ".output/", "bun.lock", "docs/.vitepress/dist/", "docs/.vitepress/cache/", "**/*.md", "**/*.d.ts"],
+    ignores: ["node_modules/", "**/dist/", ".nuxt/", ".output/", "bun.lock", "docs/.vitepress/dist/", "docs/.vitepress/cache/", "**/*.md", "**/*.d.ts", "**/.storybook/"],
   },
 ];
