@@ -20,5 +20,5 @@ export {
   useA98,
   useProPhoto,
   useRec2020,
-} from "./composables/useColor";
-export type { UseColorReturn } from "./composables/useColor";
+} from "./composables";
+export type { UseColorReturn, ColorInput } from "./composables";
