@@ -29,6 +29,8 @@ export type ColorWheelRootEmits = {
   "valueCommit": [payload: Color];
 };
 
+export type ActiveDirection = "x" | "y";
+
 export interface ColorWheelRootContext {
   disabled: Ref<boolean>;
   colorSpace: Ref<string>;
@@ -43,6 +45,9 @@ export interface ColorWheelRootContext {
   radiusMax: Ref<number>;
   startAngle: Ref<number>;
   dir: Ref<Direction>;
+  activeDirection: Ref<ActiveDirection>;
+  thumbXElement: Ref<HTMLElement | undefined>;
+  thumbYElement: Ref<HTMLElement | undefined>;
 }
 
 export const [injectColorWheelRootContext, provideColorWheelRootContext]
@@ -145,6 +150,10 @@ function snap(value: number, min: number, max: number, step: number): number {
   return Math.max(min, Math.min(max, Math.round(snapped * factor) / factor));
 }
 
+const activeDirection = ref<ActiveDirection>("x");
+const thumbXElement = ref<HTMLElement>();
+const thumbYElement = ref<HTMLElement>();
+
 const valueBeforeSlide = ref({ angle: currentAngleValue.value, radius: currentRadiusValue.value });
 const rectRef = ref<DOMRect>();
 
@@ -170,8 +179,16 @@ function updateValues(angle: number, radius: number, commit = false) {
   const snappedAngle = snap(angle, angleMin.value, angleMax.value, angleStep.value);
   const snappedRadius = snap(radius, radiusMin.value, radiusMax.value, radiusStep.value);
 
+  const hasChanged = Math.abs(snappedAngle - currentAngleValue.value) > 0.001
+    || Math.abs(snappedRadius - currentRadiusValue.value) > 0.001;
+
   currentAngleValue.value = snappedAngle;
   currentRadiusValue.value = snappedRadius;
+
+  if (hasChanged) {
+    const thumb = activeDirection.value === "x" ? thumbXElement.value : thumbYElement.value;
+    thumb?.focus();
+  }
 
   const newColor = displayValuesToColor(snappedAngle, snappedRadius);
   if (newColor) {
@@ -184,16 +201,44 @@ function updateValues(angle: number, radius: number, commit = false) {
 function handlePointerDown(event: PointerEvent) {
   if (props.disabled) return;
   const target = event.target as HTMLElement;
+
+  // Ignore clicks outside the circle
+  const rect = currentElement.value.getBoundingClientRect();
+  const cx = rect.left + rect.width / 2;
+  const cy = rect.top + rect.height / 2;
+  const maxR = Math.min(rect.width, rect.height) / 2;
+  const dx = event.clientX - cx;
+  const dy = event.clientY - cy;
+  if (dx * dx + dy * dy > maxR * maxR) return;
+
   target.setPointerCapture(event.pointerId);
   event.preventDefault();
+
+  // Focus thumb if pointer is on or inside a thumb element
+  if (thumbXElement.value && (target === thumbXElement.value || thumbXElement.value.contains(target))) {
+    activeDirection.value = "x";
+    thumbXElement.value.focus();
+  } else if (thumbYElement.value && (target === thumbYElement.value || thumbYElement.value.contains(target))) {
+    activeDirection.value = "y";
+    thumbYElement.value.focus();
+  }
+
   valueBeforeSlide.value = { angle: currentAngleValue.value, radius: currentRadiusValue.value };
   const vals = getValuesFromPointer(event);
   updateValues(vals.angle, vals.radius);
 }
 
+const lastPointerPosition = ref<{ x: number; y: number }>();
+
 function handlePointerMove(event: PointerEvent) {
   const target = event.target as HTMLElement;
   if (!target.hasPointerCapture(event.pointerId)) return;
+  if (lastPointerPosition.value) {
+    const dx = Math.abs(event.clientX - lastPointerPosition.value.x);
+    const dy = Math.abs(event.clientY - lastPointerPosition.value.y);
+    activeDirection.value = dx >= dy ? "x" : "y";
+  }
+  lastPointerPosition.value = { x: event.clientX, y: event.clientY };
   const vals = getValuesFromPointer(event);
   updateValues(vals.angle, vals.radius);
 }
@@ -203,6 +248,7 @@ function handlePointerUp(event: PointerEvent) {
   if (!target.hasPointerCapture(event.pointerId)) return;
   target.releasePointerCapture(event.pointerId);
   rectRef.value = undefined;
+  lastPointerPosition.value = undefined;
   const prev = valueBeforeSlide.value;
   if (prev.angle !== currentAngleValue.value || prev.radius !== currentRadiusValue.value) {
     if (colorRef.value) emits("valueCommit", colorRef.value);
@@ -234,13 +280,20 @@ function handleKeyDown(event: KeyboardEvent) {
   }
 
   event.preventDefault();
+  if (angleOffset !== 0) activeDirection.value = "x";
+  if (radiusOffset !== 0) activeDirection.value = "y";
+
   let newAngle = currentAngleValue.value + angleOffset;
   const isCyclic = angleConfig.value?.format === "degree";
   if (isCyclic) {
     const range = angleMax.value - angleMin.value;
     newAngle = ((newAngle - angleMin.value) % range + range) % range + angleMin.value;
+  } else {
+    newAngle = Math.max(angleMin.value, Math.min(angleMax.value, newAngle));
   }
-  updateValues(newAngle, currentRadiusValue.value + radiusOffset, true);
+
+  const newRadius = Math.max(radiusMin.value, Math.min(radiusMax.value, currentRadiusValue.value + radiusOffset));
+  updateValues(newAngle, newRadius, true);
 }
 
 const isFormControl = computed(() => currentElement.value ? Boolean(currentElement.value.closest("form")) : false);
@@ -259,6 +312,9 @@ provideColorWheelRootContext({
   radiusMax,
   startAngle: computed(() => props.startAngle),
   dir: direction,
+  activeDirection,
+  thumbXElement,
+  thumbYElement,
 });
 </script>
 

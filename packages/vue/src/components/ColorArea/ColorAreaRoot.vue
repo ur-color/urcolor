@@ -256,8 +256,7 @@ function handleSlideStart(event: PointerEvent) {
   if (closestIndex === -1)
     return;
   lastPointerPosition.value = { x: event.clientX, y: event.clientY };
-  activeDirection.value = "x";
-  updateValues(point, closestIndex);
+  updateValues(point, closestIndex, { skipFocus: true });
 }
 
 function handleSlideMove(event: PointerEvent) {
@@ -294,7 +293,7 @@ function clampAxis(nextValue: number, axisIndex: number, atIndex: number, minGap
   return nextValue;
 }
 
-function updateValues(point: number[], atIndex: number, { commit } = { commit: false }) {
+function updateValues(point: number[], atIndex: number, { commit, skipFocus } = { commit: false, skipFocus: false }) {
   const nextX = snapToStep(point[0] ?? 0, minX.value, maxX.value, stepX.value);
   const nextY = snapToStep(point[1] ?? 0, minY.value, maxY.value, stepY.value);
 
@@ -309,8 +308,10 @@ function updateValues(point: number[], atIndex: number, { commit } = { commit: f
   const hasChanged = JSON.stringify(nextValues) !== JSON.stringify(internalValue.value);
 
   if (hasChanged) {
-    const thumbs = activeDirection.value === "x" ? thumbXElements.value : thumbYElements.value;
-    thumbs[valueIndexToChangeRef.value]?.focus();
+    if (!skipFocus) {
+      const thumbs = activeDirection.value === "x" ? thumbXElements.value : thumbYElements.value;
+      thumbs[valueIndexToChangeRef.value]?.focus();
+    }
     internalValue.value = nextValues;
 
     // Rebuild and emit Color

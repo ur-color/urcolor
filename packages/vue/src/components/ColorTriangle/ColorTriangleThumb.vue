@@ -12,6 +12,9 @@ import { computed } from "vue";
 import { Primitive, useForwardExpose } from "reka-ui";
 import { barycentricToCartesian } from "@urcolor/core";
 import { injectColorTriangleRootContext } from "./ColorTriangleRoot.vue";
+import ColorTriangleThumbX from "./ColorTriangleThumbX.vue";
+import ColorTriangleThumbY from "./ColorTriangleThumbY.vue";
+import ColorTriangleThumbZ from "./ColorTriangleThumbZ.vue";
 
 withDefaults(defineProps<ColorTriangleThumbProps>(), { as: "span" });
 
@@ -31,7 +34,6 @@ const thumbPosition = computed(() => {
   let u: number, v: number, w: number;
 
   if (rootContext.isThreeChannel.value) {
-    // 3-channel: v0→(xMax,yMin,zMin), v1→(xMin,yMax,zMin), v2→(xMin,yMin,zMax)
     const zVal = rootContext.currentZValue.value;
     const zMin = rootContext.zMin.value;
     const zMax = rootContext.zMax.value;
@@ -39,13 +41,11 @@ const thumbPosition = computed(() => {
     const rawU = xRange === 0 ? 0 : (xVal - xMin) / xRange;
     const rawV = yRange === 0 ? 0 : (yVal - yMin) / yRange;
     const rawW = zRange === 0 ? 0 : (zVal - zMin) / zRange;
-    // Normalize so they sum to 1
     const sum = rawU + rawV + rawW || 1;
     u = rawU / sum;
     v = rawV / sum;
     w = rawW / sum;
   } else {
-    // 2-channel: v0→(xMax,yMax), v1→(xMin,yMax), v2→(xMin,yMin)
     u = xRange === 0 ? 0 : (xVal - xMin) / xRange;
     w = yRange === 0 ? 0 : 1 - (yVal - yMin) / yRange;
     v = Math.max(0, 1 - u - w);
@@ -63,12 +63,7 @@ const thumbPosition = computed(() => {
 
 <template>
   <Primitive
-    role="slider"
-    tabindex="0"
     aria-roledescription="2D slider"
-    :aria-valuenow="rootContext.currentXValue.value"
-    :aria-valuemin="rootContext.xMin.value"
-    :aria-valuemax="rootContext.xMax.value"
     :aria-disabled="rootContext.disabled.value"
     :data-disabled="rootContext.disabled.value ? '' : undefined"
     :as-child="asChild"
@@ -80,6 +75,9 @@ const thumbPosition = computed(() => {
       transform: 'translate(-50%, -50%)',
     }"
   >
+    <ColorTriangleThumbX />
+    <ColorTriangleThumbY />
+    <ColorTriangleThumbZ v-if="rootContext.isThreeChannel.value" />
     <slot />
   </Primitive>
 </template>

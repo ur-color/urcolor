@@ -8,14 +8,23 @@ export interface ColorRingThumbProps extends /* @vue-ignore */ PrimitiveProps {
 </script>
 
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, onMounted, onUnmounted } from "vue";
 import { Primitive, useForwardExpose } from "reka-ui";
 import { injectColorRingRootContext } from "./ColorRingRoot.vue";
 
 withDefaults(defineProps<ColorRingThumbProps>(), { as: "span" });
 
 const rootContext = injectColorRingRootContext();
-useForwardExpose();
+const { forwardRef, currentElement: thumbEl } = useForwardExpose();
+
+onMounted(() => {
+  if (thumbEl.value)
+    rootContext.thumbElement.value = thumbEl.value;
+});
+onUnmounted(() => {
+  if (rootContext.thumbElement.value === thumbEl.value)
+    rootContext.thumbElement.value = undefined;
+});
 
 const angleDeg = computed(() => {
   const range = rootContext.max.value - rootContext.min.value;
@@ -27,6 +36,7 @@ const angleDeg = computed(() => {
 
 <template>
   <Primitive
+    :ref="forwardRef"
     role="slider"
     tabindex="0"
     :aria-valuenow="rootContext.currentValue.value"
@@ -40,7 +50,7 @@ const angleDeg = computed(() => {
       position: 'absolute',
       top: '50%',
       left: '50%',
-      transform: `rotate(${angleDeg}deg) translateY(-50cqmin) translate(-50%, -50%)`,
+      transform: `rotate(${angleDeg}deg) translateY(-${(1 + rootContext.innerRadius.value) / 2 * 50}cqmin) translate(-50%, -50%)`,
       transformOrigin: '0 0',
     }"
   >

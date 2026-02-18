@@ -5,7 +5,7 @@ export interface ColorRingGradientProps extends /* @vue-ignore */ PrimitiveProps
   as?: string;
   asChild?: boolean;
   channelOverrides?: Record<string, number> | false;
-  /** Inner radius as a ratio of the outer radius (0–1). 0 = full disc, 0.8 = thin ring. Default 0.7 */
+  /** @deprecated Use innerRadius on ColorRingRoot instead */
   innerRadius?: number;
 }
 </script>
@@ -21,7 +21,6 @@ import { injectColorRingRootContext } from "./ColorRingRoot.vue";
 const props = withDefaults(defineProps<ColorRingGradientProps>(), {
   as: "span",
   channelOverrides: () => ({ alpha: 1 }),
-  innerRadius: 0.7,
 });
 
 const rootContext = injectColorRingRootContext();
@@ -66,7 +65,7 @@ function renderToCanvas(canvas: HTMLCanvasElement, pixels: Uint8ClampedArray, sa
   const cx = w / 2;
   const cy = h / 2;
   const outerR = Math.min(cx, cy);
-  const innerR = outerR * props.innerRadius;
+  const innerR = outerR * (props.innerRadius ?? rootContext.innerRadius.value);
 
   ctx.save();
   ctx.beginPath();
@@ -110,7 +109,7 @@ useResizeObserver(canvasRef, () => render());
 
 watch(
   () => [
-    props.channelOverrides, props.innerRadius,
+    props.channelOverrides, (props.innerRadius ?? rootContext.innerRadius.value),
     rootContext.colorSpace.value, rootContext.channelKey.value,
     rootContext.colorRef.value, rootContext.startAngle.value,
   ],

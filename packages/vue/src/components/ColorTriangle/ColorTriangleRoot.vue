@@ -5,7 +5,7 @@ import { createContext, useDirection, useForwardExpose, VisuallyHidden } from "r
 import { computed, ref, shallowRef, toRefs, watch } from "vue";
 import { Color } from "internationalized-color";
 import { colorSpaces, getChannelConfig, displayToCulori, culoriToDisplay, type ChannelConfig } from "@urcolor/core";
-import { triangleVertices, clampToTriangle, barycentricCoords, type Point } from "@urcolor/core";
+import { triangleVertices, clampToTriangle, barycentricCoords, barycentricToCartesian, pointInTriangle, type Point } from "@urcolor/core";
 
 type Direction = "ltr" | "rtl";
 
@@ -23,12 +23,15 @@ export interface ColorTriangleRootProps extends /* @vue-ignore */ PrimitiveProps
   channelY?: string;
   channelZ?: string;
   rotation?: number;
+  orientation?: "vertical" | "horizontal";
 }
 
 export type ColorTriangleRootEmits = {
   "update:modelValue": [payload: Color | undefined];
   "valueCommit": [payload: Color];
 };
+
+export type ActiveDirection = "x" | "y" | "z";
 
 export interface ColorTriangleRootContext {
   disabled: Ref<boolean>;
@@ -49,7 +52,12 @@ export interface ColorTriangleRootContext {
   isThreeChannel: Ref<boolean>;
   rotation: Ref<number>;
   vertices: Ref<[Point, Point, Point]>;
+  orientation: Ref<"vertical" | "horizontal">;
   dir: Ref<Direction>;
+  activeDirection: Ref<ActiveDirection>;
+  thumbXElement: Ref<HTMLElement | undefined>;
+  thumbYElement: Ref<HTMLElement | undefined>;
+  thumbZElement: Ref<HTMLElement | undefined>;
 }
 
 export const [injectColorTriangleRootContext, provideColorTriangleRootContext]
@@ -65,6 +73,7 @@ const props = withDefaults(defineProps<ColorTriangleRootProps>(), {
   defaultValue: "hsl(0, 100%, 50%)",
   colorSpace: "hsv",
   rotation: 0,
+  orientation: "vertical",
   as: "span",
 });
 const emits = defineEmits<ColorTriangleRootEmits>();
@@ -173,6 +182,11 @@ function snap(value: number, min: number, max: number, step: number): number {
   return Math.max(min, Math.min(max, Math.round(snapped * factor) / factor));
 }
 
+const activeDirection = ref<ActiveDirection>("x");
+const thumbXElement = ref<HTMLElement>();
+const thumbYElement = ref<HTMLElement>();
+const thumbZElement = ref<HTMLElement>();
+
 const valueBeforeSlide = ref({ x: currentXValue.value, y: currentYValue.value, z: currentZValue.value });
 const rectRef = ref<DOMRect>();
 
@@ -225,16 +239,56 @@ function updateValues(xVal: number, yVal: number, commit = false, zVal?: number)
 function handlePointerDown(event: PointerEvent) {
   if (props.disabled) return;
   const target = event.target as HTMLElement;
+
+  // Ignore clicks outside the triangle
+  const rect = currentElement.value.getBoundingClientRect();
+  const nx = (event.clientX - rect.left) / rect.width;
+  const ny = (event.clientY - rect.top) / rect.height;
+  const [v0, v1, v2] = vertices.value;
+  if (!pointInTriangle(nx, ny, v0, v1, v2)) return;
+
   target.setPointerCapture(event.pointerId);
   event.preventDefault();
+
+  if (thumbXElement.value && (target === thumbXElement.value || thumbXElement.value.contains(target))) {
+    activeDirection.value = "x";
+    thumbXElement.value.focus();
+  } else if (thumbYElement.value && (target === thumbYElement.value || thumbYElement.value.contains(target))) {
+    activeDirection.value = "y";
+    thumbYElement.value.focus();
+  } else if (thumbZElement.value && (target === thumbZElement.value || thumbZElement.value.contains(target))) {
+    activeDirection.value = "z";
+    thumbZElement.value.focus();
+  } else {
+    // Clicked on triangle surface — focus the X thumb by default
+    activeDirection.value = "x";
+    thumbXElement.value?.focus();
+  }
+
   valueBeforeSlide.value = { x: currentXValue.value, y: currentYValue.value, z: currentZValue.value };
   const vals = getValuesFromPointer(event);
   updateValues(vals.x, vals.y, false, vals.z);
 }
 
+const lastPointerPosition = ref<{ x: number; y: number }>();
+
 function handlePointerMove(event: PointerEvent) {
   const target = event.target as HTMLElement;
   if (!target.hasPointerCapture(event.pointerId)) return;
+  if (lastPointerPosition.value) {
+    const dx = Math.abs(event.clientX - lastPointerPosition.value.x);
+    const dy = Math.abs(event.clientY - lastPointerPosition.value.y);
+    const newDirection = dx >= dy ? "x" : "y";
+    if (newDirection !== activeDirection.value) {
+      activeDirection.value = newDirection;
+      if (newDirection === "x") {
+        thumbXElement.value?.focus();
+      } else {
+        thumbYElement.value?.focus();
+      }
+    }
+  }
+  lastPointerPosition.value = { x: event.clientX, y: event.clientY };
   const vals = getValuesFromPointer(event);
   updateValues(vals.x, vals.y, false, vals.z);
 }
@@ -244,38 +298,208 @@ function handlePointerUp(event: PointerEvent) {
   if (!target.hasPointerCapture(event.pointerId)) return;
   target.releasePointerCapture(event.pointerId);
   rectRef.value = undefined;
+  lastPointerPosition.value = undefined;
   const prev = valueBeforeSlide.value;
   if (prev.x !== currentXValue.value || prev.y !== currentYValue.value || prev.z !== currentZValue.value) {
     if (colorRef.value) emits("valueCommit", colorRef.value);
   }
 }
 
-function handleKeyDown(event: KeyboardEvent) {
-  if (props.disabled) return;
-  let xOffset = 0;
-  let yOffset = 0;
-  const multiplier = event.shiftKey ? 10 : 1;
+function channelsToBary(): { u: number; v: number; w: number } {
+  const xRange = xMax.value - xMin.value;
+  const yRange = yMax.value - yMin.value;
 
-  if (event.key === "ArrowRight") xOffset = xStep.value * multiplier;
-  else if (event.key === "ArrowLeft") xOffset = -xStep.value * multiplier;
-  else if (event.key === "ArrowUp") yOffset = -yStep.value * multiplier;
-  else if (event.key === "ArrowDown") yOffset = yStep.value * multiplier;
-  else if (event.key === "PageUp") yOffset = -yStep.value * 10;
-  else if (event.key === "PageDown") yOffset = yStep.value * 10;
-  else if (event.key === "Home") {
-    updateValues(xMin.value, yMin.value, true);
-    event.preventDefault();
-    return;
+  if (isThreeChannel.value) {
+    // 3-channel: v0→(xMax,yMin,zMin), v1→(xMin,yMax,zMin), v2→(xMin,yMin,zMax)
+    const u = xRange > 0 ? (currentXValue.value - xMin.value) / xRange : 0;
+    const v = yRange > 0 ? (currentYValue.value - yMin.value) / yRange : 0;
+    const w = Math.max(0, 1 - u - v);
+    const sum = u + v + w;
+    return sum > 0 ? { u: u / sum, v: v / sum, w: w / sum } : { u: 1 / 3, v: 1 / 3, w: 1 / 3 };
   }
-  else if (event.key === "End") {
-    updateValues(xMax.value, yMax.value, true);
-    event.preventDefault();
-    return;
+
+  // 2-channel: v0→(xMax,yMax), v1→(xMin,yMax), v2→(xMin,yMin)
+  // x = u*xMax + (1-u)*xMin → u = (x - xMin) / xRange
+  // y = (1-w)*yMax + w*yMin → w = (yMax - y) / yRange
+  const u = xRange > 0 ? (currentXValue.value - xMin.value) / xRange : 0;
+  const w = yRange > 0 ? (yMax.value - currentYValue.value) / yRange : 0;
+  const v = Math.max(0, 1 - u - w);
+  const sum = u + v + w;
+  return sum > 0 ? { u: u / sum, v: v / sum, w: w / sum } : { u: 1 / 3, v: 1 / 3, w: 1 / 3 };
+}
+
+function baryToChannels(u: number, v: number, w: number): { x: number; y: number; z?: number } {
+  if (isThreeChannel.value) {
+    return {
+      x: u * xMax.value + (1 - u) * xMin.value,
+      y: v * yMax.value + (1 - v) * yMin.value,
+      z: w * zMax.value + (1 - w) * zMin.value,
+    };
   }
-  else return;
+  return {
+    x: u * xMax.value + (1 - u) * xMin.value,
+    y: (1 - w) * yMax.value + w * yMin.value,
+  };
+}
+
+function handleKeyDown3Channel(event: KeyboardEvent) {
+  const step = 0.05;
+  const multiplier = event.shiftKey ? 4 : 1;
+
+  // Determine delta for the focused channel
+  let channelDelta = 0;
+  switch (event.key) {
+    case "ArrowUp":
+    case "ArrowRight":
+      channelDelta = step * multiplier;
+      break;
+    case "ArrowDown":
+    case "ArrowLeft":
+      channelDelta = -step * multiplier;
+      break;
+    case "PageUp":
+      channelDelta = step * 4;
+      break;
+    case "PageDown":
+      channelDelta = -step * 4;
+      break;
+    case "Home": {
+      // Jump to this channel's vertex (max this, min others)
+      const dir = activeDirection.value;
+      const u = dir === "x" ? 1 : 0;
+      const v = dir === "y" ? 1 : 0;
+      const w = dir === "z" ? 1 : 0;
+      const vals = baryToChannels(u, v, w);
+      updateValues(vals.x, vals.y, true, vals.z);
+      event.preventDefault();
+      return;
+    }
+    case "End": {
+      // Jump to center (equal distribution)
+      const vals = baryToChannels(1 / 3, 1 / 3, 1 / 3);
+      updateValues(vals.x, vals.y, true, vals.z);
+      event.preventDefault();
+      return;
+    }
+    default:
+      return;
+  }
 
   event.preventDefault();
-  updateValues(currentXValue.value + xOffset, currentYValue.value + yOffset, true);
+
+  const bary = channelsToBary();
+  let newU = bary.u, newV = bary.v, newW = bary.w;
+  const ad = activeDirection.value;
+
+  // Get current value of focused component and apply delta
+  const focused = ad === "x" ? newU : ad === "y" ? newV : newW;
+  const newFocused = Math.max(0, Math.min(1, focused + channelDelta));
+  const actualDelta = newFocused - focused;
+
+  // Save originals before mutation
+  const origU = newU, origV = newV, origW = newW;
+
+  if (ad === "x") newU = newFocused;
+  else if (ad === "y") newV = newFocused;
+  else newW = newFocused;
+
+  // Distribute the opposite delta proportionally to the other two
+  function redistribute(a: number, b: number, delta: number): [number, number] {
+    const sum = a + b;
+    if (sum > 0) {
+      return [a - delta * (a / sum), b - delta * (b / sum)];
+    }
+    const half = -delta / 2;
+    return [half, half];
+  }
+
+  if (ad === "x") {
+    [newV, newW] = redistribute(origV, origW, actualDelta);
+  } else if (ad === "y") {
+    [newU, newW] = redistribute(origU, origW, actualDelta);
+  } else {
+    [newU, newV] = redistribute(origU, origV, actualDelta);
+  }
+
+  // Clamp and normalize
+  newU = Math.max(0, newU);
+  newV = Math.max(0, newV);
+  newW = Math.max(0, newW);
+  const sum = newU + newV + newW;
+  if (sum > 0) { newU /= sum; newV /= sum; newW /= sum; }
+
+  const vals = baryToChannels(newU, newV, newW);
+  updateValues(vals.x, vals.y, true, vals.z);
+}
+
+function handleKeyDown2Channel(event: KeyboardEvent) {
+  const multiplier = event.shiftKey ? 4 : 1;
+  let newX = currentXValue.value;
+  let newY = currentYValue.value;
+
+  let targetedY = false;
+
+  switch (event.key) {
+    case "ArrowRight":
+      newY = Math.min(yMax.value, newY + yStep.value * multiplier);
+      targetedY = true;
+      break;
+    case "ArrowLeft":
+      newY = Math.max(yMin.value, newY - yStep.value * multiplier);
+      targetedY = true;
+      break;
+    case "ArrowUp":
+      newX = Math.min(xMax.value, newX + xStep.value * multiplier);
+      break;
+    case "ArrowDown":
+      newX = Math.max(xMin.value, newX - xStep.value * multiplier);
+      break;
+    case "PageUp":
+      newX = xMax.value;
+      newY = yMax.value;
+      break;
+    case "PageDown":
+      newX = xMin.value;
+      newY = yMin.value;
+      break;
+    case "Home":
+      newX = xMax.value;
+      newY = yMax.value;
+      break;
+    case "End":
+      newX = xMin.value;
+      newY = yMin.value;
+      break;
+    default:
+      return;
+  }
+
+  // Clamp to triangle bounds: u + w <= 1 (v >= 0)
+  const xRange = xMax.value - xMin.value;
+  const yRange = yMax.value - yMin.value;
+  if (xRange > 0 && yRange > 0) {
+    const u = (newX - xMin.value) / xRange;
+    const w = (yMax.value - newY) / yRange;
+    if (u + w > 1) {
+      if (targetedY) {
+        newX = xMin.value + (1 - w) * xRange;
+      } else {
+        newY = yMax.value - (1 - u) * yRange;
+      }
+    }
+  }
+
+  event.preventDefault();
+  updateValues(newX, newY, true);
+}
+
+function handleKeyDown(event: KeyboardEvent) {
+  if (props.disabled) return;
+  if (isThreeChannel.value) {
+    handleKeyDown3Channel(event);
+  } else {
+    handleKeyDown2Channel(event);
+  }
 }
 
 const isFormControl = computed(() => currentElement.value ? Boolean(currentElement.value.closest("form")) : false);
@@ -298,8 +522,13 @@ provideColorTriangleRootContext({
   zMax,
   isThreeChannel,
   rotation: computed(() => props.rotation),
+  orientation: computed(() => props.orientation!),
   vertices,
   dir,
+  activeDirection,
+  thumbXElement,
+  thumbYElement,
+  thumbZElement,
 });
 </script>
 

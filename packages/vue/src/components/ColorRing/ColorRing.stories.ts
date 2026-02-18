@@ -7,7 +7,7 @@ type Story = StoryObj<typeof ColorRingRoot>;
 function singleRing(props: Record<string, unknown> = {}, { alpha = false } = {}) {
   return h(
     ColorRingRoot,
-    { class: "block relative size-64", style: "container-type: inline-size", ...props },
+    { class: "block relative size-64", style: "container-type: inline-size", innerRadius: 0.85, ...props },
     () =>
       h(
         ColorRingTrack,

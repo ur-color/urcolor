@@ -11,6 +11,8 @@ export interface ColorWheelThumbProps extends /* @vue-ignore */ PrimitiveProps {
 import { computed } from "vue";
 import { Primitive, useForwardExpose } from "reka-ui";
 import { injectColorWheelRootContext } from "./ColorWheelRoot.vue";
+import ColorWheelThumbX from "./ColorWheelThumbX.vue";
+import ColorWheelThumbY from "./ColorWheelThumbY.vue";
 
 withDefaults(defineProps<ColorWheelThumbProps>(), { as: "span" });
 
@@ -33,12 +35,7 @@ const radiusPercent = computed(() => {
 
 <template>
   <Primitive
-    role="slider"
-    tabindex="0"
     aria-roledescription="2D slider"
-    :aria-valuenow="rootContext.currentAngleValue.value"
-    :aria-valuemin="rootContext.angleMin.value"
-    :aria-valuemax="rootContext.angleMax.value"
     :aria-disabled="rootContext.disabled.value"
     :data-disabled="rootContext.disabled.value ? '' : undefined"
     :as-child="asChild"
@@ -51,6 +48,8 @@ const radiusPercent = computed(() => {
       transformOrigin: '0 0',
     }"
   >
+    <ColorWheelThumbX />
+    <ColorWheelThumbY />
     <slot />
   </Primitive>
 </template>

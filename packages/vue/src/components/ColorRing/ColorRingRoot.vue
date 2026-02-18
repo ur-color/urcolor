@@ -21,6 +21,8 @@ export interface ColorRingRootProps extends /* @vue-ignore */ PrimitiveProps {
   colorSpace?: string;
   channel?: string;
   startAngle?: number;
+  /** Inner radius as a ratio of the outer radius (0–1). Used for hit testing. Default 0.7 */
+  innerRadius?: number;
 }
 
 export type ColorRingRootEmits = {
@@ -39,6 +41,8 @@ export interface ColorRingRootContext {
   currentValue: Ref<number>;
   startAngle: Ref<number>;
   dir: Ref<Direction>;
+  thumbElement: Ref<HTMLElement | undefined>;
+  innerRadius: Ref<number>;
 }
 
 export const [injectColorRingRootContext, provideColorRingRootContext]
@@ -54,6 +58,7 @@ const props = withDefaults(defineProps<ColorRingRootProps>(), {
   defaultValue: "hsl(0, 100%, 50%)",
   colorSpace: "hsl",
   startAngle: 0,
+  innerRadius: 0.7,
   as: "span",
 });
 const emits = defineEmits<ColorRingRootEmits>();
@@ -117,6 +122,8 @@ function displayValueToColor(val: number): Color | undefined {
   return colorRef.value.set({ mode: props.colorSpace, [channelKey.value]: culoriVal });
 }
 
+const thumbElement = ref<HTMLElement>();
+
 const valueBeforeSlide = ref(currentValue.value);
 const rectRef = ref<DOMRect>();
 const isDragging = ref(false);
@@ -140,8 +147,12 @@ function getValueFromPointer(event: PointerEvent): number {
 
 function updateValue(val: number, commit = false) {
   const snapped = snapValue(val);
-  if (Math.abs(snapped - currentValue.value) < 0.001 && !commit) return;
+  const hasChanged = Math.abs(snapped - currentValue.value) > 0.001;
+  if (!hasChanged && !commit) return;
   currentValue.value = snapped;
+
+  if (hasChanged) thumbElement.value?.focus();
+
   const newColor = displayValueToColor(snapped);
   if (newColor) {
     colorRef.value = newColor;
@@ -153,8 +164,25 @@ function updateValue(val: number, commit = false) {
 function handlePointerDown(event: PointerEvent) {
   if (props.disabled) return;
   const target = event.target as HTMLElement;
+
+  // Ignore clicks outside the ring (annulus)
+  const rect = currentElement.value.getBoundingClientRect();
+  const cx = rect.left + rect.width / 2;
+  const cy = rect.top + rect.height / 2;
+  const outerR = Math.min(rect.width, rect.height) / 2;
+  const innerR = outerR * props.innerRadius;
+  const dx = event.clientX - cx;
+  const dy = event.clientY - cy;
+  const distSq = dx * dx + dy * dy;
+  if (distSq > outerR * outerR || distSq < innerR * innerR) return;
+
   target.setPointerCapture(event.pointerId);
   event.preventDefault();
+
+  if (thumbElement.value && (target === thumbElement.value || thumbElement.value.contains(target))) {
+    thumbElement.value.focus();
+  }
+
   isDragging.value = true;
   valueBeforeSlide.value = currentValue.value;
   updateValue(getValueFromPointer(event));
@@ -195,6 +223,8 @@ function handleKeyDown(event: KeyboardEvent) {
   const isCyclic = channelConfig.value?.format === "degree";
   if (isCyclic) {
     newVal = ((newVal - min.value) % (max.value - min.value) + (max.value - min.value)) % (max.value - min.value) + min.value;
+  } else {
+    newVal = Math.max(min.value, Math.min(max.value, newVal));
   }
   updateValue(newVal, true);
 }
@@ -212,6 +242,8 @@ provideColorRingRootContext({
   currentValue,
   startAngle: computed(() => props.startAngle),
   dir,
+  thumbElement,
+  innerRadius: computed(() => props.innerRadius),
 });
 </script>
 

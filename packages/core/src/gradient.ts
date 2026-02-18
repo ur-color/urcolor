@@ -437,7 +437,7 @@ export function samplePolarGrid(
       const dx = (x - cx) / cx;
       const dy = (y - cy) / cy;
       const r = Math.min(1, Math.sqrt(dx * dx + dy * dy));
-      let angle = Math.atan2(dy, dx) - startRad;
+      let angle = Math.atan2(dx, -dy) - startRad;
       if (angle < 0) angle += 2 * Math.PI;
       const angleFrac = angle / (2 * Math.PI);
       const angleVal = angleMin + angleFrac * (angleMax - angleMin);
@@ -479,7 +479,7 @@ export function sampleConicRing(
     for (let x = 0; x < w; x++) {
       const dx = (x - cx) / cx;
       const dy = (y - cy) / cy;
-      let angle = Math.atan2(dy, dx) - startRad;
+      let angle = Math.atan2(dx, -dy) - startRad;
       if (angle < 0) angle += 2 * Math.PI;
       const frac = angle / (2 * Math.PI);
       const val = channelMin + frac * (channelMax - channelMin);
