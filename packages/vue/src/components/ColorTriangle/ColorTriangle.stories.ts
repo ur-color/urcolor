@@ -58,3 +58,7 @@ export const HSL_HSL: Story = { name: "HSL / H × S × L", render: renderTriangl
 export const OKLab_ab: Story = { name: "OKLab / a × b", render: renderTriangle({ colorSpace: "oklab", channelX: "a", channelY: "b" }) };
 export const Lab_ab: Story = { name: "Lab / a × b", render: renderTriangle({ colorSpace: "lab", channelX: "a", channelY: "b" }) };
 export const RGB_RG: Story = { name: "RGB / R × G", render: renderTriangle({ colorSpace: "rgb", channelX: "r", channelY: "g" }) };
+
+// Thumb alignment stories
+export const ThumbContain: Story = { name: "Thumb Contain", render: renderTriangle({ colorSpace: "hsv", channelX: "s", channelY: "v", thumbAlignment: "contain" }) };
+export const ThumbContain3Channel: Story = { name: "Thumb Contain / 3-Channel", render: renderTriangle({ colorSpace: "rgb", channelX: "r", channelY: "g", channelZ: "b", thumbAlignment: "contain" }) };

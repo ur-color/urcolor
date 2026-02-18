@@ -92,6 +92,29 @@ function closestPointOnSegment(px: number, py: number, ax: number, ay: number, b
   return { x: ax + t * dx, y: ay + t * dy };
 }
 
+/** Inset a triangle toward its centroid by a given distance. Returns a smaller similar triangle. */
+export function insetTriangle(v0: Point, v1: Point, v2: Point, inset: number): [Point, Point, Point] {
+  const cx = (v0.x + v1.x + v2.x) / 3;
+  const cy = (v0.y + v1.y + v2.y) / 3;
+
+  // Compute inradius via area / semi-perimeter (works for any triangle)
+  const a = Math.hypot(v1.x - v2.x, v1.y - v2.y);
+  const b = Math.hypot(v0.x - v2.x, v0.y - v2.y);
+  const c = Math.hypot(v0.x - v1.x, v0.y - v1.y);
+  const s = (a + b + c) / 2;
+  const area = Math.sqrt(s * (s - a) * (s - b) * (s - c));
+  const inradius = area / s;
+
+  if (inset >= inradius) inset = inradius * 0.9; // safety clamp
+  const scale = (inradius - inset) / inradius;
+
+  return [
+    { x: cx + (v0.x - cx) * scale, y: cy + (v0.y - cy) * scale },
+    { x: cx + (v1.x - cx) * scale, y: cy + (v1.y - cy) * scale },
+    { x: cx + (v2.x - cx) * scale, y: cy + (v2.y - cy) * scale },
+  ];
+}
+
 /** Clamp a point to be within a triangle. If outside, project to nearest edge. */
 export function clampToTriangle(x: number, y: number, v0: Point, v1: Point, v2: Point): Point {
   if (pointInTriangle(x, y, v0, v1, v2)) return { x, y };

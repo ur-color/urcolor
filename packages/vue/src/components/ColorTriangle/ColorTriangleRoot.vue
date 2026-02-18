@@ -4,8 +4,7 @@ import type { PrimitiveProps } from "reka-ui";
 import { createContext, useDirection, useForwardExpose, VisuallyHidden } from "reka-ui";
 import { computed, ref, shallowRef, toRefs, watch } from "vue";
 import { Color } from "internationalized-color";
-import { colorSpaces, getChannelConfig, displayToCulori, culoriToDisplay, type ChannelConfig } from "@urcolor/core";
-import { triangleVertices, clampToTriangle, barycentricCoords, barycentricToCartesian, pointInTriangle, type Point } from "@urcolor/core";
+import { colorSpaces, getChannelConfig, displayToCulori, culoriToDisplay, type ChannelConfig, triangleVertices, clampToTriangle, barycentricCoords, pointInTriangle, insetTriangle, type Point } from "@urcolor/core";
 
 type Direction = "ltr" | "rtl";
 
@@ -25,6 +24,7 @@ export interface ColorTriangleRootProps extends /* @vue-ignore */ PrimitiveProps
   rotation?: number;
   orientation?: "vertical" | "horizontal";
   inverted?: boolean;
+  thumbAlignment?: "contain" | "overflow";
 }
 
 export type ColorTriangleRootEmits = {
@@ -61,6 +61,8 @@ export interface ColorTriangleRootContext {
   thumbZElement: Ref<HTMLElement | undefined>;
   inverted: Ref<boolean>;
   isDragging: Ref<boolean>;
+  thumbAlignment: Ref<"contain" | "overflow">;
+  thumbElement: Ref<HTMLElement | undefined>;
 }
 
 export const [injectColorTriangleRootContext, provideColorTriangleRootContext]
@@ -78,6 +80,7 @@ const props = withDefaults(defineProps<ColorTriangleRootProps>(), {
   rotation: 0,
   orientation: "vertical",
   inverted: false,
+  thumbAlignment: "overflow",
   as: "span",
 });
 const emits = defineEmits<ColorTriangleRootEmits>();
@@ -86,7 +89,8 @@ defineSlots<{
   default?: (props: { modelValue: Color | undefined }) => any;
 }>();
 
-const { disabled, dir: propDir } = toRefs(props);
+const { disabled, thumbAlignment, dir: propDir } = toRefs(props);
+const thumbElement = ref<HTMLElement>();
 const dir = useDirection(propDir);
 const { forwardRef, currentElement } = useForwardExpose();
 
@@ -121,6 +125,18 @@ const zStep = computed(() => zConfig.value?.step ?? 1);
 const vertices = computed(() => {
   const [v0, v1, v2] = triangleVertices(1, 1, props.rotation);
   return props.inverted ? [v0, v2, v1] as [Point, Point, Point] : [v0, v1, v2] as [Point, Point, Point];
+});
+
+const containVertices = computed<[Point, Point, Point]>(() => {
+  if (thumbAlignment.value !== "contain" || !thumbElement.value || !currentElement.value) return vertices.value;
+  const containerSize = Math.min(currentElement.value.clientWidth, currentElement.value.clientHeight);
+  if (containerSize <= 0) return vertices.value;
+  const thumbW = thumbElement.value.clientWidth;
+  const thumbH = thumbElement.value.clientHeight;
+  const inset = Math.max(thumbW, thumbH) / 2 / containerSize;
+  if (inset <= 0) return vertices.value;
+  const [v0, v1, v2] = vertices.value;
+  return insetTriangle(v0, v1, v2, inset);
 });
 
 const clipPathStyle = computed(() => {
@@ -211,7 +227,7 @@ function getValuesFromPointer(event: PointerEvent): { x: number; y: number; z?: 
   const nx = (event.clientX - rect.left) / rect.width;
   const ny = (event.clientY - rect.top) / rect.height;
 
-  const [v0, v1, v2] = vertices.value;
+  const [v0, v1, v2] = containVertices.value;
   const clamped = clampToTriangle(nx, ny, v0, v1, v2);
 
   const { u, v, w } = barycentricCoords(clamped.x, clamped.y, v0, v1, v2);
@@ -258,8 +274,8 @@ function handlePointerDown(event: PointerEvent) {
   const rect = currentElement.value.getBoundingClientRect();
   const nx = (event.clientX - rect.left) / rect.width;
   const ny = (event.clientY - rect.top) / rect.height;
-  const [v0, v1, v2] = vertices.value;
-  if (!pointInTriangle(nx, ny, v0, v1, v2)) return;
+  const [hv0, hv1, hv2] = vertices.value;
+  if (!pointInTriangle(nx, ny, hv0, hv1, hv2)) return;
 
   target.setPointerCapture(event.pointerId);
   event.preventDefault();
@@ -549,6 +565,8 @@ provideColorTriangleRootContext({
   thumbZElement,
   inverted: computed(() => props.inverted),
   isDragging,
+  thumbAlignment,
+  thumbElement,
 });
 </script>
 
@@ -562,6 +580,7 @@ provideColorTriangleRootContext({
     :aria-disabled="disabled"
     :style="clipPathStyle"
     :data-disabled="disabled ? '' : undefined"
+    data-color-triangle-root
     @pointerdown="handlePointerDown"
     @pointermove="handlePointerMove"
     @pointerup="handlePointerUp"

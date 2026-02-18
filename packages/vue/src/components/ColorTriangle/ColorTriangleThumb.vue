@@ -8,9 +8,9 @@ export interface ColorTriangleThumbProps extends /* @vue-ignore */ PrimitiveProp
 </script>
 
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, onMounted } from "vue";
 import { Primitive, useForwardExpose } from "reka-ui";
-import { barycentricToCartesian } from "@urcolor/core";
+import { barycentricToCartesian, insetTriangle } from "@urcolor/core";
 import { injectColorTriangleRootContext } from "./ColorTriangleRoot.vue";
 import ColorTriangleThumbX from "./ColorTriangleThumbX.vue";
 import ColorTriangleThumbY from "./ColorTriangleThumbY.vue";
@@ -19,7 +19,12 @@ import ColorTriangleThumbZ from "./ColorTriangleThumbZ.vue";
 withDefaults(defineProps<ColorTriangleThumbProps>(), { as: "span" });
 
 const rootContext = injectColorTriangleRootContext();
-useForwardExpose();
+const { forwardRef, currentElement } = useForwardExpose();
+
+// Register thumb element in root context for size measurement
+onMounted(() => {
+  rootContext.thumbElement.value = currentElement.value;
+});
 
 const thumbPosition = computed(() => {
   const xVal = rootContext.currentXValue.value;
@@ -52,7 +57,25 @@ const thumbPosition = computed(() => {
   }
 
   const [v0, v1, v2] = rootContext.vertices.value;
-  const pos = barycentricToCartesian(u, v, w, v0, v1, v2);
+
+  // In contain mode, position thumb within inset triangle
+  let posVerts: [typeof v0, typeof v1, typeof v2] = [v0, v1, v2];
+  if (rootContext.thumbAlignment.value === "contain" && currentElement.value) {
+    const rootEl = currentElement.value.closest("[data-color-triangle-root]") as HTMLElement | null;
+    if (rootEl) {
+      const containerSize = Math.min(rootEl.clientWidth, rootEl.clientHeight);
+      if (containerSize > 0) {
+        const thumbW = currentElement.value.clientWidth;
+        const thumbH = currentElement.value.clientHeight;
+        const inset = Math.max(thumbW, thumbH) / 2 / containerSize;
+        if (inset > 0) {
+          posVerts = insetTriangle(v0, v1, v2, inset);
+        }
+      }
+    }
+  }
+
+  const pos = barycentricToCartesian(u, v, w, posVerts[0], posVerts[1], posVerts[2]);
 
   return {
     left: `${pos.x * 100}%`,
@@ -63,6 +86,7 @@ const thumbPosition = computed(() => {
 
 <template>
   <Primitive
+    :ref="forwardRef"
     aria-roledescription="2D slider"
     :aria-disabled="rootContext.disabled.value"
     :data-disabled="rootContext.disabled.value ? '' : undefined"
