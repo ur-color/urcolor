@@ -58,6 +58,7 @@ export interface ColorTriangleRootContext {
   thumbXElement: Ref<HTMLElement | undefined>;
   thumbYElement: Ref<HTMLElement | undefined>;
   thumbZElement: Ref<HTMLElement | undefined>;
+  isDragging: Ref<boolean>;
 }
 
 export const [injectColorTriangleRootContext, provideColorTriangleRootContext]
@@ -186,6 +187,7 @@ const activeDirection = ref<ActiveDirection>("x");
 const thumbXElement = ref<HTMLElement>();
 const thumbYElement = ref<HTMLElement>();
 const thumbZElement = ref<HTMLElement>();
+const isDragging = ref(false);
 
 const valueBeforeSlide = ref({ x: currentXValue.value, y: currentYValue.value, z: currentZValue.value });
 const rectRef = ref<DOMRect>();
@@ -265,38 +267,42 @@ function handlePointerDown(event: PointerEvent) {
     thumbXElement.value?.focus();
   }
 
+  isDragging.value = true;
   valueBeforeSlide.value = { x: currentXValue.value, y: currentYValue.value, z: currentZValue.value };
   const vals = getValuesFromPointer(event);
   updateValues(vals.x, vals.y, false, vals.z);
 }
 
 const lastPointerPosition = ref<{ x: number; y: number }>();
+let rafPending = false;
 
 function handlePointerMove(event: PointerEvent) {
   const target = event.target as HTMLElement;
   if (!target.hasPointerCapture(event.pointerId)) return;
-  if (lastPointerPosition.value) {
-    const dx = Math.abs(event.clientX - lastPointerPosition.value.x);
-    const dy = Math.abs(event.clientY - lastPointerPosition.value.y);
-    const newDirection = dx >= dy ? "x" : "y";
-    if (newDirection !== activeDirection.value) {
+  if (rafPending) return;
+  rafPending = true;
+  const clientX = event.clientX;
+  const clientY = event.clientY;
+  const pointerId = event.pointerId;
+  requestAnimationFrame(() => {
+    rafPending = false;
+    if (lastPointerPosition.value) {
+      const dx = Math.abs(clientX - lastPointerPosition.value.x);
+      const dy = Math.abs(clientY - lastPointerPosition.value.y);
+      const newDirection = dx >= dy ? "x" : "y";
       activeDirection.value = newDirection;
-      if (newDirection === "x") {
-        thumbXElement.value?.focus();
-      } else {
-        thumbYElement.value?.focus();
-      }
     }
-  }
-  lastPointerPosition.value = { x: event.clientX, y: event.clientY };
-  const vals = getValuesFromPointer(event);
-  updateValues(vals.x, vals.y, false, vals.z);
+    lastPointerPosition.value = { x: clientX, y: clientY };
+    const vals = getValuesFromPointer({ clientX, clientY, pointerId } as PointerEvent);
+    updateValues(vals.x, vals.y, false, vals.z);
+  });
 }
 
 function handlePointerUp(event: PointerEvent) {
   const target = event.target as HTMLElement;
   if (!target.hasPointerCapture(event.pointerId)) return;
   target.releasePointerCapture(event.pointerId);
+  isDragging.value = false;
   rectRef.value = undefined;
   lastPointerPosition.value = undefined;
   const prev = valueBeforeSlide.value;
@@ -529,6 +535,7 @@ provideColorTriangleRootContext({
   thumbXElement,
   thumbYElement,
   thumbZElement,
+  isDragging,
 });
 </script>
 

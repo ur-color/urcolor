@@ -293,7 +293,7 @@ function clampAxis(nextValue: number, axisIndex: number, atIndex: number, minGap
   return nextValue;
 }
 
-function updateValues(point: number[], atIndex: number, { commit, skipFocus } = { commit: false, skipFocus: false }) {
+function updateValues(point: number[], atIndex: number, { commit = false, skipFocus = false } = {}) {
   const nextX = snapToStep(point[0] ?? 0, minX.value, maxX.value, stepX.value);
   const nextY = snapToStep(point[1] ?? 0, minY.value, maxY.value, stepY.value);
 

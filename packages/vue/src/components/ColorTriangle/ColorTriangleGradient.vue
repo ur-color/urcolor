@@ -136,9 +136,13 @@ watch(
     rootContext.colorSpace.value, rootContext.xChannelKey.value, rootContext.yChannelKey.value, rootContext.zChannelKey.value,
     rootContext.colorRef.value, rootContext.rotation.value,
   ],
-  () => render(),
+  () => { if (!rootContext.isDragging.value) render(); },
   { flush: "post" },
 );
+
+watch(() => rootContext.isDragging.value, (dragging, wasDragging) => {
+  if (wasDragging && !dragging) render();
+});
 
 onBeforeUnmount(() => {
   const canvas = canvasRef.value;

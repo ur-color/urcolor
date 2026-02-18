@@ -17,6 +17,7 @@ const { color, hex } = useColor("hsl(210, 80%, 50%)");
     v-model="color"
     color-space="hsl"
     channel="h"
+    :inner-radius="0.85"
     class="relative block size-64"
     style="container-type: inline-size"
   >

@@ -48,6 +48,7 @@ export interface ColorWheelRootContext {
   activeDirection: Ref<ActiveDirection>;
   thumbXElement: Ref<HTMLElement | undefined>;
   thumbYElement: Ref<HTMLElement | undefined>;
+  isDragging: Ref<boolean>;
 }
 
 export const [injectColorWheelRootContext, provideColorWheelRootContext]
@@ -153,6 +154,7 @@ function snap(value: number, min: number, max: number, step: number): number {
 const activeDirection = ref<ActiveDirection>("x");
 const thumbXElement = ref<HTMLElement>();
 const thumbYElement = ref<HTMLElement>();
+const isDragging = ref(false);
 
 const valueBeforeSlide = ref({ angle: currentAngleValue.value, radius: currentRadiusValue.value });
 const rectRef = ref<DOMRect>();
@@ -185,7 +187,7 @@ function updateValues(angle: number, radius: number, commit = false) {
   currentAngleValue.value = snappedAngle;
   currentRadiusValue.value = snappedRadius;
 
-  if (hasChanged) {
+  if (hasChanged && !isDragging.value) {
     const thumb = activeDirection.value === "x" ? thumbXElement.value : thumbYElement.value;
     thumb?.focus();
   }
@@ -223,30 +225,41 @@ function handlePointerDown(event: PointerEvent) {
     thumbYElement.value.focus();
   }
 
+  isDragging.value = true;
   valueBeforeSlide.value = { angle: currentAngleValue.value, radius: currentRadiusValue.value };
   const vals = getValuesFromPointer(event);
   updateValues(vals.angle, vals.radius);
 }
 
 const lastPointerPosition = ref<{ x: number; y: number }>();
+let rafPending = false;
 
 function handlePointerMove(event: PointerEvent) {
   const target = event.target as HTMLElement;
   if (!target.hasPointerCapture(event.pointerId)) return;
-  if (lastPointerPosition.value) {
-    const dx = Math.abs(event.clientX - lastPointerPosition.value.x);
-    const dy = Math.abs(event.clientY - lastPointerPosition.value.y);
-    activeDirection.value = dx >= dy ? "x" : "y";
-  }
-  lastPointerPosition.value = { x: event.clientX, y: event.clientY };
-  const vals = getValuesFromPointer(event);
-  updateValues(vals.angle, vals.radius);
+  if (rafPending) return;
+  rafPending = true;
+  const clientX = event.clientX;
+  const clientY = event.clientY;
+  const pointerId = event.pointerId;
+  requestAnimationFrame(() => {
+    rafPending = false;
+    if (lastPointerPosition.value) {
+      const dx = Math.abs(clientX - lastPointerPosition.value.x);
+      const dy = Math.abs(clientY - lastPointerPosition.value.y);
+      activeDirection.value = dx >= dy ? "x" : "y";
+    }
+    lastPointerPosition.value = { x: clientX, y: clientY };
+    const vals = getValuesFromPointer({ clientX, clientY, pointerId } as PointerEvent);
+    updateValues(vals.angle, vals.radius);
+  });
 }
 
 function handlePointerUp(event: PointerEvent) {
   const target = event.target as HTMLElement;
   if (!target.hasPointerCapture(event.pointerId)) return;
   target.releasePointerCapture(event.pointerId);
+  isDragging.value = false;
   rectRef.value = undefined;
   lastPointerPosition.value = undefined;
   const prev = valueBeforeSlide.value;
@@ -315,6 +328,7 @@ provideColorWheelRootContext({
   activeDirection,
   thumbXElement,
   thumbYElement,
+  isDragging,
 });
 </script>
 

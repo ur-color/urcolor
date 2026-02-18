@@ -43,6 +43,7 @@ export interface ColorRingRootContext {
   dir: Ref<Direction>;
   thumbElement: Ref<HTMLElement | undefined>;
   innerRadius: Ref<number>;
+  isDragging: Ref<boolean>;
 }
 
 export const [injectColorRingRootContext, provideColorRingRootContext]
@@ -151,7 +152,7 @@ function updateValue(val: number, commit = false) {
   if (!hasChanged && !commit) return;
   currentValue.value = snapped;
 
-  if (hasChanged) thumbElement.value?.focus();
+  if (hasChanged && !isDragging.value) thumbElement.value?.focus();
 
   const newColor = displayValueToColor(snapped);
   if (newColor) {
@@ -188,10 +189,20 @@ function handlePointerDown(event: PointerEvent) {
   updateValue(getValueFromPointer(event));
 }
 
+let rafPending = false;
+
 function handlePointerMove(event: PointerEvent) {
   const target = event.target as HTMLElement;
   if (!target.hasPointerCapture(event.pointerId)) return;
-  updateValue(getValueFromPointer(event));
+  if (rafPending) return;
+  rafPending = true;
+  const clientX = event.clientX;
+  const clientY = event.clientY;
+  const pointerId = event.pointerId;
+  requestAnimationFrame(() => {
+    rafPending = false;
+    updateValue(getValueFromPointer({ clientX, clientY, pointerId } as PointerEvent));
+  });
 }
 
 function handlePointerUp(event: PointerEvent) {
@@ -244,6 +255,7 @@ provideColorRingRootContext({
   dir,
   thumbElement,
   innerRadius: computed(() => props.innerRadius),
+  isDragging,
 });
 </script>
 
