@@ -24,6 +24,7 @@ export interface ColorTriangleRootProps extends /* @vue-ignore */ PrimitiveProps
   channelZ?: string;
   rotation?: number;
   orientation?: "vertical" | "horizontal";
+  inverted?: boolean;
 }
 
 export type ColorTriangleRootEmits = {
@@ -58,6 +59,7 @@ export interface ColorTriangleRootContext {
   thumbXElement: Ref<HTMLElement | undefined>;
   thumbYElement: Ref<HTMLElement | undefined>;
   thumbZElement: Ref<HTMLElement | undefined>;
+  inverted: Ref<boolean>;
   isDragging: Ref<boolean>;
 }
 
@@ -75,6 +77,7 @@ const props = withDefaults(defineProps<ColorTriangleRootProps>(), {
   colorSpace: "hsv",
   rotation: 0,
   orientation: "vertical",
+  inverted: false,
   as: "span",
 });
 const emits = defineEmits<ColorTriangleRootEmits>();
@@ -115,7 +118,16 @@ const zMax = computed(() => zConfig.value?.max ?? 100);
 const zStep = computed(() => zConfig.value?.step ?? 1);
 
 // Triangle vertices in normalized 0-1 space
-const vertices = computed(() => triangleVertices(1, 1, props.rotation));
+const vertices = computed(() => {
+  const [v0, v1, v2] = triangleVertices(1, 1, props.rotation);
+  return props.inverted ? [v0, v2, v1] as [Point, Point, Point] : [v0, v1, v2] as [Point, Point, Point];
+});
+
+const clipPathStyle = computed(() => {
+  const [v0, v1, v2] = vertices.value;
+  const pts = [v0, v1, v2].map(p => `${(p.x * 100).toFixed(2)}% ${(p.y * 100).toFixed(2)}%`).join(", ");
+  return { clipPath: `polygon(${pts})` };
+});
 
 function parseColor(v: Color | string | null | undefined): Color | undefined {
   if (!v) return undefined;
@@ -535,6 +547,7 @@ provideColorTriangleRootContext({
   thumbXElement,
   thumbYElement,
   thumbZElement,
+  inverted: computed(() => props.inverted),
   isDragging,
 });
 </script>
@@ -547,6 +560,7 @@ provideColorTriangleRootContext({
     :as="as"
     :dir="dir"
     :aria-disabled="disabled"
+    :style="clipPathStyle"
     :data-disabled="disabled ? '' : undefined"
     @pointerdown="handlePointerDown"
     @pointermove="handlePointerMove"

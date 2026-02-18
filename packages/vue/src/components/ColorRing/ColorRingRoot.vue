@@ -180,9 +180,7 @@ function handlePointerDown(event: PointerEvent) {
   target.setPointerCapture(event.pointerId);
   event.preventDefault();
 
-  if (thumbElement.value && (target === thumbElement.value || thumbElement.value.contains(target))) {
-    thumbElement.value.focus();
-  }
+  thumbElement.value?.focus();
 
   isDragging.value = true;
   valueBeforeSlide.value = currentValue.value;
