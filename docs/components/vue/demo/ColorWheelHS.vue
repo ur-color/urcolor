@@ -1,33 +1,26 @@
 <script setup lang="ts">
-import { shallowRef } from "vue";
-import { Color } from "internationalized-color";
 import "internationalized-color/css";
 import {
   ColorWheelRoot,
   ColorWheelGradient,
   ColorWheelThumb,
+  useColor,
 } from "@urcolor/vue";
 
-const color = shallowRef<Color>(Color.parse("hsl(210, 80%, 50%)")!);
-
-function onColorUpdate(c: Color | undefined) {
-  if (c) {
-    color.value = c;
-  }
-}
+const { color, hex } = useColor("hsl(210, 80%, 50%)");
 </script>
 
 <template>
+  <code>{{ hex }}</code>
   <ColorWheelRoot
-    :model-value="color"
+    v-model="color"
     color-space="hsl"
     channel-angle="h"
     channel-radius="s"
-    class="block relative size-64 rounded-full overflow-hidden"
+    class="relative block size-64 overflow-hidden rounded-full"
     style="container-type: inline-size"
-    @update:model-value="onColorUpdate"
   >
-    <ColorWheelGradient class="block absolute inset-0" />
+    <ColorWheelGradient class="absolute inset-0 block" />
     <ColorWheelThumb
       class="
         size-4 rounded-full border-2 border-white

@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { ref, shallowRef, computed, watch } from "vue";
+import { ref, computed, watch } from "vue";
 import { usePreferredLanguages } from "@vueuse/core";
 import "internationalized-color/css";
-import { Color, useLocale, nameColor } from "internationalized-color";
+import { useLocale, nameColor } from "internationalized-color";
 import * as allLocales from "internationalized-color/locales";
 
 const localeOptions = [
@@ -143,13 +143,14 @@ import {
   ColorFieldIncrement,
   ColorFieldDecrement,
   ColorSwatchRoot,
+  useColor,
 } from "@urcolor/vue";
 
 const colorSpace = ref("hsv");
 const invertedX = ref(false);
 const invertedY = ref(false);
 
-const color = shallowRef<Color>(Color.parse("hsl(0, 100%, 50%)")!);
+const { color } = useColor("hsl(0, 100%, 50%)");
 
 const spaceConfig = computed(() => colorSpaces[colorSpace.value]);
 const channels = computed(() => spaceConfig.value?.channels ?? []);
@@ -209,12 +210,6 @@ function getSliderColors(channelKey: string): string[] {
     colors.push(color.value.set({ mode: colorSpace.value, [channelKey]: val }).toString() ?? "black");
   }
   return colors;
-}
-
-function onColorUpdate(c: Color | undefined) {
-  if (c) {
-    color.value = c;
-  }
 }
 
 const colorName = computed(() => {
@@ -460,7 +455,7 @@ const spaceKeys = Object.keys(colorSpaces);
       </TooltipProvider>
     </div>
     <ColorAreaRoot
-      :model-value="color"
+      v-model="color"
       :color-space="colorSpace"
       :channel-x="xChannel"
       :channel-y="yChannel"
@@ -470,7 +465,6 @@ const spaceKeys = Object.keys(colorSpaces);
       alpha
       class="block self-start"
       :aria-label="`Color picker, selected: ${colorName}`"
-      @update:model-value="onColorUpdate"
     >
       <ColorAreaTrack
         as="div"
@@ -510,12 +504,11 @@ const spaceKeys = Object.keys(colorSpaces);
         class="flex items-center justify-center text-sm font-medium"
       >{{ ch.label.charAt(0).toUpperCase() }}</Label>
       <ColorSliderRoot
-        :model-value="color"
+        v-model="color"
         :color-space="colorSpace"
         :channel="ch.key"
         class="w-full"
         as="div"
-        @update:model-value="onColorUpdate"
       >
         <ColorSliderTrack
           as="div"
@@ -547,12 +540,11 @@ const spaceKeys = Object.keys(colorSpaces);
       class="flex items-center justify-center text-sm font-medium"
     >A</Label>
     <ColorSliderRoot
-      :model-value="color"
+      v-model="color"
       :color-space="colorSpace"
       channel="alpha"
       class="w-full"
       as="div"
-      @update:model-value="onColorUpdate"
     >
       <ColorSliderTrack
         as="div"
@@ -592,7 +584,7 @@ const spaceKeys = Object.keys(colorSpaces);
           class="text-xs font-semibold text-(--vp-c-text-2)"
         >Hex</Label>
         <ColorFieldRoot
-          :model-value="color"
+          v-model="color"
           color-space="hex"
           channel="hex"
           format="hex"
@@ -600,7 +592,6 @@ const spaceKeys = Object.keys(colorSpaces);
             color-field-root flex items-center overflow-hidden rounded-md border
             border-(--vp-c-divider) bg-(--vp-c-bg)
           "
-          @update:model-value="onColorUpdate"
         >
           <ColorFieldInput
             id="field-hex"
@@ -617,14 +608,13 @@ const spaceKeys = Object.keys(colorSpaces);
           class="text-xs font-semibold text-(--vp-c-text-2)"
         >A</Label>
         <ColorFieldRoot
-          :model-value="color"
+          v-model="color"
           :color-space="colorSpace"
           channel="alpha"
           class="
             color-field-root flex items-center overflow-hidden rounded-md border
             border-(--vp-c-divider) bg-(--vp-c-bg)
           "
-          @update:model-value="onColorUpdate"
         >
           <ColorFieldDecrement
             class="
@@ -670,14 +660,13 @@ const spaceKeys = Object.keys(colorSpaces);
           class="text-xs font-semibold text-(--vp-c-text-2)"
         >{{ ch.label.charAt(0).toUpperCase() }}</Label>
         <ColorFieldRoot
-          :model-value="color"
+          v-model="color"
           :color-space="colorSpace"
           :channel="ch.key"
           class="
             color-field-root flex items-center overflow-hidden rounded-md border
             border-(--vp-c-divider) bg-(--vp-c-bg)
           "
-          @update:model-value="onColorUpdate"
         >
           <ColorFieldDecrement
             class="

@@ -6,3 +6,19 @@ export * from "./components/ColorSwatchGroup";
 export * from "./components/ColorRing";
 export * from "./components/ColorWheel";
 export * from "./components/ColorTriangle";
+export {
+  useColor,
+  useRGB,
+  useHSL,
+  useHSV,
+  useHWB,
+  useOKLCh,
+  useOKLab,
+  useLCh,
+  useLab,
+  useP3,
+  useA98,
+  useProPhoto,
+  useRec2020,
+} from "./composables/useColor";
+export type { UseColorReturn } from "./composables/useColor";

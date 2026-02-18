@@ -1,34 +1,27 @@
 <script setup lang="ts">
-import { shallowRef } from "vue";
-import { Color } from "internationalized-color";
 import "internationalized-color/css";
 import {
   ColorRingRoot,
   ColorRingTrack,
   ColorRingGradient,
   ColorRingThumb,
+  useColor,
 } from "@urcolor/vue";
 
-const color = shallowRef<Color>(Color.parse("hsl(210, 80%, 50%)")!);
-
-function onColorUpdate(c: Color | undefined) {
-  if (c) {
-    color.value = c;
-  }
-}
+const { color, hex } = useColor("hsl(210, 80%, 50%)");
 </script>
 
 <template>
+  <code>{{ hex }}</code>
   <ColorRingRoot
-    :model-value="color"
+    v-model="color"
     color-space="hsl"
     channel="h"
-    class="block relative size-64"
+    class="relative block size-64"
     style="container-type: inline-size"
-    @update:model-value="onColorUpdate"
   >
-    <ColorRingTrack class="block relative size-full">
-      <ColorRingGradient class="block absolute inset-0" />
+    <ColorRingTrack class="relative block size-full">
+      <ColorRingGradient class="absolute inset-0 block" />
       <ColorRingThumb
         class="
           size-4 rounded-full border-2 border-white

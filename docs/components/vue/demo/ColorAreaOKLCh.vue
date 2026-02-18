@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { shallowRef } from "vue";
-import { Color } from "internationalized-color";
 import "internationalized-color/css";
 import {
   ColorAreaRoot,
@@ -9,27 +7,21 @@ import {
   ColorAreaThumb,
   ColorAreaThumbX,
   ColorAreaThumbY,
+  useColor,
 } from "@urcolor/vue";
 
-const color = shallowRef<Color>(Color.parse("hsl(210, 80%, 50%)")!);
-
-function onColorUpdate(c: Color | undefined) {
-  if (c) {
-    color.value = c;
-  }
-}
+const { color } = useColor("hsl(210, 80%, 50%)");
 </script>
 
 <template>
   <ColorAreaRoot
-    :model-value="color"
+    v-model="color"
     color-space="oklch"
     channel-x="c"
     channel-y="l"
     as="div"
     class="block"
     aria-label="OKLCh color area"
-    @update:model-value="onColorUpdate"
   >
     <ColorAreaTrack
       as="div"

@@ -1,33 +1,26 @@
 <script setup lang="ts">
-import { shallowRef } from "vue";
-import { Color } from "internationalized-color";
 import "internationalized-color/css";
 import {
   ColorTriangleRoot,
   ColorTriangleGradient,
   ColorTriangleThumb,
+  useColor,
 } from "@urcolor/vue";
 
-const color = shallowRef<Color>(Color.parse("hsl(210, 80%, 50%)")!);
-
-function onColorUpdate(c: Color | undefined) {
-  if (c) {
-    color.value = c;
-  }
-}
+const { color, hex } = useColor("hsl(210, 80%, 50%)");
 </script>
 
 <template>
+  <code>{{ hex }}</code>
   <ColorTriangleRoot
-    :model-value="color"
+    v-model="color"
     color-space="rgb"
     channel-x="r"
     channel-y="g"
     channel-z="b"
-    class="block relative size-64"
-    @update:model-value="onColorUpdate"
+    class="relative block size-64"
   >
-    <ColorTriangleGradient class="block absolute inset-0" />
+    <ColorTriangleGradient class="absolute inset-0 block" />
     <ColorTriangleThumb
       class="
         size-4 rounded-full border-2 border-white

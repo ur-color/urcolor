@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { shallowRef, computed } from "vue";
-import { Color } from "internationalized-color";
+import { computed } from "vue";
 import "internationalized-color/css";
 import { getChannelConfig } from "@urcolor/core";
 import {
@@ -8,9 +7,10 @@ import {
   ColorSliderTrack,
   ColorSliderGradient,
   ColorSliderThumb,
+  useColor,
 } from "@urcolor/vue";
 
-const color = shallowRef<Color>(Color.parse("hsl(210, 80%, 50%)")!);
+const { color } = useColor("hsl(210, 80%, 50%)");
 
 const gradientColors = computed(() => {
   if (!color.value) return ["gray", "blue"];
@@ -27,22 +27,15 @@ const gradientColors = computed(() => {
   }
   return colors;
 });
-
-function onColorUpdate(c: Color | undefined) {
-  if (c) {
-    color.value = c;
-  }
-}
 </script>
 
 <template>
   <ColorSliderRoot
-    :model-value="color"
+    v-model="color"
     color-space="hsl"
     channel="s"
     as="div"
     class="w-full"
-    @update:model-value="onColorUpdate"
   >
     <ColorSliderTrack
       as="div"

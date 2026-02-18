@@ -1,31 +1,23 @@
 <script setup lang="ts">
-import { shallowRef } from "vue";
-import { Color } from "internationalized-color";
 import "internationalized-color/css";
 import {
   ColorSliderRoot,
   ColorSliderTrack,
   ColorSliderGradient,
   ColorSliderThumb,
+  useColor,
 } from "@urcolor/vue";
 
-const color = shallowRef<Color>(Color.parse("hsl(210, 80%, 50%)")!);
-
-function onColorUpdate(c: Color | undefined) {
-  if (c) {
-    color.value = c;
-  }
-}
+const { color } = useColor("hsl(210, 80%, 50%)");
 </script>
 
 <template>
   <ColorSliderRoot
-    :model-value="color"
+    v-model="color"
     color-space="hsl"
     channel="h"
     as="div"
     class="w-full"
-    @update:model-value="onColorUpdate"
   >
     <ColorSliderTrack
       as="div"
