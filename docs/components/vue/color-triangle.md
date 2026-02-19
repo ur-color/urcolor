@@ -2,7 +2,7 @@
 
 A triangular 2D area component for adjusting two (or three) color channels simultaneously.
 
-## Examples
+## Preview
 
 <script setup>
 import ColorTriangleSV from './demo/ColorTriangleSV.vue'
@@ -10,60 +10,21 @@ import ColorTriangleSL from './demo/ColorTriangleSL.vue'
 import ColorTriangleRGB from './demo/ColorTriangleRGB.vue'
 </script>
 
-### HSV / Saturation x Value
-
-HSV color triangle with Saturation and Value mapped to the triangle axes.
-
 <ColorTriangleSV />
+
+<details>
+<summary>Source code</summary>
 
 <<< @/components/vue/demo/ColorTriangleSV.vue
 
-### HSL / Saturation x Lightness
+</details>
 
-HSL color triangle with Saturation and Lightness mapped to the triangle axes.
-
-<ColorTriangleSL />
-
-<<< @/components/vue/demo/ColorTriangleSL.vue
-
-### Maxwell's RGB Triangle
-
-Three-channel RGB triangle using barycentric coordinates.
-
-<ColorTriangleRGB />
-
-<<< @/components/vue/demo/ColorTriangleRGB.vue
-
-## Usage
+## Anatomy
 
 ```vue
-<script setup>
-import { shallowRef } from "vue";
-import { Color } from "internationalized-color";
-import {
-  ColorTriangleRoot,
-  ColorTriangleGradient,
-  ColorTriangleCheckerboard,
-  ColorTriangleThumb,
-  ColorTriangleThumbX,
-  ColorTriangleThumbY,
-} from "@urcolor/vue";
-
-const color = shallowRef(Color.parse("hsv(210, 80%, 90%)"));
-
-function onColorUpdate(c) {
-  if (c) color.value = c;
-}
-</script>
-
 <template>
-  <ColorTriangleRoot
-    :model-value="color"
-    color-space="hsv"
-    channel-x="s"
-    channel-y="v"
-    @update:model-value="onColorUpdate"
-  >
+  <ColorTriangleRoot>
+    <ColorTriangleCheckerboard />
     <ColorTriangleGradient />
     <ColorTriangleThumb>
       <ColorTriangleThumbX />
@@ -72,6 +33,47 @@ function onColorUpdate(c) {
   </ColorTriangleRoot>
 </template>
 ```
+
+## Examples
+
+### HSV / Saturation x Value
+
+HSV color triangle with Saturation and Value mapped to the triangle axes.
+
+<ColorTriangleSV />
+
+<details>
+<summary>Source code</summary>
+
+<<< @/components/vue/demo/ColorTriangleSV.vue
+
+</details>
+
+### HSL / Saturation x Lightness
+
+HSL color triangle with Saturation and Lightness mapped to the triangle axes.
+
+<ColorTriangleSL />
+
+<details>
+<summary>Source code</summary>
+
+<<< @/components/vue/demo/ColorTriangleSL.vue
+
+</details>
+
+### Maxwell's RGB Triangle
+
+Three-channel RGB triangle using barycentric coordinates.
+
+<ColorTriangleRGB />
+
+<details>
+<summary>Source code</summary>
+
+<<< @/components/vue/demo/ColorTriangleRGB.vue
+
+</details>
 
 ### Three-Channel Mode
 
@@ -158,9 +160,22 @@ Individual axis thumb elements. Both are required inside `ColorTriangleThumb` fo
 
 Optional third axis thumb for three-channel barycentric mode. Only include when `channelZ` is set on the root.
 
-## Keyboard Navigation
+## Accessibility
 
-### Two-Channel Mode
+ColorTriangle provides a triangular 2D interface with independently focusable thumb elements for keyboard access. In three-channel mode, each channel has its own focusable thumb.
+
+### ARIA Labels
+
+| Attribute | Description |
+|-----------|-------------|
+| `aria-label` | Labels the root element with the color triangle's purpose. |
+| `role="slider"` | Applied to each thumb element for screen reader recognition. |
+| `aria-valuemin` / `aria-valuemax` | Defines the range for each channel. |
+| `aria-valuenow` | Current value of the focused channel. |
+
+### Keyboard Navigation
+
+#### Two-Channel Mode
 
 | Key | Action |
 |-----|--------|
@@ -172,7 +187,7 @@ Optional third axis thumb for three-channel barycentric mode. Only include when 
 | Home / Page Up | Jump to max |
 | End / Page Down | Jump to min |
 
-### Three-Channel Mode
+#### Three-Channel Mode
 
 | Key | Action |
 |-----|--------|

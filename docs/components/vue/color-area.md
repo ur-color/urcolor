@@ -2,61 +2,29 @@
 
 A 2D slider component for selecting values across two axes, ideal for color picking (e.g., saturation and lightness).
 
-## Examples
+## Preview
 
 <script setup>
 import ColorAreaHSL from './demo/ColorAreaHSL.vue'
 import ColorAreaOKLCh from './demo/ColorAreaOKLCh.vue'
 </script>
 
-### HSL
-
-HSL color area with Hue on X and Saturation on Y.
-
 <ColorAreaHSL />
+
+<details>
+<summary>Source code</summary>
 
 <<< @/components/vue/demo/ColorAreaHSL.vue
 
-### OKLCh
+</details>
 
-OKLCh color area with Chroma on X and Lightness on Y.
-
-<ColorAreaOKLCh />
-
-<<< @/components/vue/demo/ColorAreaOKLCh.vue
-
-## Usage
+## Anatomy
 
 ```vue
-<script setup>
-import { shallowRef } from "vue";
-import { Color } from "internationalized-color";
-import {
-  ColorAreaRoot,
-  ColorAreaTrack,
-  ColorAreaGradient,
-  ColorAreaCheckerboard,
-  ColorAreaThumb,
-  ColorAreaThumbX,
-  ColorAreaThumbY,
-} from "@urcolor/vue";
-
-const color = shallowRef(Color.parse("hsl(210, 80%, 50%)"));
-
-function onColorUpdate(c) {
-  if (c) color.value = c;
-}
-</script>
-
 <template>
-  <ColorAreaRoot
-    :model-value="color"
-    color-space="hsl"
-    channel-x="s"
-    channel-y="l"
-    @update:model-value="onColorUpdate"
-  >
+  <ColorAreaRoot>
     <ColorAreaTrack>
+      <ColorAreaCheckerboard />
       <ColorAreaGradient />
       <ColorAreaThumb>
         <ColorAreaThumbX />
@@ -66,6 +34,34 @@ function onColorUpdate(c) {
   </ColorAreaRoot>
 </template>
 ```
+
+## Examples
+
+### HSL
+
+HSL color area with Hue on X and Saturation on Y.
+
+<ColorAreaHSL />
+
+<details>
+<summary>Source code</summary>
+
+<<< @/components/vue/demo/ColorAreaHSL.vue
+
+</details>
+
+### OKLCh
+
+OKLCh color area with Chroma on X and Lightness on Y.
+
+<ColorAreaOKLCh />
+
+<details>
+<summary>Source code</summary>
+
+<<< @/components/vue/demo/ColorAreaOKLCh.vue
+
+</details>
 
 ### With Alpha
 
@@ -147,7 +143,20 @@ Wrapper for the thumb indicator. Position is set automatically via CSS custom pr
 
 Individual axis thumb elements. Both are required inside `ColorAreaThumb` for keyboard navigation to work on both axes.
 
-## Keyboard Navigation
+## Accessibility
+
+ColorArea provides a 2D slider interface with two independently focusable thumb elements for keyboard access to both axes.
+
+### ARIA Labels
+
+| Attribute | Description |
+|-----------|-------------|
+| `aria-label` | Labels the root element with the color area's purpose. |
+| `role="slider"` | Applied to each thumb element (ThumbX, ThumbY) for screen reader recognition. |
+| `aria-valuemin` / `aria-valuemax` | Defines the range for each axis channel. |
+| `aria-valuenow` | Current value of the focused channel. |
+
+### Keyboard Navigation
 
 | Key | Action |
 |-----|--------|

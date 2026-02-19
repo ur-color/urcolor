@@ -2,12 +2,37 @@
 
 A circular ring component for adjusting a single color channel along a circular arc.
 
-## Examples
+## Preview
 
 <script setup>
 import ColorRingHue from './demo/ColorRingHue.vue'
 import ColorRingSaturation from './demo/ColorRingSaturation.vue'
 </script>
+
+<ColorRingHue />
+
+<details>
+<summary>Source code</summary>
+
+<<< @/components/vue/demo/ColorRingHue.vue
+
+</details>
+
+## Anatomy
+
+```vue
+<template>
+  <ColorRingRoot>
+    <ColorRingTrack>
+      <ColorRingCheckerboard />
+      <ColorRingGradient />
+      <ColorRingThumb />
+    </ColorRingTrack>
+  </ColorRingRoot>
+</template>
+```
+
+## Examples
 
 ### Hue
 
@@ -15,7 +40,12 @@ Hue ring slider for cycling through the color spectrum.
 
 <ColorRingHue />
 
+<details>
+<summary>Source code</summary>
+
 <<< @/components/vue/demo/ColorRingHue.vue
+
+</details>
 
 ### Saturation
 
@@ -23,43 +53,12 @@ Saturation ring slider for adjusting color intensity.
 
 <ColorRingSaturation />
 
+<details>
+<summary>Source code</summary>
+
 <<< @/components/vue/demo/ColorRingSaturation.vue
 
-## Usage
-
-```vue
-<script setup>
-import { shallowRef } from "vue";
-import { Color } from "internationalized-color";
-import {
-  ColorRingRoot,
-  ColorRingTrack,
-  ColorRingGradient,
-  ColorRingCheckerboard,
-  ColorRingThumb,
-} from "@urcolor/vue";
-
-const color = shallowRef(Color.parse("hsl(210, 80%, 50%)"));
-
-function onColorUpdate(c) {
-  if (c) color.value = c;
-}
-</script>
-
-<template>
-  <ColorRingRoot
-    :model-value="color"
-    color-space="hsl"
-    channel="h"
-    @update:model-value="onColorUpdate"
-  >
-    <ColorRingTrack>
-      <ColorRingGradient />
-      <ColorRingThumb />
-    </ColorRingTrack>
-  </ColorRingRoot>
-</template>
-```
+</details>
 
 ### With Alpha
 
@@ -126,7 +125,20 @@ Renders a checkerboard pattern behind the gradient to visualize alpha transparen
 
 The draggable thumb element positioned along the ring arc.
 
-## Keyboard Navigation
+## Accessibility
+
+ColorRing provides a circular slider interface for adjusting a single color channel with full keyboard support.
+
+### ARIA Labels
+
+| Attribute | Description |
+|-----------|-------------|
+| `aria-label` | Labels the slider with the controlled channel name. |
+| `role="slider"` | Applied to the thumb element for screen reader recognition. |
+| `aria-valuemin` / `aria-valuemax` | Defines the channel's value range. |
+| `aria-valuenow` | Current value of the channel. |
+
+### Keyboard Navigation
 
 | Key | Action |
 |-----|--------|

@@ -2,11 +2,30 @@
 
 A color preview element that displays a color with a checkerboard background for visualizing alpha transparency.
 
-## Examples
+## Preview
 
 <script setup>
 import ColorSwatchBasic from './demo/ColorSwatchBasic.vue'
 </script>
+
+<ColorSwatchBasic />
+
+<details>
+<summary>Source code</summary>
+
+<<< @/components/vue/demo/ColorSwatchBasic.vue
+
+</details>
+
+## Anatomy
+
+```vue
+<template>
+  <ColorSwatchRoot />
+</template>
+```
+
+## Examples
 
 ### Basic
 
@@ -14,23 +33,12 @@ A set of color swatches, including one with alpha transparency.
 
 <ColorSwatchBasic />
 
+<details>
+<summary>Source code</summary>
+
 <<< @/components/vue/demo/ColorSwatchBasic.vue
 
-## Usage
-
-```vue
-<script setup>
-import { shallowRef } from "vue";
-import { Color } from "internationalized-color";
-import { ColorSwatchRoot } from "@urcolor/vue";
-
-const color = shallowRef(Color.parse("hsla(210, 80%, 50%, 0.5)"));
-</script>
-
-<template>
-  <ColorSwatchRoot :model-value="color" alpha />
-</template>
-```
+</details>
 
 ## API Reference
 
@@ -54,3 +62,14 @@ The component exposes CSS custom properties on the root element for advanced sty
 | `--swatch-color-opaque` | The color at full opacity. |
 | `--swatch-alpha` | The color's alpha value (0–1). |
 | `--swatch-checkerboard` | The checkerboard background gradient. |
+
+## Accessibility
+
+ColorSwatch is a purely visual element that displays a color preview.
+
+### ARIA Labels
+
+| Attribute | Description |
+|-----------|-------------|
+| `role="img"` | Identifies the swatch as a presentational image for screen readers. |
+| `aria-label` | Describes the displayed color value for assistive technologies. |

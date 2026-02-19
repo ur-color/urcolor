@@ -2,12 +2,35 @@
 
 A group of color swatches with toggle-group selection behavior. Supports single and multiple selection modes with full keyboard navigation via roving focus.
 
-## Examples
+## Preview
 
 <script setup>
 import ColorSwatchGroupBasic from './demo/ColorSwatchGroupBasic.vue'
 import ColorSwatchGroupMultiple from './demo/ColorSwatchGroupMultiple.vue'
 </script>
+
+<ColorSwatchGroupBasic />
+
+<details>
+<summary>Source code</summary>
+
+<<< @/components/vue/demo/ColorSwatchGroupBasic.vue
+
+</details>
+
+## Anatomy
+
+```vue
+<template>
+  <ColorSwatchGroupRoot>
+    <ColorSwatchGroupItem />
+    <ColorSwatchGroupItem />
+    <ColorSwatchGroupItem />
+  </ColorSwatchGroupRoot>
+</template>
+```
+
+## Examples
 
 ### Single Selection
 
@@ -15,7 +38,12 @@ Click a swatch to select it. Clicking the selected swatch deselects it.
 
 <ColorSwatchGroupBasic />
 
+<details>
+<summary>Source code</summary>
+
 <<< @/components/vue/demo/ColorSwatchGroupBasic.vue
+
+</details>
 
 ### Multiple Selection
 
@@ -23,26 +51,12 @@ Toggle any number of swatches independently.
 
 <ColorSwatchGroupMultiple />
 
+<details>
+<summary>Source code</summary>
+
 <<< @/components/vue/demo/ColorSwatchGroupMultiple.vue
 
-## Usage
-
-```vue
-<script setup>
-import { ref } from "vue";
-import { ColorSwatchGroupRoot, ColorSwatchGroupItem } from "@urcolor/vue";
-
-const selected = ref([]);
-</script>
-
-<template>
-  <ColorSwatchGroupRoot v-model="selected" type="single">
-    <ColorSwatchGroupItem value="hsl(210, 80%, 50%)" />
-    <ColorSwatchGroupItem value="hsl(350, 90%, 60%)" />
-    <ColorSwatchGroupItem value="hsl(120, 60%, 45%)" />
-  </ColorSwatchGroupRoot>
-</template>
-```
+</details>
 
 ## API Reference
 
@@ -84,7 +98,20 @@ An individual selectable swatch. Renders a `ColorSwatchRoot` internally.
 | `data-disabled` | Present when disabled | Whether the item is disabled. |
 | `data-orientation` | `'horizontal' \| 'vertical'` | The group orientation (on root). |
 
-## Keyboard Navigation
+## Accessibility
+
+ColorSwatchGroup uses toggle-group semantics with roving focus for efficient keyboard navigation across swatch items.
+
+### ARIA Labels
+
+| Attribute | Description |
+|-----------|-------------|
+| `role="radiogroup"` | Applied in single selection mode for screen reader recognition. |
+| `role="group"` | Applied in multiple selection mode. |
+| `aria-pressed` | Indicates the toggle state of each item. |
+| `data-state` | Exposes `'on'` or `'off'` for styling selected/unselected states. |
+
+### Keyboard Navigation
 
 | Key | Action |
 |-----|--------|

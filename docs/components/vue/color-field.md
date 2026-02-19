@@ -2,18 +2,48 @@
 
 A numeric input component for editing individual color channels, with optional increment/decrement buttons and a color swatch preview.
 
-## Examples
+## Preview
 
 <script setup>
 import ColorFieldHex from './demo/ColorFieldHex.vue'
 import ColorFieldHSL from './demo/ColorFieldHSL.vue'
 </script>
 
+<ColorFieldHSL />
+
+<details>
+<summary>Source code</summary>
+
+<<< @/components/vue/demo/ColorFieldHSL.vue
+
+</details>
+
+## Anatomy
+
+```vue
+<template>
+  <ColorFieldRoot>
+    <ColorFieldDecrement />
+    <ColorFieldInput />
+    <ColorFieldIncrement />
+  </ColorFieldRoot>
+
+  <ColorFieldSwatch />
+</template>
+```
+
+## Examples
+
 ### Hex Input
 
 <ColorFieldHex />
 
+<details>
+<summary>Source code</summary>
+
 <<< @/components/vue/demo/ColorFieldHex.vue
+
+</details>
 
 ### HSL Channel Fields
 
@@ -21,50 +51,23 @@ HSL channel inputs with increment/decrement buttons.
 
 <ColorFieldHSL />
 
+<details>
+<summary>Source code</summary>
+
 <<< @/components/vue/demo/ColorFieldHSL.vue
 
-## Usage
+</details>
+
+### Alpha Channel
+
+Set `channel="alpha"` to create an opacity input (0–100%).
 
 ```vue
-<script setup>
-import { shallowRef } from "vue";
-import { Color } from "internationalized-color";
-import {
-  ColorFieldRoot,
-  ColorFieldInput,
-  ColorFieldIncrement,
-  ColorFieldDecrement,
-  ColorFieldSwatch,
-} from "@urcolor/vue";
-
-const color = shallowRef(Color.parse("hsl(210, 80%, 50%)"));
-
-function onColorUpdate(c) {
-  if (c) {
-    color.value = c;
-  }
-}
-</script>
-
 <template>
-  <ColorFieldSwatch :model-value="color.toHex()" />
-
-  <!-- Hex input -->
-  <ColorFieldRoot
-    :model-value="color"
-    color-space="hex"
-    channel="hex"
-    format="hex"
-    @update:model-value="onColorUpdate"
-  >
-    <ColorFieldInput />
-  </ColorFieldRoot>
-
-  <!-- Channel input with increment/decrement -->
   <ColorFieldRoot
     :model-value="color"
     color-space="hsl"
-    channel="h"
+    channel="alpha"
     @update:model-value="onColorUpdate"
   >
     <ColorFieldDecrement>&minus;</ColorFieldDecrement>
@@ -129,26 +132,20 @@ Displays a color preview swatch. Wraps `ColorSwatchRoot` with automatic checkerb
 | `alpha` | `boolean` | `false` | When true, reflects the color's alpha channel. |
 | `checkerSize` | `number` | `16` | The checkerboard tile size in pixels. |
 
-### Alpha Channel
+## Accessibility
 
-Set `channel="alpha"` to create an opacity input (0–100%).
+ColorField provides a spinbutton interface for precise numeric color channel editing with keyboard-driven increment/decrement controls.
 
-```vue
-<template>
-  <ColorFieldRoot
-    :model-value="color"
-    color-space="hsl"
-    channel="alpha"
-    @update:model-value="onColorUpdate"
-  >
-    <ColorFieldDecrement>&minus;</ColorFieldDecrement>
-    <ColorFieldInput />
-    <ColorFieldIncrement>+</ColorFieldIncrement>
-  </ColorFieldRoot>
-</template>
-```
+### ARIA Labels
 
-## Keyboard Navigation
+| Attribute | Description |
+|-----------|-------------|
+| `role="spinbutton"` | Applied to the input element for screen reader recognition. |
+| `aria-label` | Labels the input with the channel name. |
+| `aria-valuemin` / `aria-valuemax` | Defines the channel's value range. |
+| `aria-valuenow` | Current numeric value of the channel. |
+
+### Keyboard Navigation
 
 | Key | Action |
 |-----|--------|

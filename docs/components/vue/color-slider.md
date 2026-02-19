@@ -2,7 +2,7 @@
 
 A 1D slider component for adjusting a single color channel, with a gradient track that reflects the current color.
 
-## Examples
+## Preview
 
 <script setup>
 import ColorSliderHue from './demo/ColorSliderHue.vue'
@@ -11,67 +11,74 @@ import ColorSliderLightness from './demo/ColorSliderLightness.vue'
 import ColorSliderVertical from './demo/ColorSliderVertical.vue'
 </script>
 
-### Hue
-
 <ColorSliderHue />
+
+<details>
+<summary>Source code</summary>
 
 <<< @/components/vue/demo/ColorSliderHue.vue
 
-### Saturation
+</details>
 
-<ColorSliderSaturation />
-
-<<< @/components/vue/demo/ColorSliderSaturation.vue
-
-### Lightness
-
-<ColorSliderLightness />
-
-<<< @/components/vue/demo/ColorSliderLightness.vue
-
-### Vertical
-
-<ColorSliderVertical />
-
-<<< @/components/vue/demo/ColorSliderVertical.vue
-
-## Usage
+## Anatomy
 
 ```vue
-<script setup>
-import { shallowRef } from "vue";
-import { Color } from "internationalized-color";
-import {
-  ColorSliderRoot,
-  ColorSliderTrack,
-  ColorSliderGradient,
-  ColorSliderCheckerboard,
-  ColorSliderThumb,
-} from "@urcolor/vue";
-
-const color = shallowRef(Color.parse("hsl(210, 80%, 50%)"));
-
-function onColorUpdate(c) {
-  if (c) {
-    color.value = c;
-  }
-}
-</script>
-
 <template>
-  <ColorSliderRoot
-    :model-value="color"
-    color-space="hsl"
-    channel="h"
-    @update:model-value="onColorUpdate"
-  >
+  <ColorSliderRoot>
     <ColorSliderTrack>
-      <ColorSliderGradient :colors="['red', 'yellow', 'lime', 'cyan', 'blue', 'magenta', 'red']" />
+      <ColorSliderCheckerboard />
+      <ColorSliderGradient />
       <ColorSliderThumb />
     </ColorSliderTrack>
   </ColorSliderRoot>
 </template>
 ```
+
+## Examples
+
+### Hue
+
+<ColorSliderHue />
+
+<details>
+<summary>Source code</summary>
+
+<<< @/components/vue/demo/ColorSliderHue.vue
+
+</details>
+
+### Saturation
+
+<ColorSliderSaturation />
+
+<details>
+<summary>Source code</summary>
+
+<<< @/components/vue/demo/ColorSliderSaturation.vue
+
+</details>
+
+### Lightness
+
+<ColorSliderLightness />
+
+<details>
+<summary>Source code</summary>
+
+<<< @/components/vue/demo/ColorSliderLightness.vue
+
+</details>
+
+### Vertical
+
+<ColorSliderVertical />
+
+<details>
+<summary>Source code</summary>
+
+<<< @/components/vue/demo/ColorSliderVertical.vue
+
+</details>
 
 ### With Alpha
 
@@ -97,7 +104,7 @@ Pass `:channel-overrides="false"` on `ColorSliderGradient` to reflect the color'
 </template>
 ```
 
-### Alpha Channel Slider
+### Alpha Channel
 
 Set `channel="alpha"` to create an opacity slider. The gradient automatically renders with transparency.
 
@@ -165,7 +172,21 @@ The draggable thumb element. Extends Reka UI's `SliderThumbProps`.
 
 The filled range portion of the track. Extends Reka UI's `SliderRangeProps`.
 
-## Keyboard Navigation
+## Accessibility
+
+ColorSlider provides a standard slider interface built on top of Reka UI's slider primitives, ensuring robust screen reader support.
+
+### ARIA Labels
+
+| Attribute | Description |
+|-----------|-------------|
+| `aria-label` | Labels the slider with the controlled channel name. |
+| `role="slider"` | Applied to the thumb element for screen reader recognition. |
+| `aria-valuemin` / `aria-valuemax` | Defines the channel's value range. |
+| `aria-valuenow` | Current value of the channel. |
+| `aria-orientation` | Reflects horizontal or vertical orientation. |
+
+### Keyboard Navigation
 
 | Key | Action |
 |-----|--------|

@@ -2,7 +2,7 @@
 
 A circular 2D area component for adjusting two color channels mapped to angle and radius.
 
-## Examples
+## Preview
 
 <script setup>
 import ColorWheelHS from './demo/ColorWheelHS.vue'
@@ -10,60 +10,21 @@ import ColorWheelHL from './demo/ColorWheelHL.vue'
 import ColorWheelOKLCh from './demo/ColorWheelOKLCh.vue'
 </script>
 
-### HSL / Hue x Saturation
-
-HSL color wheel with Hue mapped to angle and Saturation to radius.
-
 <ColorWheelHS />
+
+<details>
+<summary>Source code</summary>
 
 <<< @/components/vue/demo/ColorWheelHS.vue
 
-### HSL / Hue x Lightness
+</details>
 
-HSL color wheel with Hue mapped to angle and Lightness to radius.
-
-<ColorWheelHL />
-
-<<< @/components/vue/demo/ColorWheelHL.vue
-
-### OKLCh / Hue x Chroma
-
-OKLCh color wheel with Hue mapped to angle and Chroma to radius.
-
-<ColorWheelOKLCh />
-
-<<< @/components/vue/demo/ColorWheelOKLCh.vue
-
-## Usage
+## Anatomy
 
 ```vue
-<script setup>
-import { shallowRef } from "vue";
-import { Color } from "internationalized-color";
-import {
-  ColorWheelRoot,
-  ColorWheelGradient,
-  ColorWheelCheckerboard,
-  ColorWheelThumb,
-  ColorWheelThumbX,
-  ColorWheelThumbY,
-} from "@urcolor/vue";
-
-const color = shallowRef(Color.parse("hsl(210, 80%, 50%)"));
-
-function onColorUpdate(c) {
-  if (c) color.value = c;
-}
-</script>
-
 <template>
-  <ColorWheelRoot
-    :model-value="color"
-    color-space="hsl"
-    channel-angle="h"
-    channel-radius="s"
-    @update:model-value="onColorUpdate"
-  >
+  <ColorWheelRoot>
+    <ColorWheelCheckerboard />
     <ColorWheelGradient />
     <ColorWheelThumb>
       <ColorWheelThumbX />
@@ -72,6 +33,47 @@ function onColorUpdate(c) {
   </ColorWheelRoot>
 </template>
 ```
+
+## Examples
+
+### HSL / Hue x Saturation
+
+HSL color wheel with Hue mapped to angle and Saturation to radius.
+
+<ColorWheelHS />
+
+<details>
+<summary>Source code</summary>
+
+<<< @/components/vue/demo/ColorWheelHS.vue
+
+</details>
+
+### HSL / Hue x Lightness
+
+HSL color wheel with Hue mapped to angle and Lightness to radius.
+
+<ColorWheelHL />
+
+<details>
+<summary>Source code</summary>
+
+<<< @/components/vue/demo/ColorWheelHL.vue
+
+</details>
+
+### OKLCh / Hue x Chroma
+
+OKLCh color wheel with Hue mapped to angle and Chroma to radius.
+
+<ColorWheelOKLCh />
+
+<details>
+<summary>Source code</summary>
+
+<<< @/components/vue/demo/ColorWheelOKLCh.vue
+
+</details>
 
 ## API Reference
 
@@ -117,7 +119,20 @@ Wrapper for the thumb indicator. Position is set automatically via CSS custom pr
 
 Individual axis thumb elements for angle and radius. Both are required inside `ColorWheelThumb` for keyboard navigation to work on both axes.
 
-## Keyboard Navigation
+## Accessibility
+
+ColorWheel provides a circular 2D interface with two independently focusable thumb elements for keyboard access to the angle and radius axes.
+
+### ARIA Labels
+
+| Attribute | Description |
+|-----------|-------------|
+| `aria-label` | Labels the root element with the color wheel's purpose. |
+| `role="slider"` | Applied to each thumb element (ThumbX, ThumbY) for screen reader recognition. |
+| `aria-valuemin` / `aria-valuemax` | Defines the range for the angle and radius channels. |
+| `aria-valuenow` | Current value of the focused channel. |
+
+### Keyboard Navigation
 
 | Key | Action |
 |-----|--------|
