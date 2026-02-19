@@ -76,6 +76,7 @@ export interface ColorAreaRootContext {
   yChannelKey: Ref<string>;
   colorRef: Readonly<Ref<Color | undefined>>;
   dir: Ref<Direction>;
+  isDragging: Ref<boolean>;
 }
 
 export const [injectColorAreaRootContext, provideColorAreaRootContext]
@@ -255,6 +256,7 @@ function handleSlideStart(event: PointerEvent) {
   const closestIndex = getClosestThumbIndex(currentModelValue.value, point, minX.value, maxX.value, minY.value, maxY.value);
   if (closestIndex === -1)
     return;
+  isDragging.value = true;
   lastPointerPosition.value = { x: event.clientX, y: event.clientY };
   updateValues(point, closestIndex, { skipFocus: true });
 }
@@ -271,6 +273,7 @@ function handleSlideMove(event: PointerEvent) {
 }
 
 function handleSlideEnd() {
+  isDragging.value = false;
   rectRef.value = undefined;
   offsetPosition.value = undefined;
   lastPointerPosition.value = undefined;
@@ -382,6 +385,7 @@ function handleBoundaryKey(axis: ActiveDirection, boundaryValue: number) {
 const thumbXElements = ref<HTMLElement[]>([]);
 const thumbYElements = ref<HTMLElement[]>([]);
 const activeDirection = ref<ActiveDirection>("x");
+const isDragging = ref(false);
 
 provideColorAreaRootContext({
   modelValue: internalValue,
@@ -403,6 +407,7 @@ provideColorAreaRootContext({
   yChannelKey,
   colorRef,
   dir,
+  isDragging,
 });
 </script>
 

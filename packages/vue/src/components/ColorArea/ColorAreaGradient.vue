@@ -249,9 +249,13 @@ watch(
     rootContext.colorRef.value,
     rootContext.isSlidingFromLeft.value, rootContext.isSlidingFromTop.value,
   ],
-  () => render(),
+  () => { if (!rootContext.isDragging.value) render(); },
   { flush: "post" },
 );
+
+watch(() => rootContext.isDragging.value, (dragging, wasDragging) => {
+  if (wasDragging && !dragging) render();
+});
 
 onBeforeUnmount(() => {
   const canvas = canvasRef.value;
