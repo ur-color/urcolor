@@ -1,9 +1,9 @@
-# Build Color Picker
+# Build Color Picker (Triangle in Ring)
 
 Let's combine a color ring and color triangle into a Photoshop-style HSV color picker.
 
 <script setup>
-import ColorPickerGuide from './demo/ColorPickerGuide.vue'
+import ColorPickerGuide from './demo/ColorPickerTriangleInRingGuide.vue'
 </script>
 
 Here's what we'll end up with:

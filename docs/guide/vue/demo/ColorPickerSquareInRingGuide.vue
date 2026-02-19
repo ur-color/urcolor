@@ -1,0 +1,83 @@
+<script setup lang="ts">
+import "internationalized-color/css";
+import {
+  useColor,
+  ColorRingRoot,
+  ColorRingTrack,
+  ColorRingGradient,
+  ColorRingThumb,
+  ColorAreaRoot,
+  ColorAreaTrack,
+  ColorAreaGradient,
+  ColorAreaThumb,
+  ColorAreaThumbX,
+  ColorAreaThumbY,
+} from "@urcolor/vue";
+
+const { color } = useColor("hsl(210, 80%, 50%)");
+</script>
+
+<template>
+  <div class="relative size-64">
+    <ColorRingRoot
+      v-model="color"
+      color-space="hsv"
+      channel="h"
+      :inner-radius="0.84"
+      as="div"
+      class="absolute inset-0"
+      style="container-type: inline-size"
+    >
+      <ColorRingTrack
+        as="div"
+        class="relative block size-full"
+      >
+        <ColorRingGradient
+          as="div"
+          class="absolute inset-0 block"
+          :channel-overrides="{ s: 1, v: 1, alpha: 1 }"
+        />
+        <ColorRingThumb
+          class="
+            size-4 rounded-full border-2 border-white
+            shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_2px_4px_rgba(0,0,0,0.3)]
+            focus-visible:shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_0_0_3px_rgba(66,153,225,0.6)]
+          "
+          aria-label="Hue"
+        />
+      </ColorRingTrack>
+    </ColorRingRoot>
+
+    <ColorAreaRoot
+      v-model="color"
+      color-space="hsv"
+      channel-x="s"
+      channel-y="v"
+      :inverted-y="true"
+      as="div"
+      class="absolute inset-[20.3%]"
+    >
+      <ColorAreaTrack
+        as="div"
+        class="relative size-full cursor-crosshair touch-none overflow-clip rounded-sm"
+      >
+        <ColorAreaGradient
+          as="div"
+          class="absolute inset-0"
+        />
+        <ColorAreaThumb
+          as="div"
+          class="
+            absolute size-5 transform-(--reka-slider-area-thumb-transform)
+            rounded-full border-2 border-white
+            shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_2px_4px_rgba(0,0,0,0.3)]
+            focus-visible:shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_0_0_3px_rgba(66,153,225,0.6)]
+          "
+        >
+          <ColorAreaThumbX class="outline-none" />
+          <ColorAreaThumbY class="outline-none" />
+        </ColorAreaThumb>
+      </ColorAreaTrack>
+    </ColorAreaRoot>
+  </div>
+</template>
