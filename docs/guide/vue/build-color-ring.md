@@ -1,4 +1,4 @@
-# Build a Color Ring
+# Build Color Ring
 
 Let's build a circular hue ring step by step.
 
@@ -16,14 +16,13 @@ Start by importing the color model and creating a reactive color value.
 
 ```vue
 <script setup lang="ts">
-import { shallowRef } from "vue";  // [!code ++]
-import { Color } from "internationalized-color";  // [!code ++]
+import { useColor } from "@urcolor/vue";  // [!code ++]
 
-const color = shallowRef(Color.parse("hsl(210, 80%, 50%)")!);  // [!code ++]
+const { color } = useColor("hsl(210, 80%, 50%)");  // [!code ++]
 </script>
 ```
 
-`Color.parse()` creates a color object from any CSS color string. We use `shallowRef` since `Color` is an immutable object — no deep reactivity needed.
+`useColor()` creates a reactive color ref from any CSS color string. It returns a `{ color }` object where `color` is a shallow ref holding the parsed `Color` instance.
 
 ## Step 2: Add the root
 
@@ -31,11 +30,9 @@ const color = shallowRef(Color.parse("hsl(210, 80%, 50%)")!);  // [!code ++]
 
 ```vue
 <script setup lang="ts">
-import { shallowRef } from "vue";
-import { Color } from "internationalized-color";
-import { ColorRingRoot } from "@urcolor/vue"; // [!code ++]
+import { useColor, ColorRingRoot } from "@urcolor/vue"; // [!code ++]
 
-const color = shallowRef(Color.parse("hsl(210, 80%, 50%)")!);
+const { color } = useColor("hsl(210, 80%, 50%)");
 </script>
 
 <template>
@@ -61,15 +58,14 @@ const color = shallowRef(Color.parse("hsl(210, 80%, 50%)")!);
 
 ```vue
 <script setup lang="ts">
-import { shallowRef } from "vue";
-import { Color } from "internationalized-color";
 import {
+  useColor,
   ColorRingRoot,
   ColorRingTrack, // [!code ++]
   ColorRingGradient, // [!code ++]
 } from "@urcolor/vue";
 
-const color = shallowRef(Color.parse("hsl(210, 80%, 50%)")!);
+const { color } = useColor("hsl(210, 80%, 50%)");
 </script>
 
 <template>
@@ -97,16 +93,15 @@ The root needs `container-type: inline-size` so the component can calculate dime
 
 ```vue
 <script setup lang="ts">
-import { shallowRef } from "vue";
-import { Color } from "internationalized-color";
 import {
+  useColor,
   ColorRingRoot,
   ColorRingTrack,
   ColorRingGradient,
   ColorRingThumb, // [!code ++]
 } from "@urcolor/vue";
 
-const color = shallowRef(Color.parse("hsl(210, 80%, 50%)")!);
+const { color } = useColor("hsl(210, 80%, 50%)");
 </script>
 
 <template>

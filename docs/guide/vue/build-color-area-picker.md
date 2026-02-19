@@ -1,4 +1,4 @@
-# Build a Color Area Picker
+# Build Color Area Picker
 
 Let's build a 2D color area picker step by step.
 
@@ -16,14 +16,13 @@ Start by importing the color model and creating a reactive color value.
 
 ```vue
 <script setup lang="ts">
-import { shallowRef } from "vue";  // [!code ++]
-import { Color } from "internationalized-color";  // [!code ++]
+import { useColor } from "@urcolor/vue";  // [!code ++]
 
-const color = shallowRef(Color.parse("hsl(210, 80%, 50%)")!);  // [!code ++]
+const { color } = useColor("hsl(210, 80%, 50%)");  // [!code ++]
 </script>
 ```
 
-`Color.parse()` creates a color object from any CSS color string. We use `shallowRef` since `Color` is an immutable object — no deep reactivity needed.
+`useColor()` creates a reactive color ref from any CSS color string. It returns a `{ color }` object where `color` is a shallow ref holding the parsed `Color` instance.
 
 ## Step 2: Add the root
 
@@ -31,11 +30,9 @@ const color = shallowRef(Color.parse("hsl(210, 80%, 50%)")!);  // [!code ++]
 
 ```vue
 <script setup lang="ts">
-import { shallowRef } from "vue";
-import { Color } from "internationalized-color";
-import { ColorAreaRoot } from "@urcolor/vue"; // [!code ++]
+import { useColor, ColorAreaRoot } from "@urcolor/vue"; // [!code ++]
 
-const color = shallowRef(Color.parse("hsl(210, 80%, 50%)")!);
+const { color } = useColor("hsl(210, 80%, 50%)");
 </script>
 
 <template>
@@ -61,15 +58,14 @@ const color = shallowRef(Color.parse("hsl(210, 80%, 50%)")!);
 
 ```vue
 <script setup lang="ts">
-import { shallowRef } from "vue";
-import { Color } from "internationalized-color";
 import {
+  useColor,
   ColorAreaRoot,
   ColorAreaTrack, // [!code ++]
   ColorAreaGradient, // [!code ++]
 } from "@urcolor/vue";
 
-const color = shallowRef(Color.parse("hsl(210, 80%, 50%)")!);
+const { color } = useColor("hsl(210, 80%, 50%)");
 </script>
 
 <template>
@@ -102,9 +98,8 @@ You only need to style `ColorAreaThumb` — the inner X/Y elements can be left u
 
 ```vue
 <script setup lang="ts">
-import { shallowRef } from "vue";
-import { Color } from "internationalized-color";
 import {
+  useColor,
   ColorAreaRoot,
   ColorAreaTrack,
   ColorAreaGradient,
@@ -113,7 +108,7 @@ import {
   ColorAreaThumbY, // [!code ++]
 } from "@urcolor/vue";
 
-const color = shallowRef(Color.parse("hsl(210, 80%, 50%)")!);
+const { color } = useColor("hsl(210, 80%, 50%)");
 </script>
 
 <template>
@@ -159,10 +154,9 @@ You can change the color space and channel mapping to get completely different p
 
 ```vue{5,11-13}
 <script setup lang="ts">
-import { shallowRef } from "vue";
-import { Color } from "internationalized-color";
+import { useColor } from "@urcolor/vue";
 
-const color = shallowRef(Color.parse("oklch(0.6, 0.15, 210)")!);
+const { color } = useColor("oklch(0.6, 0.15, 210)");
 </script>
 
 <template>

@@ -16,10 +16,9 @@ Start by importing the color model and defining your colors.
 
 ```vue
 <script setup lang="ts">
-import { shallowRef } from "vue";  // [!code ++]
-import { Color } from "internationalized-color";  // [!code ++]
+import { useColor } from "@urcolor/vue";  // [!code ++]
 
-const color = shallowRef(Color.parse("hsl(210, 80%, 50%)")!);  // [!code ++]
+const { color } = useColor("hsl(210, 80%, 50%)");  // [!code ++]
 </script>
 ```
 
@@ -29,11 +28,9 @@ const color = shallowRef(Color.parse("hsl(210, 80%, 50%)")!);  // [!code ++]
 
 ```vue
 <script setup lang="ts">
-import { shallowRef } from "vue";
-import { Color } from "internationalized-color";
-import { ColorSwatchRoot } from "@urcolor/vue"; // [!code ++]
+import { useColor, ColorSwatchRoot } from "@urcolor/vue"; // [!code ++]
 
-const color = shallowRef(Color.parse("hsl(210, 80%, 50%)")!);
+const { color } = useColor("hsl(210, 80%, 50%)");
 </script>
 
 <template>

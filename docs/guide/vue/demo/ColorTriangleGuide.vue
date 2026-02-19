@@ -1,14 +1,13 @@
 <script setup lang="ts">
-import { shallowRef } from "vue";
 import "internationalized-color/css";
-import { Color } from "internationalized-color";
 import {
+  useColor,
   ColorTriangleRoot,
   ColorTriangleGradient,
   ColorTriangleThumb,
 } from "@urcolor/vue";
 
-const color = shallowRef<Color>(Color.parse("hsl(210, 80%, 50%)")!);
+const { color } = useColor("hsl(210, 80%, 50%)");
 </script>
 
 <template>

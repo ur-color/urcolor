@@ -16,10 +16,9 @@ Start by importing the color model and creating a reactive color value.
 
 ```vue
 <script setup lang="ts">
-import { shallowRef } from "vue";  // [!code ++]
-import { Color } from "internationalized-color";  // [!code ++]
+import { useColor } from "@urcolor/vue";  // [!code ++]
 
-const color = shallowRef(Color.parse("hsl(210, 80%, 50%)")!);  // [!code ++]
+const { color } = useColor("hsl(210, 80%, 50%)");  // [!code ++]
 </script>
 ```
 
@@ -29,11 +28,9 @@ const color = shallowRef(Color.parse("hsl(210, 80%, 50%)")!);  // [!code ++]
 
 ```vue
 <script setup lang="ts">
-import { shallowRef } from "vue";
-import { Color } from "internationalized-color";
-import { ColorFieldRoot } from "@urcolor/vue"; // [!code ++]
+import { useColor, ColorFieldRoot } from "@urcolor/vue"; // [!code ++]
 
-const color = shallowRef(Color.parse("hsl(210, 80%, 50%)")!);
+const { color } = useColor("hsl(210, 80%, 50%)");
 </script>
 
 <template>
@@ -57,14 +54,13 @@ const color = shallowRef(Color.parse("hsl(210, 80%, 50%)")!);
 
 ```vue
 <script setup lang="ts">
-import { shallowRef } from "vue";
-import { Color } from "internationalized-color";
 import {
+  useColor,
   ColorFieldRoot,
   ColorFieldInput, // [!code ++]
 } from "@urcolor/vue";
 
-const color = shallowRef(Color.parse("hsl(210, 80%, 50%)")!);
+const { color } = useColor("hsl(210, 80%, 50%)");
 </script>
 
 <template>
@@ -96,16 +92,15 @@ The input supports keyboard interactions — arrow keys increment and decrement 
 
 ```vue
 <script setup lang="ts">
-import { shallowRef } from "vue";
-import { Color } from "internationalized-color";
 import {
+  useColor,
   ColorFieldRoot,
   ColorFieldInput,
   ColorFieldIncrement, // [!code ++]
   ColorFieldDecrement, // [!code ++]
 } from "@urcolor/vue";
 
-const color = shallowRef(Color.parse("hsl(210, 80%, 50%)")!);
+const { color } = useColor("hsl(210, 80%, 50%)");
 </script>
 
 <template>
@@ -146,17 +141,17 @@ To build a full channel editor, loop over the channels in a color space using th
 
 ```vue{3,4,9,16-21}
 <script setup lang="ts">
-import { shallowRef, computed } from "vue";
-import { Color } from "internationalized-color";
+import { computed } from "vue";
 import { colorSpaces } from "@urcolor/core";
 import {
+  useColor,
   ColorFieldRoot,
   ColorFieldInput,
   ColorFieldIncrement,
   ColorFieldDecrement,
 } from "@urcolor/vue";
 
-const color = shallowRef(Color.parse("hsl(210, 80%, 50%)")!);
+const { color } = useColor("hsl(210, 80%, 50%)");
 const channels = computed(() => colorSpaces["hsl"]?.channels ?? []);
 </script>
 

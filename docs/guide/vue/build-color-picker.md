@@ -1,4 +1,4 @@
-# Build a Photoshop-like Color Picker
+# Build Color Picker
 
 Let's combine a color ring and color triangle into a Photoshop-style HSV color picker.
 
@@ -16,10 +16,9 @@ Both components will share the same color ref. Start with a single reactive colo
 
 ```vue
 <script setup lang="ts">
-import { shallowRef } from "vue";  // [!code ++]
-import { Color } from "internationalized-color";  // [!code ++]
+import { useColor } from "@urcolor/vue";  // [!code ++]
 
-const color = shallowRef(Color.parse("hsl(210, 80%, 50%)")!);  // [!code ++]
+const { color } = useColor("hsl(210, 80%, 50%)");  // [!code ++]
 </script>
 ```
 
@@ -29,16 +28,15 @@ The `ColorRing` handles hue selection. We use a relative container to position t
 
 ```vue
 <script setup lang="ts">
-import { shallowRef } from "vue";
-import { Color } from "internationalized-color";
 import { // [!code ++]
+  useColor, // [!code ++]
   ColorRingRoot, // [!code ++]
   ColorRingTrack, // [!code ++]
   ColorRingGradient, // [!code ++]
   ColorRingThumb, // [!code ++]
 } from "@urcolor/vue"; // [!code ++]
 
-const color = shallowRef(Color.parse("hsl(210, 80%, 50%)")!);
+const { color } = useColor("hsl(210, 80%, 50%)");
 </script>
 
 <template>
@@ -79,9 +77,8 @@ Place a `ColorTriangle` inside the ring to control saturation and value. Use `ab
 
 ```vue
 <script setup lang="ts">
-import { shallowRef } from "vue";
-import { Color } from "internationalized-color";
 import {
+  useColor,
   ColorRingRoot,
   ColorRingTrack,
   ColorRingGradient,
@@ -91,7 +88,7 @@ import {
   ColorTriangleThumb, // [!code ++]
 } from "@urcolor/vue";
 
-const color = shallowRef(Color.parse("hsl(210, 80%, 50%)")!);
+const { color } = useColor("hsl(210, 80%, 50%)");
 </script>
 
 <template>

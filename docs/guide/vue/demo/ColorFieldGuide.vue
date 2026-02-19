@@ -1,17 +1,17 @@
 <script setup lang="ts">
-import { shallowRef, computed } from "vue";
+import { computed } from "vue";
 import "internationalized-color/css";
-import { Color } from "internationalized-color";
 import { colorSpaces } from "@urcolor/core";
 import { Label } from "reka-ui";
 import {
+  useColor,
   ColorFieldRoot,
   ColorFieldInput,
   ColorFieldIncrement,
   ColorFieldDecrement,
 } from "@urcolor/vue";
 
-const color = shallowRef(Color.parse("hsl(210, 80%, 50%)")!);
+const { color } = useColor("hsl(210, 80%, 50%)");
 const channels = computed(() => colorSpaces["hsl"]?.channels ?? []);
 </script>
 
