@@ -1,5 +1,5 @@
 {
-  "buildCommand": "bun run docs:build && bun run --cwd packages/vue build-storybook && mkdir -p docs/.vitepress/dist/storybook/vue && cp -r packages/vue/storybook-static/* docs/.vitepress/dist/storybook/vue/",
+  "buildCommand": "bun run docs:build",
   "outputDirectory": "docs/.vitepress/dist",
   "installCommand": "bun install"
 }
