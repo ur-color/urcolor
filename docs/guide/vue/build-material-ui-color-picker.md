@@ -10,6 +10,18 @@ Here's what we'll end up with:
 
 <MaterialColorPickerGuide />
 
+
+<details>
+<summary>Click to view the full code</summary>
+
+::: code-group
+
+<<< @/guide/vue/demo/MaterialColorPickerGuide.vue
+
+:::
+
+</details>
+
 ## Step 1: Set up shared state
 
 All components will share the same color ref.

@@ -10,6 +10,18 @@ Here's what we'll end up with:
 
 <ColorPickerSquareInRingGuide />
 
+
+<details>
+<summary>Click to view the full code</summary>
+
+::: code-group
+
+<<< @/guide/vue/demo/ColorPickerSquareInRingGuide.vue
+
+:::
+
+</details>
+
 ## Step 1: Set up shared state
 
 Both components will share the same color ref. Start with a single reactive color value.

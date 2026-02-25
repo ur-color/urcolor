@@ -3,6 +3,7 @@ import { defineConfig } from "vitepress";
 import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
+  cleanUrls: true,
   title: "urcolor",
   description: "Universal color picker component library",
   vite: {
@@ -56,6 +57,7 @@ export default defineConfig({
           items: [
             { text: "Overview", link: "/components/" },
             { text: "Preview", link: "/components/vue/preview" },
+            { text: "Stories", link: "/components/vue/stories" },
           ],
         },
         {

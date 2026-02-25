@@ -10,6 +10,18 @@ Here's what we'll end up with:
 
 <ColorSwatchGroupGuide />
 
+
+<details>
+<summary>Click to view the full code</summary>
+
+::: code-group
+
+<<< @/guide/vue/demo/ColorSwatchGroupGuide.vue
+
+:::
+
+</details>
+
 ## Step 1: Set up state
 
 Define your color palette and a reactive selection state.

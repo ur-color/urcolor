@@ -10,6 +10,18 @@ Here's what we'll end up with:
 
 <ColorSwatchGuide />
 
+
+<details>
+<summary>Click to view the full code</summary>
+
+::: code-group
+
+<<< @/guide/vue/demo/ColorSwatchGuide.vue
+
+:::
+
+</details>
+
 ## Step 1: Set up state
 
 Start by importing the color model and defining your colors.

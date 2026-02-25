@@ -38,3 +38,6 @@ docs/.vitepress/cache
 
 # npmrc
 .npmrc
+
+# Storybook
+storybook-static

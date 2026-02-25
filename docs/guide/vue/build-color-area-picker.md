@@ -10,6 +10,18 @@ Here's what we'll end up with:
 
 <ColorAreaGuide />
 
+
+<details>
+<summary>Click to view the full code</summary>
+
+::: code-group
+
+<<< @/guide/vue/demo/ColorAreaGuide.vue
+
+:::
+
+</details>
+
 ## Step 1: Set up state
 
 Start by importing the color model and creating a reactive color value.
