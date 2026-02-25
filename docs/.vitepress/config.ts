@@ -1,6 +1,6 @@
+import path from "node:path";
 import { defineConfig } from "vitepress";
 import tailwindcss from "@tailwindcss/vite";
-import path from "node:path";
 
 export default defineConfig({
   title: "urcolor",
@@ -74,7 +74,7 @@ export default defineConfig({
       ],
     },
     socialLinks: [
-      { icon: "github", link: "https://github.com/user/urcolor" },
+      { icon: "github", link: "https://github.com/GrandMagus02/urcolor" },
     ],
   },
 });
