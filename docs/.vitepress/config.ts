@@ -40,6 +40,7 @@ export default defineConfig({
           "Unstyled, accessible color picker components for Vue. Build color areas, sliders, swatches, wheels, and more.",
       },
     ],
+    ["link", { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" }],
     ["link", { rel: "canonical", href: "https://urcolor.dev" }],
   ],
   sitemap: {
