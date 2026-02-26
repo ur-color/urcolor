@@ -44,6 +44,7 @@ jobs:
 
       - name: Run tests
         if: steps.version.outputs.changed == 'true'
+        working-directory: packages/core
         run: bun test
 
       - name: Build packages
