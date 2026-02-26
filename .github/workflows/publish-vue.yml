@@ -61,6 +61,13 @@ jobs:
         if: steps.version.outputs.changed == 'true'
         run: npm install -g npm@latest
 
+      - name: Resolve workspace dependencies
+        if: steps.version.outputs.changed == 'true'
+        run: |
+          CORE_VERSION=$(grep '"version"' packages/core/package.json | sed 's/.*: "\(.*\)".*/\1/')
+          cd packages/vue
+          sed -i 's/"@urcolor\/core": "workspace:\*"/"@urcolor\/core": "^'"$CORE_VERSION"'"/' package.json
+
       - name: Publish to npm with provenance
         if: steps.version.outputs.changed == 'true'
         working-directory: packages/vue
