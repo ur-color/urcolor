@@ -5,7 +5,46 @@ import tailwindcss from "@tailwindcss/vite";
 export default defineConfig({
   cleanUrls: true,
   title: "urcolor",
-  description: "Universal color picker component library",
+  description:
+    "Unstyled, accessible color picker components for Vue. Build color areas, sliders, swatches, wheels, and more with full keyboard navigation and ARIA support.",
+  head: [
+    ["meta", { name: "author", content: "GrandMagus" }],
+    [
+      "meta",
+      {
+        name: "keywords",
+        content:
+          "color picker, vue, vue3, color area, color slider, color wheel, color swatch, accessible, unstyled, headless ui, component library",
+      },
+    ],
+    ["meta", { property: "og:type", content: "website" }],
+    ["meta", { property: "og:title", content: "urcolor" }],
+    [
+      "meta",
+      {
+        property: "og:description",
+        content:
+          "Unstyled, accessible color picker components for Vue. Build color areas, sliders, swatches, wheels, and more.",
+      },
+    ],
+    ["meta", { property: "og:url", content: "https://urcolor.dev" }],
+    ["meta", { property: "og:site_name", content: "urcolor" }],
+    ["meta", { property: "og:locale", content: "en_US" }],
+    ["meta", { name: "twitter:card", content: "summary_large_image" }],
+    ["meta", { name: "twitter:title", content: "urcolor" }],
+    [
+      "meta",
+      {
+        name: "twitter:description",
+        content:
+          "Unstyled, accessible color picker components for Vue. Build color areas, sliders, swatches, wheels, and more.",
+      },
+    ],
+    ["link", { rel: "canonical", href: "https://urcolor.dev" }],
+  ],
+  sitemap: {
+    hostname: "https://urcolor.dev",
+  },
   vite: {
     plugins: [tailwindcss()],
     resolve: {
