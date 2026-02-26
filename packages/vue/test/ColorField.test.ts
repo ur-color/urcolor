@@ -76,7 +76,7 @@ describe("ColorField", () => {
       wrapper = mountField();
       const input = wrapper.find("input");
       expect(input.exists()).toBe(true);
-      expect(input.element.value).toBe("180deg");
+      expect(input.element.value).toBe("180°");
     });
 
     it("should render increment and decrement buttons", () => {
@@ -91,32 +91,32 @@ describe("ColorField", () => {
       wrapper = mountField();
     });
 
-    it("should display with deg suffix", () => {
-      expect(wrapper.find("input").element.value).toBe("180deg");
+    it("should display with degree suffix", () => {
+      expect(wrapper.find("input").element.value).toBe("180°");
     });
 
     it("should increment on ArrowUp", async () => {
       const input = wrapper.find("input");
       await input.trigger("keydown", { key: "ArrowUp" });
-      expect(input.element.value).toBe("181deg");
+      expect(input.element.value).toBe("181°");
     });
 
     it("should decrement on ArrowDown", async () => {
       const input = wrapper.find("input");
       await input.trigger("keydown", { key: "ArrowDown" });
-      expect(input.element.value).toBe("179deg");
+      expect(input.element.value).toBe("179°");
     });
 
     it("should go to min on Home", async () => {
       const input = wrapper.find("input");
       await input.trigger("keydown", { key: "Home" });
-      expect(input.element.value).toBe("0deg");
+      expect(input.element.value).toBe("0°");
     });
 
     it("should go to max on End", async () => {
       const input = wrapper.find("input");
       await input.trigger("keydown", { key: "End" });
-      expect(input.element.value).toBe("360deg");
+      expect(input.element.value).toBe("360°");
     });
   });
 
@@ -141,7 +141,7 @@ describe("ColorField", () => {
       wrapper = mountField({ disabled: true });
       const input = wrapper.find("input");
       await input.trigger("keydown", { key: "ArrowUp" });
-      expect(input.element.value).toBe("180deg");
+      expect(input.element.value).toBe("180°");
     });
 
     it("should have disabled attribute on input", () => {
@@ -170,7 +170,7 @@ describe("ColorField", () => {
       wrapper = mountField({ readOnly: true });
       const input = wrapper.find("input");
       await input.trigger("keydown", { key: "ArrowUp" });
-      expect(input.element.value).toBe("180deg");
+      expect(input.element.value).toBe("180°");
     });
   });
 
@@ -196,7 +196,7 @@ describe("ColorField", () => {
       const btn = wrapper.find("[aria-label=\"Increase\"]");
       await btn.trigger("pointerdown", { button: 0 });
       window.dispatchEvent(new PointerEvent("pointerup"));
-      expect(wrapper.find("input").element.value).toBe("181deg");
+      expect(wrapper.find("input").element.value).toBe("181°");
     });
 
     it("should decrement on decrement button click", async () => {
@@ -204,7 +204,7 @@ describe("ColorField", () => {
       const btn = wrapper.find("[aria-label=\"Decrease\"]");
       await btn.trigger("pointerdown", { button: 0 });
       window.dispatchEvent(new PointerEvent("pointerup"));
-      expect(wrapper.find("input").element.value).toBe("179deg");
+      expect(wrapper.find("input").element.value).toBe("179°");
     });
   });
 
