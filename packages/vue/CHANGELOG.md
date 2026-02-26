@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `ColorRing`, `ColorWheel`, and `ColorTriangle` components
+- Inner radius property for `ColorRing` components
+- Dragging state management in `ColorArea` for improved rendering performance during interactions
+- `useColor` composable for color state management
+- New color space utilities and restructured color composables
+
+### Fixed
+
+- Resolve `workspace:*` dependency on `@urcolor/core` during publish so the package is installable outside the monorepo
+- Enhanced drag handling in `ColorWheel` and `ColorTriangle` components
+
 ## [0.0.1] - 2026-02-16
 
 ### Added

@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `insetTriangle` function for triangle manipulation with thumb alignment support
+
+### Fixed
+
+- Vue components update
+
 ## [0.0.1] - 2026-02-16
 
 ### Added
