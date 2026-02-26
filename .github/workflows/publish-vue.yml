@@ -44,8 +44,7 @@ jobs:
 
       - name: Run tests
         if: steps.version.outputs.changed == 'true'
-        working-directory: packages/vue
-        run: bun test
+        run: bun test packages/vue/test
 
       - name: Build packages
         if: steps.version.outputs.changed == 'true'
