@@ -31,7 +31,10 @@
     "oklch",
     "hsl",
     "color-swatch",
-    "color-slider"
+    "color-slider",
+    "color-ring",
+    "color-wheel",
+    "color-triangle"
   ],
   "author": {
     "name": "GrandMagus",
