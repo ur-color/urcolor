@@ -52,6 +52,7 @@
     "@vue/compiler-core": "3.5.17"
   },
   "dependencies": {
+    "@vercel/analytics": "^1.6.1",
     "internationalized-color": "^1.1.0"
   }
 }
