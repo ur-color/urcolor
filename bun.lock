@@ -57,17 +57,17 @@
     },
     "packages/core": {
       "name": "@urcolor/core",
-      "version": "0.0.1",
+      "version": "0.0.3",
       "dependencies": {
-        "internationalized-color": "*",
+        "internationalized-color": "1.1.1",
       },
     },
     "packages/vue": {
       "name": "@urcolor/vue",
-      "version": "0.0.1",
+      "version": "0.0.3",
       "dependencies": {
         "@urcolor/core": "workspace:*",
-        "internationalized-color": "*",
+        "internationalized-color": "1.1.1",
         "reka-ui": "^2.8.0",
       },
       "devDependencies": {
@@ -1556,6 +1556,10 @@
     "@typescript-eslint/eslint-plugin/ignore": ["ignore@7.0.5", "", {}, "sha512-Hs59xBNfUIunMFgWAbGX5cq6893IbWg4KnrjbYwX3tx0ztorVgTDA6B2sxf8ejHJ4wz8BqGUMYlnzNBer5NvGg=="],
 
     "@typescript-eslint/typescript-estree/minimatch": ["minimatch@9.0.5", "", { "dependencies": { "brace-expansion": "^2.0.1" } }, "sha512-G6T0ZX48xgozx7587koeX9Ys2NYy6Gmv//P89sEte9V9whIapMNF4idKxnW2QtCcLiTWlb/wfCabAtAFWhhBow=="],
+
+    "@urcolor/core/internationalized-color": ["internationalized-color@1.1.1", "", { "dependencies": { "culori": "^4.0.2" }, "peerDependencies": { "typescript": "^5" } }, "sha512-xh2iuDjWJJ3KEWrtrPATPj24Eh+9jiYNcF55g0YKoCGuB/9qijZQm8rGLeV9ESJaS9x9lhMpOFc7VCKdQ++plA=="],
+
+    "@urcolor/vue/internationalized-color": ["internationalized-color@1.1.1", "", { "dependencies": { "culori": "^4.0.2" }, "peerDependencies": { "typescript": "^5" } }, "sha512-xh2iuDjWJJ3KEWrtrPATPj24Eh+9jiYNcF55g0YKoCGuB/9qijZQm8rGLeV9ESJaS9x9lhMpOFc7VCKdQ++plA=="],
 
     "@vitest/expect/@vitest/utils": ["@vitest/utils@2.0.5", "", { "dependencies": { "@vitest/pretty-format": "2.0.5", "estree-walker": "^3.0.3", "loupe": "^3.1.1", "tinyrainbow": "^1.2.0" } }, "sha512-d8HKbqIcya+GR67mkZbrzhS5kKhtp8dQLcmRZLGTscGVg7yImT82cIrhtn2L8+VujWcy6KZweApgNmPsTAO/UQ=="],
 
