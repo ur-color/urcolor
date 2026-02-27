@@ -1,6 +1,6 @@
 {
   "name": "@urcolor/vue",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -51,7 +51,7 @@
   },
   "dependencies": {
     "@urcolor/core": "workspace:*",
-    "internationalized-color": "*",
+    "internationalized-color": "1.1.1",
     "reka-ui": "^2.8.0"
   },
   "peerDependencies": {
