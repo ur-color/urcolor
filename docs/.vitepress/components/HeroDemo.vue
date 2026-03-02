@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { shallowRef, computed, watch } from "vue";
-import { usePreferredLanguages, useCssVar } from "@vueuse/core";
+import { shallowRef, ref, computed, watch, onMounted } from "vue";
+import { inBrowser } from "vitepress";
 import { useBrandHue } from "../composables/useBrandHue";
 import { Color, nameColor, useLocale } from "internationalized-color";
 import * as allLocales from "internationalized-color/locales";
@@ -27,15 +27,12 @@ import { ColorSwatchRoot } from "../../../packages/vue/src/components/ColorSwatc
 // Register all locales
 Object.values(allLocales).forEach(useLocale);
 
-// Detect browser locale
-const browserLanguages = usePreferredLanguages();
-const browserLocale = computed(() => {
-  for (const lang of browserLanguages.value) {
-    const code = lang?.split("-")[0]?.toLowerCase();
-    if (code) return code;
-  }
-  return "en";
-});
+// Detect browser locale — use "en" during SSR to avoid mismatch
+const browserLocale = ref("en");
+if (inBrowser) {
+  const lang = navigator.languages?.[0]?.split("-")[0]?.toLowerCase();
+  if (lang) browserLocale.value = lang;
+}
 const colorName = computed(() => nameColor(color.value, browserLocale.value)?.name ?? "unknown");
 
 const color = shallowRef<Color>(Color.create("hsv", { h: 328, s: 1, v: 1 }));
@@ -52,22 +49,25 @@ function onFieldUpdate(c: Color | undefined) {
   }
 }
 
+// Update CSS custom properties — only in browser (no DOM during SSR)
 const brandHue = useBrandHue();
-const brand1 = useCssVar("--vp-c-brand-1");
-const brand2 = useCssVar("--vp-c-brand-2");
-const brand3 = useCssVar("--vp-c-brand-3");
-const brandSoft = useCssVar("--vp-c-brand-soft");
-const heroNameBg = useCssVar("--vp-home-hero-name-background");
 
-watch(color, (c) => {
-  const h = c.get("h") as number;
-  brandHue.value = h;
-  brand1.value = `hsl(${h}, 100%, 69%)`;
-  brand2.value = `hsl(${h}, 100%, 63%)`;
-  brand3.value = `hsl(${h}, 82%, 52%)`;
-  brandSoft.value = `hsla(${h}, 100%, 63%, 0.14)`;
-  heroNameBg.value = `linear-gradient(135deg, hsl(${h}, 100%, 63%), hsl(${h}, 82%, 52%))`;
-}, { immediate: true });
+function updateCssVars(h: number) {
+  const el = document.documentElement;
+  el.style.setProperty("--vp-c-brand-1", `hsl(${h}, 100%, 69%)`);
+  el.style.setProperty("--vp-c-brand-2", `hsl(${h}, 100%, 63%)`);
+  el.style.setProperty("--vp-c-brand-3", `hsl(${h}, 82%, 52%)`);
+  el.style.setProperty("--vp-c-brand-soft", `hsla(${h}, 100%, 63%, 0.14)`);
+  el.style.setProperty("--vp-home-hero-name-background", `linear-gradient(135deg, hsl(${h}, 100%, 63%), hsl(${h}, 82%, 52%))`);
+}
+
+if (inBrowser) {
+  watch(color, (c) => {
+    const h = c.get("h") as number;
+    brandHue.value = h;
+    updateCssVars(h);
+  }, { immediate: true });
+}
 
 </script>
 

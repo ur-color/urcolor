@@ -53,12 +53,7 @@ onMounted(async () => {
       ref="perspectiveEl"
       class="hero-demo-perspective"
     >
-      <ClientOnly>
-        <HeroDemo />
-        <template #fallback>
-          <div class="hero-demo-skeleton" />
-        </template>
-      </ClientOnly>
+      <HeroDemo />
     </div>
 
     <FeaturesGrid />
@@ -145,13 +140,6 @@ onMounted(async () => {
 .hero-demo-perspective {
   margin-bottom: 64px;
   will-change: transform;
-}
-
-.hero-demo-skeleton {
-  aspect-ratio: 16 / 9;
-  max-width: 100%;
-  border-radius: 16px;
-  background: color-mix(in srgb, var(--vp-c-bg-soft) 60%, transparent);
 }
 
 @media (max-width: 768px) {
