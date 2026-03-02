@@ -53,7 +53,7 @@ export default defineConfig({
         "@urcolor/core": path.resolve(__dirname, "../../packages/core/src/index.ts"),
         "@urcolor/vue": path.resolve(__dirname, "../../packages/vue/src/index.ts"),
       },
-      dedupe: ["vue"],
+      dedupe: ["vue", "internationalized-color"],
     },
     optimizeDeps: {
       include: ["reka-ui", "@vueuse/core", "internationalized-color", "internationalized-color/css"],

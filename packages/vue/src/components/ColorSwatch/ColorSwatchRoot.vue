@@ -25,13 +25,7 @@ const props = withDefaults(defineProps<ColorSwatchRootProps>(), {
 
 const { forwardRef } = useForwardExpose();
 
-function parseColor(v: Color | string | null | undefined): Color | undefined {
-  if (!v) return undefined;
-  if (v instanceof Color) return v;
-  return Color.parse(v) ?? undefined;
-}
-
-const color = computed(() => parseColor(props.modelValue));
+const color = computed(() => Color.from(props.modelValue));
 
 const opaqueString = computed(() => {
   if (!color.value) return "transparent";
