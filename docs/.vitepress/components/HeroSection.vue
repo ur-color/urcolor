@@ -53,24 +53,7 @@ onMounted(async () => {
       ref="perspectiveEl"
       class="hero-demo-perspective"
     >
-      <ClientOnly>
-        <HeroDemo />
-        <template #fallback>
-          <div class="hero-demo-skeleton">
-            <div class="hero-demo-skeleton-grid">
-              <div class="skeleton-area" />
-              <div class="skeleton-swatches" />
-              <div class="skeleton-sliders">
-                <div class="skeleton-track" />
-                <div class="skeleton-track" />
-                <div class="skeleton-track" />
-                <div class="skeleton-track" />
-              </div>
-              <div class="skeleton-fields" />
-            </div>
-          </div>
-        </template>
-      </ClientOnly>
+      <HeroDemo />
     </div>
 
     <FeaturesGrid />
