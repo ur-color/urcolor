@@ -779,6 +779,7 @@ const spaceKeys = Object.keys(colorSpaces);
   />
 </template>
 
+<!-- Unscoped: portal-rendered elements (teleported outside component tree) -->
 <style>
 .select-content {
   background: var(--vp-c-bg);
@@ -805,7 +806,10 @@ const spaceKeys = Object.keys(colorSpaces);
   from { opacity: 0; transform: translateY(2px); }
   to { opacity: 1; transform: translateY(0); }
 }
+</style>
 
+<!-- Scoped: all component-local styles -->
+<style scoped>
 /* ToggleGroup / Toggle: brand color on selected state */
 button[data-state="on"],
 button[data-active] {
