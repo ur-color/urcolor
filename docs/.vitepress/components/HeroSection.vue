@@ -53,7 +53,24 @@ onMounted(async () => {
       ref="perspectiveEl"
       class="hero-demo-perspective"
     >
-      <HeroDemo />
+      <ClientOnly>
+        <HeroDemo />
+        <template #fallback>
+          <div class="hero-demo-skeleton">
+            <div class="hero-demo-skeleton-grid">
+              <div class="skeleton-area" />
+              <div class="skeleton-swatches" />
+              <div class="skeleton-sliders">
+                <div class="skeleton-track" />
+                <div class="skeleton-track" />
+                <div class="skeleton-track" />
+                <div class="skeleton-track" />
+              </div>
+              <div class="skeleton-fields" />
+            </div>
+          </div>
+        </template>
+      </ClientOnly>
     </div>
 
     <FeaturesGrid />
@@ -140,6 +157,96 @@ onMounted(async () => {
 .hero-demo-perspective {
   margin-bottom: 64px;
   will-change: transform;
+}
+
+/* Skeleton matching HeroDemo layout */
+.hero-demo-skeleton {
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.hero-demo-skeleton-grid {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-rows: auto auto;
+  gap: 16px;
+  padding: 20px;
+  border-radius: 20px;
+  background: color-mix(in srgb, var(--vp-c-bg) 40%, transparent);
+  backdrop-filter: blur(20px);
+  border: 1px solid color-mix(in srgb, var(--vp-c-text-1) 15%, transparent);
+}
+
+.skeleton-area {
+  grid-column: 1;
+  grid-row: 1;
+  height: 260px;
+  border-radius: 12px;
+  background: var(--vp-c-bg-soft);
+}
+
+.skeleton-swatches {
+  grid-column: 2;
+  grid-row: 1;
+  width: 192px;
+  border-radius: 12px;
+  background: var(--vp-c-bg-soft);
+}
+
+.skeleton-sliders {
+  grid-column: 1;
+  grid-row: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.skeleton-track {
+  height: 1.25rem;
+  border-radius: 0.75rem;
+  background: var(--vp-c-bg-soft);
+}
+
+.skeleton-fields {
+  grid-column: 2;
+  grid-row: 2;
+  width: 192px;
+  background: var(--vp-c-bg-soft);
+  border-radius: 6px;
+}
+
+@media (max-width: 640px) {
+  .hero-demo-skeleton-grid {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto auto;
+  }
+
+  .skeleton-area {
+    grid-column: 1;
+    grid-row: 1;
+    height: 160px;
+  }
+
+  .skeleton-swatches {
+    grid-column: 1;
+    grid-row: 2;
+    width: 100%;
+    height: 60px;
+  }
+
+  .skeleton-sliders {
+    grid-column: 1;
+    grid-row: 3;
+  }
+
+  .skeleton-fields {
+    grid-column: 1;
+    grid-row: 4;
+    width: 100%;
+    height: 60px;
+  }
 }
 
 @media (max-width: 768px) {

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { shallowRef, ref, computed, watch, onMounted } from "vue";
+import { shallowRef, ref, computed, watch } from "vue";
 import { inBrowser } from "vitepress";
 import { useBrandHue } from "../composables/useBrandHue";
 import { Color, nameColor, useLocale } from "internationalized-color";
@@ -30,7 +30,7 @@ Object.values(allLocales).forEach(useLocale);
 // Detect browser locale — use "en" during SSR to avoid mismatch
 const browserLocale = ref("en");
 if (inBrowser) {
-  const lang = navigator.languages?.[0]?.split("-")[0]?.toLowerCase();
+  const lang = window.navigator.languages?.[0]?.split("-")[0]?.toLowerCase();
   if (lang) browserLocale.value = lang;
 }
 const colorName = computed(() => nameColor(color.value, browserLocale.value)?.name ?? "unknown");
