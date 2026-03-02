@@ -250,7 +250,7 @@ watch(
     rootContext.isSlidingFromLeft.value, rootContext.isSlidingFromTop.value,
   ],
   () => { if (!rootContext.isDragging.value) render(); },
-  { flush: "post" },
+  { flush: "post", immediate: true },
 );
 
 watch(() => rootContext.isDragging.value, (dragging, wasDragging) => {

@@ -161,7 +161,7 @@ useResizeObserver(canvasRef, () => {
 watch(
   () => [props.colors, effectiveAngle.value, effectiveMirrorX.value, effectiveMirrorY.value, props.interpolationSpace, props.channelOverrides, autoColors.value],
   () => render(),
-  { flush: "post", deep: true },
+  { flush: "post", deep: true, immediate: true },
 );
 
 onBeforeUnmount(() => {
