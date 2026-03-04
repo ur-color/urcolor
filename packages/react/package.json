@@ -1,0 +1,46 @@
+{
+  "name": "@urcolor/react",
+  "version": "0.0.1",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "bun run build:js && bun run build:types",
+    "build:js": "vite build",
+    "build:types": "tsc -p tsconfig.build.json",
+    "storybook": "storybook dev -p 6875",
+    "build-storybook": "storybook build"
+  },
+  "dependencies": {
+    "@urcolor/core": "workspace:*",
+    "@base-ui-components/react": "^1.0.0-rc.0",
+    "internationalized-color": "1.1.1"
+  },
+  "peerDependencies": {
+    "react": "^18 || ^19",
+    "react-dom": "^18 || ^19"
+  },
+  "devDependencies": {
+    "@storybook/addon-essentials": "^8.6.14",
+    "@storybook/addon-interactions": "^8.6.14",
+    "@storybook/react": "^8.6.14",
+    "@storybook/react-vite": "^8.6.14",
+    "@tailwindcss/vite": "^4.1.18",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "^4.5.2",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "storybook": "^8.6.14",
+    "tailwindcss": "^4.1.18"
+  }
+}
