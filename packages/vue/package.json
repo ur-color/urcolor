@@ -8,6 +8,10 @@
     ".": {
       "import": "./dist/index.js",
       "types": "./dist/index.d.ts"
+    },
+    "./namespaced": {
+      "import": "./dist/namespaced/index.js",
+      "types": "./dist/namespaced/index.d.ts"
     }
   },
   "files": [

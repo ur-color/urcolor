@@ -6,9 +6,11 @@ export default defineConfig({
   plugins: [vue()],
   build: {
     lib: {
-      entry: resolve(__dirname, "src/index.ts"),
+      entry: {
+        index: resolve(__dirname, "src/index.ts"),
+        "namespaced/index": resolve(__dirname, "src/namespaced/index.ts"),
+      },
       formats: ["es"],
-      fileName: "index",
     },
     rollupOptions: {
       external: ["vue", "@urcolor/core", "reka-ui", "internationalized-color"],
