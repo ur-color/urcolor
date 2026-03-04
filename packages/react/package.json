@@ -13,6 +13,39 @@
   "files": [
     "dist"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": [
+    "color",
+    "color-picker",
+    "react",
+    "react18",
+    "react19",
+    "headless",
+    "accessible",
+    "color-space",
+    "oklch",
+    "hsl",
+    "color-swatch",
+    "color-slider",
+    "color-ring",
+    "color-wheel",
+    "color-triangle"
+  ],
+  "author": {
+    "name": "GrandMagus",
+    "url": "https://github.com/GrandMagus02"
+  },
+  "homepage": "https://urcolor.vercel.app/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ur-color/urcolor",
+    "directory": "packages/react"
+  },
+  "bugs": {
+    "url": "https://github.com/ur-color/urcolor/issues"
+  },
   "scripts": {
     "build": "bun run build:js && bun run build:types",
     "build:js": "vite build",

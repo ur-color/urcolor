@@ -13,6 +13,9 @@
   "files": [
     "dist"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "bun run build:js && bun run build:types",
     "build:js": "vite build",
