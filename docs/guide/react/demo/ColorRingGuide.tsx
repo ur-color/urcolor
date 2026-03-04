@@ -1,17 +1,11 @@
 import "internationalized-color/css";
-import {
-  useColor,
-  ColorRingRoot,
-  ColorRingTrack,
-  ColorRingGradient,
-  ColorRingThumb,
-} from "@urcolor/react";
+import { ColorRing, useColor } from "@urcolor/react";
 
 export default function ColorRingGuide() {
   const { color, setColor } = useColor("hsl(210, 80%, 50%)");
 
   return (
-    <ColorRingRoot
+    <ColorRing.Root
       value={color}
       onValueChange={setColor}
       colorSpace="hsl"
@@ -20,9 +14,9 @@ export default function ColorRingGuide() {
       className="relative block size-64"
       style={{ containerType: "inline-size" }}
     >
-      <ColorRingTrack className="relative block size-full">
-        <ColorRingGradient className="absolute inset-0 block" />
-        <ColorRingThumb
+      <ColorRing.Track className="relative block size-full">
+        <ColorRing.Gradient className="absolute inset-0 block" />
+        <ColorRing.Thumb
           className="
             size-4 rounded-full border-2 border-white
             shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_2px_4px_rgba(0,0,0,0.3)]
@@ -30,7 +24,7 @@ export default function ColorRingGuide() {
           "
           aria-label="Hue"
         />
-      </ColorRingTrack>
-    </ColorRingRoot>
+      </ColorRing.Track>
+    </ColorRing.Root>
   );
 }

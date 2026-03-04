@@ -22,13 +22,13 @@ import ColorFieldHSL from './demo/ColorFieldHSL.tsx'
 ## Anatomy
 
 ```tsx
-<ColorFieldRoot>
-  <ColorFieldDecrement />
-  <ColorFieldInput />
-  <ColorFieldIncrement />
-</ColorFieldRoot>
+<ColorField.Root>
+  <ColorField.Decrement />
+  <ColorField.Input />
+  <ColorField.Increment />
+</ColorField.Root>
 
-<ColorFieldSwatch />
+<ColorField.Swatch />
 ```
 
 ## Examples
@@ -59,7 +59,7 @@ HSL channel inputs with increment/decrement buttons.
 
 ## API Reference
 
-### ColorFieldRoot
+### ColorField.Root
 
 The root container that manages field state and color channel binding.
 
@@ -78,11 +78,11 @@ The root container that manages field state and color channel binding.
 | `onValueChange` | `(color: Color) => void` | — | Called when color changes. |
 | `onValueCommit` | `(color: Color) => void` | — | Called when interaction ends (blur or Enter). |
 
-### ColorFieldInput
+### ColorField.Input
 
 The text input element for entering color channel values.
 
-### ColorFieldIncrement
+### ColorField.Increment
 
 Button to increment the color field value. Auto-disabled at maximum.
 
@@ -90,7 +90,7 @@ Button to increment the color field value. Auto-disabled at maximum.
 |------|------|---------|-------------|
 | `disabled` | `boolean` | `false` | Disables the button. |
 
-### ColorFieldDecrement
+### ColorField.Decrement
 
 Button to decrement the color field value. Auto-disabled at minimum.
 
@@ -98,7 +98,7 @@ Button to decrement the color field value. Auto-disabled at minimum.
 |------|------|---------|-------------|
 | `disabled` | `boolean` | `false` | Disables the button. |
 
-### ColorFieldSwatch
+### ColorField.Swatch
 
 Displays a color preview swatch with automatic checkerboard background.
 

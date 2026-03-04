@@ -22,11 +22,11 @@ import ColorSwatchGroupMultiple from './demo/ColorSwatchGroupMultiple.tsx'
 ## Anatomy
 
 ```tsx
-<ColorSwatchGroupRoot>
-  <ColorSwatchGroupItem />
-  <ColorSwatchGroupItem />
-  <ColorSwatchGroupItem />
-</ColorSwatchGroupRoot>
+<ColorSwatchGroup.Root>
+  <ColorSwatchGroup.Item />
+  <ColorSwatchGroup.Item />
+  <ColorSwatchGroup.Item />
+</ColorSwatchGroup.Root>
 ```
 
 ## Examples
@@ -59,7 +59,7 @@ Toggle any number of swatches independently.
 
 ## API Reference
 
-### ColorSwatchGroupRoot
+### ColorSwatchGroup.Root
 
 The root container that manages selection state and keyboard navigation.
 
@@ -72,7 +72,7 @@ The root container that manages selection state and keyboard navigation.
 | `orientation` | `'horizontal' \| 'vertical'` | `'horizontal'` | Orientation for arrow key navigation. |
 | `onValueChange` | `(value: string[]) => void` | — | Called when the selection changes. |
 
-### ColorSwatchGroupItem
+### ColorSwatchGroup.Item
 
 An individual selectable swatch.
 

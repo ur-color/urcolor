@@ -1,7 +1,7 @@
 import { useState } from "react";
 import "internationalized-color/css";
 import { Color } from "internationalized-color";
-import { ColorSwatchRoot } from "@urcolor/react";
+import { ColorSwatch } from "@urcolor/react";
 
 const colors = [
   Color.parse("hsl(210, 80%, 50%)")!,
@@ -16,7 +16,7 @@ export default function ColorSwatchGuide() {
   return (
     <div className="flex items-center gap-3">
       {colors.map((color, i) => (
-        <ColorSwatchRoot
+        <ColorSwatch.Root
           key={i}
           value={color}
           alpha
@@ -35,7 +35,7 @@ export default function ColorSwatchGuide() {
           >
             <polyline points="20 6 9 17 4 12" />
           </svg>
-        </ColorSwatchRoot>
+        </ColorSwatch.Root>
       ))}
     </div>
   );

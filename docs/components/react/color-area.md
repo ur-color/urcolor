@@ -22,13 +22,13 @@ import ColorAreaOKLCh from './demo/ColorAreaOKLCh.tsx'
 ## Anatomy
 
 ```tsx
-<ColorAreaRoot>
-  <ColorAreaTrack>
-    <ColorAreaCheckerboard />
-    <ColorAreaGradient />
-    <ColorAreaThumb />
-  </ColorAreaTrack>
-</ColorAreaRoot>
+<ColorArea.Root>
+  <ColorArea.Track>
+    <ColorArea.Checkerboard />
+    <ColorArea.Gradient />
+    <ColorArea.Thumb />
+  </ColorArea.Track>
+</ColorArea.Root>
 ```
 
 ## Examples
@@ -61,7 +61,7 @@ OKLCh color area with Chroma on X and Lightness on Y.
 
 ## API Reference
 
-### ColorAreaRoot
+### ColorArea.Root
 
 The root container that manages slider state.
 
@@ -80,11 +80,11 @@ The root container that manages slider state.
 | `onValueChange` | `(color: Color) => void` | — | Called when color changes. |
 | `onValueCommit` | `(color: Color) => void` | — | Called when interaction ends. |
 
-### ColorAreaTrack
+### ColorArea.Track
 
 The track area that contains thumbs and receives pointer events.
 
-### ColorAreaGradient
+### ColorArea.Gradient
 
 Renders a 2D gradient canvas for the color area.
 
@@ -97,11 +97,11 @@ Renders a 2D gradient canvas for the color area.
 | `interpolationSpace` | `string` | — | Color space for perceptual interpolation. |
 | `channelOverrides` | `Record<string, number> \| false` | `{ alpha: 1 }` | Lock specific channels to fixed values in the gradient. |
 
-### ColorAreaCheckerboard
+### ColorArea.Checkerboard
 
 Renders a checkerboard pattern behind the gradient to visualize alpha transparency.
 
-### ColorAreaThumb
+### ColorArea.Thumb
 
 The draggable thumb element. Position is set automatically.
 

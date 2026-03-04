@@ -23,11 +23,11 @@ import ColorTriangleRGB from './demo/ColorTriangleRGB.tsx'
 ## Anatomy
 
 ```tsx
-<ColorTriangleRoot>
-  <ColorTriangleCheckerboard />
-  <ColorTriangleGradient />
-  <ColorTriangleThumb />
-</ColorTriangleRoot>
+<ColorTriangle.Root>
+  <ColorTriangle.Checkerboard />
+  <ColorTriangle.Gradient />
+  <ColorTriangle.Thumb />
+</ColorTriangle.Root>
 ```
 
 ## Examples
@@ -73,7 +73,7 @@ Three-channel RGB triangle using barycentric coordinates.
 
 ## API Reference
 
-### ColorTriangleRoot
+### ColorTriangle.Root
 
 The root container that manages triangle state and color channel binding.
 
@@ -92,7 +92,7 @@ The root container that manages triangle state and color channel binding.
 | `onValueChange` | `(color: Color) => void` | — | Called when color changes. |
 | `onValueCommit` | `(color: Color) => void` | — | Called when interaction ends. |
 
-### ColorTriangleGradient
+### ColorTriangle.Gradient
 
 Renders a triangular gradient canvas.
 
@@ -100,19 +100,19 @@ Renders a triangular gradient canvas.
 |------|------|---------|-------------|
 | `channelOverrides` | `Record<string, number> \| false` | `{ alpha: 1 }` | Lock specific channels to fixed values in the gradient. |
 
-### ColorTriangleCheckerboard
+### ColorTriangle.Checkerboard
 
 Renders a checkerboard pattern behind the gradient to visualize alpha transparency.
 
-### ColorTriangleThumb
+### ColorTriangle.Thumb
 
 Wrapper for the thumb indicator. Position is set automatically.
 
-### ColorTriangleThumbX / ColorTriangleThumbY
+### ColorTriangle.ThumbX / ColorTriangle.ThumbY
 
 Individual axis thumb elements for keyboard navigation.
 
-### ColorTriangleThumbZ
+### ColorTriangle.ThumbZ
 
 Optional third axis thumb for three-channel barycentric mode.
 

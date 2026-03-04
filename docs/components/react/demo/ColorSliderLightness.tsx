@@ -1,13 +1,7 @@
 import { useMemo } from "react";
 import "internationalized-color/css";
 import { getChannelConfig } from "@urcolor/core";
-import {
-  ColorSliderRoot,
-  ColorSliderTrack,
-  ColorSliderGradient,
-  ColorSliderThumb,
-  useColor,
-} from "@urcolor/react";
+import { ColorSlider, useColor } from "@urcolor/react";
 
 export default function ColorSliderLightness() {
   const { color, setColor } = useColor("hsl(210, 80%, 50%)");
@@ -28,27 +22,29 @@ export default function ColorSliderLightness() {
   }, [color]);
 
   return (
-    <ColorSliderRoot
+    <ColorSlider.Root
       value={color}
       onValueChange={setColor}
       colorSpace="hsl"
       channel="l"
       className="w-full"
     >
-      <ColorSliderTrack className="relative h-5 overflow-hidden rounded-xl">
-        <ColorSliderGradient
-          className="absolute inset-0 rounded-xl"
-          colors={gradientColors}
-        />
-        <ColorSliderThumb
-          className="
-            block size-5 rounded-full border-[2.5px] border-white bg-white
-            shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_2px_4px_rgba(0,0,0,0.3)]
-            focus-visible:shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_0_0_3px_rgba(66,153,225,0.6)]
-          "
-          aria-label="Lightness"
-        />
-      </ColorSliderTrack>
-    </ColorSliderRoot>
+      <ColorSlider.Control>
+        <ColorSlider.Track className="relative h-5 overflow-hidden rounded-xl">
+          <ColorSlider.Gradient
+            className="absolute inset-0 rounded-xl"
+            colors={gradientColors}
+          />
+          <ColorSlider.Thumb
+            className="
+              block size-5 rounded-full border-[2.5px] border-white bg-white
+              shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_2px_4px_rgba(0,0,0,0.3)]
+              focus-visible:shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_0_0_3px_rgba(66,153,225,0.6)]
+            "
+            aria-label="Lightness"
+          />
+        </ColorSlider.Track>
+      </ColorSlider.Control>
+    </ColorSlider.Root>
   );
 }

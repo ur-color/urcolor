@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import "internationalized-color/css";
-import { ColorSwatchGroupRoot, ColorSwatchGroupItem } from "./index";
+import * as ColorSwatchGroup from "./index.parts";
 
-type Story = StoryObj<typeof ColorSwatchGroupRoot>;
+type Story = StoryObj<typeof ColorSwatchGroup.Root>;
 
 const materialColors = [
   "#f44336", "#e91e63", "#9c27b0", "#673ab7", "#3f51b5",
@@ -12,21 +12,21 @@ const materialColors = [
 
 function GroupDemo(props: Record<string, unknown>, colors = materialColors) {
   return (
-    <ColorSwatchGroupRoot className="flex gap-2 flex-wrap" {...props}>
+    <ColorSwatchGroup.Root className="flex gap-2 flex-wrap" {...props}>
       {colors.map(color => (
-        <ColorSwatchGroupItem
+        <ColorSwatchGroup.Item
           key={color}
           value={color}
           className="block size-9 rounded-md border border-gray-300 cursor-pointer"
         />
       ))}
-    </ColorSwatchGroupRoot>
+    </ColorSwatchGroup.Root>
   );
 }
 
-const meta: Meta<typeof ColorSwatchGroupRoot> = {
+const meta: Meta<typeof ColorSwatchGroup.Root> = {
   title: "ColorSwatchGroup",
-  component: ColorSwatchGroupRoot,
+  component: ColorSwatchGroup.Root,
 };
 export default meta;
 

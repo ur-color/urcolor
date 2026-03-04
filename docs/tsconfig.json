@@ -2,9 +2,10 @@
   "compilerOptions": {
     "module": "ESNext",
     "moduleResolution": "bundler",
+    "jsx": "react-jsx",
     "strict": true,
     "skipLibCheck": true,
     "noEmit": true,
   },
-  "include": [".vitepress/**/*", ".vitepress/env.d.ts", "components/**/*"]
+  "include": [".vitepress/**/*", ".vitepress/env.d.ts", "components/**/*", "guide/**/*"]
 }

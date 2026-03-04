@@ -37,17 +37,17 @@ function MySwatch() {
 
 ## Step 2: Render a swatch
 
-`ColorSwatchRoot` renders a single color as a filled element. Pass the color via `value`.
+`ColorSwatch.Root` renders a single color as a filled element. Pass the color via `value`.
 
 ```tsx
-import { useColor, ColorSwatchRoot } from "@urcolor/react"; // [!code ++]
+import { useColor, ColorSwatch } from "@urcolor/react"; // [!code ++]
 
 function MySwatch() {
   const { color } = useColor("hsl(210, 80%, 50%)");
 
   return (
     // [!code ++:4]
-    <ColorSwatchRoot
+    <ColorSwatch.Root
       value={color}
       className="size-10 rounded-lg"
     />
@@ -64,7 +64,7 @@ All components are completely unstyled — the classes above are just an example
 Set the `alpha` prop to show a checkerboard pattern behind semi-transparent colors:
 
 ```tsx{4}
-<ColorSwatchRoot
+<ColorSwatch.Root
   value={color}
   alpha
   className="size-10 rounded-lg"
@@ -76,7 +76,7 @@ Set the `alpha` prop to show a checkerboard pattern behind semi-transparent colo
 Customize the checkerboard pattern size with `checkerSize` (in pixels):
 
 ```tsx{5}
-<ColorSwatchRoot
+<ColorSwatch.Root
   value={color}
   alpha
   checkerSize={8}
@@ -91,7 +91,7 @@ Render a palette by looping over an array of colors:
 ```tsx
 import { useState } from "react";
 import { Color } from "internationalized-color";
-import { ColorSwatchRoot } from "@urcolor/react";
+import { ColorSwatch } from "@urcolor/react";
 
 const colors = [
   Color.parse("hsl(210, 80%, 50%)")!,
@@ -106,7 +106,7 @@ function MyPalette() {
   return (
     <div className="flex items-center gap-3">
       {colors.map((color, i) => (
-        <ColorSwatchRoot
+        <ColorSwatch.Root
           key={i}
           value={color}
           alpha
@@ -124,7 +124,7 @@ function MyPalette() {
 You can also pass a plain CSS color string instead of a `Color` object:
 
 ```tsx
-<ColorSwatchRoot
+<ColorSwatch.Root
   value="oklch(0.6 0.15 210)"
   className="size-10 rounded-lg"
 />

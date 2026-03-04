@@ -37,17 +37,17 @@ function MyWheel() {
 
 ## Step 2: Add the root
 
-`ColorWheelRoot` manages all the state and interactions. Tell it which color space and channels to map to the angle and radius.
+`ColorWheel.Root` manages all the state and interactions. Tell it which color space and channels to map to the angle and radius.
 
 ```tsx
-import { useColor, ColorWheelRoot } from "@urcolor/react"; // [!code ++]
+import { useColor, ColorWheel } from "@urcolor/react"; // [!code ++]
 
 function MyWheel() {
   const { color, setColor } = useColor("hsl(210, 80%, 50%)");
 
   return (
     // [!code ++:8]
-    <ColorWheelRoot
+    <ColorWheel.Root
       value={color}
       onValueChange={setColor}
       colorSpace="hsl"
@@ -55,7 +55,7 @@ function MyWheel() {
       channelRadius="s"
     >
       {/* children go here */}
-    </ColorWheelRoot>
+    </ColorWheel.Root>
   );
 }
 ```
@@ -66,20 +66,16 @@ function MyWheel() {
 
 ## Step 3: Add the gradient
 
-`ColorWheelGradient` renders the 2D circular gradient on a canvas.
+`ColorWheel.Gradient` renders the 2D circular gradient on a canvas.
 
 ```tsx
-import {
-  useColor,
-  ColorWheelRoot,
-  ColorWheelGradient, // [!code ++]
-} from "@urcolor/react";
+import { useColor, ColorWheel } from "@urcolor/react";
 
 function MyWheel() {
   const { color, setColor } = useColor("hsl(210, 80%, 50%)");
 
   return (
-    <ColorWheelRoot
+    <ColorWheel.Root
       value={color}
       onValueChange={setColor}
       colorSpace="hsl"
@@ -88,8 +84,8 @@ function MyWheel() {
       className="relative block size-64 overflow-hidden rounded-full"
       style={{ containerType: "inline-size" }}
     >
-      <ColorWheelGradient className="absolute inset-0 block" /> {/* [!code ++] */}
-    </ColorWheelRoot>
+      <ColorWheel.Gradient className="absolute inset-0 block" /> {/* [!code ++] */}
+    </ColorWheel.Root>
   );
 }
 ```
@@ -98,21 +94,16 @@ The root needs `overflow-hidden rounded-full` to clip the gradient to a circle, 
 
 ## Step 4: Add the thumb
 
-`ColorWheelThumb` is the draggable handle. It's positioned automatically within the wheel.
+`ColorWheel.Thumb` is the draggable handle. It's positioned automatically within the wheel.
 
 ```tsx
-import {
-  useColor,
-  ColorWheelRoot,
-  ColorWheelGradient,
-  ColorWheelThumb, // [!code ++]
-} from "@urcolor/react";
+import { useColor, ColorWheel } from "@urcolor/react";
 
 function MyWheel() {
   const { color, setColor } = useColor("hsl(210, 80%, 50%)");
 
   return (
-    <ColorWheelRoot
+    <ColorWheel.Root
       value={color}
       onValueChange={setColor}
       colorSpace="hsl"
@@ -121,9 +112,9 @@ function MyWheel() {
       className="relative block size-64 overflow-hidden rounded-full"
       style={{ containerType: "inline-size" }}
     >
-      <ColorWheelGradient className="absolute inset-0 block" />
+      <ColorWheel.Gradient className="absolute inset-0 block" />
       {/* [!code ++:8] */}
-      <ColorWheelThumb
+      <ColorWheel.Thumb
         className="
           size-4 rounded-full border-2 border-white
           shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_2px_4px_rgba(0,0,0,0.3)]
@@ -131,7 +122,7 @@ function MyWheel() {
         "
         aria-label="Color"
       />
-    </ColorWheelRoot>
+    </ColorWheel.Root>
   );
 }
 ```
@@ -145,7 +136,7 @@ All components are completely unstyled — the classes above are just an example
 Use `startAngle` to rotate where the wheel gradient begins (in degrees):
 
 ```tsx{5}
-<ColorWheelRoot
+<ColorWheel.Root
   value={color}
   onValueChange={setColor}
   colorSpace="hsl"
@@ -154,7 +145,7 @@ Use `startAngle` to rotate where the wheel gradient begins (in degrees):
   channelRadius="s"
 >
   {/* ... */}
-</ColorWheelRoot>
+</ColorWheel.Root>
 ```
 
 ## Different color spaces
@@ -164,7 +155,7 @@ Switch the color space and channel mapping for different wheel behaviors. For ex
 ```tsx{5,11-13}
 const { color, setColor } = useColor("oklch(0.6, 0.15, 210)");
 
-<ColorWheelRoot
+<ColorWheel.Root
   value={color}
   onValueChange={setColor}
   colorSpace="oklch"
@@ -172,7 +163,7 @@ const { color, setColor } = useColor("oklch(0.6, 0.15, 210)");
   channelRadius="chroma"
 >
   {/* ... */}
-</ColorWheelRoot>
+</ColorWheel.Root>
 ```
 
 ## Listening to changes
@@ -189,7 +180,7 @@ const onColorCommit = (color: Color) => {
   console.log("committed", color.toString("css"));
 };
 
-<ColorWheelRoot
+<ColorWheel.Root
   value={color}
   onValueChange={onColorChange}
   onValueCommit={onColorCommit}
@@ -198,5 +189,5 @@ const onColorCommit = (color: Color) => {
   channelRadius="s"
 >
   {/* ... */}
-</ColorWheelRoot>
+</ColorWheel.Root>
 ```

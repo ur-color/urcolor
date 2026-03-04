@@ -4,3 +4,5 @@ export { ColorRingGradient, type ColorRingGradientProps } from "./ColorRingGradi
 export { ColorRingCheckerboard, type ColorRingCheckerboardProps } from "./ColorRingCheckerboard";
 export { ColorRingThumb, type ColorRingThumbProps } from "./ColorRingThumb";
 export { useColorRingContext } from "./ColorRingContext";
+
+export * as ColorRing from "./index.parts";

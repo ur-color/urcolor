@@ -46,11 +46,11 @@ The selection is always an array of strings — even for single selection mode.
 
 ## Step 2: Add the group root
 
-`ColorSwatchGroupRoot` manages selection state and keyboard navigation.
+`ColorSwatchGroup.Root` manages selection state and keyboard navigation.
 
 ```tsx
 import { useState } from "react";
-import { ColorSwatchGroupRoot } from "@urcolor/react"; // [!code ++]
+import { ColorSwatchGroup } from "@urcolor/react"; // [!code ++]
 
 function MyGroup() {
   const colors = [
@@ -63,14 +63,14 @@ function MyGroup() {
 
   return (
     // [!code ++:5]
-    <ColorSwatchGroupRoot
+    <ColorSwatchGroup.Root
       value={selected}
       onValueChange={setSelected}
       type="single"
       className="flex items-center gap-2"
     >
       {/* items go here */}
-    </ColorSwatchGroupRoot>
+    </ColorSwatchGroup.Root>
   );
 }
 ```
@@ -80,14 +80,11 @@ function MyGroup() {
 
 ## Step 3: Add swatch items
 
-`ColorSwatchGroupItem` renders each selectable color. The `value` prop is both the selection value and the displayed color.
+`ColorSwatchGroup.Item` renders each selectable color. The `value` prop is both the selection value and the displayed color.
 
 ```tsx
 import { useState } from "react";
-import {
-  ColorSwatchGroupRoot,
-  ColorSwatchGroupItem, // [!code ++]
-} from "@urcolor/react";
+import { ColorSwatchGroup } from "@urcolor/react";
 
 function MyGroup() {
   const colors = [
@@ -99,7 +96,7 @@ function MyGroup() {
   const [selected, setSelected] = useState<string[]>([colors[0]!]);
 
   return (
-    <ColorSwatchGroupRoot
+    <ColorSwatchGroup.Root
       value={selected}
       onValueChange={setSelected}
       type="single"
@@ -107,7 +104,7 @@ function MyGroup() {
     >
       {/* [!code ++:10] */}
       {colors.map((color) => (
-        <ColorSwatchGroupItem
+        <ColorSwatchGroup.Item
           key={color}
           value={color}
           className="
@@ -116,7 +113,7 @@ function MyGroup() {
           "
         />
       ))}
-    </ColorSwatchGroupRoot>
+    </ColorSwatchGroup.Root>
   );
 }
 ```
@@ -130,16 +127,16 @@ All components are completely unstyled — the classes above are just an example
 Change `type` to `"multiple"` to allow selecting more than one color:
 
 ```tsx{4}
-<ColorSwatchGroupRoot
+<ColorSwatchGroup.Root
   value={selected}
   onValueChange={setSelected}
   type="multiple"
   className="flex items-center gap-2"
 >
   {colors.map((color) => (
-    <ColorSwatchGroupItem key={color} value={color} className="..." />
+    <ColorSwatchGroup.Item key={color} value={color} className="..." />
   ))}
-</ColorSwatchGroupRoot>
+</ColorSwatchGroup.Root>
 ```
 
 ## Keyboard navigation
@@ -155,17 +152,17 @@ The group supports full keyboard navigation out of the box:
 Use `onValueChange` to react to selection changes:
 
 ```tsx{3-5,11}
-import { ColorSwatchGroupRoot } from "@urcolor/react";
+import { ColorSwatchGroup } from "@urcolor/react";
 
 const onSelectionChange = (value: string[]) => {
   console.log("selected:", value);
 };
 
-<ColorSwatchGroupRoot
+<ColorSwatchGroup.Root
   value={selected}
   onValueChange={onSelectionChange}
   type="single"
 >
   {/* ... */}
-</ColorSwatchGroupRoot>
+</ColorSwatchGroup.Root>
 ```

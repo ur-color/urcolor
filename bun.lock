@@ -42,6 +42,7 @@
       "version": "0.0.1",
       "dependencies": {
         "@urcolor/core": "workspace:*",
+        "@urcolor/react": "workspace:*",
         "@urcolor/vue": "workspace:*",
         "gsap": "^3.12.7",
       },

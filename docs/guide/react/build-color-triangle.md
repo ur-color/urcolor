@@ -37,17 +37,17 @@ function MyTriangle() {
 
 ## Step 2: Add the root
 
-`ColorTriangleRoot` manages all the state and interactions. Tell it which color space and channels to map to the triangle axes.
+`ColorTriangle.Root` manages all the state and interactions. Tell it which color space and channels to map to the triangle axes.
 
 ```tsx
-import { useColor, ColorTriangleRoot } from "@urcolor/react"; // [!code ++]
+import { useColor, ColorTriangle } from "@urcolor/react"; // [!code ++]
 
 function MyTriangle() {
   const { color, setColor } = useColor("hsl(210, 80%, 50%)");
 
   return (
     // [!code ++:8]
-    <ColorTriangleRoot
+    <ColorTriangle.Root
       value={color}
       onValueChange={setColor}
       colorSpace="hsv"
@@ -55,7 +55,7 @@ function MyTriangle() {
       channelY="v"
     >
       {/* children go here */}
-    </ColorTriangleRoot>
+    </ColorTriangle.Root>
   );
 }
 ```
@@ -66,20 +66,16 @@ function MyTriangle() {
 
 ## Step 3: Add the gradient
 
-`ColorTriangleGradient` renders the 2D gradient inside the triangular shape.
+`ColorTriangle.Gradient` renders the 2D gradient inside the triangular shape.
 
 ```tsx
-import {
-  useColor,
-  ColorTriangleRoot,
-  ColorTriangleGradient, // [!code ++]
-} from "@urcolor/react";
+import { useColor, ColorTriangle } from "@urcolor/react";
 
 function MyTriangle() {
   const { color, setColor } = useColor("hsl(210, 80%, 50%)");
 
   return (
-    <ColorTriangleRoot
+    <ColorTriangle.Root
       value={color}
       onValueChange={setColor}
       colorSpace="hsv"
@@ -87,29 +83,24 @@ function MyTriangle() {
       channelY="v"
       className="relative block size-64"
     >
-      <ColorTriangleGradient className="absolute inset-0 block" /> {/* [!code ++] */}
-    </ColorTriangleRoot>
+      <ColorTriangle.Gradient className="absolute inset-0 block" /> {/* [!code ++] */}
+    </ColorTriangle.Root>
   );
 }
 ```
 
 ## Step 4: Add the thumb
 
-`ColorTriangleThumb` is the draggable handle. It's positioned automatically within the triangle.
+`ColorTriangle.Thumb` is the draggable handle. It's positioned automatically within the triangle.
 
 ```tsx
-import {
-  useColor,
-  ColorTriangleRoot,
-  ColorTriangleGradient,
-  ColorTriangleThumb, // [!code ++]
-} from "@urcolor/react";
+import { useColor, ColorTriangle } from "@urcolor/react";
 
 function MyTriangle() {
   const { color, setColor } = useColor("hsl(210, 80%, 50%)");
 
   return (
-    <ColorTriangleRoot
+    <ColorTriangle.Root
       value={color}
       onValueChange={setColor}
       colorSpace="hsv"
@@ -117,9 +108,9 @@ function MyTriangle() {
       channelY="v"
       className="relative block size-64"
     >
-      <ColorTriangleGradient className="absolute inset-0 block" />
+      <ColorTriangle.Gradient className="absolute inset-0 block" />
       {/* [!code ++:8] */}
-      <ColorTriangleThumb
+      <ColorTriangle.Thumb
         className="
           size-4 rounded-full border-2 border-white
           shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_2px_4px_rgba(0,0,0,0.3)]
@@ -127,7 +118,7 @@ function MyTriangle() {
         "
         aria-label="Color"
       />
-    </ColorTriangleRoot>
+    </ColorTriangle.Root>
   );
 }
 ```
@@ -141,7 +132,7 @@ All components are completely unstyled — the classes above are just an example
 Use the `rotation` prop to rotate the triangle (in degrees):
 
 ```tsx{5}
-<ColorTriangleRoot
+<ColorTriangle.Root
   value={color}
   onValueChange={setColor}
   colorSpace="hsv"
@@ -150,7 +141,7 @@ Use the `rotation` prop to rotate the triangle (in degrees):
   channelY="v"
 >
   {/* ... */}
-</ColorTriangleRoot>
+</ColorTriangle.Root>
 ```
 
 ## Three-channel mode
@@ -158,7 +149,7 @@ Use the `rotation` prop to rotate the triangle (in degrees):
 Add `channelZ` to enable barycentric three-channel mode. This maps all three channels to the triangle's vertices — useful for RGB color mixing:
 
 ```tsx{4-6}
-<ColorTriangleRoot
+<ColorTriangle.Root
   value={color}
   onValueChange={setColor}
   colorSpace="rgb"
@@ -167,7 +158,7 @@ Add `channelZ` to enable barycentric three-channel mode. This maps all three cha
   channelZ="b"
 >
   {/* ... */}
-</ColorTriangleRoot>
+</ColorTriangle.Root>
 ```
 
 ## Listening to changes
@@ -184,7 +175,7 @@ const onColorCommit = (color: Color) => {
   console.log("committed", color.toString("css"));
 };
 
-<ColorTriangleRoot
+<ColorTriangle.Root
   value={color}
   onValueChange={onColorChange}
   onValueCommit={onColorCommit}
@@ -193,5 +184,5 @@ const onColorCommit = (color: Color) => {
   channelY="v"
 >
   {/* ... */}
-</ColorTriangleRoot>
+</ColorTriangle.Root>
 ```

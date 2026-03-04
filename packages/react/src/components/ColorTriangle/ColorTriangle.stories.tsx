@@ -2,33 +2,33 @@ import type { Meta, StoryObj } from "@storybook/react";
 import "internationalized-color/css";
 import { useState } from "react";
 import { Color } from "internationalized-color";
-import { ColorTriangleRoot, ColorTriangleGradient, ColorTriangleCheckerboard, ColorTriangleThumb, ColorTriangleThumbX, ColorTriangleThumbY, ColorTriangleThumbZ } from "./index";
+import * as ColorTriangle from "./index.parts";
 
-type Story = StoryObj<typeof ColorTriangleRoot>;
+type Story = StoryObj<typeof ColorTriangle.Root>;
 
 function TriangleDemo(props: Record<string, unknown>) {
   const [color, setColor] = useState<Color | undefined>();
   const isThreeChannel = "channelZ" in props;
   return (
-    <ColorTriangleRoot
+    <ColorTriangle.Root
       value={color}
       onValueChange={setColor}
       className="block relative size-64"
       {...props}
     >
-      <ColorTriangleGradient className="block absolute inset-0" />
-      <ColorTriangleThumb className="size-4 rounded-full border-2 border-white shadow bg-current">
-        <ColorTriangleThumbX />
-        <ColorTriangleThumbY />
-        {isThreeChannel && <ColorTriangleThumbZ />}
-      </ColorTriangleThumb>
-    </ColorTriangleRoot>
+      <ColorTriangle.Gradient className="block absolute inset-0" />
+      <ColorTriangle.Thumb className="size-4 rounded-full border-2 border-white shadow bg-current">
+        <ColorTriangle.ThumbX />
+        <ColorTriangle.ThumbY />
+        {isThreeChannel && <ColorTriangle.ThumbZ />}
+      </ColorTriangle.Thumb>
+    </ColorTriangle.Root>
   );
 }
 
-const meta: Meta<typeof ColorTriangleRoot> = {
+const meta: Meta<typeof ColorTriangle.Root> = {
   title: "ColorTriangle",
-  component: ColorTriangleRoot,
+  component: ColorTriangle.Root,
 };
 export default meta;
 

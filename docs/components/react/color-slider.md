@@ -24,13 +24,15 @@ import ColorSliderVertical from './demo/ColorSliderVertical.tsx'
 ## Anatomy
 
 ```tsx
-<ColorSliderRoot>
-  <ColorSliderTrack>
-    <ColorSliderCheckerboard />
-    <ColorSliderGradient />
-    <ColorSliderThumb />
-  </ColorSliderTrack>
-</ColorSliderRoot>
+<ColorSlider.Root>
+  <ColorSlider.Control>
+    <ColorSlider.Track>
+      <ColorSlider.Checkerboard />
+      <ColorSlider.Gradient />
+      <ColorSlider.Thumb />
+    </ColorSlider.Track>
+  </ColorSlider.Control>
+</ColorSlider.Root>
 ```
 
 ## Examples
@@ -81,7 +83,7 @@ import ColorSliderVertical from './demo/ColorSliderVertical.tsx'
 
 ## API Reference
 
-### ColorSliderRoot
+### ColorSlider.Root
 
 The root container that manages slider state and color channel binding.
 
@@ -98,11 +100,15 @@ The root container that manages slider state and color channel binding.
 | `onValueChange` | `(color: Color) => void` | — | Called when color changes. |
 | `onValueCommit` | `(color: Color) => void` | — | Called when interaction ends. |
 
-### ColorSliderTrack
+### ColorSlider.Control
+
+The clickable, interactive area that handles pointer events for dragging.
+
+### ColorSlider.Track
 
 The track area that contains the gradient and thumb.
 
-### ColorSliderGradient
+### ColorSlider.Gradient
 
 Renders a gradient canvas background for the slider track.
 
@@ -113,15 +119,15 @@ Renders a gradient canvas background for the slider track.
 | `interpolationSpace` | `string` | — | Color space for perceptual interpolation (e.g. `'oklch'`). |
 | `channelOverrides` | `Record<string, number> \| false` | `{ alpha: 1 }` | Lock specific channels to fixed values in the gradient. Set to `false` to reflect all channels from current color including alpha. |
 
-### ColorSliderCheckerboard
+### ColorSlider.Checkerboard
 
 Renders a checkerboard pattern behind the gradient to visualize alpha transparency.
 
-### ColorSliderThumb
+### ColorSlider.Thumb
 
 The draggable thumb element.
 
-### ColorSliderRange
+### ColorSlider.Range
 
 The filled range portion of the track.
 

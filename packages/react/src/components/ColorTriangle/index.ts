@@ -5,3 +5,5 @@ export { ColorTriangleThumb, type ColorTriangleThumbProps } from "./ColorTriangl
 export { ColorTriangleThumbX, type ColorTriangleThumbXProps } from "./ColorTriangleThumbX";
 export { ColorTriangleThumbY, type ColorTriangleThumbYProps } from "./ColorTriangleThumbY";
 export { ColorTriangleThumbZ, type ColorTriangleThumbZProps } from "./ColorTriangleThumbZ";
+
+export * as ColorTriangle from "./index.parts";

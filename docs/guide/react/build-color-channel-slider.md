@@ -39,24 +39,24 @@ function MySlider() {
 
 ## Step 2: Add the root
 
-`ColorSliderRoot` manages all the state and interactions. Tell it which color space and channel to control.
+`ColorSlider.Root` manages all the state and interactions. Tell it which color space and channel to control.
 
 ```tsx
-import { useColor, ColorSliderRoot } from "@urcolor/react"; // [!code ++]
+import { useColor, ColorSlider } from "@urcolor/react"; // [!code ++]
 
 function MySlider() {
   const { color, setColor } = useColor("hsl(210, 80%, 50%)");
 
   return (
     // [!code ++:7]
-    <ColorSliderRoot
+    <ColorSlider.Root
       value={color}
       onValueChange={setColor}
       colorSpace="hsl"
       channel="h"
     >
       {/* children go here */}
-    </ColorSliderRoot>
+    </ColorSlider.Root>
   );
 }
 ```
@@ -66,36 +66,33 @@ function MySlider() {
 
 ## Step 3: Add the track and gradient
 
-`ColorSliderTrack` is the interactive area that handles pointer events. `ColorSliderGradient` renders the 1D gradient on a canvas.
+`ColorSlider.Control` is the interactive area that handles pointer events. `ColorSlider.Track` wraps the visual track. `ColorSlider.Gradient` renders the 1D gradient on a canvas.
 
 ```tsx
-import {
-  useColor,
-  ColorSliderRoot,
-  ColorSliderTrack, // [!code ++]
-  ColorSliderGradient, // [!code ++]
-} from "@urcolor/react";
+import { useColor, ColorSlider } from "@urcolor/react";
 
 function MySlider() {
   const { color, setColor } = useColor("hsl(210, 80%, 50%)");
 
   return (
-    <ColorSliderRoot
+    <ColorSlider.Root
       value={color}
       onValueChange={setColor}
       colorSpace="hsl"
       channel="h"
     >
-      {/* [!code ++:8] */}
-      <ColorSliderTrack
-        className="relative h-5 overflow-hidden rounded-xl"
-      >
-        <ColorSliderGradient
-          className="absolute inset-0 rounded-xl"
-          colors={["red", "yellow", "lime", "cyan", "blue", "magenta", "red"]}
-        />
-      </ColorSliderTrack>
-    </ColorSliderRoot>
+      {/* [!code ++:10] */}
+      <ColorSlider.Control>
+        <ColorSlider.Track
+          className="relative h-5 overflow-hidden rounded-xl"
+        >
+          <ColorSlider.Gradient
+            className="absolute inset-0 rounded-xl"
+            colors={["red", "yellow", "lime", "cyan", "blue", "magenta", "red"]}
+          />
+        </ColorSlider.Track>
+      </ColorSlider.Control>
+    </ColorSlider.Root>
   );
 }
 ```
@@ -104,43 +101,39 @@ The `colors` prop defines the gradient stops. For a hue slider, use the full spe
 
 ## Step 4: Add the thumb
 
-`ColorSliderThumb` is the draggable handle. It's positioned automatically by the component.
+`ColorSlider.Thumb` is the draggable handle. It's positioned automatically by the component.
 
 ```tsx
-import {
-  useColor,
-  ColorSliderRoot,
-  ColorSliderTrack,
-  ColorSliderGradient,
-  ColorSliderThumb, // [!code ++]
-} from "@urcolor/react";
+import { useColor, ColorSlider } from "@urcolor/react";
 
 function MySlider() {
   const { color, setColor } = useColor("hsl(210, 80%, 50%)");
 
   return (
-    <ColorSliderRoot
+    <ColorSlider.Root
       value={color}
       onValueChange={setColor}
       colorSpace="hsl"
       channel="h"
     >
-      <ColorSliderTrack className="relative h-5 overflow-hidden rounded-xl">
-        <ColorSliderGradient
-          className="absolute inset-0 rounded-xl"
-          colors={["red", "yellow", "lime", "cyan", "blue", "magenta", "red"]}
-        />
-        {/* [!code ++:8] */}
-        <ColorSliderThumb
-          className="
-            block size-5 rounded-full border-[2.5px] border-white bg-white
-            shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_2px_4px_rgba(0,0,0,0.3)]
-            focus-visible:shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_0_0_3px_rgba(66,153,225,0.6)]
-          "
-          aria-label="Hue"
-        />
-      </ColorSliderTrack>
-    </ColorSliderRoot>
+      <ColorSlider.Control>
+        <ColorSlider.Track className="relative h-5 overflow-hidden rounded-xl">
+          <ColorSlider.Gradient
+            className="absolute inset-0 rounded-xl"
+            colors={["red", "yellow", "lime", "cyan", "blue", "magenta", "red"]}
+          />
+          {/* [!code ++:8] */}
+          <ColorSlider.Thumb
+            className="
+              block size-5 rounded-full border-[2.5px] border-white bg-white
+              shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_2px_4px_rgba(0,0,0,0.3)]
+              focus-visible:shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_0_0_3px_rgba(66,153,225,0.6)]
+            "
+            aria-label="Hue"
+          />
+        </ColorSlider.Track>
+      </ColorSlider.Control>
+    </ColorSlider.Root>
   );
 }
 ```
@@ -154,7 +147,7 @@ All components are completely unstyled — the classes above are just an example
 Set `orientation="vertical"` to render a vertical slider:
 
 ```tsx{5}
-<ColorSliderRoot
+<ColorSlider.Root
   value={color}
   onValueChange={setColor}
   colorSpace="hsl"
@@ -162,7 +155,7 @@ Set `orientation="vertical"` to render a vertical slider:
   channel="h"
 >
   {/* ... */}
-</ColorSliderRoot>
+</ColorSlider.Root>
 ```
 
 ## Inverting direction
@@ -170,7 +163,7 @@ Set `orientation="vertical"` to render a vertical slider:
 Use `inverted` to reverse the slider direction:
 
 ```tsx{5}
-<ColorSliderRoot
+<ColorSlider.Root
   value={color}
   onValueChange={setColor}
   colorSpace="hsl"
@@ -178,7 +171,7 @@ Use `inverted` to reverse the slider direction:
   channel="h"
 >
   {/* ... */}
-</ColorSliderRoot>
+</ColorSlider.Root>
 ```
 
 ## Different channels
@@ -186,23 +179,25 @@ Use `inverted` to reverse the slider direction:
 Switch the `channel` prop to control different color properties. For example, a lightness slider:
 
 ```tsx{5,12}
-<ColorSliderRoot
+<ColorSlider.Root
   value={color}
   onValueChange={setColor}
   colorSpace="hsl"
   channel="l"
 >
-  <ColorSliderTrack className="relative h-5 overflow-hidden rounded-xl">
-    <ColorSliderGradient
-      className="absolute inset-0 rounded-xl"
-      colors={["black", "hsl(210, 80%, 50%)", "white"]}
-    />
-    <ColorSliderThumb
-      className="..."
-      aria-label="Lightness"
-    />
-  </ColorSliderTrack>
-</ColorSliderRoot>
+  <ColorSlider.Control>
+    <ColorSlider.Track className="relative h-5 overflow-hidden rounded-xl">
+      <ColorSlider.Gradient
+        className="absolute inset-0 rounded-xl"
+        colors={["black", "hsl(210, 80%, 50%)", "white"]}
+      />
+      <ColorSlider.Thumb
+        className="..."
+        aria-label="Lightness"
+      />
+    </ColorSlider.Track>
+  </ColorSlider.Control>
+</ColorSlider.Root>
 ```
 
 ## Listening to changes
@@ -219,7 +214,7 @@ const onColorCommit = (color: Color) => {
   console.log("committed", color.toString("css"));
 };
 
-<ColorSliderRoot
+<ColorSlider.Root
   value={color}
   onValueChange={onColorChange}
   onValueCommit={onColorCommit}
@@ -227,5 +222,5 @@ const onColorCommit = (color: Color) => {
   channel="h"
 >
   {/* ... */}
-</ColorSliderRoot>
+</ColorSlider.Root>
 ```

@@ -37,17 +37,17 @@ function MyArea() {
 
 ## Step 2: Add the root
 
-`ColorAreaRoot` manages all the state and interactions. Tell it which color space and channels to use for each axis.
+`ColorArea.Root` manages all the state and interactions. Tell it which color space and channels to use for each axis.
 
 ```tsx
-import { useColor, ColorAreaRoot } from "@urcolor/react"; // [!code ++]
+import { useColor, ColorArea } from "@urcolor/react"; // [!code ++]
 
 function MyArea() {
   const { color, setColor } = useColor("hsl(210, 80%, 50%)");
 
   return (
     // [!code ++:8]
-    <ColorAreaRoot
+    <ColorArea.Root
       value={color}
       onValueChange={setColor}
       colorSpace="hsl"
@@ -55,7 +55,7 @@ function MyArea() {
       channelY="s"
     >
       {/* children go here */}
-    </ColorAreaRoot>
+    </ColorArea.Root>
   );
 }
 ```
@@ -66,21 +66,16 @@ function MyArea() {
 
 ## Step 3: Add the track and gradient
 
-`ColorAreaTrack` is the interactive area that handles pointer events. `ColorAreaGradient` renders the 2D gradient on a canvas.
+`ColorArea.Track` is the interactive area that handles pointer events. `ColorArea.Gradient` renders the 2D gradient on a canvas.
 
 ```tsx
-import {
-  useColor,
-  ColorAreaRoot,
-  ColorAreaTrack, // [!code ++]
-  ColorAreaGradient, // [!code ++]
-} from "@urcolor/react";
+import { useColor, ColorArea } from "@urcolor/react";
 
 function MyArea() {
   const { color, setColor } = useColor("hsl(210, 80%, 50%)");
 
   return (
-    <ColorAreaRoot
+    <ColorArea.Root
       value={color}
       onValueChange={setColor}
       colorSpace="hsl"
@@ -88,15 +83,15 @@ function MyArea() {
       channelY="s"
     >
       {/* [!code ++:7] */}
-      <ColorAreaTrack
+      <ColorArea.Track
         className="
           relative h-[200px] w-full cursor-crosshair
           touch-none overflow-clip rounded-lg
         "
       >
-        <ColorAreaGradient className="absolute inset-0" />
-      </ColorAreaTrack>
-    </ColorAreaRoot>
+        <ColorArea.Gradient className="absolute inset-0" />
+      </ColorArea.Track>
+    </ColorArea.Root>
   );
 }
 ```
@@ -105,45 +100,39 @@ The track needs a fixed height and `position: relative` so the thumb can be posi
 
 ## Step 4: Add the thumb
 
-`ColorAreaThumb` is the draggable handle. It's positioned automatically by the component.
+`ColorArea.Thumb` is the draggable handle. It's positioned automatically by the component.
 
 ```tsx
-import {
-  useColor,
-  ColorAreaRoot,
-  ColorAreaTrack,
-  ColorAreaGradient,
-  ColorAreaThumb, // [!code ++]
-} from "@urcolor/react";
+import { useColor, ColorArea } from "@urcolor/react";
 
 function MyArea() {
   const { color, setColor } = useColor("hsl(210, 80%, 50%)");
 
   return (
-    <ColorAreaRoot
+    <ColorArea.Root
       value={color}
       onValueChange={setColor}
       colorSpace="hsl"
       channelX="h"
       channelY="s"
     >
-      <ColorAreaTrack
+      <ColorArea.Track
         className="
           relative h-[200px] w-full cursor-crosshair
           touch-none overflow-clip rounded-lg
         "
       >
-        <ColorAreaGradient className="absolute inset-0" />
+        <ColorArea.Gradient className="absolute inset-0" />
         {/* [!code ++:8] */}
-        <ColorAreaThumb
+        <ColorArea.Thumb
           className="
             absolute size-5
             rounded-full border-2 border-white
             shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_2px_4px_rgba(0,0,0,0.3)]
           "
         />
-      </ColorAreaTrack>
-    </ColorAreaRoot>
+      </ColorArea.Track>
+    </ColorArea.Root>
   );
 }
 ```
@@ -159,7 +148,7 @@ Change the color space and channel mapping for different picker behavior. For ex
 ```tsx{5,11-13}
 const { color, setColor } = useColor("oklch(0.6, 0.15, 210)");
 
-<ColorAreaRoot
+<ColorArea.Root
   value={color}
   onValueChange={setColor}
   colorSpace="oklch"
@@ -167,7 +156,7 @@ const { color, setColor } = useColor("oklch(0.6, 0.15, 210)");
   channelY="chroma"
 >
   {/* ... */}
-</ColorAreaRoot>
+</ColorArea.Root>
 ```
 
 ## Inverting axis direction
@@ -175,7 +164,7 @@ const { color, setColor } = useColor("oklch(0.6, 0.15, 210)");
 Use `invertedX` or `invertedY` to reverse axis directions:
 
 ```tsx{7-8}
-<ColorAreaRoot
+<ColorArea.Root
   value={color}
   onValueChange={setColor}
   colorSpace="hsl"
@@ -185,7 +174,7 @@ Use `invertedX` or `invertedY` to reverse axis directions:
   invertedY
 >
   {/* ... */}
-</ColorAreaRoot>
+</ColorArea.Root>
 ```
 
 ## Listening to changes
@@ -202,7 +191,7 @@ const onColorCommit = (color: Color) => {
   console.log("committed", color.toString("css"));
 };
 
-<ColorAreaRoot
+<ColorArea.Root
   value={color}
   onValueChange={onColorChange}
   onValueCommit={onColorCommit}
@@ -211,5 +200,5 @@ const onColorCommit = (color: Color) => {
   channelY="s"
 >
   {/* ... */}
-</ColorAreaRoot>
+</ColorArea.Root>
 ```

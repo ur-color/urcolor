@@ -2,33 +2,37 @@ import type { Meta, StoryObj } from "@storybook/react";
 import "internationalized-color/css";
 import { useState } from "react";
 import { Color } from "internationalized-color";
-import { ColorSliderRoot, ColorSliderTrack, ColorSliderGradient, ColorSliderCheckerboard, ColorSliderThumb } from "./index";
+import * as ColorSlider from "./index.parts";
 
-type Story = StoryObj<typeof ColorSliderRoot>;
+type Story = StoryObj<typeof ColorSlider.Root>;
 
 function HorizontalSlider(props: Record<string, unknown> & { alpha?: boolean }) {
   const { alpha, ...rest } = props;
   return (
-    <ColorSliderRoot className="block w-75" {...rest}>
-      <ColorSliderTrack className="block relative h-4 rounded-xl outline outline-1 outline-gray-300 overflow-hidden">
-        {alpha && <ColorSliderCheckerboard className="block absolute inset-0" />}
-        <ColorSliderGradient className="block inset-0" />
-        <ColorSliderThumb className="absolute size-4 rounded-full border-2 border-white shadow" />
-      </ColorSliderTrack>
-    </ColorSliderRoot>
+    <ColorSlider.Root className="block w-75" {...rest}>
+      <ColorSlider.Control>
+        <ColorSlider.Track className="block relative h-4 rounded-xl outline outline-1 outline-gray-300 overflow-hidden">
+          {alpha && <ColorSlider.Checkerboard className="block absolute inset-0" />}
+          <ColorSlider.Gradient className="block inset-0" />
+          <ColorSlider.Thumb className="absolute size-4 rounded-full border-2 border-white shadow" />
+        </ColorSlider.Track>
+      </ColorSlider.Control>
+    </ColorSlider.Root>
   );
 }
 
 function VerticalSlider(props: Record<string, unknown> & { alpha?: boolean }) {
   const { alpha, ...rest } = props;
   return (
-    <ColorSliderRoot className="block h-50" orientation="vertical" {...rest}>
-      <ColorSliderTrack className="block relative w-4 h-full rounded-xl outline outline-1 outline-gray-300 overflow-hidden">
-        {alpha && <ColorSliderCheckerboard className="block absolute inset-0" />}
-        <ColorSliderGradient className="block inset-0" />
-        <ColorSliderThumb className="absolute size-4 rounded-full border-2 border-white shadow" />
-      </ColorSliderTrack>
-    </ColorSliderRoot>
+    <ColorSlider.Root className="block h-50" orientation="vertical" {...rest}>
+      <ColorSlider.Control>
+        <ColorSlider.Track className="block relative w-4 h-full rounded-xl outline outline-1 outline-gray-300 overflow-hidden">
+          {alpha && <ColorSlider.Checkerboard className="block absolute inset-0" />}
+          <ColorSlider.Gradient className="block inset-0" />
+          <ColorSlider.Thumb className="absolute size-4 rounded-full border-2 border-white shadow" />
+        </ColorSlider.Track>
+      </ColorSlider.Control>
+    </ColorSlider.Root>
   );
 }
 
@@ -64,9 +68,9 @@ function renderSlider(props: Record<string, unknown> = {}, opts: { alpha?: boole
   return () => <SliderDemo {...props} alpha={opts.alpha} />;
 }
 
-const meta: Meta<typeof ColorSliderRoot> = {
+const meta: Meta<typeof ColorSlider.Root> = {
   title: "ColorSlider",
-  component: ColorSliderRoot,
+  component: ColorSlider.Root,
 };
 export default meta;
 

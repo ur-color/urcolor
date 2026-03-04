@@ -1,18 +1,18 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import "internationalized-color/css";
-import { ColorSwatchRoot } from "./index";
+import * as ColorSwatch from "./index.parts";
 
-type Story = StoryObj<typeof ColorSwatchRoot>;
+type Story = StoryObj<typeof ColorSwatch.Root>;
 
-const meta: Meta<typeof ColorSwatchRoot> = {
+const meta: Meta<typeof ColorSwatch.Root> = {
   title: "ColorSwatch",
-  component: ColorSwatchRoot,
+  component: ColorSwatch.Root,
 };
 
 export default meta;
 
 function Swatch(props: Record<string, unknown>) {
-  return <ColorSwatchRoot className="block size-12 rounded-lg border border-gray-300" {...props} />;
+  return <ColorSwatch.Root className="block size-12 rounded-lg border border-gray-300" {...props} />;
 }
 
 export const Red: Story = { name: "Red", render: () => <Swatch value="#ff0000" /> };

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import "internationalized-color/css";
-import { ColorSwatchGroupRoot, ColorSwatchGroupItem } from "@urcolor/react";
+import { ColorSwatchGroup } from "@urcolor/react";
 
 const colors = [
   "hsl(210, 80%, 50%)",
@@ -16,14 +16,14 @@ export default function ColorSwatchGroupMultiple() {
 
   return (
     <div className="flex flex-col gap-4">
-      <ColorSwatchGroupRoot
+      <ColorSwatchGroup.Root
         value={selected}
         onValueChange={setSelected}
         type="multiple"
         className="flex items-center gap-2"
       >
         {colors.map((color) => (
-          <ColorSwatchGroupItem
+          <ColorSwatchGroup.Item
             key={color}
             value={color}
             className="
@@ -43,9 +43,9 @@ export default function ColorSwatchGroupMultiple() {
             >
               <polyline points="20 6 9 17 4 12" />
             </svg>
-          </ColorSwatchGroupItem>
+          </ColorSwatchGroup.Item>
         ))}
-      </ColorSwatchGroupRoot>
+      </ColorSwatchGroup.Root>
       <p className="text-sm text-gray-500">
         Selected: <code>{selected.length ? selected.join(", ") : "none"}</code>
       </p>

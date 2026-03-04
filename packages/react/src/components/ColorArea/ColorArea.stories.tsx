@@ -2,34 +2,34 @@ import type { Meta, StoryObj } from "@storybook/react";
 import "internationalized-color/css";
 import { useState } from "react";
 import { Color } from "internationalized-color";
-import { ColorAreaRoot, ColorAreaTrack, ColorAreaGradient, ColorAreaCheckerboard, ColorAreaThumb, ColorAreaThumbX, ColorAreaThumbY } from "./index";
+import * as ColorArea from "./index.parts";
 
-type Story = StoryObj<typeof ColorAreaRoot>;
+type Story = StoryObj<typeof ColorArea.Root>;
 
 function AreaDemo(props: Record<string, unknown>) {
   const [color, setColor] = useState<Color | undefined>();
   return (
-    <ColorAreaRoot
+    <ColorArea.Root
       value={color}
       onValueChange={setColor}
       className="block relative w-60 h-60"
       style={{ containerType: "inline-size" }}
       {...props}
     >
-      <ColorAreaTrack className="block relative w-full h-full rounded-lg overflow-hidden">
-        <ColorAreaGradient className="block" />
-        <ColorAreaThumb className="absolute size-5 rounded-full border-2 border-white shadow" style={{ transform: "var(--reka-slider-area-thumb-transform)" }}>
-          <ColorAreaThumbX />
-          <ColorAreaThumbY />
-        </ColorAreaThumb>
-      </ColorAreaTrack>
-    </ColorAreaRoot>
+      <ColorArea.Track className="block relative w-full h-full rounded-lg overflow-hidden">
+        <ColorArea.Gradient className="block" />
+        <ColorArea.Thumb className="absolute size-5 rounded-full border-2 border-white shadow" style={{ transform: "var(--reka-slider-area-thumb-transform)" }}>
+          <ColorArea.ThumbX />
+          <ColorArea.ThumbY />
+        </ColorArea.Thumb>
+      </ColorArea.Track>
+    </ColorArea.Root>
   );
 }
 
-const meta: Meta<typeof ColorAreaRoot> = {
+const meta: Meta<typeof ColorArea.Root> = {
   title: "ColorArea",
-  component: ColorAreaRoot,
+  component: ColorArea.Root,
 };
 export default meta;
 

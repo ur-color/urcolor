@@ -37,17 +37,17 @@ function MyRing() {
 
 ## Step 2: Add the root
 
-`ColorRingRoot` manages all the state and interactions. Tell it which color space and channel to control.
+`ColorRing.Root` manages all the state and interactions. Tell it which color space and channel to control.
 
 ```tsx
-import { useColor, ColorRingRoot } from "@urcolor/react"; // [!code ++]
+import { useColor, ColorRing } from "@urcolor/react"; // [!code ++]
 
 function MyRing() {
   const { color, setColor } = useColor("hsl(210, 80%, 50%)");
 
   return (
     // [!code ++:8]
-    <ColorRingRoot
+    <ColorRing.Root
       value={color}
       onValueChange={setColor}
       colorSpace="hsl"
@@ -55,7 +55,7 @@ function MyRing() {
       innerRadius={0.85}
     >
       {/* children go here */}
-    </ColorRingRoot>
+    </ColorRing.Root>
   );
 }
 ```
@@ -66,21 +66,16 @@ function MyRing() {
 
 ## Step 3: Add the track and gradient
 
-`ColorRingTrack` is the interactive area. `ColorRingGradient` renders the circular gradient on a canvas.
+`ColorRing.Track` is the interactive area. `ColorRing.Gradient` renders the circular gradient on a canvas.
 
 ```tsx
-import {
-  useColor,
-  ColorRingRoot,
-  ColorRingTrack, // [!code ++]
-  ColorRingGradient, // [!code ++]
-} from "@urcolor/react";
+import { useColor, ColorRing } from "@urcolor/react";
 
 function MyRing() {
   const { color, setColor } = useColor("hsl(210, 80%, 50%)");
 
   return (
-    <ColorRingRoot
+    <ColorRing.Root
       value={color}
       onValueChange={setColor}
       colorSpace="hsl"
@@ -90,10 +85,10 @@ function MyRing() {
       style={{ containerType: "inline-size" }}
     >
       {/* [!code ++:4] */}
-      <ColorRingTrack className="relative block size-full">
-        <ColorRingGradient className="absolute inset-0 block" />
-      </ColorRingTrack>
-    </ColorRingRoot>
+      <ColorRing.Track className="relative block size-full">
+        <ColorRing.Gradient className="absolute inset-0 block" />
+      </ColorRing.Track>
+    </ColorRing.Root>
   );
 }
 ```
@@ -102,22 +97,16 @@ The root needs `container-type: inline-size` so the component can calculate dime
 
 ## Step 4: Add the thumb
 
-`ColorRingThumb` is the draggable handle. It's positioned automatically along the ring.
+`ColorRing.Thumb` is the draggable handle. It's positioned automatically along the ring.
 
 ```tsx
-import {
-  useColor,
-  ColorRingRoot,
-  ColorRingTrack,
-  ColorRingGradient,
-  ColorRingThumb, // [!code ++]
-} from "@urcolor/react";
+import { useColor, ColorRing } from "@urcolor/react";
 
 function MyRing() {
   const { color, setColor } = useColor("hsl(210, 80%, 50%)");
 
   return (
-    <ColorRingRoot
+    <ColorRing.Root
       value={color}
       onValueChange={setColor}
       colorSpace="hsl"
@@ -126,10 +115,10 @@ function MyRing() {
       className="relative block size-64"
       style={{ containerType: "inline-size" }}
     >
-      <ColorRingTrack className="relative block size-full">
-        <ColorRingGradient className="absolute inset-0 block" />
+      <ColorRing.Track className="relative block size-full">
+        <ColorRing.Gradient className="absolute inset-0 block" />
         {/* [!code ++:8] */}
-        <ColorRingThumb
+        <ColorRing.Thumb
           className="
             size-4 rounded-full border-2 border-white
             shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_2px_4px_rgba(0,0,0,0.3)]
@@ -137,8 +126,8 @@ function MyRing() {
           "
           aria-label="Hue"
         />
-      </ColorRingTrack>
-    </ColorRingRoot>
+      </ColorRing.Track>
+    </ColorRing.Root>
   );
 }
 ```
@@ -152,7 +141,7 @@ All components are completely unstyled — the classes above are just an example
 Use the `innerRadius` prop to control the ring thickness. `0` gives a full circle, `0.9` gives a thin ring:
 
 ```tsx{5}
-<ColorRingRoot
+<ColorRing.Root
   value={color}
   onValueChange={setColor}
   colorSpace="hsl"
@@ -160,7 +149,7 @@ Use the `innerRadius` prop to control the ring thickness. `0` gives a full circl
   channel="h"
 >
   {/* ... */}
-</ColorRingRoot>
+</ColorRing.Root>
 ```
 
 ## Changing start angle
@@ -168,7 +157,7 @@ Use the `innerRadius` prop to control the ring thickness. `0` gives a full circl
 Use `startAngle` to rotate where the ring gradient begins (in degrees):
 
 ```tsx{5}
-<ColorRingRoot
+<ColorRing.Root
   value={color}
   onValueChange={setColor}
   colorSpace="hsl"
@@ -176,7 +165,7 @@ Use `startAngle` to rotate where the ring gradient begins (in degrees):
   channel="h"
 >
   {/* ... */}
-</ColorRingRoot>
+</ColorRing.Root>
 ```
 
 ## Different channels
@@ -184,14 +173,14 @@ Use `startAngle` to rotate where the ring gradient begins (in degrees):
 Switch the `channel` prop to control different color properties. For example, a saturation ring:
 
 ```tsx{5}
-<ColorRingRoot
+<ColorRing.Root
   value={color}
   onValueChange={setColor}
   colorSpace="hsl"
   channel="s"
 >
   {/* ... */}
-</ColorRingRoot>
+</ColorRing.Root>
 ```
 
 ## Listening to changes
@@ -208,7 +197,7 @@ const onColorCommit = (color: Color) => {
   console.log("committed", color.toString("css"));
 };
 
-<ColorRingRoot
+<ColorRing.Root
   value={color}
   onValueChange={onColorChange}
   onValueCommit={onColorCommit}
@@ -216,5 +205,5 @@ const onColorCommit = (color: Color) => {
   channel="h"
 >
   {/* ... */}
-</ColorRingRoot>
+</ColorRing.Root>
 ```

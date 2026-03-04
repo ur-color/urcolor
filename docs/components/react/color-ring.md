@@ -22,13 +22,13 @@ import ColorRingSaturation from './demo/ColorRingSaturation.tsx'
 ## Anatomy
 
 ```tsx
-<ColorRingRoot>
-  <ColorRingTrack>
-    <ColorRingCheckerboard />
-    <ColorRingGradient />
-    <ColorRingThumb />
-  </ColorRingTrack>
-</ColorRingRoot>
+<ColorRing.Root>
+  <ColorRing.Track>
+    <ColorRing.Checkerboard />
+    <ColorRing.Gradient />
+    <ColorRing.Thumb />
+  </ColorRing.Track>
+</ColorRing.Root>
 ```
 
 ## Examples
@@ -61,7 +61,7 @@ Saturation ring slider for adjusting color intensity.
 
 ## API Reference
 
-### ColorRingRoot
+### ColorRing.Root
 
 The root container that manages ring state and color channel binding.
 
@@ -77,11 +77,11 @@ The root container that manages ring state and color channel binding.
 | `onValueChange` | `(color: Color) => void` | — | Called when color changes. |
 | `onValueCommit` | `(color: Color) => void` | — | Called when interaction ends. |
 
-### ColorRingTrack
+### ColorRing.Track
 
 The track container that holds the gradient, checkerboard, and thumb.
 
-### ColorRingGradient
+### ColorRing.Gradient
 
 Renders a ring gradient canvas for the track.
 
@@ -89,11 +89,11 @@ Renders a ring gradient canvas for the track.
 |------|------|---------|-------------|
 | `channelOverrides` | `Record<string, number> \| false` | `{ alpha: 1 }` | Lock specific channels to fixed values in the gradient. |
 
-### ColorRingCheckerboard
+### ColorRing.Checkerboard
 
 Renders a checkerboard pattern behind the gradient to visualize alpha transparency.
 
-### ColorRingThumb
+### ColorRing.Thumb
 
 The draggable thumb element positioned along the ring arc.
 

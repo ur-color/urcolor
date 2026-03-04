@@ -2,31 +2,31 @@ import type { Meta, StoryObj } from "@storybook/react";
 import "internationalized-color/css";
 import { useState } from "react";
 import { Color } from "internationalized-color";
-import { ColorRingRoot, ColorRingTrack, ColorRingGradient, ColorRingThumb } from "./index";
+import * as ColorRing from "./index.parts";
 
-type Story = StoryObj<typeof ColorRingRoot>;
+type Story = StoryObj<typeof ColorRing.Root>;
 
 function RingDemo(props: Record<string, unknown>) {
   const [color, setColor] = useState<Color | undefined>();
   return (
-    <ColorRingRoot
+    <ColorRing.Root
       value={color}
       onValueChange={setColor}
       className="block relative size-60 rounded-full"
       style={{ containerType: "inline-size" }}
       {...props}
     >
-      <ColorRingTrack className="block relative size-full rounded-full overflow-hidden">
-        <ColorRingGradient className="block" />
-        <ColorRingThumb className="size-5 rounded-full border-2 border-white shadow bg-current" />
-      </ColorRingTrack>
-    </ColorRingRoot>
+      <ColorRing.Track className="block relative size-full rounded-full overflow-hidden">
+        <ColorRing.Gradient className="block" />
+        <ColorRing.Thumb className="size-5 rounded-full border-2 border-white shadow bg-current" />
+      </ColorRing.Track>
+    </ColorRing.Root>
   );
 }
 
-const meta: Meta<typeof ColorRingRoot> = {
+const meta: Meta<typeof ColorRing.Root> = {
   title: "ColorRing",
-  component: ColorRingRoot,
+  component: ColorRing.Root,
 };
 export default meta;
 

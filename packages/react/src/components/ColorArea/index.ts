@@ -7,3 +7,5 @@ export { ColorAreaThumbX, type ColorAreaThumbXProps } from "./ColorAreaThumbX";
 export { ColorAreaThumbY, type ColorAreaThumbYProps } from "./ColorAreaThumbY";
 export { ColorAreaRegion, type ColorAreaRegionProps } from "./ColorAreaRegion";
 export { useColorAreaContext } from "./ColorAreaContext";
+
+export * as ColorArea from "./index.parts";

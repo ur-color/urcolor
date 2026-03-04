@@ -21,7 +21,7 @@ import ColorSwatchBasic from './demo/ColorSwatchBasic.tsx'
 ## Anatomy
 
 ```tsx
-<ColorSwatchRoot />
+<ColorSwatch.Root />
 ```
 
 ## Examples
@@ -41,7 +41,7 @@ A set of color swatches, including one with alpha transparency.
 
 ## API Reference
 
-### ColorSwatchRoot
+### ColorSwatch.Root
 
 Renders a color preview with an automatic checkerboard background.
 

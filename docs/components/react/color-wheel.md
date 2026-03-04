@@ -23,11 +23,11 @@ import ColorWheelOKLCh from './demo/ColorWheelOKLCh.tsx'
 ## Anatomy
 
 ```tsx
-<ColorWheelRoot>
-  <ColorWheelCheckerboard />
-  <ColorWheelGradient />
-  <ColorWheelThumb />
-</ColorWheelRoot>
+<ColorWheel.Root>
+  <ColorWheel.Checkerboard />
+  <ColorWheel.Gradient />
+  <ColorWheel.Thumb />
+</ColorWheel.Root>
 ```
 
 ## Examples
@@ -73,7 +73,7 @@ OKLCh color wheel with Hue mapped to angle and Chroma to radius.
 
 ## API Reference
 
-### ColorWheelRoot
+### ColorWheel.Root
 
 The root container that manages wheel state and color channel binding.
 
@@ -89,7 +89,7 @@ The root container that manages wheel state and color channel binding.
 | `onValueChange` | `(color: Color) => void` | — | Called when color changes. |
 | `onValueCommit` | `(color: Color) => void` | — | Called when interaction ends. |
 
-### ColorWheelGradient
+### ColorWheel.Gradient
 
 Renders a polar gradient canvas for the wheel.
 
@@ -97,15 +97,15 @@ Renders a polar gradient canvas for the wheel.
 |------|------|---------|-------------|
 | `channelOverrides` | `Record<string, number> \| false` | `{ alpha: 1 }` | Lock specific channels to fixed values in the gradient. |
 
-### ColorWheelCheckerboard
+### ColorWheel.Checkerboard
 
 Renders a checkerboard pattern behind the gradient to visualize alpha transparency.
 
-### ColorWheelThumb
+### ColorWheel.Thumb
 
 Wrapper for the thumb indicator. Position is set automatically using polar coordinates.
 
-### ColorWheelThumbX / ColorWheelThumbY
+### ColorWheel.ThumbX / ColorWheel.ThumbY
 
 Individual axis thumb elements for angle and radius keyboard navigation.
 

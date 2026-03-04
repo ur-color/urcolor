@@ -1,12 +1,6 @@
 import "internationalized-color/css";
 import { colorSpaces } from "@urcolor/core";
-import {
-  useColor,
-  ColorFieldRoot,
-  ColorFieldInput,
-  ColorFieldIncrement,
-  ColorFieldDecrement,
-} from "@urcolor/react";
+import { ColorField, useColor } from "@urcolor/react";
 
 export default function ColorFieldGuide() {
   const { color, setColor } = useColor("hsl(210, 80%, 50%)");
@@ -22,7 +16,7 @@ export default function ColorFieldGuide() {
           >
             {ch.label}
           </label>
-          <ColorFieldRoot
+          <ColorField.Root
             value={color}
             onValueChange={setColor}
             colorSpace="hsl"
@@ -32,7 +26,7 @@ export default function ColorFieldGuide() {
               border-[var(--vp-c-divider)] bg-[var(--vp-c-bg)]
             "
           >
-            <ColorFieldDecrement
+            <ColorField.Decrement
               className="
                 flex size-8 shrink-0 cursor-pointer items-center justify-center
                 border-none bg-transparent text-lg leading-none text-[var(--vp-c-text-2)]
@@ -43,15 +37,15 @@ export default function ColorFieldGuide() {
               "
             >
               &minus;
-            </ColorFieldDecrement>
-            <ColorFieldInput
+            </ColorField.Decrement>
+            <ColorField.Input
               id={`guide-field-${ch.key}`}
               className="
                 w-0 min-w-0 flex-1 border-none bg-transparent px-0.5 py-1
                 text-center font-mono text-[13px] text-[var(--vp-c-text-1)] outline-none
               "
             />
-            <ColorFieldIncrement
+            <ColorField.Increment
               className="
                 flex size-8 shrink-0 cursor-pointer items-center justify-center
                 border-none bg-transparent text-lg leading-none text-[var(--vp-c-text-2)]
@@ -62,8 +56,8 @@ export default function ColorFieldGuide() {
               "
             >
               +
-            </ColorFieldIncrement>
-          </ColorFieldRoot>
+            </ColorField.Increment>
+          </ColorField.Root>
         </div>
       ))}
     </div>

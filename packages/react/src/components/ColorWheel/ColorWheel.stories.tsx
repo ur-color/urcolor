@@ -2,32 +2,32 @@ import type { Meta, StoryObj } from "@storybook/react";
 import "internationalized-color/css";
 import { useState } from "react";
 import { Color } from "internationalized-color";
-import { ColorWheelRoot, ColorWheelGradient, ColorWheelThumb, ColorWheelThumbX, ColorWheelThumbY } from "./index";
+import * as ColorWheel from "./index.parts";
 
-type Story = StoryObj<typeof ColorWheelRoot>;
+type Story = StoryObj<typeof ColorWheel.Root>;
 
 function WheelDemo(props: Record<string, unknown>) {
   const [color, setColor] = useState<Color | undefined>();
   return (
-    <ColorWheelRoot
+    <ColorWheel.Root
       value={color}
       onValueChange={setColor}
       className="block relative size-60 rounded-full"
       style={{ containerType: "inline-size" }}
       {...props}
     >
-      <ColorWheelGradient className="block" />
-      <ColorWheelThumb className="size-5 rounded-full border-2 border-white shadow bg-current">
-        <ColorWheelThumbX />
-        <ColorWheelThumbY />
-      </ColorWheelThumb>
-    </ColorWheelRoot>
+      <ColorWheel.Gradient className="block" />
+      <ColorWheel.Thumb className="size-5 rounded-full border-2 border-white shadow bg-current">
+        <ColorWheel.ThumbX />
+        <ColorWheel.ThumbY />
+      </ColorWheel.Thumb>
+    </ColorWheel.Root>
   );
 }
 
-const meta: Meta<typeof ColorWheelRoot> = {
+const meta: Meta<typeof ColorWheel.Root> = {
   title: "ColorWheel",
-  component: ColorWheelRoot,
+  component: ColorWheel.Root,
 };
 export default meta;
 

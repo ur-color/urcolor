@@ -1,10 +1,5 @@
 import "internationalized-color/css";
-import {
-  ColorTriangleRoot,
-  ColorTriangleGradient,
-  ColorTriangleThumb,
-  useColor,
-} from "@urcolor/react";
+import { ColorTriangle, useColor } from "@urcolor/react";
 
 export default function ColorTriangleRGB() {
   const { color, setColor, hex } = useColor("hsl(210, 80%, 50%)");
@@ -12,7 +7,7 @@ export default function ColorTriangleRGB() {
   return (
     <>
       <code>{hex}</code>
-      <ColorTriangleRoot
+      <ColorTriangle.Root
         value={color}
         onValueChange={setColor}
         colorSpace="rgb"
@@ -21,15 +16,15 @@ export default function ColorTriangleRGB() {
         channelZ="b"
         className="relative block size-64"
       >
-        <ColorTriangleGradient className="absolute inset-0 block" />
-        <ColorTriangleThumb
+        <ColorTriangle.Gradient className="absolute inset-0 block" />
+        <ColorTriangle.Thumb
           className="
             size-4 rounded-full border-2 border-white
             shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_2px_4px_rgba(0,0,0,0.3)]
             focus-visible:shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_0_0_3px_rgba(66,153,225,0.6)]
           "
         />
-      </ColorTriangleRoot>
+      </ColorTriangle.Root>
     </>
   );
 }

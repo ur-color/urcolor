@@ -4,3 +4,5 @@ export { ColorFieldIncrement, type ColorFieldIncrementProps } from "./ColorField
 export { ColorFieldDecrement, type ColorFieldDecrementProps } from "./ColorFieldDecrement";
 export { ColorFieldSwatch, type ColorFieldSwatchProps } from "./ColorFieldSwatch";
 export { useColorFieldContext } from "./ColorFieldContext";
+
+export * as ColorField from "./index.parts";
