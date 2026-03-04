@@ -7,7 +7,7 @@
     "docs"
   ],
   "scripts": {
-    "build": "bun run --cwd packages/core build && bun run --cwd packages/vue build",
+    "build": "bun run --cwd packages/core build && bun run --cwd packages/vue build && bun run --cwd packages/react build",
     "docs:dev": "bun run --cwd docs dev",
     "docs:build": "bun run build && bun run --cwd docs build && bun run --cwd packages/vue build-storybook && mkdir -p docs/.vitepress/dist/storybook/vue && cp -r packages/vue/storybook-static/* docs/.vitepress/dist/storybook/vue/",
     "docs:preview": "bun run --cwd docs preview",

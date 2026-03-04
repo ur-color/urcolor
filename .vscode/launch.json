@@ -31,6 +31,22 @@
       "skipFiles": [
         "<node_internals>/**"
       ]
+    },
+    {
+      "name": "Storybook (React)",
+      "type": "node",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/packages/react",
+      "runtimeExecutable": "bun",
+      "runtimeArgs": [
+        "run",
+        "storybook",
+        "--ci"
+      ],
+      "console": "integratedTerminal",
+      "skipFiles": [
+        "<node_internals>/**"
+      ]
     }
   ]
 }
