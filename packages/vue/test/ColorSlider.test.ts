@@ -1,9 +1,9 @@
 import type { VueWrapper } from "@vue/test-utils";
 import { mount } from "@vue/test-utils";
-import { beforeEach, describe, expect, it, vi } from "bun:test";
-import { defineComponent, h } from "vue";
+import { afterEach, beforeEach, describe, expect, it, mock, vi } from "bun:test";
+import { defineComponent, h, nextTick } from "vue";
 import { Color } from "@urcolor/core";
-import { ColorSliderRoot, ColorSliderThumb, ColorSliderTrack, injectColorSliderRootContext } from "../src/components/ColorSlider";
+import { ColorSliderGradient, ColorSliderRoot, ColorSliderThumb, ColorSliderTrack, injectColorSliderRootContext } from "../src/components/ColorSlider";
 
 const ColorSlider = defineComponent({
   props: { disabled: { type: Boolean, default: false } },
@@ -93,6 +93,68 @@ describe("given default ColorSlider", () => {
   it("should not render a hidden input when not inside a form", () => {
     expect(wrapper.find("input[name=\"hue\"]").exists()).toBe(false);
   });
+
+  it("should label the thumb with the channel name", () => {
+    const thumb = wrapper.find("[role=\"slider\"]");
+    expect(thumb.attributes("aria-label")).toBe("Hue");
+    expect(thumb.attributes("aria-valuetext")).toBe("180°");
+  });
+});
+
+describe("given a ColorSlider on a non-degree channel", () => {
+  // Saturation formats as a plain rounded number (no unit) in HSL, so this
+  // exercises formatChannelValue's non-degree path — a hardcoded `°` in the
+  // thumb would fail here even though it passes for the hue slider above.
+  let wrapper: VueWrapper;
+
+  beforeEach(() => {
+    document.body.innerHTML = "";
+    wrapper = mount(defineComponent({
+      setup() {
+        return () =>
+          h(ColorSliderRoot, {
+            defaultValue: "hsl(180, 60%, 50%)",
+            colorSpace: "hsl",
+            channel: "s",
+          }, { default: () => h(ColorSliderTrack, null, { default: () => h(ColorSliderThumb) }) });
+      },
+    }), { attachTo: document.body });
+  });
+
+  it("should format aria-valuetext for the saturation channel without a degree sign", () => {
+    const thumb = wrapper.find("[role=\"slider\"]");
+    expect(thumb.attributes("aria-label")).toBe("Saturation");
+    expect(thumb.attributes("aria-valuetext")).toBe("60%");
+  });
+});
+
+describe("given a ColorSlider thumb with a default slot", () => {
+  let wrapper: VueWrapper;
+
+  beforeEach(() => {
+    document.body.innerHTML = "";
+    wrapper = mount(defineComponent({
+      setup() {
+        return () =>
+          h(ColorSliderRoot, {
+            defaultValue: "hsl(180, 50%, 50%)",
+            colorSpace: "hsl",
+            channel: "h",
+          }, {
+            default: () => h(ColorSliderTrack, null, {
+              default: () => h(ColorSliderThumb, null, {
+                default: (slotProps: { channelName: string; channelValue: number }) =>
+                  h("span", { "data-testid": "slot-probe" }, `${slotProps.channelName}:${slotProps.channelValue}`),
+              }),
+            }),
+          });
+      },
+    }), { attachTo: document.body });
+  });
+
+  it("should expose channelName and channelValue on the default slot", () => {
+    expect(wrapper.find("[data-testid=\"slot-probe\"]").text()).toBe("Hue:180");
+  });
 });
 
 describe("given a ColorSlider in a form", () => {
@@ -168,5 +230,129 @@ describe("given a ColorSlider with a dragging probe", () => {
 
     await thumb.trigger("pointerup", { pointerId: 1 });
     expect(wrapper.find("[data-testid=\"dragging-probe\"]").attributes("data-dragging")).toBe("false");
+  });
+});
+
+describe("given a ColorSlider with a gradient, while dragging", () => {
+  // ColorSliderGradient draws via WebGL, which happy-dom does not implement
+  // (canvas.getContext("webgl") returns null). Stub just enough of the API
+  // surface for drawLinearGradient's init + per-frame calls to succeed, and
+  // spy on `viewport` — it is called exactly once per actual repaint, unlike
+  // getContext which is only called once (the WebGL program is cached per
+  // canvas) — so counting it is the only reliable way to observe repaints.
+  let originalGetContextDescriptor: PropertyDescriptor | undefined;
+  let viewportSpy: ReturnType<typeof mock>;
+
+  function stubGl() {
+    return {
+      VERTEX_SHADER: 1,
+      FRAGMENT_SHADER: 2,
+      ARRAY_BUFFER: 3,
+      STATIC_DRAW: 4,
+      TRIANGLE_STRIP: 5,
+      createShader: () => ({}),
+      shaderSource: () => {},
+      compileShader: () => {},
+      createProgram: () => ({}),
+      attachShader: () => {},
+      linkProgram: () => {},
+      useProgram: () => {},
+      createBuffer: () => ({}),
+      bindBuffer: () => {},
+      bufferData: () => {},
+      getAttribLocation: () => 0,
+      enableVertexAttribArray: () => {},
+      vertexAttribPointer: () => {},
+      getUniformLocation: () => ({}),
+      uniform4fv: () => {},
+      uniform1fv: () => {},
+      uniform1i: () => {},
+      uniform1f: () => {},
+      viewport: viewportSpy,
+      drawArrays: () => {},
+    };
+  }
+
+  beforeEach(() => {
+    document.body.innerHTML = "";
+
+    // happy-dom's stub ResizeObserver never fires, so the canvas would never
+    // draw at all — real ResizeObserver invokes its callback once as soon as
+    // observe() is called, even absent an actual resize. Reproduce that so
+    // the gradient gets its normal initial paint.
+    globalThis.ResizeObserver = class ResizeObserver {
+      callback: ResizeObserverCallback;
+      constructor(callback: ResizeObserverCallback) {
+        this.callback = callback;
+      }
+
+      observe(target: Element) {
+        this.callback([{ target } as ResizeObserverEntry], this as unknown as globalThis.ResizeObserver);
+      }
+
+      unobserve() {}
+      disconnect() {}
+    };
+
+    originalGetContextDescriptor = Object.getOwnPropertyDescriptor(HTMLCanvasElement.prototype, "getContext");
+    viewportSpy = mock(() => {});
+    const originalGetContext = originalGetContextDescriptor?.value as ((type: string, options?: unknown) => unknown) | undefined;
+    Object.defineProperty(HTMLCanvasElement.prototype, "getContext", {
+      configurable: true,
+      value(this: HTMLCanvasElement, type: string, options?: unknown) {
+        if (type === "webgl") return stubGl() as unknown as WebGLRenderingContext;
+        return originalGetContext?.call(this, type, options);
+      },
+    });
+  });
+
+  afterEach(() => {
+    if (originalGetContextDescriptor)
+      Object.defineProperty(HTMLCanvasElement.prototype, "getContext", originalGetContextDescriptor);
+  });
+
+  function mountSliderWithGradient() {
+    return mount(defineComponent({
+      setup() {
+        return () =>
+          h(ColorSliderRoot, {
+            defaultValue: "hsl(180, 50%, 50%)",
+            colorSpace: "hsl",
+            channel: "h",
+          }, {
+            default: () => [
+              h(ColorSliderTrack, null, { default: () => h(ColorSliderThumb) }),
+              h(ColorSliderGradient),
+            ],
+          });
+      },
+    }), { attachTo: document.body });
+  }
+
+  it("should not repaint the gradient while dragging, and repaint exactly once when the drag ends", async () => {
+    const wrapper = mountSliderWithGradient();
+    await nextTick();
+    await nextTick();
+
+    const initialPaintCount = viewportSpy.mock.calls.length;
+    expect(initialPaintCount).toBeGreaterThan(0);
+
+    const thumb = wrapper.find("[role=\"slider\"]");
+    await thumb.trigger("pointerdown", { pointerId: 1 });
+
+    // Change the channel value mid-drag via a keyboard step. This mutates
+    // colorRef, which feeds autoColors — one of the gradient's watched
+    // sources — so absent the isDragging guard this would trigger a repaint.
+    await thumb.trigger("keydown", { key: "ArrowRight" });
+    await nextTick();
+    await nextTick();
+
+    expect(viewportSpy.mock.calls.length).toBe(initialPaintCount);
+
+    await thumb.trigger("pointerup", { pointerId: 1 });
+    await nextTick();
+    await nextTick();
+
+    expect(viewportSpy.mock.calls.length).toBe(initialPaintCount + 1);
   });
 });

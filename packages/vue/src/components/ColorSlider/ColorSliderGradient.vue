@@ -160,9 +160,17 @@ useResizeObserver(canvasRef, () => {
 
 watch(
   () => [props.colors, effectiveAngle.value, effectiveMirrorX.value, effectiveMirrorY.value, props.interpolationSpace, props.channelOverrides, autoColors.value],
-  () => render(),
+  () => {
+    if (!rootContext.isDragging.value)
+      render();
+  },
   { flush: "post", deep: true, immediate: true },
 );
+
+watch(() => rootContext.isDragging.value, (dragging, wasDragging) => {
+  if (wasDragging && !dragging)
+    render();
+});
 
 onBeforeUnmount(() => {
   const canvas = canvasRef.value;

@@ -5,14 +5,34 @@ export interface ColorSliderThumbProps extends /* @vue-ignore */ SliderThumbProp
 </script>
 
 <script setup lang="ts">
-import { SliderThumb, useForwardExpose } from "reka-ui";
+import { computed } from "vue";
+import { SliderThumb } from "reka-ui";
+import { channelLabel, formatChannelValue } from "../../shared/channel-labels";
+import { injectColorSliderRootContext } from "./ColorSliderRoot.vue";
 
-defineProps<ColorSliderThumbProps>();
-useForwardExpose();
+withDefaults(defineProps<ColorSliderThumbProps>(), { as: "span" });
+
+const rootContext = injectColorSliderRootContext();
+
+const channelName = computed(() => channelLabel(rootContext.colorSpace.value, rootContext.channel.value));
+const channelValue = computed(() => rootContext.channelValue.value);
+const ariaValueText = computed(() => formatChannelValue(rootContext.colorSpace.value, rootContext.channel.value, channelValue.value));
+
+defineSlots<{
+  default?: (props: { channelName: string; channelValue: number }) => any;
+}>();
 </script>
 
 <template>
-  <SliderThumb>
-    <slot />
+  <SliderThumb
+    :as="as"
+    :as-child="asChild"
+    :aria-label="($attrs['aria-label'] as string) || channelName"
+    :aria-valuetext="ariaValueText"
+  >
+    <slot
+      :channel-name="channelName"
+      :channel-value="channelValue"
+    />
   </SliderThumb>
 </template>
