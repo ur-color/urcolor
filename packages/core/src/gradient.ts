@@ -1,5 +1,5 @@
-import "internationalized-color/css";
-import { Color } from "internationalized-color";
+import { Color } from "./color/color";
+import type { SpaceId } from "./color/types";
 import { barycentricCoords, type Point } from "./geometry";
 
 const VERTEX_SHADER = `
@@ -81,14 +81,8 @@ function initGL(canvas: HTMLCanvasElement): GradientProgram {
 }
 
 function colorToVec4(color: Color, alpha = false): [number, number, number, number] {
-  const rgb = color.to("rgb");
-  if (!rgb) throw new Error(`Cannot convert ${color.mode} to rgb`);
-  return [
-    rgb.get("r", 0),
-    rgb.get("g", 0),
-    rgb.get("b", 0),
-    alpha ? (rgb.alpha ?? 1) : 1,
-  ];
+  const rgb = color.to("srgb");
+  return [rgb.get("r"), rgb.get("g"), rgb.get("b"), alpha ? rgb.alpha : 1];
 }
 
 const LINEAR_FRAGMENT_SHADER = `
@@ -248,7 +242,7 @@ export function drawLinearGradient(
  * Interpolate between an array of colors in a given color space,
  * producing `steps` intermediate sRGB Color values.
  */
-export function interpolateStops(colors: Color[], steps: number, space: string): Color[] {
+export function interpolateStops(colors: Color[], steps: number, space: SpaceId): Color[] {
   if (colors.length < 2) return [...colors];
   const result: Color[] = [];
   for (let i = 0; i < steps; i++) {
@@ -258,11 +252,7 @@ export function interpolateStops(colors: Color[], steps: number, space: string):
     const localT = segment - idx;
     const a = colors[idx]!;
     const b = colors[idx + 1]!;
-    const mixed = a.mix(b, localT, space);
-    if (mixed) {
-      const rgb = mixed.to("rgb");
-      result.push(rgb ?? mixed);
-    }
+    result.push(a.mix(b, localT, { space }).to("srgb"));
   }
   return result;
 }
@@ -278,7 +268,7 @@ export function sampleBilinearGrid(
   br: Color,
   w: number,
   h: number,
-  space: string,
+  space: SpaceId,
   alpha = false,
 ): Uint8ClampedArray {
   const data = new Uint8ClampedArray(w * h * 4);
@@ -287,18 +277,14 @@ export function sampleBilinearGrid(
     for (let x = 0; x < w; x++) {
       const vx = x / (w - 1);
       // Bilinear: mix top-left/top-right, bottom-left/bottom-right, then mix results
-      const topMix = tl.mix(tr, vx, space);
-      const botMix = bl.mix(br, vx, space);
-      if (!topMix || !botMix) continue;
-      const final = topMix.mix(botMix, vy, space);
-      if (!final) continue;
-      const rgb = final.to("rgb");
-      if (!rgb) continue;
+      const topMix = tl.mix(tr, vx, { space });
+      const botMix = bl.mix(br, vx, { space });
+      const rgb = topMix.mix(botMix, vy, { space }).to("srgb");
       const idx = (y * w + x) * 4;
-      data[idx] = Math.round(Math.max(0, Math.min(1, rgb.get("r", 0))) * 255);
-      data[idx + 1] = Math.round(Math.max(0, Math.min(1, rgb.get("g", 0))) * 255);
-      data[idx + 2] = Math.round(Math.max(0, Math.min(1, rgb.get("b", 0))) * 255);
-      data[idx + 3] = alpha ? Math.round((rgb.alpha ?? 1) * 255) : 255;
+      data[idx] = Math.round(Math.max(0, Math.min(1, rgb.get("r"))) * 255);
+      data[idx + 1] = Math.round(Math.max(0, Math.min(1, rgb.get("g"))) * 255);
+      data[idx + 2] = Math.round(Math.max(0, Math.min(1, rgb.get("b"))) * 255);
+      data[idx + 3] = alpha ? Math.round(rgb.alpha * 255) : 255;
     }
   }
   return data;
@@ -311,7 +297,7 @@ export function sampleBilinearGrid(
  */
 export function sampleChannelGrid(
   baseColor: Color,
-  colorSpace: string,
+  colorSpace: SpaceId,
   xChannel: string,
   yChannel: string,
   xMin: number,
@@ -329,19 +315,14 @@ export function sampleChannelGrid(
     for (let x = 0; x < w; x++) {
       const vx = x / (w - 1);
       const xVal = xMin + vx * (xMax - xMin);
-      const c = baseColor.set({
-        mode: colorSpace,
-        [xChannel]: xVal,
-        [yChannel]: yVal,
-      });
-      if (!c) continue;
-      const rgb = c.to("rgb");
-      if (!rgb) continue;
+      const rgb = baseColor
+        .with({ space: colorSpace, [xChannel]: xVal, [yChannel]: yVal })
+        .to("srgb");
       const idx = (y * w + x) * 4;
-      data[idx] = Math.round(Math.max(0, Math.min(1, rgb.get("r", 0))) * 255);
-      data[idx + 1] = Math.round(Math.max(0, Math.min(1, rgb.get("g", 0))) * 255);
-      data[idx + 2] = Math.round(Math.max(0, Math.min(1, rgb.get("b", 0))) * 255);
-      data[idx + 3] = alpha ? Math.round((rgb.alpha ?? 1) * 255) : 255;
+      data[idx] = Math.round(Math.max(0, Math.min(1, rgb.get("r"))) * 255);
+      data[idx + 1] = Math.round(Math.max(0, Math.min(1, rgb.get("g"))) * 255);
+      data[idx + 2] = Math.round(Math.max(0, Math.min(1, rgb.get("b"))) * 255);
+      data[idx + 3] = alpha ? Math.round(rgb.alpha * 255) : 255;
     }
   }
   return data;
@@ -349,7 +330,7 @@ export function sampleChannelGrid(
 
 export function sampleTriangleGrid(
   baseColor: Color,
-  colorSpace: string,
+  colorSpace: SpaceId,
   xChannel: string,
   yChannel: string,
   xMin: number,
@@ -400,15 +381,12 @@ export function sampleTriangleGrid(
         updates[yChannel] = yVal;
       }
 
-      const c = baseColor.set({ mode: colorSpace, ...updates });
-      if (!c) continue;
-      const rgb = c.to("rgb");
-      if (!rgb) continue;
+      const rgb = baseColor.with({ space: colorSpace, ...updates }).to("srgb");
       const idx = (py * w + px) * 4;
-      data[idx] = Math.round(Math.max(0, Math.min(1, rgb.get("r", 0))) * 255);
-      data[idx + 1] = Math.round(Math.max(0, Math.min(1, rgb.get("g", 0))) * 255);
-      data[idx + 2] = Math.round(Math.max(0, Math.min(1, rgb.get("b", 0))) * 255);
-      data[idx + 3] = alpha ? Math.round((rgb.alpha ?? 1) * 255) : 255;
+      data[idx] = Math.round(Math.max(0, Math.min(1, rgb.get("r"))) * 255);
+      data[idx + 1] = Math.round(Math.max(0, Math.min(1, rgb.get("g"))) * 255);
+      data[idx + 2] = Math.round(Math.max(0, Math.min(1, rgb.get("b"))) * 255);
+      data[idx + 3] = alpha ? Math.round(rgb.alpha * 255) : 255;
     }
   }
   return data;
@@ -416,7 +394,7 @@ export function sampleTriangleGrid(
 
 export function samplePolarGrid(
   baseColor: Color,
-  colorSpace: string,
+  colorSpace: SpaceId,
   angleChannel: string,
   radiusChannel: string,
   angleMin: number,
@@ -442,19 +420,14 @@ export function samplePolarGrid(
       const angleFrac = angle / (2 * Math.PI);
       const angleVal = angleMin + angleFrac * (angleMax - angleMin);
       const radiusVal = radiusMin + r * (radiusMax - radiusMin);
-      const c = baseColor.set({
-        mode: colorSpace,
-        [angleChannel]: angleVal,
-        [radiusChannel]: radiusVal,
-      });
-      if (!c) continue;
-      const rgb = c.to("rgb");
-      if (!rgb) continue;
+      const rgb = baseColor
+        .with({ space: colorSpace, [angleChannel]: angleVal, [radiusChannel]: radiusVal })
+        .to("srgb");
       const idx = (y * w + x) * 4;
-      data[idx] = Math.round(Math.max(0, Math.min(1, rgb.get("r", 0))) * 255);
-      data[idx + 1] = Math.round(Math.max(0, Math.min(1, rgb.get("g", 0))) * 255);
-      data[idx + 2] = Math.round(Math.max(0, Math.min(1, rgb.get("b", 0))) * 255);
-      data[idx + 3] = alpha ? Math.round((rgb.alpha ?? 1) * 255) : 255;
+      data[idx] = Math.round(Math.max(0, Math.min(1, rgb.get("r"))) * 255);
+      data[idx + 1] = Math.round(Math.max(0, Math.min(1, rgb.get("g"))) * 255);
+      data[idx + 2] = Math.round(Math.max(0, Math.min(1, rgb.get("b"))) * 255);
+      data[idx + 3] = alpha ? Math.round(rgb.alpha * 255) : 255;
     }
   }
   return data;
@@ -462,7 +435,7 @@ export function samplePolarGrid(
 
 export function sampleConicRing(
   baseColor: Color,
-  colorSpace: string,
+  colorSpace: SpaceId,
   channel: string,
   channelMin: number,
   channelMax: number,
@@ -483,15 +456,12 @@ export function sampleConicRing(
       if (angle < 0) angle += 2 * Math.PI;
       const frac = angle / (2 * Math.PI);
       const val = channelMin + frac * (channelMax - channelMin);
-      const c = baseColor.set({ mode: colorSpace, [channel]: val });
-      if (!c) continue;
-      const rgb = c.to("rgb");
-      if (!rgb) continue;
+      const rgb = baseColor.with({ space: colorSpace, [channel]: val }).to("srgb");
       const idx = (y * w + x) * 4;
-      data[idx] = Math.round(Math.max(0, Math.min(1, rgb.get("r", 0))) * 255);
-      data[idx + 1] = Math.round(Math.max(0, Math.min(1, rgb.get("g", 0))) * 255);
-      data[idx + 2] = Math.round(Math.max(0, Math.min(1, rgb.get("b", 0))) * 255);
-      data[idx + 3] = alpha ? Math.round((rgb.alpha ?? 1) * 255) : 255;
+      data[idx] = Math.round(Math.max(0, Math.min(1, rgb.get("r"))) * 255);
+      data[idx + 1] = Math.round(Math.max(0, Math.min(1, rgb.get("g"))) * 255);
+      data[idx + 2] = Math.round(Math.max(0, Math.min(1, rgb.get("b"))) * 255);
+      data[idx + 3] = alpha ? Math.round(rgb.alpha * 255) : 255;
     }
   }
   return data;
