@@ -7,8 +7,9 @@ export { translations, type ChannelTranslations } from "./channels";
 // Colour-name sources.
 import { registerSource } from "./engine/registry";
 import { uwdataSource } from "./sources/uwdata/source";
+import { uwdataChunks } from "./sources/uwdata/chunks";
 
-registerSource(uwdataSource, {});
+registerSource(uwdataSource, uwdataChunks);
 
 export { listSources, getSource } from "./engine/registry";
 export type { LanguageCoverage, NameSource } from "./engine/types";

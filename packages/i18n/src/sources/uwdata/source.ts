@@ -1,4 +1,5 @@
 import type { NameSource } from "../../engine/types";
+import meta from "../../data/uwdata/meta.json";
 
 export const UWDATA_COMMIT = "f0d3e30db9e4b2c3b703bde0d816043eb48a6cb5";
 
@@ -15,5 +16,5 @@ export const uwdataSource: NameSource = {
     "We represent the color labels provided by the participants in our study, which may include "
     + "misspellings, but also whatever racial biases they have (e.g., the color 'skin'). This is "
     + "not meant to be a prescriptive definition of what colors fit what labels.",
-  languages: {},
+  languages: meta.languages as NameSource["languages"],
 };

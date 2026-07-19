@@ -187,6 +187,16 @@ describe("parseBasicInfo", () => {
     expect(() => parseBasicInfo(csv)).toThrow(/avgFullL/);
   });
 
+  it("parses a blank avgFullL/avgFullA/avgFullB as NaN rather than throwing", () => {
+    // Real upstream data: terms with too few full-colour samples to average
+    // ship with these three cells empty, not missing or malformed.
+    const csv = `${header}\nko,파란색,파랑,,,\n`;
+    const rows = parseBasicInfo(csv);
+    expect(rows[0]?.avgFullL).toBeNaN();
+    expect(rows[0]?.avgFullA).toBeNaN();
+    expect(rows[0]?.avgFullB).toBeNaN();
+  });
+
   it("throws SchemaError naming the row and column counts when a row has fewer fields than the header", () => {
     const csv = `${header}\nko,파란색,파랑,0.52,-0.04\n`;
     expect(() => parseBasicInfo(csv)).toThrow(/expected 6 columns, got 5/);

@@ -23,10 +23,13 @@ export const FULL_LANGS = [
   "de", "en", "es", "fa", "fi", "fr", "ko", "nl", "pl", "pt", "ro", "ru", "sv", "zh",
 ];
 
-export const HUE_LANGS = [
-  "ar", "bg", "ca", "cs", "da", "el", "et", "he", "hi", "hr", "hu", "id", "it", "ja",
-  "ka", "lt", "mk", "ms", "nb", "sk", "sl", "sr", "th", "tr", "uk", "ur", "vi",
-];
+// Upstream's basic_colors_info directory lists 41 languages, but at this pinned
+// commit only these 6 (beyond the 14 FULL_LANGS) actually have entries in
+// hue_color_names_binned_72.json — the other 21 have centroid data only, with
+// no binned name data at any granularity this package uses. Verified against
+// the raw file: the 21 excluded languages are bg, ca, cs, et, he, hi, hr, id,
+// ja, ka, lt, mk, ms, nb, sk, sl, sr, th, uk, ur, vi.
+export const HUE_LANGS = ["ar", "da", "el", "hu", "it", "tr"];
 
 const FULL_PATH = "model/binned_full_colors/full_color_names_binned_0.05.json";
 const HUE_PATH = "model/binned_hue_colors/hue_color_names_binned_72.json";

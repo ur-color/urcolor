@@ -36,8 +36,11 @@ export interface RawBasicRow {
   lang_abv: string;
   commonName: string;
   simplifiedName: string;
+  /** `NaN` when upstream left the cell blank (no full-colour centroid computed for this term). */
   avgFullL: number;
+  /** `NaN` when upstream left the cell blank (no full-colour centroid computed for this term). */
   avgFullA: number;
+  /** `NaN` when upstream left the cell blank (no full-colour centroid computed for this term). */
   avgFullB: number;
 }
 
@@ -93,6 +96,18 @@ function requireFinite(value: unknown, where: string, field: string): number {
     );
   }
   return parsed;
+}
+
+/**
+ * Like {@link requireFinite}, but a blank cell is a legitimate "no centroid
+ * computed for this term" rather than schema drift: upstream leaves
+ * `avgFullL`/`avgFullA`/`avgFullB` empty for terms with too few full-colour
+ * samples to average. Any *non*-blank, non-numeric value (e.g. `"N/A"`)
+ * still throws — that would be real drift.
+ */
+function optionalFinite(value: unknown, where: string, field: string): number {
+  if (value === undefined || (typeof value === "string" && value.trim().length === 0)) return NaN;
+  return requireFinite(value, where, field);
 }
 
 export function parseFullBinned(json: string): RawFullRecord[] {
@@ -216,9 +231,9 @@ export function parseBasicInfo(csv: string): RawBasicRow[] {
       lang_abv: requireString(fields[index("lang_abv")], where, "lang_abv"),
       commonName: requireString(fields[index("commonName")], where, "commonName"),
       simplifiedName: requireString(fields[index("simplifiedName")], where, "simplifiedName"),
-      avgFullL: requireFinite(fields[index("avgFullL")], where, "avgFullL"),
-      avgFullA: requireFinite(fields[index("avgFullA")], where, "avgFullA"),
-      avgFullB: requireFinite(fields[index("avgFullB")], where, "avgFullB"),
+      avgFullL: optionalFinite(fields[index("avgFullL")], where, "avgFullL"),
+      avgFullA: optionalFinite(fields[index("avgFullA")], where, "avgFullA"),
+      avgFullB: optionalFinite(fields[index("avgFullB")], where, "avgFullB"),
     };
   });
 }
