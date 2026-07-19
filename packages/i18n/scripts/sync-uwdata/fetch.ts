@@ -48,6 +48,15 @@ export async function download(path: string): Promise<string> {
   return response.text();
 }
 
+function requireObject(value: unknown, where: string): Record<string, unknown> {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    throw new SchemaError(
+      `Upstream schema drift in ${where}: expected an object, got ${JSON.stringify(value)}.`,
+    );
+  }
+  return value as Record<string, unknown>;
+}
+
 function requireKeys(record: Record<string, unknown>, keys: string[], where: string): void {
   const missing = keys.filter(key => record[key] === undefined);
   if (missing.length > 0) {
@@ -59,7 +68,7 @@ function requireKeys(record: Record<string, unknown>, keys: string[], where: str
 }
 
 function requireString(value: unknown, where: string, field: string): string {
-  if (typeof value !== "string" || value.length === 0) {
+  if (typeof value !== "string" || value.trim().length === 0) {
     throw new SchemaError(
       `Upstream schema drift in ${where}: ${field} must be a non-empty string, got ${JSON.stringify(value)}.`,
     );
@@ -85,8 +94,8 @@ export function parseFullBinned(json: string): RawFullRecord[] {
   }
 
   return parsed.map((raw, index) => {
-    const record = raw as Record<string, unknown>;
     const where = `full_color_names_binned[${index}]`;
+    const record = requireObject(raw, where);
     requireKeys(
       record,
       ["langAbv", "term", "commonTerm", "binL", "binA", "binB", "pTC"],
@@ -113,9 +122,10 @@ export function parseHueBinned(json: string): Record<string, Record<string, RawH
   const result: Record<string, Record<string, RawHueTerm>> = {};
   for (const [lang, termsRaw] of Object.entries(parsed as Record<string, unknown>)) {
     const terms: Record<string, RawHueTerm> = {};
-    for (const [term, valueRaw] of Object.entries(termsRaw as Record<string, unknown>)) {
-      const value = valueRaw as Record<string, unknown>;
+    const termsRecord = requireObject(termsRaw, `hue[${lang}]`);
+    for (const [term, valueRaw] of Object.entries(termsRecord)) {
       const where = `hue[${lang}][${term}]`;
+      const value = requireObject(valueRaw, where);
       requireKeys(value, ["simplifiedName", "commonName", "bins"], where);
       if (!Array.isArray(value.bins)) {
         throw new SchemaError(`Upstream schema drift in ${where}: bins is not an array.`);
@@ -125,7 +135,7 @@ export function parseHueBinned(json: string): Record<string, Record<string, RawH
         commonName: requireString(value.commonName, where, "commonName"),
         bins: value.bins.map((bin, binIndex) => {
           const binWhere = `${where}.bins[${binIndex}]`;
-          const binRecord = bin as Record<string, unknown>;
+          const binRecord = requireObject(bin, binWhere);
           return { pTC: requireFinite(binRecord.pTC, binWhere, "pTC") };
         }),
       };
