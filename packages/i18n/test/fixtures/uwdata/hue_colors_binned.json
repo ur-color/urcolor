@@ -1,0 +1,11 @@
+{
+  "ar": {
+    "أحمر": {
+      "simplifiedName": "أحمر",
+      "commonName": "أحمر",
+      "totalColorFraction": 0.056,
+      "cnt": 50,
+      "bins": [{"cnt":32,"pCT":0.54,"pTC":0.54},{"cnt":4,"pCT":0.07,"pTC":0.09}]
+    }
+  }
+}
