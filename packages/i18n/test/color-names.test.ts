@@ -114,6 +114,30 @@ describe("reverse lookup", () => {
   });
 });
 
+describe("colorOf: Unicode normalisation (NFC/NFD)", () => {
+  // Upstream shipped some Hangul terms in NFD (decomposed); anything a
+  // caller types, pastes, or writes as a source literal is NFC (composed).
+  // Built from explicit code points, not source literals, so the fixture's
+  // normalisation form can't be silently altered by an editor or git filter.
+  // Real term: Korean "파랑" ("blue"), present in the actual generated ko
+  // chunk — a synthetic fixture would not exercise the real data path.
+  const NFC_TERM = String.fromCharCode(0xd30c, 0xb791);
+  const NFD_TERM = String.fromCharCode(0x1111, 0x1161, 0x1105, 0x1161, 0x11bc);
+
+  it("resolves a Korean term passed in both NFC and NFD form to the same colour", async () => {
+    expect(NFC_TERM).not.toBe(NFD_TERM);
+    expect(NFD_TERM.normalize("NFC")).toBe(NFC_TERM);
+
+    const names = await ColorNames.load("ko", { source: "uwdata" });
+    const viaNfc = names.colorOf(NFC_TERM);
+    const viaNfd = names.colorOf(NFD_TERM);
+
+    expect(viaNfc).toBeInstanceOf(Color);
+    expect(viaNfd).toBeInstanceOf(Color);
+    expect(viaNfd?.to("oklab").coords).toEqual(viaNfc?.to("oklab").coords);
+  });
+});
+
 describe("supportedLocalesOf", () => {
   it("filters requested tags to those the source covers", () => {
     const supported = ColorNames.supportedLocalesOf(["ko-KR", "xh", "de"], { source: "uwdata" });
@@ -134,8 +158,10 @@ describe("known limitation: white falls back into a pale chromatic bin", () => {
     const result = names.resolve(WHITE);
 
     expect(result.coverage).toBe("nearest");
-    // Source data stores Hangul in NFD; normalize before comparing so the
-    // assertion isn't sensitive to Unicode composition form.
+    // Shipped data is normalised to NFC at generation time (see
+    // scripts/sync-uwdata/transform.ts), but normalize before comparing
+    // anyway so this assertion isn't sensitive to the composition form of
+    // the literal below, wherever it's read from.
     expect(result.name?.normalize("NFC")).toBe("연분홍색".normalize("NFC"));
     expect(result.term?.normalize("NFC")).toBe("연분홍".normalize("NFC"));
     // Measured distance from #ffffff's Oklab bin to the nearest populated

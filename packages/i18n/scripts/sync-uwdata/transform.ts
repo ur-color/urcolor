@@ -12,13 +12,24 @@ function centroidIndex(centroids: RawBasicRow[]): Map<string, [number, number, n
   const map = new Map<string, [number, number, number]>();
   for (const row of centroids) {
     if (Number.isFinite(row.avgFullL) && Number.isFinite(row.avgFullA) && Number.isFinite(row.avgFullB)) {
-      map.set(row.simplifiedName, [row.avgFullL, row.avgFullA, row.avgFullB]);
+      // Upstream ships some terms in NFD; normalise so lookups from
+      // TermTable.indexOf (which normalises to NFC before matching) hit.
+      map.set(row.simplifiedName.normalize("NFC"), [row.avgFullL, row.avgFullA, row.avgFullB]);
     }
   }
   return map;
 }
 
-/** Interns terms into a shared table so bins can reference them by index. */
+/**
+ * Interns terms into a shared table so bins can reference them by index.
+ *
+ * Upstream ships some colour terms in Unicode NFD (decomposed) form while
+ * everything a consumer types, pastes, or writes as a source literal is NFC
+ * (composed) — the two render identically but compare unequal with `===`.
+ * Both `term` and `name` are normalised to NFC before interning, so shipped
+ * data is always NFC and two upstream spellings differing only by
+ * normalisation form collapse to a single entry instead of two.
+ */
 class TermTable {
   readonly entries: TermEntry[] = [];
   readonly #indices = new Map<string, number>();
@@ -26,14 +37,17 @@ class TermTable {
   constructor(private readonly centroids: Map<string, [number, number, number]>) {}
 
   indexOf(term: string, name: string): number {
-    const existing = this.#indices.get(term);
+    const normalizedTerm = term.normalize("NFC");
+    const normalizedName = name.normalize("NFC");
+
+    const existing = this.#indices.get(normalizedTerm);
     if (existing !== undefined) return existing;
 
     // When the same term recurs with a different display name (commonTerm),
     // the first-seen display name wins; subsequent recurrences are ignored.
     const index = this.entries.length;
-    this.entries.push([term, name, this.centroids.get(term) ?? null]);
-    this.#indices.set(term, index);
+    this.entries.push([normalizedTerm, normalizedName, this.centroids.get(normalizedTerm) ?? null]);
+    this.#indices.set(normalizedTerm, index);
     return index;
   }
 }

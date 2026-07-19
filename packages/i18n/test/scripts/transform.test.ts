@@ -143,6 +143,74 @@ describe("TermTable.indexOf (display-name collision policy)", () => {
   });
 });
 
+describe("TermTable.indexOf (Unicode normalisation)", () => {
+  // Upstream ships some colour terms in NFD (decomposed); anything a caller
+  // types, pastes, or writes as a source literal is NFC (composed). Built
+  // from explicit code points (not source literals) so the fixture's
+  // normalisation form can't be silently altered by an editor or git filter.
+  // Real example: Korean "파랑" ("blue"). Code points per the bug report.
+  const NFD_TERM = String.fromCharCode(0x1111, 0x1161, 0x1105, 0x1161, 0x11bc);
+  const NFC_TERM = String.fromCharCode(0xd30c, 0xb791);
+  const NFD_NAME = String.fromCharCode(0x1111, 0x1161, 0x1105, 0x1161, 0x11ab, 0x1109, 0x1162, 0x11a8);
+
+  it("normalises NFD term and name input to NFC on the way in", () => {
+    expect(NFD_TERM).not.toBe(NFC_TERM);
+    expect(NFD_TERM.normalize("NFC")).toBe(NFC_TERM);
+
+    const records: RawFullRecord[] = [
+      { langAbv: "test", term: NFD_TERM, commonTerm: NFD_TERM, binL: 10, binA: 0, binB: 0, pTC: 0.5 },
+    ];
+    const chunk = buildFullChunk("test", records, []);
+
+    expect(chunk.terms[0]?.[0]).toBe(NFC_TERM);
+    expect(chunk.terms[0]?.[0]).toBe(chunk.terms[0]?.[0]?.normalize("NFC"));
+    expect(chunk.terms[0]?.[1]).toBe(NFC_TERM);
+    expect(chunk.terms[0]?.[1]).toBe(chunk.terms[0]?.[1]?.normalize("NFC"));
+  });
+
+  it("interns NFD and NFC spellings of the same term to a single entry, not two", () => {
+    const records: RawFullRecord[] = [
+      { langAbv: "test", term: NFD_TERM, commonTerm: "firstName", binL: 10, binA: 0, binB: 0, pTC: 0.5 },
+      { langAbv: "test", term: NFC_TERM, commonTerm: "secondName", binL: 10, binA: 1, binB: 1, pTC: 0.3 },
+    ];
+    const chunk = buildFullChunk("test", records, []);
+
+    expect(chunk.terms).toHaveLength(1);
+    expect(chunk.terms[0]?.[0]).toBe(NFC_TERM);
+    // First-seen display name wins, per the existing interning policy.
+    expect(chunk.terms[0]?.[1]).toBe("firstName");
+    // Both records' bins reference the same interned index.
+    expect(chunk.bins["10,0,0"]?.[0]?.[0]).toBe(0);
+    expect(chunk.bins["10,1,1"]?.[0]?.[0]).toBe(0);
+  });
+
+  it("normalises a centroid's NFD simplifiedName so an NFD term still finds its centroid", () => {
+    const records: RawFullRecord[] = [
+      { langAbv: "test", term: NFD_TERM, commonTerm: NFD_NAME, binL: 10, binA: 0, binB: 0, pTC: 0.5 },
+    ];
+    const centroids: RawBasicRow[] = [
+      { lang_abv: "test", commonName: NFD_NAME, simplifiedName: NFD_TERM, avgFullL: 0.5, avgFullA: 0.1, avgFullB: 0.2 },
+    ];
+    const chunk = buildFullChunk("test", records, centroids);
+
+    expect(chunk.terms[0]?.[2]).toEqual([0.5, 0.1, 0.2]);
+  });
+
+  it("normalises NFD term and name in buildHueChunk too", () => {
+    const terms: Record<string, RawHueTerm> = {
+      [NFD_TERM]: {
+        simplifiedName: NFD_TERM,
+        commonName: NFD_NAME,
+        bins: [{ pTC: 0.5 }],
+      },
+    };
+    const chunk = buildHueChunk("test", terms, []);
+
+    expect(chunk.terms[0]?.[0]).toBe(NFC_TERM);
+    expect(chunk.terms[0]?.[0]).toBe(chunk.terms[0]?.[0]?.normalize("NFC"));
+  });
+});
+
 describe("chunkCoverage", () => {
   it("reports term count and populated-bin fraction", async () => {
     const parsed = parseHueBinned(await fixture("hue_colors_binned.json"));

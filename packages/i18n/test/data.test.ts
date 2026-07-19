@@ -59,4 +59,23 @@ describe("generated uwdata data", () => {
       expect(bytes).toBeLessThan(715 * 1024);
     }
   });
+
+  // Guards against a future upstream sync silently reintroducing NFD
+  // (decomposed) Hangul/Arabic terms. Upstream ships some colour terms in
+  // NFD while anything a consumer types, pastes, or writes as a source
+  // literal is NFC (composed); the two render identically but fail `===`.
+  // scripts/sync-uwdata/transform.ts normalises both `term` and `name` to
+  // NFC at generation time, so every shipped chunk must already satisfy
+  // `s === s.normalize("NFC")` without needing normalisation at read time.
+  it("ships every term and name already normalised to NFC", async () => {
+    const offenders: string[] = [];
+    for (const lang of Object.keys(meta.languages)) {
+      const chunk = (await uwdataChunks[lang]!()).default as FullChunk | HueChunk;
+      for (const [term, name] of chunk.terms) {
+        if (term !== term.normalize("NFC")) offenders.push(`${lang}: term ${JSON.stringify(term)}`);
+        if (name !== name.normalize("NFC")) offenders.push(`${lang}: name ${JSON.stringify(name)}`);
+      }
+    }
+    expect(offenders).toEqual([]);
+  });
 });

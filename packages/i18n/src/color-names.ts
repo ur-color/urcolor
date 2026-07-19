@@ -162,7 +162,13 @@ export class ColorNames {
   }
 
   resolveColorOf(term: string): { color: Color; term: string; name: string } | undefined {
-    const entry = this.#chunk.terms.find(([key, name]) => key === term || name === term);
+    // Shipped data is normalised to NFC (composed) at generation time, but a
+    // caller may pass NFD (decomposed) — macOS filesystem APIs and some IMEs
+    // produce it — which renders identically but fails `===`. Normalise the
+    // input, not the comparison strategy: this keeps the match exact rather
+    // than fuzzy, while making it robust to the caller's normalisation form.
+    const normalizedTerm = term.normalize("NFC");
+    const entry = this.#chunk.terms.find(([key, name]) => key === normalizedTerm || name === normalizedTerm);
     if (entry === undefined) return undefined;
 
     const [key, name, centroid] = entry;
