@@ -1,5 +1,5 @@
 import { mount } from "@vue/test-utils";
-import { describe, expect, it } from "bun:test";
+import { describe, expect, it, mock } from "bun:test";
 import { defineComponent, h, ref } from "vue";
 import { Color } from "@urcolor/core";
 import {
@@ -64,6 +64,11 @@ describe("ColorSwatchPicker", () => {
     const wrapper = mount(makePicker(), { attachTo: document.body });
     await wrapper.findAll("[role=\"option\"]")[1]!.trigger("click");
     expect(wrapper.emitted("update:modelValue")?.[0]?.[0]).toBe("#00ff00");
+    // Guards against re-introducing a second `update:modelValue` path (e.g. a
+    // generic `useForwardPropsEmits` alongside `v-model`) that would
+    // double-fire this event; see ColorSwatchPickerRoot.vue's template
+    // comment for why that combination is unsafe here.
+    expect(wrapper.emitted("update:modelValue")).toHaveLength(1);
   });
 
   it("should collect several values when multiple is set", async () => {
@@ -173,7 +178,14 @@ describe("ColorSwatchPicker", () => {
     expect(options[2]!.attributes("aria-selected")).toBe("true");
   });
 
-  it("should round-trip a click through a controlled parent", async () => {
+  it("should round-trip a click through an uncontrolled parent whose ref starts undefined", async () => {
+    // NOTE: `value` starts at `undefined`, so `isControlled` (which latches on
+    // `props.modelValue !== undefined` at setup) is `false` for this mount —
+    // this exercises the `internalValue` path, not `props.modelValue`. It is
+    // kept because it incidentally demonstrates that latch: a parent ref
+    // that *becomes* defined later does not retroactively make the root
+    // controlled. Genuine controlled-mode coverage (ref starts defined) lives
+    // in "should reflect external model-value updates when controlled" above.
     const Controlled = defineComponent({
       setup() {
         const value = ref<string | undefined>(undefined);
@@ -240,5 +252,35 @@ describe("ColorSwatchPicker", () => {
     expect(wrapper.find("[role=\"listbox\"]").attributes("aria-orientation")).toBe("horizontal");
     const vertical = mount(makePicker({ orientation: "vertical" }), { attachTo: document.body });
     expect(vertical.find("[role=\"listbox\"]").attributes("aria-orientation")).toBe("vertical");
+  });
+
+  // `ColorSwatchPickerRootEmits` is reka's `ListboxRootEmits`: four events are
+  // declared (`update:modelValue`, `highlight`, `entryFocus`, `leave`), which
+  // means Vue registers all four at runtime and strips them from `$attrs`. If
+  // the root only forwards `v-model` (as it briefly did) a consumer's
+  // `@highlight` / `@entryFocus` / `@leave` listener is silently swallowed
+  // instead of reaching `ListboxRoot`. These three tests each prove one event
+  // actually reaches a consumer listener.
+
+  it("should forward the listbox's highlight event to a consumer listener", async () => {
+    const onHighlight = mock((_payload: unknown) => {});
+    const wrapper = mount(makePicker({ onHighlight }), { attachTo: document.body });
+    await wrapper.find("[role=\"listbox\"]").trigger("keydown", { key: "ArrowRight" });
+    expect(onHighlight).toHaveBeenCalledTimes(1);
+    expect((onHighlight.mock.calls[0]![0] as { value: string }).value).toBe("#ff0000");
+  });
+
+  it("should forward the listbox's entryFocus event to a consumer listener", async () => {
+    const onEntryFocus = mock((_event: unknown) => {});
+    const wrapper = mount(makePicker({ onEntryFocus }), { attachTo: document.body });
+    await wrapper.find("[role=\"listbox\"]").trigger("focus");
+    expect(onEntryFocus).toHaveBeenCalledTimes(1);
+  });
+
+  it("should forward the listbox's leave event to a consumer listener", async () => {
+    const onLeave = mock((_event: unknown) => {});
+    const wrapper = mount(makePicker({ onLeave }), { attachTo: document.body });
+    await wrapper.find("[role=\"listbox\"]").trigger("pointerleave");
+    expect(onLeave).toHaveBeenCalledTimes(1);
   });
 });

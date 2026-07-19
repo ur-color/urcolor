@@ -33,6 +33,10 @@ export type ColorSwatchPickerRootEmits = ListboxRootEmits;
 import { computed, ref } from "vue";
 import { ListboxContent, ListboxRoot, useForwardExpose } from "reka-ui";
 
+// `dir` is deliberately left out of these defaults (unlike the reka brief's
+// `dir: "ltr"`): leaving it `undefined` lets `ListboxRoot` fall through to
+// reka's `ConfigProvider` for direction instead of hard-forcing LTR. Do not
+// "restore" a default here without re-checking that trade-off.
 const props = withDefaults(defineProps<ColorSwatchPickerRootProps>(), {
   as: "div",
   multiple: false,
@@ -80,10 +84,31 @@ const listboxProps = computed(() => ({
 </script>
 
 <template>
+  <!--
+    `ColorSwatchPickerRootEmits` is `ListboxRootEmits`, which declares four
+    events: `update:modelValue`, `highlight`, `entryFocus`, `leave`. Once
+    `defineEmits` registers all four, Vue strips them out of `$attrs`, so a
+    plain `v-bind="listboxProps"` (which carries no listeners) plus
+    `v-model` is not enough — a consumer's `@highlight` etc. would be
+    silently swallowed instead of reaching `ListboxRoot`.
+
+    We forward `highlight` / `entryFocus` / `leave` explicitly rather than
+    via reka's `useForwardPropsEmits` + `useEmitAsProps`: those forward
+    every declared emit generically, including `update:modelValue`, which
+    would double-fire it alongside the `v-model` binding above (once from
+    reka's auto-generated `onUpdate:modelValue` prop, once from `v-model`
+    itself) and bypass the controlled/uncontrolled logic in the
+    `modelValue` computed setter. Explicit bindings keep that setter as the
+    single source of truth for `update:modelValue` while still letting the
+    other three pass through untouched.
+  -->
   <ListboxRoot
     v-bind="listboxProps"
     v-model="modelValue"
     as-child
+    @highlight="emits('highlight', $event)"
+    @entry-focus="emits('entryFocus', $event)"
+    @leave="emits('leave', $event)"
   >
     <ListboxContent
       :as="as"
