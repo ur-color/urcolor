@@ -1,11 +1,16 @@
 <script lang="ts">
 import type { Ref } from "vue";
-import { createContext, SliderRoot, useForwardExpose } from "reka-ui";
+import type { PrimitiveProps } from "reka-ui";
+import { createContext, SliderRoot, useForwardExpose, VisuallyHidden } from "reka-ui";
 import { Color, type SpaceId } from "@urcolor/core";
 
-export interface ColorSliderRootProps {
+export interface ColorSliderRootProps extends /* @vue-ignore */ PrimitiveProps {
+  as?: string;
+  asChild?: boolean;
   /** The controlled color value. Can be bind as `v-model`. */
   modelValue?: Color | string | null;
+  /** The default color value when uncontrolled. */
+  defaultValue?: Color | string;
   /** The color space mode (e.g. 'hsl', 'oklch'). */
   colorSpace?: SpaceId;
   /** Which channel this slider controls (e.g. 'h', 's', 'l'). */
@@ -18,11 +23,23 @@ export interface ColorSliderRootProps {
   inverted?: boolean;
   /** The orientation of the slider. */
   orientation?: "horizontal" | "vertical";
+  /** The stepping interval. When omitted, derives from the channel config. */
+  step?: number;
+  /** The name of the hidden input field for form submission. */
+  name?: string;
+  /** Whether the field is required for form submission. */
+  required?: boolean;
 }
 
 export type ColorSliderRootEmits = {
+  /** Event handler called when the color value changes */
   "update:modelValue": [payload: Color | undefined];
-  "valueCommit": [payload: Color];
+  /** Event handler called when the color value changes. Mirrors `update:modelValue`; present for API parity. */
+  "update:color": [payload: Color];
+  /** Event handler called on every value change, including mid-drag. */
+  "change": [payload: Color];
+  /** Event handler called when the value changes at the end of an interaction. */
+  "changeEnd": [payload: Color];
 };
 
 export interface ColorSliderRootContext {
@@ -31,6 +48,12 @@ export interface ColorSliderRootContext {
   colorSpace: Ref<SpaceId>;
   orientation: Ref<"horizontal" | "vertical">;
   inverted: Ref<boolean>;
+  disabled: Ref<boolean>;
+  min: Ref<number>;
+  max: Ref<number>;
+  step: Ref<number>;
+  channelValue: Ref<number>;
+  isDragging: Ref<boolean>;
 }
 
 export const [injectColorSliderRootContext, provideColorSliderRootContext]
@@ -38,18 +61,29 @@ export const [injectColorSliderRootContext, provideColorSliderRootContext]
 </script>
 
 <script setup lang="ts">
-import { computed, shallowRef, toRef, watch } from "vue";
+import { computed, ref, shallowRef, toRef, watch } from "vue";
 
 import { getChannelConfig, displayToNative, nativeToDisplay } from "@urcolor/core";
+import { useFormControl } from "../../shared/utils";
 
 const props = withDefaults(defineProps<ColorSliderRootProps>(), {
+  as: "span",
   colorSpace: "hsl",
   channel: "h",
   disabled: false,
+  defaultValue: "hsl(0, 100%, 50%)",
 });
 const emit = defineEmits<ColorSliderRootEmits>();
 
-useForwardExpose();
+const { forwardRef, currentElement } = useForwardExpose();
+const isFormControl = useFormControl(currentElement);
+
+defineSlots<{
+  default?: (props: {
+    /** Current color value */
+    modelValue: Color | undefined;
+  }) => any;
+}>();
 
 function parseColor(v: Color | string | null | undefined): Color | undefined {
   if (!v) return undefined;
@@ -57,9 +91,7 @@ function parseColor(v: Color | string | null | undefined): Color | undefined {
   return Color.parse(v) ?? undefined;
 }
 
-const DEFAULT_COLOR = Color.parse("hsl(210, 80%, 50%)")!;
-
-const colorRef = shallowRef<Color | undefined>(parseColor(props.modelValue) ?? DEFAULT_COLOR);
+const colorRef = shallowRef<Color | undefined>(parseColor(props.modelValue ?? props.defaultValue));
 
 watch(() => props.modelValue, (val) => {
   const parsed = parseColor(val);
@@ -70,6 +102,10 @@ const isAlpha = computed(() => props.channel === "alpha");
 
 const alphaConfig = { key: "alpha", label: "Alpha", min: 0, max: 100, step: 1, format: "percentage" as const, nativeMin: 0, nativeMax: 1 };
 const channelConfig = computed(() => isAlpha.value ? alphaConfig : getChannelConfig(props.colorSpace, props.channel));
+
+const min = computed(() => channelConfig.value?.min ?? 0);
+const max = computed(() => channelConfig.value?.max ?? 100);
+const step = computed(() => props.step ?? channelConfig.value?.step ?? 1);
 
 // Extract display value from Color for the internal slider
 const internalValue = computed<number[]>({
@@ -97,33 +133,65 @@ const internalValue = computed<number[]>({
     if (newColor) {
       colorRef.value = newColor;
       emit("update:modelValue", newColor);
+      emit("update:color", newColor);
+      emit("change", newColor);
     }
   },
 });
 
 function handleValueCommit() {
   if (colorRef.value) {
-    emit("valueCommit", colorRef.value);
+    emit("changeEnd", colorRef.value);
   }
 }
 
 const orientationRef = computed(() => props.orientation ?? "horizontal");
 const invertedRef = computed(() => props.inverted ?? false);
-provideColorSliderRootContext({ colorRef, channel: toRef(props, "channel"), colorSpace: toRef(props, "colorSpace"), orientation: orientationRef, inverted: invertedRef });
+const isDragging = ref(false);
+const channelValue = computed(() => internalValue.value[0] ?? min.value);
+
+provideColorSliderRootContext({
+  colorRef,
+  channel: toRef(props, "channel"),
+  colorSpace: toRef(props, "colorSpace"),
+  orientation: orientationRef,
+  inverted: invertedRef,
+  disabled: toRef(props, "disabled"),
+  min,
+  max,
+  step,
+  channelValue,
+  isDragging,
+});
 </script>
 
 <template>
   <SliderRoot
+    :ref="forwardRef"
     v-model="internalValue"
-    :min="channelConfig?.min ?? 0"
-    :max="channelConfig?.max ?? 100"
-    :step="channelConfig?.step ?? 1"
+    :as="as"
+    :as-child="asChild"
+    :min="min"
+    :max="max"
+    :step="step"
     :disabled="disabled"
     :dir="dir"
     :inverted="inverted"
     :orientation="orientation"
     @value-commit="handleValueCommit"
+    @pointerdown="isDragging = true"
+    @pointerup="isDragging = false"
   >
-    <slot />
+    <slot :model-value="colorRef" />
+
+    <VisuallyHidden
+      v-if="isFormControl && name"
+      as="input"
+      type="hidden"
+      :value="colorRef?.toString() ?? ''"
+      :name="name"
+      :required="required"
+      :disabled="disabled"
+    />
   </SliderRoot>
 </template>
