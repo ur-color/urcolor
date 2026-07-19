@@ -64,6 +64,13 @@
       "name": "@urcolor/core",
       "version": "0.0.4",
     },
+    "packages/i18n": {
+      "name": "@urcolor/i18n",
+      "version": "0.0.4",
+      "dependencies": {
+        "@urcolor/core": "workspace:*",
+      },
+    },
     "packages/react": {
       "name": "@urcolor/react",
       "version": "0.0.1",
@@ -729,6 +736,8 @@
     "@urcolor/core": ["@urcolor/core@workspace:packages/core"],
 
     "@urcolor/docs": ["@urcolor/docs@workspace:docs"],
+
+    "@urcolor/i18n": ["@urcolor/i18n@workspace:packages/i18n"],
 
     "@urcolor/react": ["@urcolor/react@workspace:packages/react"],
 
