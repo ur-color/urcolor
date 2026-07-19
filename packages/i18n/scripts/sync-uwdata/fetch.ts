@@ -46,12 +46,17 @@ export interface RawBasicRow {
 
 const BASE = "https://raw.githubusercontent.com/uwdata/color-naming-in-different-languages";
 
-export function upstreamUrl(path: string): string {
-  return `${BASE}/${UWDATA_COMMIT}/${path}`;
+/**
+ * `commitSha` defaults to the committed pin so existing callers (and the
+ * tests that pin this default) are unaffected. A caller doing a `--ref`
+ * sync passes the SHA that {@link resolveRef} resolved that ref to.
+ */
+export function upstreamUrl(path: string, commitSha: string = UWDATA_COMMIT): string {
+  return `${BASE}/${commitSha}/${path}`;
 }
 
-export async function download(path: string): Promise<string> {
-  const url = upstreamUrl(path);
+export async function download(path: string, commitSha: string = UWDATA_COMMIT): Promise<string> {
+  const url = upstreamUrl(path, commitSha);
   const response = await fetch(url);
   if (!response.ok) {
     throw new SchemaError(`Failed to download ${url}: HTTP ${response.status}`, response.status);

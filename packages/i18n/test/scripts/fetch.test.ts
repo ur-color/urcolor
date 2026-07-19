@@ -1,6 +1,7 @@
-import { describe, expect, it } from "bun:test";
+import { afterEach, describe, expect, it, mock } from "bun:test";
 import {
   SchemaError,
+  download,
   parseBasicInfo,
   parseFullBinned,
   parseHueBinned,
@@ -216,11 +217,61 @@ describe("parseBasicInfo", () => {
 });
 
 describe("upstreamUrl", () => {
-  it("pins the commit sha", () => {
+  it("pins the commit sha by default", () => {
     expect(upstreamUrl("model/lang_info.csv")).toBe(
       "https://raw.githubusercontent.com/uwdata/color-naming-in-different-languages/"
       + "f0d3e30db9e4b2c3b703bde0d816043eb48a6cb5/model/lang_info.csv",
     );
+  });
+
+  it("accepts an explicit commit sha, overriding the pinned default", () => {
+    expect(upstreamUrl("model/lang_info.csv", "deadbeefcafe")).toBe(
+      "https://raw.githubusercontent.com/uwdata/color-naming-in-different-languages/"
+      + "deadbeefcafe/model/lang_info.csv",
+    );
+  });
+});
+
+describe("download", () => {
+  const originalFetch = globalThis.fetch;
+  afterEach(() => {
+    globalThis.fetch = originalFetch;
+  });
+
+  it("downloads from the pinned default commit sha when none is given", async () => {
+    // `download` always calls `fetch` with a plain string URL, never a
+    // Request/URL object, so the mock can assert on `input` directly.
+    const fetchMock = mock(async (input: string) => {
+      expect(input).toBe(
+        "https://raw.githubusercontent.com/uwdata/color-naming-in-different-languages/"
+        + "f0d3e30db9e4b2c3b703bde0d816043eb48a6cb5/model/lang_info.csv",
+      );
+      return new Response("ok");
+    });
+    globalThis.fetch = fetchMock as unknown as typeof fetch;
+
+    expect(await download("model/lang_info.csv")).toBe("ok");
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("downloads from an explicit commit sha when given one", async () => {
+    const fetchMock = mock(async (input: string) => {
+      expect(input).toBe(
+        "https://raw.githubusercontent.com/uwdata/color-naming-in-different-languages/"
+        + "deadbeefcafe/model/lang_info.csv",
+      );
+      return new Response("ok-at-ref");
+    });
+    globalThis.fetch = fetchMock as unknown as typeof fetch;
+
+    expect(await download("model/lang_info.csv", "deadbeefcafe")).toBe("ok-at-ref");
+  });
+
+  it("throws a SchemaError carrying the HTTP status on failure", async () => {
+    globalThis.fetch = mock(async () => new Response("nope", { status: 404 })) as unknown as typeof fetch;
+
+    // eslint-disable-next-line @typescript-eslint/await-thenable
+    await expect(download("model/missing.csv")).rejects.toThrow(SchemaError);
   });
 });
 

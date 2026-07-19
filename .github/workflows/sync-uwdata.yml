@@ -23,8 +23,9 @@ jobs:
 
       - name: Regenerate data from upstream master
         id: sync
+        shell: bash
         run: |
-          bun run --cwd packages/i18n sync:uwdata 2>&1 | tee /tmp/sync-report.txt
+          bun run --cwd packages/i18n sync:uwdata --ref master 2>&1 | tee /tmp/sync-report.txt
           {
             echo 'report<<EOF'
             cat /tmp/sync-report.txt
