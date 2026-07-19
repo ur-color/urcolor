@@ -97,6 +97,13 @@
         "react-dom": "^18 || ^19",
       },
     },
+    "packages/relative": {
+      "name": "@urcolor/relative",
+      "version": "0.0.4",
+      "dependencies": {
+        "@urcolor/core": "workspace:*",
+      },
+    },
     "packages/vue": {
       "name": "@urcolor/vue",
       "version": "0.0.4",
@@ -740,6 +747,8 @@
     "@urcolor/i18n": ["@urcolor/i18n@workspace:packages/i18n"],
 
     "@urcolor/react": ["@urcolor/react@workspace:packages/react"],
+
+    "@urcolor/relative": ["@urcolor/relative@workspace:packages/relative"],
 
     "@urcolor/vue": ["@urcolor/vue@workspace:packages/vue"],
 
