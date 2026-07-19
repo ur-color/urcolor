@@ -13,7 +13,7 @@ export default defineConfig({
       formats: ["es"],
     },
     rollupOptions: {
-      external: ["vue", "@urcolor/core", "reka-ui", "internationalized-color"],
+      external: ["vue", "@urcolor/core", "reka-ui"],
     },
   },
 });
