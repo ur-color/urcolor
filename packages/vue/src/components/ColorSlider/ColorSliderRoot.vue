@@ -61,10 +61,10 @@ export const [injectColorSliderRootContext, provideColorSliderRootContext]
 </script>
 
 <script setup lang="ts">
-import { computed, ref, shallowRef, toRef, watch } from "vue";
+import { computed, ref, toRef } from "vue";
 
-import { getChannelConfig, displayToNative, nativeToDisplay } from "@urcolor/core";
 import { useFormControl } from "../../shared/utils";
+import { useColorChannelModel } from "../../shared/useColorChannelModel";
 
 const props = withDefaults(defineProps<ColorSliderRootProps>(), {
   as: "span",
@@ -85,64 +85,32 @@ defineSlots<{
   }) => any;
 }>();
 
-function parseColor(v: Color | string | null | undefined): Color | undefined {
-  if (!v) return undefined;
-  if (v instanceof Color) return v;
-  return Color.parse(v) ?? undefined;
-}
-
-const colorRef = shallowRef<Color | undefined>(parseColor(props.modelValue ?? props.defaultValue));
-
-watch(() => props.modelValue, (val) => {
-  const parsed = parseColor(val);
-  if (parsed) colorRef.value = parsed;
+const { colorRef, displayValues, configs, setDisplayValues, commit } = useColorChannelModel({
+  colorSpace: toRef(props, "colorSpace"),
+  channels: computed(() => [props.channel]),
+  modelValue: toRef(props, "modelValue"),
+  defaultValue: toRef(props, "defaultValue"),
+  emit,
 });
 
-const isAlpha = computed(() => props.channel === "alpha");
-
-const alphaConfig = { key: "alpha", label: "Alpha", min: 0, max: 100, step: 1, format: "percentage" as const, nativeMin: 0, nativeMax: 1 };
-const channelConfig = computed(() => isAlpha.value ? alphaConfig : getChannelConfig(props.colorSpace, props.channel));
+const channelConfig = computed(() => configs.value[0]);
 
 const min = computed(() => channelConfig.value?.min ?? 0);
 const max = computed(() => channelConfig.value?.max ?? 100);
 const step = computed(() => props.step ?? channelConfig.value?.step ?? 1);
 
-// Extract display value from Color for the internal slider
 const internalValue = computed<number[]>({
   get() {
-    if (!colorRef.value || !channelConfig.value) return [channelConfig.value?.min ?? 0];
-    if (isAlpha.value) {
-      return [Math.round(colorRef.value.alpha * 100)];
-    }
-    const converted = colorRef.value.to(props.colorSpace);
-    const raw = converted.get(props.channel);
-    return [nativeToDisplay(channelConfig.value, raw)];
+    return displayValues.value;
   },
   set(val: number[]) {
-    if (!colorRef.value || !channelConfig.value || val[0] === undefined) return;
-    let newColor: Color | undefined;
-    if (isAlpha.value) {
-      newColor = colorRef.value.withAlpha(val[0] / 100);
-    } else {
-      const nativeVal = displayToNative(channelConfig.value, val[0]);
-      newColor = colorRef.value.with({
-        space: props.colorSpace,
-        [props.channel]: nativeVal,
-      });
-    }
-    if (newColor) {
-      colorRef.value = newColor;
-      emit("update:modelValue", newColor);
-      emit("update:color", newColor);
-      emit("change", newColor);
-    }
+    if (val[0] === undefined) return;
+    setDisplayValues(val);
   },
 });
 
 function handleValueCommit() {
-  if (colorRef.value) {
-    emit("changeEnd", colorRef.value);
-  }
+  commit();
 }
 
 const orientationRef = computed(() => props.orientation ?? "horizontal");

@@ -114,7 +114,10 @@ export const ARROW_KEYS = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"];
 // --- Composables ---
 
 export function useFormControl(el: MaybeElementRef) {
-  return computed(() => toValue(el) ? Boolean(unrefElement(el)?.closest("form")) : true);
+  // Before mount there is no element to look at, so report "not in a form"
+  // rather than "in a form" — otherwise a root renders its hidden input on the
+  // server even when it is standalone.
+  return computed(() => toValue(el) ? Boolean(unrefElement(el)?.closest("form")) : false);
 }
 
 export function useSize(element: MaybeElementRef) {

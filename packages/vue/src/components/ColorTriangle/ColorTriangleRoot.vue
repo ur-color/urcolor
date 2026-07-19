@@ -2,9 +2,9 @@
 import type { Ref } from "vue";
 import type { PrimitiveProps } from "reka-ui";
 import { createContext, useDirection, useForwardExpose, VisuallyHidden } from "reka-ui";
-import { computed, ref, shallowRef, toRefs, watch } from "vue";
+import { computed, ref, toRef, toRefs } from "vue";
 import { Color, type SpaceId } from "@urcolor/core";
-import { colorSpaces, getChannelConfig, displayToNative, nativeToDisplay, type ChannelConfig, triangleVertices, clampToTriangle, barycentricCoords, pointInTriangle, insetTriangle, type Point } from "@urcolor/core";
+import { colorSpaces, triangleVertices, clampToTriangle, barycentricCoords, pointInTriangle, insetTriangle, type Point } from "@urcolor/core";
 
 type Direction = "ltr" | "rtl";
 
@@ -71,7 +71,8 @@ export const [injectColorTriangleRootContext, provideColorTriangleRootContext]
 
 <script setup lang="ts">
 import { Primitive } from "reka-ui";
-import { snapToStep } from "../../shared/utils";
+import { snapToStep, useFormControl } from "../../shared/utils";
+import { useColorChannelModel } from "../../shared/useColorChannelModel";
 
 defineOptions({ inheritAttrs: false });
 
@@ -96,22 +97,28 @@ const thumbElement = ref<HTMLElement>();
 const dir = useDirection(propDir);
 const { forwardRef, currentElement } = useForwardExpose();
 
-const ALPHA_CONFIG: ChannelConfig = {
-  key: "alpha", label: "Alpha", min: 0, max: 100, step: 1, format: "percentage", nativeMin: 0, nativeMax: 1,
-};
-
 const spaceConfig = computed(() => colorSpaces[props.colorSpace]);
 const xChannelKey = computed(() => props.xChannel ?? spaceConfig.value?.channels[1]?.key ?? "s");
 const yChannelKey = computed(() => props.yChannel ?? spaceConfig.value?.channels[2]?.key ?? "v");
-const xIsAlpha = computed(() => xChannelKey.value === "alpha");
-const yIsAlpha = computed(() => yChannelKey.value === "alpha");
-const xConfig = computed(() => xIsAlpha.value ? ALPHA_CONFIG : getChannelConfig(props.colorSpace, xChannelKey.value));
-const yConfig = computed(() => yIsAlpha.value ? ALPHA_CONFIG : getChannelConfig(props.colorSpace, yChannelKey.value));
 
 const zChannelKey = computed(() => props.zChannel);
-const zIsAlpha = computed(() => zChannelKey.value === "alpha");
-const zConfig = computed(() => zChannelKey.value ? (zIsAlpha.value ? ALPHA_CONFIG : getChannelConfig(props.colorSpace, zChannelKey.value)) : undefined);
 const isThreeChannel = computed(() => zChannelKey.value != null);
+
+// The z axis is optional, so the channel list is two or three entries long and
+// the display values follow it in the same order.
+const { colorRef, displayValues, configs, setDisplayValues } = useColorChannelModel({
+  colorSpace: toRef(props, "colorSpace"),
+  channels: computed(() => zChannelKey.value
+    ? [xChannelKey.value, yChannelKey.value, zChannelKey.value]
+    : [xChannelKey.value, yChannelKey.value]),
+  modelValue: toRef(props, "modelValue"),
+  defaultValue: toRef(props, "defaultValue"),
+  emit: emits,
+});
+
+const xConfig = computed(() => configs.value[0]);
+const yConfig = computed(() => configs.value[1]);
+const zConfig = computed(() => configs.value[2]);
 
 const xMin = computed(() => xConfig.value?.min ?? 0);
 const xMax = computed(() => xConfig.value?.max ?? 100);
@@ -147,63 +154,9 @@ const clipPathStyle = computed(() => {
   return { clipPath: `polygon(${pts})` };
 });
 
-function parseColor(v: Color | string | null | undefined): Color | undefined {
-  if (!v) return undefined;
-  if (v instanceof Color) return v;
-  return Color.parse(v) ?? undefined;
-}
-
-const colorRef = shallowRef<Color | undefined>(parseColor(props.modelValue ?? props.defaultValue));
-
-watch(() => props.modelValue, (val) => {
-  const parsed = parseColor(val);
-  if (parsed) colorRef.value = parsed;
-});
-
-function colorToDisplayValues(color: Color | undefined): { x: number; y: number; z: number } {
-  if (!color || !xConfig.value || !yConfig.value) return { x: xMin.value, y: yMin.value, z: zMin.value };
-  const converted = color.to(props.colorSpace);
-  const rawX = xIsAlpha.value ? color.alpha : converted.get(xChannelKey.value);
-  const rawY = yIsAlpha.value ? color.alpha : converted.get(yChannelKey.value);
-  const rawZ = zChannelKey.value ? (zIsAlpha.value ? color.alpha : converted.get(zChannelKey.value)) : 0;
-  return {
-    x: nativeToDisplay(xConfig.value, rawX),
-    y: nativeToDisplay(yConfig.value, rawY),
-    z: zConfig.value ? nativeToDisplay(zConfig.value, rawZ) : zMin.value,
-  };
-}
-
-const initValues = colorToDisplayValues(colorRef.value);
-const currentXValue = ref(initValues.x);
-const currentYValue = ref(initValues.y);
-const currentZValue = ref(initValues.z);
-
-watch([colorRef, xChannelKey, yChannelKey, zChannelKey], ([color]) => {
-  const newVals = colorToDisplayValues(color);
-  if (Math.abs(currentXValue.value - newVals.x) > 0.001) currentXValue.value = newVals.x;
-  if (Math.abs(currentYValue.value - newVals.y) > 0.001) currentYValue.value = newVals.y;
-  if (Math.abs(currentZValue.value - newVals.z) > 0.001) currentZValue.value = newVals.z;
-});
-
-function displayValuesToColor(xVal: number, yVal: number, zVal?: number): Color | undefined {
-  if (!colorRef.value || !xConfig.value || !yConfig.value) return undefined;
-  const nativeX = displayToNative(xConfig.value, xVal);
-  const nativeY = displayToNative(yConfig.value, yVal);
-  const updates: Record<string, number> = {};
-  if (!xIsAlpha.value) updates[xChannelKey.value] = nativeX;
-  if (!yIsAlpha.value) updates[yChannelKey.value] = nativeY;
-  if (zChannelKey.value && zConfig.value && zVal != null) {
-    const nativeZ = displayToNative(zConfig.value, zVal);
-    if (!zIsAlpha.value) updates[zChannelKey.value] = nativeZ;
-  }
-  let result = colorRef.value.with({ space: props.colorSpace, ...updates });
-  if (xIsAlpha.value) result = result.withAlpha(nativeX);
-  if (yIsAlpha.value) result = result.withAlpha(nativeY);
-  if (zChannelKey.value && zConfig.value && zVal != null && zIsAlpha.value) {
-    result = result.withAlpha(displayToNative(zConfig.value, zVal));
-  }
-  return result;
-}
+const currentXValue = computed(() => displayValues.value[0] ?? xMin.value);
+const currentYValue = computed(() => displayValues.value[1] ?? yMin.value);
+const currentZValue = computed(() => displayValues.value[2] ?? zMin.value);
 
 const isDragging = ref(false);
 
@@ -244,18 +197,12 @@ function updateValues(xVal: number, yVal: number, commit = false, zVal?: number)
   const snappedY = snapToStep(yVal, yMin.value, yMax.value, yStep.value);
   const snappedZ = zVal != null ? snapToStep(zVal, zMin.value, zMax.value, zStep.value) : undefined;
 
-  currentXValue.value = snappedX;
-  currentYValue.value = snappedY;
-  if (snappedZ != null) currentZValue.value = snappedZ;
-
-  const newColor = displayValuesToColor(snappedX, snappedY, snappedZ);
-  if (newColor) {
-    colorRef.value = newColor;
-    emits("update:modelValue", newColor);
-    emits("update:color", newColor);
-    emits("change", newColor);
-    if (commit) emits("changeEnd", newColor);
-  }
+  setDisplayValues(
+    isThreeChannel.value
+      ? [snappedX, snappedY, snappedZ ?? currentZValue.value]
+      : [snappedX, snappedY],
+    { commit },
+  );
 }
 
 /**
@@ -420,7 +367,7 @@ function handleKeyDown(event: KeyboardEvent) {
   setChannelValues({ [spec.axis]: currentFor(spec.axis) + delta }, { commit: true });
 }
 
-const isFormControl = computed(() => currentElement.value ? Boolean(currentElement.value.closest("form")) : false);
+const isFormControl = useFormControl(currentElement);
 
 provideColorTriangleRootContext({
   disabled,

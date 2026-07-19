@@ -2,11 +2,12 @@
 import type { Ref } from "vue";
 import type { PrimitiveProps } from "reka-ui";
 import { createContext, useDirection, useForwardExpose, VisuallyHidden, Primitive } from "reka-ui";
-import { computed, ref, shallowRef, toRefs, watch } from "vue";
+import { computed, ref, toRef, toRefs } from "vue";
 import { Color, type SpaceId } from "@urcolor/core";
-import { colorSpaces, getChannelConfig, displayToNative, nativeToDisplay, type ChannelConfig } from "@urcolor/core";
+import { colorSpaces } from "@urcolor/core";
 import { cartesianToPolar, normalizeAngle, clampToCircle } from "@urcolor/core";
-import { cyclicWrap, snapToStep } from "../../shared/utils";
+import { cyclicWrap, snapToStep, useFormControl } from "../../shared/utils";
+import { useColorChannelModel } from "../../shared/useColorChannelModel";
 
 type Direction = "ltr" | "rtl";
 
@@ -78,19 +79,20 @@ const { disabled, dir: propDir } = toRefs(props);
 const direction = useDirection(propDir);
 const { forwardRef, currentElement } = useForwardExpose();
 
-const ALPHA_CONFIG: ChannelConfig = {
-  key: "alpha", label: "Alpha", min: 0, max: 100, step: 1, format: "percentage", nativeMin: 0, nativeMax: 1,
-};
-
 const spaceConfig = computed(() => colorSpaces[props.colorSpace]);
 const angleChannelKey = computed(() => props.angleChannel ?? spaceConfig.value?.channels[0]?.key ?? "h");
 const radiusChannelKey = computed(() => props.radiusChannel ?? spaceConfig.value?.channels[1]?.key ?? "s");
 
-const angleIsAlpha = computed(() => angleChannelKey.value === "alpha");
-const radiusIsAlpha = computed(() => radiusChannelKey.value === "alpha");
+const { colorRef, displayValues, configs, setDisplayValues } = useColorChannelModel({
+  colorSpace: toRef(props, "colorSpace"),
+  channels: computed(() => [angleChannelKey.value, radiusChannelKey.value]),
+  modelValue: toRef(props, "modelValue"),
+  defaultValue: toRef(props, "defaultValue"),
+  emit: emits,
+});
 
-const angleConfig = computed(() => angleIsAlpha.value ? ALPHA_CONFIG : getChannelConfig(props.colorSpace, angleChannelKey.value));
-const radiusConfig = computed(() => radiusIsAlpha.value ? ALPHA_CONFIG : getChannelConfig(props.colorSpace, radiusChannelKey.value));
+const angleConfig = computed(() => configs.value[0]);
+const radiusConfig = computed(() => configs.value[1]);
 
 const angleMin = computed(() => angleConfig.value?.min ?? 0);
 const angleMax = computed(() => angleConfig.value?.max ?? 360);
@@ -99,52 +101,8 @@ const radiusMin = computed(() => radiusConfig.value?.min ?? 0);
 const radiusMax = computed(() => radiusConfig.value?.max ?? 100);
 const radiusStep = computed(() => radiusConfig.value?.step ?? 1);
 
-function parseColor(v: Color | string | null | undefined): Color | undefined {
-  if (!v) return undefined;
-  if (v instanceof Color) return v;
-  return Color.parse(v) ?? undefined;
-}
-
-const colorRef = shallowRef<Color | undefined>(parseColor(props.modelValue ?? props.defaultValue));
-
-watch(() => props.modelValue, (val) => {
-  const parsed = parseColor(val);
-  if (parsed) colorRef.value = parsed;
-});
-
-function colorToDisplayValues(color: Color | undefined): { angle: number; radius: number } {
-  if (!color || !angleConfig.value || !radiusConfig.value) return { angle: angleMin.value, radius: radiusMin.value };
-  const converted = color.to(props.colorSpace);
-  const rawAngle = angleIsAlpha.value ? color.alpha : converted.get(angleChannelKey.value);
-  const rawRadius = radiusIsAlpha.value ? color.alpha : converted.get(radiusChannelKey.value);
-  return {
-    angle: nativeToDisplay(angleConfig.value, rawAngle),
-    radius: nativeToDisplay(radiusConfig.value, rawRadius),
-  };
-}
-
-const initValues = colorToDisplayValues(colorRef.value);
-const currentAngleValue = ref(initValues.angle);
-const currentRadiusValue = ref(initValues.radius);
-
-watch([colorRef, angleChannelKey, radiusChannelKey], ([color]) => {
-  const newVals = colorToDisplayValues(color);
-  if (Math.abs(currentAngleValue.value - newVals.angle) > 0.001) currentAngleValue.value = newVals.angle;
-  if (Math.abs(currentRadiusValue.value - newVals.radius) > 0.001) currentRadiusValue.value = newVals.radius;
-});
-
-function displayValuesToColor(angle: number, radius: number): Color | undefined {
-  if (!colorRef.value || !angleConfig.value || !radiusConfig.value) return undefined;
-  const nativeAngle = displayToNative(angleConfig.value, angle);
-  const nativeRadius = displayToNative(radiusConfig.value, radius);
-  const updates: Record<string, number> = {};
-  if (!angleIsAlpha.value) updates[angleChannelKey.value] = nativeAngle;
-  if (!radiusIsAlpha.value) updates[radiusChannelKey.value] = nativeRadius;
-  let result = colorRef.value.with({ space: props.colorSpace, ...updates });
-  if (angleIsAlpha.value) result = result.withAlpha(nativeAngle);
-  if (radiusIsAlpha.value) result = result.withAlpha(nativeRadius);
-  return result;
-}
+const currentAngleValue = computed(() => displayValues.value[0] ?? angleMin.value);
+const currentRadiusValue = computed(() => displayValues.value[1] ?? radiusMin.value);
 
 const thumbElement = ref<HTMLElement>();
 const isDragging = ref(false);
@@ -177,22 +135,16 @@ function updateValues(angle: number, radius: number, commit = false) {
   const hasChanged = Math.abs(snappedAngle - currentAngleValue.value) > 0.001
     || Math.abs(snappedRadius - currentRadiusValue.value) > 0.001;
 
-  currentAngleValue.value = snappedAngle;
-  currentRadiusValue.value = snappedRadius;
-
-  if (!hasChanged) return;
+  if (!hasChanged) {
+    // Below the feedback threshold: record the values but stay silent.
+    displayValues.value = [snappedAngle, snappedRadius];
+    return;
+  }
 
   if (!isDragging.value)
     thumbElement.value?.focus();
 
-  const newColor = displayValuesToColor(snappedAngle, snappedRadius);
-  if (newColor) {
-    colorRef.value = newColor;
-    emits("update:modelValue", newColor);
-    emits("update:color", newColor);
-    emits("change", newColor);
-    if (commit) emits("changeEnd", newColor);
-  }
+  setDisplayValues([snappedAngle, snappedRadius], { commit });
 }
 
 function handlePointerDown(event: PointerEvent) {
@@ -291,7 +243,7 @@ function handleKeyDown(event: KeyboardEvent) {
   updateValues(newAngle, newRadius, true);
 }
 
-const isFormControl = computed(() => currentElement.value ? Boolean(currentElement.value.closest("form")) : false);
+const isFormControl = useFormControl(currentElement);
 
 provideColorWheelRootContext({
   disabled,

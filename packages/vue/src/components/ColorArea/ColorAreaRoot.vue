@@ -2,10 +2,11 @@
 import type { Ref } from "vue";
 import type { PrimitiveProps } from "reka-ui";
 import { createContext, useDirection, useForwardExpose, VisuallyHidden } from "reka-ui";
-import { computed, ref, shallowRef, toRefs, watch } from "vue";
+import { computed, ref, toRef, toRefs } from "vue";
 import { Color, type SpaceId } from "@urcolor/core";
-import { colorSpaces, getChannelConfig, displayToNative, nativeToDisplay, type ChannelConfig } from "@urcolor/core";
+import { colorSpaces } from "@urcolor/core";
 import { useCollection, useFormControl, ARROW_KEYS, getClosestThumbIndex, hasMinStepsBetweenValues, linearScale, snapToStep, type ActiveDirection } from "../../shared/utils";
+import { useColorChannelModel } from "../../shared/useColorChannelModel";
 
 type Direction = "ltr" | "rtl";
 type ThumbAlignment = "contain" | "overflow";
@@ -126,26 +127,21 @@ const { forwardRef, currentElement } = useForwardExpose();
 const isFormControl = useFormControl(currentElement);
 const { CollectionSlot } = useCollection({ isProvider: true });
 
-// Alpha channel config (display 0-100, culori 0-1)
-const ALPHA_CONFIG: ChannelConfig = {
-  key: "alpha",
-  label: "Alpha",
-  min: 0,
-  max: 100,
-  step: 1,
-  format: "percentage",
-  nativeMin: 0,
-  nativeMax: 1,
-};
-
 // Resolve default xChannel/yChannel from colorSpace
 const spaceConfig = computed(() => colorSpaces[props.colorSpace]);
 const xChannelKey = computed(() => props.xChannel ?? spaceConfig.value?.channels[0]?.key ?? "h");
 const yChannelKey = computed(() => props.yChannel ?? spaceConfig.value?.channels[1]?.key ?? "s");
-const xIsAlpha = computed(() => xChannelKey.value === "alpha");
-const yIsAlpha = computed(() => yChannelKey.value === "alpha");
-const xConfig = computed(() => xIsAlpha.value ? ALPHA_CONFIG : getChannelConfig(props.colorSpace, xChannelKey.value));
-const yConfig = computed(() => yIsAlpha.value ? ALPHA_CONFIG : getChannelConfig(props.colorSpace, yChannelKey.value));
+
+const { colorRef, displayValues, configs, setDisplayValues } = useColorChannelModel({
+  colorSpace: toRef(props, "colorSpace"),
+  channels: computed(() => [xChannelKey.value, yChannelKey.value]),
+  modelValue: toRef(props, "modelValue"),
+  defaultValue: toRef(props, "defaultValue"),
+  emit: emits,
+});
+
+const xConfig = computed(() => configs.value[0]);
+const yConfig = computed(() => configs.value[1]);
 
 const minX = computed(() => xConfig.value?.min ?? 0);
 const maxX = computed(() => xConfig.value?.max ?? 100);
@@ -154,58 +150,11 @@ const maxY = computed(() => yConfig.value?.max ?? 100);
 const stepX = computed(() => xConfig.value?.step ?? 1);
 const stepY = computed(() => yConfig.value?.step ?? 1);
 
-// Parse incoming modelValue to Color
-function parseColor(v: Color | string | null | undefined): Color | undefined {
-  if (!v) return undefined;
-  if (v instanceof Color) return v;
-  return Color.parse(v) ?? undefined;
-}
+// The area drives a single thumb, so the numeric model the slider mechanics
+// work in is the pair of display values wrapped in a one-entry tuple list.
+const internalValue = computed<number[][]>(() => [[displayValues.value[0] ?? minX.value, displayValues.value[1] ?? minY.value]]);
 
-// Internal Color ref
-const colorRef = shallowRef<Color | undefined>(parseColor(props.modelValue ?? props.defaultValue));
-
-// Sync from external modelValue changes
-watch(() => props.modelValue, (val) => {
-  const parsed = parseColor(val);
-  if (parsed) colorRef.value = parsed;
-});
-
-// Convert Color to display values for the internal slider
-function colorToDisplayValues(color: Color | undefined): number[][] {
-  if (!color || !xConfig.value || !yConfig.value) return [[minX.value, minY.value]];
-  const converted = color.to(props.colorSpace);
-  const rawX = xIsAlpha.value ? color.alpha : converted.get(xChannelKey.value);
-  const rawY = yIsAlpha.value ? color.alpha : converted.get(yChannelKey.value);
-  return [[nativeToDisplay(xConfig.value, rawX), nativeToDisplay(yConfig.value, rawY)]];
-}
-
-// Internal numeric model for the slider mechanics
-const internalValue = ref<number[][]>(colorToDisplayValues(colorRef.value));
-
-// Sync Color → internal numeric values (also when channels change)
-watch([colorRef, xChannelKey, yChannelKey], ([color]) => {
-  const newVals = colorToDisplayValues(color);
-  // Only update if significantly different to avoid feedback loops
-  const cur = internalValue.value[0];
-  if (cur && Math.abs((cur[0] ?? 0) - (newVals[0]?.[0] ?? 0)) < 0.001 && Math.abs((cur[1] ?? 0) - (newVals[0]?.[1] ?? 0)) < 0.001) return;
-  internalValue.value = newVals;
-});
-
-// Rebuild Color from numeric display values
-function displayValuesToColor(vals: number[][]): Color | undefined {
-  if (!vals[0] || !colorRef.value || !xConfig.value || !yConfig.value) return undefined;
-  const nativeX = displayToNative(xConfig.value, vals[0][0] ?? 0);
-  const nativeY = displayToNative(yConfig.value, vals[0][1] ?? 0);
-  const channelUpdates: Record<string, number> = {};
-  if (!xIsAlpha.value) channelUpdates[xChannelKey.value] = nativeX;
-  if (!yIsAlpha.value) channelUpdates[yChannelKey.value] = nativeY;
-  let result = colorRef.value.with({ space: props.colorSpace, ...channelUpdates });
-  if (xIsAlpha.value) result = result.withAlpha(nativeX);
-  if (yIsAlpha.value) result = result.withAlpha(nativeY);
-  return result;
-}
-
-const currentModelValue = computed(() => Array.isArray(internalValue.value) ? [...internalValue.value] : []);
+const currentModelValue = computed(() => [...internalValue.value]);
 
 const valueIndexToChangeRef = ref(0);
 const valuesBeforeSlideStartRef = ref(currentModelValue.value);
@@ -312,17 +261,7 @@ function updateValues(point: number[], atIndex: number, { commit = false, skipFo
     if (!skipFocus) {
       thumbRef.value?.focus();
     }
-    internalValue.value = nextValues;
-
-    // Rebuild and emit Color
-    const newColor = displayValuesToColor(nextValues);
-    if (newColor) {
-      colorRef.value = newColor;
-      emits("update:modelValue", newColor);
-      emits("update:color", newColor);
-      emits("change", newColor);
-      if (commit) emits("changeEnd", newColor);
-    }
+    setDisplayValues([finalX, finalY], { commit });
   }
 }
 

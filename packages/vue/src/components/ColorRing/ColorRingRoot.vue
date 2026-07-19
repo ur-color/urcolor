@@ -2,11 +2,12 @@
 import type { Ref } from "vue";
 import type { PrimitiveProps } from "reka-ui";
 import { createContext, useDirection, useForwardExpose, VisuallyHidden } from "reka-ui";
-import { computed, ref, shallowRef, toRefs, watch } from "vue";
+import { computed, ref, toRef, toRefs } from "vue";
 import { Color, type SpaceId } from "@urcolor/core";
-import { colorSpaces, getChannelConfig, displayToNative, nativeToDisplay, type ChannelConfig } from "@urcolor/core";
+import { colorSpaces } from "@urcolor/core";
 import { cartesianToPolar, normalizeAngle } from "@urcolor/core";
-import { cyclicWrap, snapToStep } from "../../shared/utils";
+import { cyclicWrap, snapToStep, useFormControl } from "../../shared/utils";
+import { useColorChannelModel } from "../../shared/useColorChannelModel";
 
 type Direction = "ltr" | "rtl";
 
@@ -79,55 +80,24 @@ const { disabled, dir: propDir } = toRefs(props);
 const dir = useDirection(propDir);
 const { forwardRef, currentElement } = useForwardExpose();
 
-const ALPHA_CONFIG: ChannelConfig = {
-  key: "alpha", label: "Alpha", min: 0, max: 100, step: 1, format: "percentage", nativeMin: 0, nativeMax: 1,
-};
-
 const spaceConfig = computed(() => colorSpaces[props.colorSpace]);
 const channelKey = computed(() => props.channel ?? spaceConfig.value?.channels[0]?.key ?? "h");
-const isAlpha = computed(() => channelKey.value === "alpha");
-const channelConfig = computed(() => isAlpha.value ? ALPHA_CONFIG : getChannelConfig(props.colorSpace, channelKey.value));
+
+const { colorRef, displayValues, configs, setDisplayValues } = useColorChannelModel({
+  colorSpace: toRef(props, "colorSpace"),
+  channels: computed(() => [channelKey.value]),
+  modelValue: toRef(props, "modelValue"),
+  defaultValue: toRef(props, "defaultValue"),
+  emit: emits,
+});
+
+const channelConfig = computed(() => configs.value[0]);
 
 const min = computed(() => channelConfig.value?.min ?? 0);
 const max = computed(() => channelConfig.value?.max ?? 360);
 const step = computed(() => channelConfig.value?.step ?? 1);
 
-function parseColor(v: Color | string | null | undefined): Color | undefined {
-  if (!v) return undefined;
-  if (v instanceof Color) return v;
-  return Color.parse(v) ?? undefined;
-}
-
-const colorRef = shallowRef<Color | undefined>(parseColor(props.modelValue ?? props.defaultValue));
-
-watch(() => props.modelValue, (val) => {
-  const parsed = parseColor(val);
-  if (parsed) colorRef.value = parsed;
-});
-
-function colorToDisplayValue(color: Color | undefined): number {
-  if (!color || !channelConfig.value) return min.value;
-  const converted = color.to(props.colorSpace);
-  const raw = isAlpha.value ? color.alpha : converted.get(channelKey.value);
-  return nativeToDisplay(channelConfig.value, raw);
-}
-
-const currentValue = ref(colorToDisplayValue(colorRef.value));
-
-watch([colorRef, channelKey], ([color]) => {
-  const newVal = colorToDisplayValue(color);
-  if (Math.abs(currentValue.value - newVal) < 0.001) return;
-  currentValue.value = newVal;
-});
-
-function displayValueToColor(val: number): Color | undefined {
-  if (!colorRef.value || !channelConfig.value) return undefined;
-  const nativeVal = displayToNative(channelConfig.value, val);
-  if (isAlpha.value) {
-    return colorRef.value.withAlpha(nativeVal);
-  }
-  return colorRef.value.with({ space: props.colorSpace, [channelKey.value]: nativeVal });
-}
+const currentValue = computed(() => displayValues.value[0] ?? min.value);
 
 const thumbElement = ref<HTMLElement>();
 
@@ -148,19 +118,15 @@ function getValueFromPointer(event: PointerEvent): number {
 function updateValue(val: number, commit = false) {
   const snapped = snapToStep(val, min.value, max.value, step.value);
   const hasChanged = Math.abs(snapped - currentValue.value) > 0.001;
-  currentValue.value = snapped;
-  if (!hasChanged) return;
+  if (!hasChanged) {
+    // Below the feedback threshold: record the value but stay silent.
+    displayValues.value = [snapped];
+    return;
+  }
 
   if (!isDragging.value) thumbElement.value?.focus();
 
-  const newColor = displayValueToColor(snapped);
-  if (newColor) {
-    colorRef.value = newColor;
-    emits("update:modelValue", newColor);
-    emits("update:color", newColor);
-    emits("change", newColor);
-    if (commit) emits("changeEnd", newColor);
-  }
+  setDisplayValues([snapped], { commit });
 }
 
 function handlePointerDown(event: PointerEvent) {
@@ -239,7 +205,7 @@ function handleKeyDown(event: KeyboardEvent) {
   updateValue(newVal, true);
 }
 
-const isFormControl = computed(() => currentElement.value ? Boolean(currentElement.value.closest("form")) : false);
+const isFormControl = useFormControl(currentElement);
 
 provideColorRingRootContext({
   disabled,
