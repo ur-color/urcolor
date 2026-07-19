@@ -25,8 +25,23 @@ export interface NameSource {
   languages: Record<string, LanguageCoverage>;
 }
 
-/** `[term, displayName, oklabCentroid]`. Centroid is null when unknown. */
-export type TermEntry = [term: string, name: string, centroid: [number, number, number] | null];
+/**
+ * `[term, displayName, oklabCentroid, pCT]`. Centroid is `null` when
+ * unknown. `pCT` is the maximum, across this term's bins, of upstream's
+ * "probability the colour is named this term" signal — see
+ * `scripts/sync-uwdata/transform.ts`'s `TermTable.indexOf` for why the
+ * maximum is the representative choice. It is `null` when the source data
+ * doesn't carry that signal for this model at all: full-model chunks always
+ * have it, but a hue-model chunk's `null` here isn't a missing value for a
+ * populated term, it's this asymmetry — upstream's hue-bin data may omit
+ * `pCT` entirely (unlike the full model, where it's always present).
+ */
+export type TermEntry = [
+  term: string,
+  name: string,
+  centroid: [number, number, number] | null,
+  pCT: number | null,
+];
 
 /** Full-colour-space model: Oklab cubes keyed `"binL,binA,binB"`. */
 export interface FullChunk {

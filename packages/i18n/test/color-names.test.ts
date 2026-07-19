@@ -152,6 +152,17 @@ describe("reverse lookup", () => {
     const names = await ColorNames.load("ko", { source: "uwdata" });
     expect(names.colorOf("definitely-not-a-korean-colour-term")).toBeUndefined();
   });
+
+  it("returns the term's representative pCT alongside color/term/name", async () => {
+    const names = await ColorNames.load("ko", { source: "uwdata" });
+    const term = names.resolve(BLUE).term!;
+    const result = names.resolveColorOf(term);
+
+    expect(result).toBeDefined();
+    expect(result!.pCT).toBeTypeOf("number");
+    expect(result!.pCT).toBeGreaterThan(0);
+    expect(result!.pCT).toBeLessThanOrEqual(1);
+  });
 });
 
 describe("colorOf: Unicode normalisation (NFC/NFD)", () => {

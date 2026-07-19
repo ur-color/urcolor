@@ -9,7 +9,7 @@ const chunk: HueChunk = {
   lang: "ar",
   model: "hue",
   binCount: 72,
-  terms: [["أحمر", "أحمر", null], ["أزرق", "أزرق", null]],
+  terms: [["أحمر", "أحمر", null, 0.54], ["أزرق", "أزرق", null, 0.71]],
   binTerms: Array.from({ length: 72 }, (_, index) => {
     if (index === 0) return [[0, 0.54]] as [number, number][];
     if (index === 48) return [[1, 0.71]] as [number, number][];

@@ -98,7 +98,14 @@ near those extremes.
 
 ```ts
 names.colorOf("파랑"); // Color — the term's average colour
+names.resolveColorOf("파랑");
+// { color, term: "파랑", name: "파랑색", pCT: 0.025 }
 ```
+
+`pCT` is upstream's "how strongly this term identifies its own colour"
+signal — the maximum across the term's bins, since that's the bin where the
+term is the *most* distinctive label for its colour. It's `null` when the
+source data doesn't carry that signal for this term's model at all.
 
 ## Coverage by language
 

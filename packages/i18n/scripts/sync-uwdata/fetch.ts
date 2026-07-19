@@ -24,12 +24,19 @@ export interface RawFullRecord {
   binA: number;
   binB: number;
   pTC: number;
+  /** Probability the *colour* is named this *term* ("P(colour|term)"). */
+  pCT: number;
 }
 
 export interface RawHueTerm {
   simplifiedName: string;
   commonName: string;
-  bins: { pTC: number }[];
+  /**
+   * `pCT` is `NaN` when upstream's bin object doesn't carry it — treated the
+   * same way as the CSV's blank centroid cells (see {@link optionalFinite}):
+   * a legitimate "no signal" rather than schema drift.
+   */
+  bins: { pTC: number; pCT: number }[];
 }
 
 export interface RawBasicRow {
@@ -126,7 +133,7 @@ export function parseFullBinned(json: string): RawFullRecord[] {
     const record = requireObject(raw, where);
     requireKeys(
       record,
-      ["langAbv", "term", "commonTerm", "binL", "binA", "binB", "pTC"],
+      ["langAbv", "term", "commonTerm", "binL", "binA", "binB", "pTC", "pCT"],
       where,
     );
     return {
@@ -137,6 +144,7 @@ export function parseFullBinned(json: string): RawFullRecord[] {
       binA: requireFinite(record.binA, where, "binA"),
       binB: requireFinite(record.binB, where, "binB"),
       pTC: requireFinite(record.pTC, where, "pTC"),
+      pCT: requireFinite(record.pCT, where, "pCT"),
     };
   });
 }
@@ -164,7 +172,14 @@ export function parseHueBinned(json: string): Record<string, Record<string, RawH
         bins: value.bins.map((bin, binIndex) => {
           const binWhere = `${where}.bins[${binIndex}]`;
           const binRecord = requireObject(bin, binWhere);
-          return { pTC: requireFinite(binRecord.pTC, binWhere, "pTC") };
+          return {
+            pTC: requireFinite(binRecord.pTC, binWhere, "pTC"),
+            // Not in requireKeys: unlike pTC, upstream may not carry a pCT
+            // signal at hue-bin granularity at all. Absent is legitimate
+            // here, not schema drift — optionalFinite maps that to NaN,
+            // same convention as the CSV's blank centroid cells.
+            pCT: optionalFinite(binRecord.pCT, binWhere, "pCT"),
+          };
         }),
       };
     }

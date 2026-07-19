@@ -16,7 +16,7 @@ describe("parseFullBinned", () => {
     expect(records).toHaveLength(3);
     expect(records[0]).toEqual({
       langAbv: "ko", term: "파랑", commonTerm: "파란색",
-      binL: 11, binA: -1, binB: -4, pTC: 0.61,
+      binL: 11, binA: -1, binB: -4, pTC: 0.61, pCT: 0.31,
     });
   });
 
@@ -32,23 +32,30 @@ describe("parseFullBinned", () => {
 
   it("throws SchemaError naming the field when langAbv is null", () => {
     const bad = JSON.stringify([
-      { langAbv: null, term: "파랑", commonTerm: "파란색", binL: 1, binA: 1, binB: 1, pTC: 0.5 },
+      { langAbv: null, term: "파랑", commonTerm: "파란색", binL: 1, binA: 1, binB: 1, pTC: 0.5, pCT: 0.3 },
     ]);
     expect(() => parseFullBinned(bad)).toThrow(/langAbv/);
   });
 
   it("throws SchemaError naming the field when term is an empty string", () => {
     const bad = JSON.stringify([
-      { langAbv: "ko", term: "", commonTerm: "파란색", binL: 1, binA: 1, binB: 1, pTC: 0.5 },
+      { langAbv: "ko", term: "", commonTerm: "파란색", binL: 1, binA: 1, binB: 1, pTC: 0.5, pCT: 0.3 },
     ]);
     expect(() => parseFullBinned(bad)).toThrow(/term/);
   });
 
   it("throws SchemaError naming the field when pTC is non-numeric", () => {
     const bad = JSON.stringify([
-      { langAbv: "ko", term: "파랑", commonTerm: "파란색", binL: 1, binA: 1, binB: 1, pTC: "N/A" },
+      { langAbv: "ko", term: "파랑", commonTerm: "파란색", binL: 1, binA: 1, binB: 1, pTC: "N/A", pCT: 0.3 },
     ]);
     expect(() => parseFullBinned(bad)).toThrow(/pTC/);
+  });
+
+  it("throws SchemaError naming the field when pCT is non-numeric", () => {
+    const bad = JSON.stringify([
+      { langAbv: "ko", term: "파랑", commonTerm: "파란색", binL: 1, binA: 1, binB: 1, pTC: 0.5, pCT: "N/A" },
+    ]);
+    expect(() => parseFullBinned(bad)).toThrow(/pCT/);
   });
 
   it("throws SchemaError naming the index when a record element is null", () => {
@@ -62,7 +69,7 @@ describe("parseFullBinned", () => {
   });
 
   const validFullRecord = {
-    langAbv: "ko", term: "파랑", commonTerm: "파란색", binL: 1, binA: 1, binB: 1, pTC: 0.5,
+    langAbv: "ko", term: "파랑", commonTerm: "파란색", binL: 1, binA: 1, binB: 1, pTC: 0.5, pCT: 0.3,
   };
 
   const invalidNumericValues: [string, unknown][] = [
@@ -85,6 +92,12 @@ describe("parseFullBinned", () => {
     expect(() => parseFullBinned(bad)).toThrow(/pTC/);
   });
 
+  it.each(invalidNumericValues)("rejects pCT when it is %s", (_label, value) => {
+    const bad = JSON.stringify([{ ...validFullRecord, pCT: value }]);
+    expect(() => parseFullBinned(bad)).toThrow(SchemaError);
+    expect(() => parseFullBinned(bad)).toThrow(/pCT/);
+  });
+
   const invalidStringValues: [string, unknown][] = [
     ["null", null],
     ["an empty string", ""],
@@ -105,6 +118,28 @@ describe("parseHueBinned", () => {
     const parsed = parseHueBinned(await fixture("hue_colors_binned.json"));
     expect(Object.keys(parsed)).toEqual(["ar"]);
     expect(parsed.ar?.["أحمر"]?.bins[0]?.pTC).toBe(0.54);
+  });
+
+  it("parses each bin's pCT alongside pTC when upstream provides it", async () => {
+    const parsed = parseHueBinned(await fixture("hue_colors_binned.json"));
+    expect(parsed.ar?.["أحمر"]?.bins[0]?.pCT).toBe(0.54);
+    expect(parsed.ar?.["أحمر"]?.bins[1]?.pCT).toBe(0.07);
+  });
+
+  it("parses a bin's pCT as NaN, not a throw, when the bin object omits it", () => {
+    const parsed = parseHueBinned(JSON.stringify({
+      ar: { x: { simplifiedName: "x", commonName: "x", bins: [{ pTC: 0.5 }] } },
+    }));
+    expect(parsed.ar?.x?.bins[0]?.pTC).toBe(0.5);
+    expect(parsed.ar?.x?.bins[0]?.pCT).toBeNaN();
+  });
+
+  it("throws SchemaError naming pCT when a bin entry's pCT is present but non-numeric", () => {
+    const bad = JSON.stringify({
+      ar: { x: { simplifiedName: "x", commonName: "x", bins: [{ pTC: 0.5, pCT: "N/A" }] } },
+    });
+    expect(() => parseHueBinned(bad)).toThrow(SchemaError);
+    expect(() => parseHueBinned(bad)).toThrow(/pCT/);
   });
 
   it("throws SchemaError when a term has no bins array", () => {

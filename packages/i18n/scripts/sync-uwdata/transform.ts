@@ -36,20 +36,44 @@ class TermTable {
 
   constructor(private readonly centroids: Map<string, [number, number, number]>) {}
 
-  indexOf(term: string, name: string): number {
+  /**
+   * `pCT` ("how strongly this term identifies its own colour") is per-bin
+   * upstream, but a term table entry is per-term. The maximum across a
+   * term's bins is the natural representative value: it's the bin where the
+   * term is the *most* distinctive identifier of its colour, which is a more
+   * useful single number for a caller than e.g. an average diluted by bins
+   * where the term is a weak, secondary label. `null` means no bin carried a
+   * usable pCT for this term (see {@link RawHueTerm}).
+   */
+  indexOf(term: string, name: string, pCT: number | null): number {
     const normalizedTerm = term.normalize("NFC");
     const normalizedName = name.normalize("NFC");
 
     const existing = this.#indices.get(normalizedTerm);
-    if (existing !== undefined) return existing;
+    if (existing !== undefined) {
+      if (pCT !== null) {
+        const entry = this.entries[existing]!;
+        if (entry[3] === null || pCT > entry[3]) entry[3] = pCT;
+      }
+      return existing;
+    }
 
     // When the same term recurs with a different display name (commonTerm),
     // the first-seen display name wins; subsequent recurrences are ignored.
     const index = this.entries.length;
-    this.entries.push([normalizedTerm, normalizedName, this.centroids.get(normalizedTerm) ?? null]);
+    this.entries.push([normalizedTerm, normalizedName, this.centroids.get(normalizedTerm) ?? null, pCT]);
     this.#indices.set(normalizedTerm, index);
     return index;
   }
+}
+
+/** Maximum of the finite values in `values`, or `null` if none are finite. */
+function maxFinite(values: number[]): number | null {
+  let max: number | null = null;
+  for (const value of values) {
+    if (Number.isFinite(value) && (max === null || value > max)) max = value;
+  }
+  return max;
 }
 
 export function buildFullChunk(
@@ -62,7 +86,7 @@ export function buildFullChunk(
 
   for (const record of records) {
     const key = `${record.binL},${record.binA},${record.binB}`;
-    const index = table.indexOf(record.term, record.commonTerm);
+    const index = table.indexOf(record.term, record.commonTerm, record.pCT);
     (bins[key] ??= []).push([index, record.pTC]);
   }
 
@@ -82,7 +106,8 @@ export function buildHueChunk(
   const binTerms: [number, number][][] = Array.from({ length: HUE_BIN_COUNT }, () => []);
 
   for (const [term, value] of Object.entries(terms)) {
-    const index = table.indexOf(term, value.commonName);
+    const pCT = maxFinite(value.bins.map(bin => bin.pCT));
+    const index = table.indexOf(term, value.commonName, pCT);
     value.bins.forEach((bin, binIndex) => {
       if (binIndex >= HUE_BIN_COUNT || !(bin.pTC > 0)) return;
       binTerms[binIndex]?.push([index, bin.pTC]);

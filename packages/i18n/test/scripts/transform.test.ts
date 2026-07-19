@@ -40,6 +40,9 @@ describe("buildFullChunk", () => {
     expect(chunk.terms.map(t => t[0])).toEqual(["파랑", "하늘"]);
     expect(chunk.terms[0]?.[1]).toBe("파란색");
     expect(chunk.terms[0]?.[2]).toEqual([0.521, -0.041, -0.173]);
+    // pCT from the fixture: "파랑" row has 0.31, "하늘" row has 0.08.
+    expect(chunk.terms[0]?.[3]).toBeCloseTo(0.31, 5);
+    expect(chunk.terms[1]?.[3]).toBeCloseTo(0.08, 5);
     expect(chunk.bins["11,-1,-4"]).toEqual([[0, 0.61], [1, 0.13]]);
   });
 
@@ -53,8 +56,8 @@ describe("buildFullChunk", () => {
   it("sorts each bin's candidates even when input is in ascending order", () => {
     // Records deliberately in ascending pTC order (wrong order without sort)
     const records: RawFullRecord[] = [
-      { langAbv: "test", term: "low", commonTerm: "lowName", binL: 10, binA: 0, binB: 0, pTC: 0.1 },
-      { langAbv: "test", term: "high", commonTerm: "highName", binL: 10, binA: 0, binB: 0, pTC: 0.9 },
+      { langAbv: "test", term: "low", commonTerm: "lowName", binL: 10, binA: 0, binB: 0, pTC: 0.1, pCT: 0.2 },
+      { langAbv: "test", term: "high", commonTerm: "highName", binL: 10, binA: 0, binB: 0, pTC: 0.9, pCT: 0.8 },
     ];
     const chunk = buildFullChunk("test", records, []);
     const bin = chunk.bins["10,0,0"] ?? [];
@@ -72,8 +75,8 @@ describe("buildFullChunk", () => {
 
   it("uses centroid from basic info when term is present, and null when absent", () => {
     const records: RawFullRecord[] = [
-      { langAbv: "test", term: "present", commonTerm: "presentName", binL: 10, binA: 0, binB: 0, pTC: 0.5 },
-      { langAbv: "test", term: "absent", commonTerm: "absentName", binL: 10, binA: 1, binB: 1, pTC: 0.3 },
+      { langAbv: "test", term: "present", commonTerm: "presentName", binL: 10, binA: 0, binB: 0, pTC: 0.5, pCT: 0.4 },
+      { langAbv: "test", term: "absent", commonTerm: "absentName", binL: 10, binA: 1, binB: 1, pTC: 0.3, pCT: 0.2 },
     ];
     const centroids: RawBasicRow[] = [
       { lang_abv: "test", commonName: "presentName", simplifiedName: "present", avgFullL: 0.5, avgFullA: 0.1, avgFullB: 0.2 },
@@ -104,16 +107,16 @@ describe("buildHueChunk", () => {
         simplifiedName: "low",
         commonName: "lowName",
         bins: [
-          { pTC: 0.1 }, // bin 0: low probability
-          { pTC: 0.0 },
+          { pTC: 0.1, pCT: NaN }, // bin 0: low probability
+          { pTC: 0.0, pCT: NaN },
         ],
       },
       high: {
         simplifiedName: "high",
         commonName: "highName",
         bins: [
-          { pTC: 0.9 }, // bin 0: high probability
-          { pTC: 0.0 },
+          { pTC: 0.9, pCT: NaN }, // bin 0: high probability
+          { pTC: 0.0, pCT: NaN },
         ],
       },
     };
@@ -127,13 +130,75 @@ describe("buildHueChunk", () => {
   });
 });
 
+describe("TermTable.indexOf (pCT: representative value per term)", () => {
+  it("keeps the maximum pCT across a term's bins, not the first or last seen", () => {
+    const records: RawFullRecord[] = [
+      { langAbv: "test", term: "color", commonTerm: "name", binL: 10, binA: 0, binB: 0, pTC: 0.5, pCT: 0.2 },
+      { langAbv: "test", term: "color", commonTerm: "name2", binL: 11, binA: 0, binB: 0, pTC: 0.3, pCT: 0.9 },
+      { langAbv: "test", term: "color", commonTerm: "name3", binL: 12, binA: 0, binB: 0, pTC: 0.1, pCT: 0.4 },
+    ];
+    const chunk = buildFullChunk("test", records, []);
+    expect(chunk.terms).toHaveLength(1);
+    expect(chunk.terms[0]?.[3]).toBe(0.9);
+  });
+
+  it("uses a single bin's pCT directly when the term has only one", () => {
+    const records: RawFullRecord[] = [
+      { langAbv: "test", term: "color", commonTerm: "name", binL: 10, binA: 0, binB: 0, pTC: 0.5, pCT: 0.42 },
+    ];
+    const chunk = buildFullChunk("test", records, []);
+    expect(chunk.terms[0]?.[3]).toBe(0.42);
+  });
+});
+
+describe("buildHueChunk: pCT", () => {
+  it("takes the maximum pCT across a term's bins when upstream provides it", () => {
+    const terms: Record<string, RawHueTerm> = {
+      x: {
+        simplifiedName: "x",
+        commonName: "xName",
+        bins: [{ pTC: 0.1, pCT: 0.2 }, { pTC: 0.9, pCT: 0.8 }],
+      },
+    };
+    const chunk = buildHueChunk("test", terms, []);
+    expect(chunk.terms[0]?.[3]).toBe(0.8);
+  });
+
+  // Documents the asymmetry noted on TermEntry (engine/types.ts): the full
+  // model always has pCT, but a hue-model chunk's pCT is null whenever
+  // upstream's bin objects don't carry the signal at all — absent, not zero.
+  it("leaves pCT null, not zero, when no bin for the term carries a finite pCT", () => {
+    const terms: Record<string, RawHueTerm> = {
+      x: {
+        simplifiedName: "x",
+        commonName: "xName",
+        bins: [{ pTC: 0.1, pCT: NaN }, { pTC: 0.9, pCT: NaN }],
+      },
+    };
+    const chunk = buildHueChunk("test", terms, []);
+    expect(chunk.terms[0]?.[3]).toBeNull();
+  });
+
+  it("ignores a bin with no usable pCT when another bin for the same term has one", () => {
+    const terms: Record<string, RawHueTerm> = {
+      x: {
+        simplifiedName: "x",
+        commonName: "xName",
+        bins: [{ pTC: 0.1, pCT: NaN }, { pTC: 0.9, pCT: 0.63 }],
+      },
+    };
+    const chunk = buildHueChunk("test", terms, []);
+    expect(chunk.terms[0]?.[3]).toBe(0.63);
+  });
+});
+
 describe("TermTable.indexOf (display-name collision policy)", () => {
   it("keeps the first-seen display name when the same term recurs with a different commonTerm", () => {
     // Test that when the same term appears with different display names,
     // the first occurrence's display name is retained
     const records: RawFullRecord[] = [
-      { langAbv: "test", term: "color", commonTerm: "firstDisplayName", binL: 10, binA: 0, binB: 0, pTC: 0.5 },
-      { langAbv: "test", term: "color", commonTerm: "secondDisplayName", binL: 10, binA: 1, binB: 1, pTC: 0.3 },
+      { langAbv: "test", term: "color", commonTerm: "firstDisplayName", binL: 10, binA: 0, binB: 0, pTC: 0.5, pCT: 0.4 },
+      { langAbv: "test", term: "color", commonTerm: "secondDisplayName", binL: 10, binA: 1, binB: 1, pTC: 0.3, pCT: 0.2 },
     ];
     const chunk = buildFullChunk("test", records, []);
     // Both records reference the same term "color", so there should be only one term entry
@@ -158,7 +223,7 @@ describe("TermTable.indexOf (Unicode normalisation)", () => {
     expect(NFD_TERM.normalize("NFC")).toBe(NFC_TERM);
 
     const records: RawFullRecord[] = [
-      { langAbv: "test", term: NFD_TERM, commonTerm: NFD_TERM, binL: 10, binA: 0, binB: 0, pTC: 0.5 },
+      { langAbv: "test", term: NFD_TERM, commonTerm: NFD_TERM, binL: 10, binA: 0, binB: 0, pTC: 0.5, pCT: 0.4 },
     ];
     const chunk = buildFullChunk("test", records, []);
 
@@ -170,8 +235,8 @@ describe("TermTable.indexOf (Unicode normalisation)", () => {
 
   it("interns NFD and NFC spellings of the same term to a single entry, not two", () => {
     const records: RawFullRecord[] = [
-      { langAbv: "test", term: NFD_TERM, commonTerm: "firstName", binL: 10, binA: 0, binB: 0, pTC: 0.5 },
-      { langAbv: "test", term: NFC_TERM, commonTerm: "secondName", binL: 10, binA: 1, binB: 1, pTC: 0.3 },
+      { langAbv: "test", term: NFD_TERM, commonTerm: "firstName", binL: 10, binA: 0, binB: 0, pTC: 0.5, pCT: 0.4 },
+      { langAbv: "test", term: NFC_TERM, commonTerm: "secondName", binL: 10, binA: 1, binB: 1, pTC: 0.3, pCT: 0.2 },
     ];
     const chunk = buildFullChunk("test", records, []);
 
@@ -186,7 +251,7 @@ describe("TermTable.indexOf (Unicode normalisation)", () => {
 
   it("normalises a centroid's NFD simplifiedName so an NFD term still finds its centroid", () => {
     const records: RawFullRecord[] = [
-      { langAbv: "test", term: NFD_TERM, commonTerm: NFD_NAME, binL: 10, binA: 0, binB: 0, pTC: 0.5 },
+      { langAbv: "test", term: NFD_TERM, commonTerm: NFD_NAME, binL: 10, binA: 0, binB: 0, pTC: 0.5, pCT: 0.4 },
     ];
     const centroids: RawBasicRow[] = [
       { lang_abv: "test", commonName: NFD_NAME, simplifiedName: NFD_TERM, avgFullL: 0.5, avgFullA: 0.1, avgFullB: 0.2 },
@@ -201,7 +266,7 @@ describe("TermTable.indexOf (Unicode normalisation)", () => {
       [NFD_TERM]: {
         simplifiedName: NFD_TERM,
         commonName: NFD_NAME,
-        bins: [{ pTC: 0.5 }],
+        bins: [{ pTC: 0.5, pCT: NaN }],
       },
     };
     const chunk = buildHueChunk("test", terms, []);

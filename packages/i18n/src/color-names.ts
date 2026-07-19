@@ -194,7 +194,9 @@ export class ColorNames {
     return this.resolveColorOf(term)?.color;
   }
 
-  resolveColorOf(term: string): { color: Color; term: string; name: string } | undefined {
+  resolveColorOf(
+    term: string,
+  ): { color: Color; term: string; name: string; pCT: number | null } | undefined {
     // Shipped data is normalised to NFC (composed) at generation time, but a
     // caller may pass NFD (decomposed) — macOS filesystem APIs and some IMEs
     // produce it — which renders identically but fails `===`. Normalise the
@@ -204,10 +206,10 @@ export class ColorNames {
     const entry = this.#chunk.terms.find(([key, name]) => key === normalizedTerm || name === normalizedTerm);
     if (entry === undefined) return undefined;
 
-    const [key, name, centroid] = entry;
+    const [key, name, centroid, pCT] = entry;
     if (centroid === null) return undefined;
 
-    return { color: Color.fromOklab(centroid[0], centroid[1], centroid[2]), term: key, name };
+    return { color: Color.fromOklab(centroid[0], centroid[1], centroid[2]), term: key, name, pCT };
   }
 
   resolvedOptions(): ResolvedColorNamesOptions {

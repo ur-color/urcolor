@@ -46,6 +46,13 @@ describe("buildOutput", () => {
     expect(output.chunks.has("zz")).toBe(false);
   });
 
+  it("carries pCT through into the chunk's term table", async () => {
+    const output = buildOutput(await inputs(), "2026-07-19T00:00:00.000Z");
+    const ko = output.chunks.get("ko");
+    // "파랑" (index 0) has pCT 0.31 in the fixture.
+    expect(ko?.terms[0]?.[3]).toBeCloseTo(0.31, 5);
+  });
+
   it("uses the given commit sha in meta instead of the pinned default", async () => {
     const output = buildOutput(await inputs(), "2026-07-19T00:00:00.000Z", "deadbeefcafe");
     expect(output.meta.commitSha).toBe("deadbeefcafe");
