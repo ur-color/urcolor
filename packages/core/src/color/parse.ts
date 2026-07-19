@@ -52,11 +52,23 @@ export function registerParser(parser: ColorParser): () => void {
   };
 }
 
+/**
+ * Whether every coordinate and the alpha are real numbers. The built-in
+ * parsers match on notation *shape* and run each token through
+ * `Number.parseFloat`, so a syntactically well-formed call with non-numeric
+ * tokens — `hsl(from red h s l)` — yields `NaN` coords rather than a miss.
+ * Treating that as a miss is what lets a registered parser (e.g. relative
+ * color syntax) see the input at all.
+ */
+function isNumeric(color: ColorObject): boolean {
+  return color.coords.every(Number.isFinite) && Number.isFinite(color.alpha);
+}
+
 /** Parse a CSS color string, or `null` if no notation matches. */
 export function tryParse(input: string): ColorObject | null {
   for (const p of PARSERS) {
     const result = p(input);
-    if (result) return result;
+    if (result && isNumeric(result)) return result;
   }
   for (const p of registered) {
     // Registered parsers are third-party code, unlike the built-ins above.
