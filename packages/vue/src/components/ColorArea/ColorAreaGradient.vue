@@ -1,5 +1,6 @@
 <script lang="ts">
 import type { PrimitiveProps } from "reka-ui";
+import type { SpaceId } from "@urcolor/core";
 
 export interface ColorAreaGradientProps extends /* @vue-ignore */ PrimitiveProps {
   as?: string;
@@ -13,7 +14,7 @@ export interface ColorAreaGradientProps extends /* @vue-ignore */ PrimitiveProps
   /** Color for the bottom-right corner. */
   bottomRight?: string;
   /** When set to a non-RGB color space, uses 2D canvas with perceptual interpolation in that space instead of WebGL (sRGB). */
-  interpolationSpace?: string;
+  interpolationSpace?: SpaceId;
   /**
    * Lock specific channels to fixed values in the gradient.
    * - `{ alpha: 1 }` (default) — lock alpha to 1
@@ -25,11 +26,10 @@ export interface ColorAreaGradientProps extends /* @vue-ignore */ PrimitiveProps
 </script>
 
 <script setup lang="ts">
-import "internationalized-color/css";
 import { ref, watch, computed, onBeforeUnmount } from "vue";
 import { useResizeObserver } from "@vueuse/core";
 import { useForwardExpose, Primitive } from "reka-ui";
-import { Color } from "internationalized-color";
+import { Color } from "@urcolor/core";
 import { drawGradient, sampleBilinearGrid, sampleChannelGrid, getChannelConfig } from "@urcolor/core";
 import { injectColorAreaRootContext } from "./ColorAreaRoot.vue";
 
@@ -89,7 +89,7 @@ function renderToCanvas(canvas: HTMLCanvasElement, pixels: Uint8ClampedArray, sa
   ctx.drawImage(offscreen, 0, 0, w, h);
 }
 
-function applyOverrides(baseColor: Color, colorSpace: string): Color {
+function applyOverrides(baseColor: Color, colorSpace: SpaceId): Color {
   const overrides: Record<string, number> | false = props.channelOverrides as any;
   if (!overrides) return baseColor;
 
@@ -97,13 +97,13 @@ function applyOverrides(baseColor: Color, colorSpace: string): Color {
   let result = baseColor;
   for (const [k, v] of Object.entries(overrides)) {
     if (k === "alpha") {
-      result = result.set({ alpha: v });
+      result = result.withAlpha(v);
     } else {
       channelUpdates[k] = v;
     }
   }
   if (Object.keys(channelUpdates).length > 0) {
-    result = result.set({ mode: colorSpace, ...channelUpdates });
+    result = result.with({ space: colorSpace, ...channelUpdates });
   }
   return result;
 }
@@ -168,10 +168,10 @@ function render() {
       const yCfg = getChannelConfig(colorSpace, effectiveYChannel);
       if (!xCfg || !yCfg) return;
 
-      const xMinVal = xCfg.culoriMin ?? xCfg.min;
-      const xMaxVal = xCfg.culoriMax ?? xCfg.max;
-      const yMinVal = yCfg.culoriMin ?? yCfg.min;
-      const yMaxVal = yCfg.culoriMax ?? yCfg.max;
+      const xMinVal = xCfg.nativeMin ?? xCfg.min;
+      const xMaxVal = xCfg.nativeMax ?? xCfg.max;
+      const yMinVal = yCfg.nativeMin ?? yCfg.min;
+      const yMaxVal = yCfg.nativeMax ?? yCfg.max;
 
       const sampleW = 64;
       const sampleH = 64;
@@ -189,8 +189,8 @@ function render() {
       const cfg = getChannelConfig(colorSpace, channelKey);
       if (!cfg) return;
 
-      const cMin = cfg.culoriMin ?? cfg.min;
-      const cMax = cfg.culoriMax ?? cfg.max;
+      const cMin = cfg.nativeMin ?? cfg.min;
+      const cMax = cfg.nativeMax ?? cfg.max;
 
       const isXReal = !!effectiveXChannel;
       const sampleW = 64;
@@ -218,17 +218,15 @@ function render() {
             ? alphaMin + vy * (alphaMax - alphaMin)
             : alphaMin + vx * (alphaMax - alphaMin);
 
-          const c = overriddenBase.set({
-            mode: colorSpace,
+          const c = overriddenBase.with({
+            space: colorSpace,
             [channelKey]: realVal,
           });
-          if (!c) continue;
-          const rgb = c.to("rgb");
-          if (!rgb) continue;
+          const rgb = c.to("srgb");
           const idx = (y * sampleW + x) * 4;
-          data[idx] = Math.round(Math.max(0, Math.min(1, rgb.get("r", 0))) * 255);
-          data[idx + 1] = Math.round(Math.max(0, Math.min(1, rgb.get("g", 0))) * 255);
-          data[idx + 2] = Math.round(Math.max(0, Math.min(1, rgb.get("b", 0))) * 255);
+          data[idx] = Math.round(Math.max(0, Math.min(1, rgb.get("r"))) * 255);
+          data[idx + 1] = Math.round(Math.max(0, Math.min(1, rgb.get("g"))) * 255);
+          data[idx + 2] = Math.round(Math.max(0, Math.min(1, rgb.get("b"))) * 255);
           data[idx + 3] = Math.round(Math.max(0, Math.min(1, alphaVal)) * 255);
         }
       }

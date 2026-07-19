@@ -2,8 +2,7 @@ import type { DOMWrapper, VueWrapper } from "@vue/test-utils";
 import { mount } from "@vue/test-utils";
 import { beforeEach, describe, expect, it, vi } from "bun:test";
 import { defineComponent, h } from "vue";
-import "internationalized-color/css";
-import { Color } from "internationalized-color";
+import { Color } from "@urcolor/core";
 import {
   ColorAreaRoot,
   ColorAreaThumb,
@@ -43,9 +42,8 @@ function getEmittedDisplayValues(wrapper: VueWrapper, eventIndex = 0): [number, 
   const emitted = wrapper.emitted("update:modelValue")?.[eventIndex]?.[0] as Color | undefined;
   if (!emitted) return undefined;
   const hsl = emitted.to("hsl");
-  if (!hsl) return undefined;
-  const h = Math.round(hsl.get("h", 0));
-  const s = Math.round(hsl.get("s", 0) * 100);
+  const h = Math.round(hsl.get("h"));
+  const s = Math.round(hsl.get("s") * 100);
   return [h, s];
 }
 

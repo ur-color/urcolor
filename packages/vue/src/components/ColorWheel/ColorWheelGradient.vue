@@ -12,7 +12,7 @@ export interface ColorWheelGradientProps extends /* @vue-ignore */ PrimitiveProp
 import { ref, watch, onBeforeUnmount } from "vue";
 import { useResizeObserver } from "@vueuse/core";
 import { useForwardExpose, Primitive } from "reka-ui";
-import { Color } from "internationalized-color";
+import { Color, type SpaceId } from "@urcolor/core";
 import { samplePolarGrid, getChannelConfig } from "@urcolor/core";
 import { injectColorWheelRootContext } from "./ColorWheelRoot.vue";
 
@@ -26,17 +26,17 @@ useForwardExpose();
 
 const canvasRef = ref<HTMLCanvasElement | null>(null);
 
-function applyOverrides(baseColor: Color, colorSpace: string): Color {
+function applyOverrides(baseColor: Color, colorSpace: SpaceId): Color {
   const overrides = props.channelOverrides;
   if (!overrides) return baseColor;
   let result = baseColor;
   const channelUpdates: Record<string, number> = {};
   for (const [k, v] of Object.entries(overrides)) {
-    if (k === "alpha") result = result.set({ alpha: v });
+    if (k === "alpha") result = result.withAlpha(v);
     else channelUpdates[k] = v;
   }
   if (Object.keys(channelUpdates).length > 0) {
-    result = result.set({ mode: colorSpace, ...channelUpdates });
+    result = result.with({ space: colorSpace, ...channelUpdates });
   }
   return result;
 }
@@ -75,10 +75,10 @@ function render() {
   const radiusCfg = getChannelConfig(colorSpace, rootContext.radiusChannelKey.value);
   if (!angleCfg || !radiusCfg) return;
 
-  const aMin = angleCfg.culoriMin ?? angleCfg.min;
-  const aMax = angleCfg.culoriMax ?? angleCfg.max;
-  const rMin = radiusCfg.culoriMin ?? radiusCfg.min;
-  const rMax = radiusCfg.culoriMax ?? radiusCfg.max;
+  const aMin = angleCfg.nativeMin ?? angleCfg.min;
+  const aMax = angleCfg.nativeMax ?? angleCfg.max;
+  const rMin = radiusCfg.nativeMin ?? radiusCfg.min;
+  const rMax = radiusCfg.nativeMax ?? radiusCfg.max;
 
   const sampleSize = 128;
   const pixels = samplePolarGrid(

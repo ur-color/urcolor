@@ -2,7 +2,7 @@
 import type { Ref } from "vue";
 import type { PrimitiveProps } from "reka-ui";
 import { createContext, Primitive, useForwardExpose, VisuallyHidden } from "reka-ui";
-import { Color } from "internationalized-color";
+import { Color, type SpaceId } from "@urcolor/core";
 
 export interface ColorFieldRootProps extends /* @vue-ignore */ PrimitiveProps {
   as?: string;
@@ -10,7 +10,7 @@ export interface ColorFieldRootProps extends /* @vue-ignore */ PrimitiveProps {
   /** The controlled color value. v-model binding. */
   modelValue?: Color | string | null;
   /** The color space mode (e.g. 'hsl', 'oklch'). */
-  colorSpace?: string;
+  colorSpace?: SpaceId;
   /** Which channel this field controls (e.g. 'h', 's', 'l'). */
   channel?: string;
   /** Channel display format. Auto-derived from colorSpace config if not set. */
@@ -59,7 +59,7 @@ export const [injectColorFieldRootContext, provideColorFieldRootContext]
 
 <script setup lang="ts">
 import { computed, ref, shallowRef, toRefs, watch } from "vue";
-import { getChannelConfig, displayToCulori, culoriToDisplay, type ChannelConfig } from "@urcolor/core";
+import { getChannelConfig, displayToNative, nativeToDisplay, type ChannelConfig } from "@urcolor/core";
 import { clamp, snapToStep, useFormControl } from "../ColorArea/utils";
 
 const props = withDefaults(defineProps<ColorFieldRootProps>(), {
@@ -91,7 +91,7 @@ watch(() => props.modelValue, (val) => {
 });
 
 const isAlpha = computed(() => props.channel === "alpha");
-const alphaConfig: ChannelConfig = { key: "alpha", label: "Alpha", min: 0, max: 100, step: 1, format: "percentage", culoriMin: 0, culoriMax: 1 };
+const alphaConfig: ChannelConfig = { key: "alpha", label: "Alpha", min: 0, max: 100, step: 1, format: "percentage", nativeMin: 0, nativeMax: 1 };
 const channelConfig = computed(() => isAlpha.value ? alphaConfig : getChannelConfig(props.colorSpace, props.channel));
 
 // Resolve effective min/max/step/format from props or config
@@ -109,18 +109,16 @@ function getDisplayValue(): number | undefined {
   if (!colorRef.value) return undefined;
   if (isHexMode.value) {
     // Convert color to integer: 0xRRGGBB
-    const hex = colorRef.value.toHex()?.replace(/^#/, "");
-    if (!hex) return undefined;
+    const hex = colorRef.value.toString("hex").replace(/^#/, "");
     return Number.parseInt(hex.slice(0, 6), 16);
   }
   if (!channelConfig.value) return undefined;
   if (isAlpha.value) {
-    return Math.round((colorRef.value.alpha ?? 1) * 100);
+    return Math.round(colorRef.value.alpha * 100);
   }
   const converted = colorRef.value.to(props.colorSpace);
-  if (!converted) return undefined;
-  const raw = converted.get(props.channel, 0);
-  return culoriToDisplay(channelConfig.value, raw);
+  const raw = converted.get(props.channel);
+  return nativeToDisplay(channelConfig.value, raw);
 }
 
 const numericValue = ref<number | undefined>(getDisplayValue());
@@ -141,12 +139,12 @@ function rebuildColor(displayVal: number): Color | undefined {
   }
   if (!channelConfig.value) return undefined;
   if (isAlpha.value) {
-    return colorRef.value.set({ alpha: displayVal / 100 });
+    return colorRef.value.withAlpha(displayVal / 100);
   }
-  const culoriVal = displayToCulori(channelConfig.value, displayVal);
-  return colorRef.value.set({
-    mode: props.colorSpace,
-    [props.channel]: culoriVal,
+  const nativeVal = displayToNative(channelConfig.value, displayVal);
+  return colorRef.value.with({
+    space: props.colorSpace,
+    [props.channel]: nativeVal,
   });
 }
 

@@ -1,6 +1,6 @@
 <script lang="ts">
 import type { PrimitiveProps } from "reka-ui";
-import { Color } from "internationalized-color";
+import { Color } from "@urcolor/core";
 
 export interface ColorSwatchRootProps extends /* @vue-ignore */ PrimitiveProps {
   as?: string;
@@ -25,28 +25,25 @@ const props = withDefaults(defineProps<ColorSwatchRootProps>(), {
 
 const { forwardRef } = useForwardExpose();
 
-const color = computed(() => Color.from(props.modelValue));
+const color = computed(() => (props.modelValue ? Color.from(props.modelValue) : undefined));
 
 const opaqueString = computed(() => {
   if (!color.value) return "transparent";
-  const c = color.value.set({ alpha: 1 });
-  if (!c) return "transparent";
-  const srgb = c.to("rgb");
-  if (!srgb) return "transparent";
-  return srgb.toString("css");
+  const c = color.value.withAlpha(1);
+  const srgb = c.to("srgb");
+  return srgb.toString();
 });
 
 const alphaValue = computed(() => {
   if (!color.value) return 1;
-  return color.value.alpha ?? 1;
+  return color.value.alpha;
 });
 
 const colorString = computed(() => {
   if (!color.value) return "transparent";
   if (!props.alpha) return opaqueString.value;
-  const srgb = color.value.to("rgb");
-  if (!srgb) return "transparent";
-  return srgb.toString("css");
+  const srgb = color.value.to("srgb");
+  return srgb.toString();
 });
 
 const swatchStyle = computed(() => {

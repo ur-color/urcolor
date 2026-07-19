@@ -58,7 +58,6 @@
   },
   "dependencies": {
     "@urcolor/core": "workspace:*",
-    "internationalized-color": "1.1.1",
     "reka-ui": "^2.8.0"
   },
   "peerDependencies": {

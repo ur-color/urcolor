@@ -2,8 +2,7 @@ import type { VueWrapper } from "@vue/test-utils";
 import { mount } from "@vue/test-utils";
 import { beforeEach, describe, expect, it } from "bun:test";
 import { defineComponent, h } from "vue";
-import "internationalized-color/css";
-import { Color } from "internationalized-color";
+import { Color, type SpaceId } from "@urcolor/core";
 import {
   ColorFieldRoot,
   ColorFieldInput,
@@ -32,7 +31,7 @@ const ColorField = defineComponent({
     return () =>
       h(ColorFieldRoot, {
         "modelValue": props.modelValue as Color | string | undefined,
-        "colorSpace": props.colorSpace,
+        "colorSpace": props.colorSpace as SpaceId,
         "channel": props.channel,
         "format": props.format as any,
         "min": props.min,

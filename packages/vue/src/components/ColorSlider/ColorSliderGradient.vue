@@ -1,5 +1,6 @@
 <script lang="ts">
 import type { PrimitiveProps } from "reka-ui";
+import type { SpaceId } from "@urcolor/core";
 
 export interface ColorSliderGradientProps extends /* @vue-ignore */ PrimitiveProps {
   as?: string;
@@ -9,7 +10,7 @@ export interface ColorSliderGradientProps extends /* @vue-ignore */ PrimitivePro
   /** Rotation angle in degrees (0 = left-to-right, 90 = top-to-bottom). Values are normalized to 0–360. When using vertical orientation, defaults to 90. */
   angle?: number;
   /** When set to a non-RGB color space, interpolates stops in that space for perceptual accuracy. */
-  interpolationSpace?: string;
+  interpolationSpace?: SpaceId;
   /**
    * Lock specific channels to fixed values in the gradient.
    * - `{ alpha: 1 }` (default) — lock alpha to 1
@@ -21,11 +22,10 @@ export interface ColorSliderGradientProps extends /* @vue-ignore */ PrimitivePro
 </script>
 
 <script setup lang="ts">
-import "internationalized-color/css";
 import { ref, computed, watch, onBeforeUnmount } from "vue";
 import { useResizeObserver } from "@vueuse/core";
 import { useForwardExpose, Primitive } from "reka-ui";
-import { Color } from "internationalized-color";
+import { Color } from "@urcolor/core";
 import { drawLinearGradient, interpolateStops, getChannelConfig } from "@urcolor/core";
 import { injectColorSliderRootContext } from "./ColorSliderRoot.vue";
 
@@ -80,11 +80,11 @@ const autoColors = computed<Color[] | null>(() => {
         if (k !== "alpha") nonAlphaOverrides[k] = v;
       }
       if (Object.keys(nonAlphaOverrides).length > 0) {
-        baseColor = color.set({ mode: colorSpace, ...nonAlphaOverrides });
+        baseColor = color.with({ space: colorSpace, ...nonAlphaOverrides });
       }
     }
-    const transparent = baseColor.set({ alpha: 0 });
-    const opaque = baseColor.set({ alpha: 1 });
+    const transparent = baseColor.withAlpha(0);
+    const opaque = baseColor.withAlpha(1);
     return [transparent, opaque];
   }
 
@@ -93,8 +93,8 @@ const autoColors = computed<Color[] | null>(() => {
 
   const steps = 12;
   const colors: Color[] = [];
-  const cMin = cfg.culoriMin ?? cfg.min;
-  const cMax = cfg.culoriMax ?? cfg.max;
+  const cMin = cfg.nativeMin ?? cfg.min;
+  const cMax = cfg.nativeMax ?? cfg.max;
 
   // Apply overrides to the base color
   let baseColor = color;
@@ -104,18 +104,18 @@ const autoColors = computed<Color[] | null>(() => {
       if (k !== "alpha") channelOverridesForSet[k] = v;
     }
     if (Object.keys(channelOverridesForSet).length > 0) {
-      baseColor = color.set({ mode: colorSpace, ...channelOverridesForSet });
+      baseColor = color.with({ space: colorSpace, ...channelOverridesForSet });
     }
     if (overrides.alpha !== undefined) {
-      baseColor = baseColor.set({ alpha: overrides.alpha });
+      baseColor = baseColor.withAlpha(overrides.alpha);
     }
   }
 
   for (let i = 0; i < steps; i++) {
     const t = i / (steps - 1);
     const val = cMin + t * (cMax - cMin);
-    const c = baseColor.set({ mode: colorSpace, [channel]: val });
-    if (c) colors.push(c);
+    const c = baseColor.with({ space: colorSpace, [channel]: val });
+    colors.push(c);
   }
   return colors;
 });
@@ -131,7 +131,7 @@ function render() {
   if (props.colors) {
     // Use explicitly provided color strings
     const parsed = props.colors.map((c: string) => Color.parse(c));
-    if (parsed.some((c: Color | undefined) => !c) || parsed.length < 2) return;
+    if (parsed.some((c: Color | null) => !c) || parsed.length < 2) return;
     colors = parsed as Color[];
   } else if (autoColors.value) {
     colors = autoColors.value;

@@ -3,8 +3,8 @@ import type { Ref } from "vue";
 import type { PrimitiveProps } from "reka-ui";
 import { createContext, useDirection, useForwardExpose, VisuallyHidden, Primitive } from "reka-ui";
 import { computed, ref, shallowRef, toRefs, watch } from "vue";
-import { Color } from "internationalized-color";
-import { colorSpaces, getChannelConfig, displayToCulori, culoriToDisplay, type ChannelConfig } from "@urcolor/core";
+import { Color, type SpaceId } from "@urcolor/core";
+import { colorSpaces, getChannelConfig, displayToNative, nativeToDisplay, type ChannelConfig } from "@urcolor/core";
 import { cartesianToPolar, normalizeAngle, clampToCircle } from "@urcolor/core";
 
 type Direction = "ltr" | "rtl";
@@ -18,7 +18,7 @@ export interface ColorWheelRootProps extends /* @vue-ignore */ PrimitiveProps {
   defaultValue?: Color | string;
   disabled?: boolean;
   dir?: Direction;
-  colorSpace?: string;
+  colorSpace?: SpaceId;
   channelAngle?: string;
   channelRadius?: string;
   startAngle?: number;
@@ -33,7 +33,7 @@ export type ActiveDirection = "x" | "y";
 
 export interface ColorWheelRootContext {
   disabled: Ref<boolean>;
-  colorSpace: Ref<string>;
+  colorSpace: Ref<SpaceId>;
   angleChannelKey: Ref<string>;
   radiusChannelKey: Ref<string>;
   colorRef: Readonly<Ref<Color | undefined>>;
@@ -76,7 +76,7 @@ const direction = useDirection(propDir);
 const { forwardRef, currentElement } = useForwardExpose();
 
 const ALPHA_CONFIG: ChannelConfig = {
-  key: "alpha", label: "Alpha", min: 0, max: 100, step: 1, format: "percentage", culoriMin: 0, culoriMax: 1,
+  key: "alpha", label: "Alpha", min: 0, max: 100, step: 1, format: "percentage", nativeMin: 0, nativeMax: 1,
 };
 
 const spaceConfig = computed(() => colorSpaces[props.colorSpace]);
@@ -112,12 +112,11 @@ watch(() => props.modelValue, (val) => {
 function colorToDisplayValues(color: Color | undefined): { angle: number; radius: number } {
   if (!color || !angleConfig.value || !radiusConfig.value) return { angle: angleMin.value, radius: radiusMin.value };
   const converted = color.to(props.colorSpace);
-  if (!converted) return { angle: angleMin.value, radius: radiusMin.value };
-  const rawAngle = angleIsAlpha.value ? (color.alpha ?? 1) : converted.get(angleChannelKey.value, 0);
-  const rawRadius = radiusIsAlpha.value ? (color.alpha ?? 1) : converted.get(radiusChannelKey.value, 0);
+  const rawAngle = angleIsAlpha.value ? color.alpha : converted.get(angleChannelKey.value);
+  const rawRadius = radiusIsAlpha.value ? color.alpha : converted.get(radiusChannelKey.value);
   return {
-    angle: culoriToDisplay(angleConfig.value, rawAngle),
-    radius: culoriToDisplay(radiusConfig.value, rawRadius),
+    angle: nativeToDisplay(angleConfig.value, rawAngle),
+    radius: nativeToDisplay(radiusConfig.value, rawRadius),
   };
 }
 
@@ -133,14 +132,14 @@ watch([colorRef, angleChannelKey, radiusChannelKey], ([color]) => {
 
 function displayValuesToColor(angle: number, radius: number): Color | undefined {
   if (!colorRef.value || !angleConfig.value || !radiusConfig.value) return undefined;
-  const culoriAngle = displayToCulori(angleConfig.value, angle);
-  const culoriRadius = displayToCulori(radiusConfig.value, radius);
+  const nativeAngle = displayToNative(angleConfig.value, angle);
+  const nativeRadius = displayToNative(radiusConfig.value, radius);
   const updates: Record<string, number> = {};
-  if (!angleIsAlpha.value) updates[angleChannelKey.value] = culoriAngle;
-  if (!radiusIsAlpha.value) updates[radiusChannelKey.value] = culoriRadius;
-  let result = colorRef.value.set({ mode: props.colorSpace, ...updates });
-  if (angleIsAlpha.value) result = result.set({ alpha: culoriAngle });
-  if (radiusIsAlpha.value) result = result.set({ alpha: culoriRadius });
+  if (!angleIsAlpha.value) updates[angleChannelKey.value] = nativeAngle;
+  if (!radiusIsAlpha.value) updates[radiusChannelKey.value] = nativeRadius;
+  let result = colorRef.value.with({ space: props.colorSpace, ...updates });
+  if (angleIsAlpha.value) result = result.withAlpha(nativeAngle);
+  if (radiusIsAlpha.value) result = result.withAlpha(nativeRadius);
   return result;
 }
 

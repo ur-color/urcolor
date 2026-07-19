@@ -1,7 +1,8 @@
 import {
   colorSpaces,
-  culoriToDisplay,
-  displayToCulori,
+  nativeToDisplay,
+  displayToNative,
+  type SpaceId,
 } from "@urcolor/core";
 import {
   computed,
@@ -11,7 +12,7 @@ import {
 } from "vue";
 import { useColor, type ColorInput, type UseColorReturn } from "./useColor";
 
-export function useColorSpace(input: MaybeRefOrGetter<ColorInput>, spaceName: string) {
+export function useColorSpace(input: MaybeRefOrGetter<ColorInput>, spaceName: SpaceId) {
   const { color, hex, alpha } = useColor(input);
   const spaceConfig = colorSpaces[spaceName];
 
@@ -21,16 +22,15 @@ export function useColorSpace(input: MaybeRefOrGetter<ColorInput>, spaceName: st
     for (const ch of spaceConfig.channels) {
       channelRefs[ch.key] = computed({
         get: () => {
-          const converted = color.value.to(spaceConfig.mode);
-          if (!converted) return 0;
-          const raw = converted.get(ch.key, 0);
-          return culoriToDisplay(ch, raw);
+          const converted = color.value.to(spaceConfig.space);
+          const raw = converted.get(ch.key);
+          return nativeToDisplay(ch, raw);
         },
         set: (value: number) => {
-          const culoriVal = displayToCulori(ch, value);
-          color.value = markRaw(color.value.set({
-            mode: spaceConfig.mode,
-            [ch.key]: culoriVal,
+          const nativeVal = displayToNative(ch, value);
+          color.value = markRaw(color.value.with({
+            space: spaceConfig.space,
+            [ch.key]: nativeVal,
           }));
         },
       });

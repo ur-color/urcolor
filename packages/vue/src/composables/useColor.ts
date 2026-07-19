@@ -1,4 +1,4 @@
-import { Color } from "internationalized-color";
+import { Color } from "@urcolor/core";
 import {
   shallowRef,
   computed,
@@ -29,7 +29,7 @@ export function useColor(input: MaybeRefOrGetter<ColorInput>): UseColorReturn {
   );
 
   const hex = computed({
-    get: () => color.value.toHex() ?? "#000000",
+    get: () => color.value.toString("hex"),
     set: (v: string) => {
       const parsed = Color.parse(v);
       if (parsed) color.value = markRaw(parsed);
@@ -37,9 +37,9 @@ export function useColor(input: MaybeRefOrGetter<ColorInput>): UseColorReturn {
   });
 
   const alpha = computed({
-    get: () => Math.round((color.value.alpha ?? 1) * 100),
+    get: () => Math.round(color.value.alpha * 100),
     set: (v: number) => {
-      color.value = markRaw(color.value.set({ alpha: v / 100 }));
+      color.value = markRaw(color.value.withAlpha(v / 100));
     },
   });
 

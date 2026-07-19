@@ -12,7 +12,7 @@ export interface ColorTriangleGradientProps extends /* @vue-ignore */ PrimitiveP
 import { ref, watch, computed, onBeforeUnmount } from "vue";
 import { useResizeObserver } from "@vueuse/core";
 import { useForwardExpose, Primitive } from "reka-ui";
-import { Color } from "internationalized-color";
+import { Color, type SpaceId } from "@urcolor/core";
 import { sampleTriangleGrid, getChannelConfig } from "@urcolor/core";
 import { injectColorTriangleRootContext } from "./ColorTriangleRoot.vue";
 
@@ -31,17 +31,17 @@ const clipPath = computed(() => {
   return `polygon(${v0.x * 100}% ${v0.y * 100}%, ${v1.x * 100}% ${v1.y * 100}%, ${v2.x * 100}% ${v2.y * 100}%)`;
 });
 
-function applyOverrides(baseColor: Color, colorSpace: string): Color {
+function applyOverrides(baseColor: Color, colorSpace: SpaceId): Color {
   const overrides = props.channelOverrides;
   if (!overrides) return baseColor;
   let result = baseColor;
   const channelUpdates: Record<string, number> = {};
   for (const [k, v] of Object.entries(overrides)) {
-    if (k === "alpha") result = result.set({ alpha: v });
+    if (k === "alpha") result = result.withAlpha(v);
     else channelUpdates[k] = v;
   }
   if (Object.keys(channelUpdates).length > 0) {
-    result = result.set({ mode: colorSpace, ...channelUpdates });
+    result = result.with({ space: colorSpace, ...channelUpdates });
   }
   return result;
 }
@@ -93,10 +93,10 @@ function render() {
   const yCfg = getChannelConfig(colorSpace, rootContext.yChannelKey.value);
   if (!xCfg || !yCfg) return;
 
-  const xMinVal = xCfg.culoriMin ?? xCfg.min;
-  const xMaxVal = xCfg.culoriMax ?? xCfg.max;
-  const yMinVal = yCfg.culoriMin ?? yCfg.min;
-  const yMaxVal = yCfg.culoriMax ?? yCfg.max;
+  const xMinVal = xCfg.nativeMin ?? xCfg.min;
+  const xMaxVal = xCfg.nativeMax ?? xCfg.max;
+  const yMinVal = yCfg.nativeMin ?? yCfg.min;
+  const yMaxVal = yCfg.nativeMax ?? yCfg.max;
 
   const [v0, v1, v2] = rootContext.vertices.value;
   const sampleSize = 64;
@@ -109,8 +109,8 @@ function render() {
     const zCfg = getChannelConfig(colorSpace, rootContext.zChannelKey.value);
     if (zCfg) {
       zChannel = rootContext.zChannelKey.value;
-      zMinVal = zCfg.culoriMin ?? zCfg.min;
-      zMaxVal = zCfg.culoriMax ?? zCfg.max;
+      zMinVal = zCfg.nativeMin ?? zCfg.min;
+      zMaxVal = zCfg.nativeMax ?? zCfg.max;
     }
   }
 

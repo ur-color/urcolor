@@ -14,7 +14,7 @@ export interface ColorRingGradientProps extends /* @vue-ignore */ PrimitiveProps
 import { ref, watch, computed, onBeforeUnmount } from "vue";
 import { useResizeObserver } from "@vueuse/core";
 import { useForwardExpose, Primitive } from "reka-ui";
-import { Color } from "internationalized-color";
+import { Color, type SpaceId } from "@urcolor/core";
 import { sampleConicRing, getChannelConfig } from "@urcolor/core";
 import { injectColorRingRootContext } from "./ColorRingRoot.vue";
 
@@ -28,17 +28,17 @@ useForwardExpose();
 
 const canvasRef = ref<HTMLCanvasElement | null>(null);
 
-function applyOverrides(baseColor: Color, colorSpace: string): Color {
+function applyOverrides(baseColor: Color, colorSpace: SpaceId): Color {
   const overrides = props.channelOverrides;
   if (!overrides) return baseColor;
   let result = baseColor;
   const channelUpdates: Record<string, number> = {};
   for (const [k, v] of Object.entries(overrides)) {
-    if (k === "alpha") result = result.set({ alpha: v });
+    if (k === "alpha") result = result.withAlpha(v);
     else channelUpdates[k] = v;
   }
   if (Object.keys(channelUpdates).length > 0) {
-    result = result.set({ mode: colorSpace, ...channelUpdates });
+    result = result.with({ space: colorSpace, ...channelUpdates });
   }
   return result;
 }
@@ -93,8 +93,8 @@ function render() {
   const cfg = getChannelConfig(colorSpace, channel);
   if (!cfg) return;
 
-  const cMin = cfg.culoriMin ?? cfg.min;
-  const cMax = cfg.culoriMax ?? cfg.max;
+  const cMin = cfg.nativeMin ?? cfg.min;
+  const cMax = cfg.nativeMax ?? cfg.max;
 
   const sampleSize = 128;
   const pixels = sampleConicRing(

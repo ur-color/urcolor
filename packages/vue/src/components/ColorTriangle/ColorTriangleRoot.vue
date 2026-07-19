@@ -3,8 +3,8 @@ import type { Ref } from "vue";
 import type { PrimitiveProps } from "reka-ui";
 import { createContext, useDirection, useForwardExpose, VisuallyHidden } from "reka-ui";
 import { computed, ref, shallowRef, toRefs, watch } from "vue";
-import { Color } from "internationalized-color";
-import { colorSpaces, getChannelConfig, displayToCulori, culoriToDisplay, type ChannelConfig, triangleVertices, clampToTriangle, barycentricCoords, pointInTriangle, insetTriangle, type Point } from "@urcolor/core";
+import { Color, type SpaceId } from "@urcolor/core";
+import { colorSpaces, getChannelConfig, displayToNative, nativeToDisplay, type ChannelConfig, triangleVertices, clampToTriangle, barycentricCoords, pointInTriangle, insetTriangle, type Point } from "@urcolor/core";
 
 type Direction = "ltr" | "rtl";
 
@@ -17,7 +17,7 @@ export interface ColorTriangleRootProps extends /* @vue-ignore */ PrimitiveProps
   defaultValue?: Color | string;
   disabled?: boolean;
   dir?: Direction;
-  colorSpace?: string;
+  colorSpace?: SpaceId;
   channelX?: string;
   channelY?: string;
   channelZ?: string;
@@ -36,7 +36,7 @@ export type ActiveDirection = "x" | "y" | "z";
 
 export interface ColorTriangleRootContext {
   disabled: Ref<boolean>;
-  colorSpace: Ref<string>;
+  colorSpace: Ref<SpaceId>;
   xChannelKey: Ref<string>;
   yChannelKey: Ref<string>;
   zChannelKey: Ref<string | undefined>;
@@ -95,7 +95,7 @@ const dir = useDirection(propDir);
 const { forwardRef, currentElement } = useForwardExpose();
 
 const ALPHA_CONFIG: ChannelConfig = {
-  key: "alpha", label: "Alpha", min: 0, max: 100, step: 1, format: "percentage", culoriMin: 0, culoriMax: 1,
+  key: "alpha", label: "Alpha", min: 0, max: 100, step: 1, format: "percentage", nativeMin: 0, nativeMax: 1,
 };
 
 const spaceConfig = computed(() => colorSpaces[props.colorSpace]);
@@ -161,14 +161,13 @@ watch(() => props.modelValue, (val) => {
 function colorToDisplayValues(color: Color | undefined): { x: number; y: number; z: number } {
   if (!color || !xConfig.value || !yConfig.value) return { x: xMin.value, y: yMin.value, z: zMin.value };
   const converted = color.to(props.colorSpace);
-  if (!converted) return { x: xMin.value, y: yMin.value, z: zMin.value };
-  const rawX = xIsAlpha.value ? (color.alpha ?? 1) : converted.get(xChannelKey.value, 0);
-  const rawY = yIsAlpha.value ? (color.alpha ?? 1) : converted.get(yChannelKey.value, 0);
-  const rawZ = zChannelKey.value ? (zIsAlpha.value ? (color.alpha ?? 1) : converted.get(zChannelKey.value, 0)) : 0;
+  const rawX = xIsAlpha.value ? color.alpha : converted.get(xChannelKey.value);
+  const rawY = yIsAlpha.value ? color.alpha : converted.get(yChannelKey.value);
+  const rawZ = zChannelKey.value ? (zIsAlpha.value ? color.alpha : converted.get(zChannelKey.value)) : 0;
   return {
-    x: culoriToDisplay(xConfig.value, rawX),
-    y: culoriToDisplay(yConfig.value, rawY),
-    z: zConfig.value ? culoriToDisplay(zConfig.value, rawZ) : zMin.value,
+    x: nativeToDisplay(xConfig.value, rawX),
+    y: nativeToDisplay(yConfig.value, rawY),
+    z: zConfig.value ? nativeToDisplay(zConfig.value, rawZ) : zMin.value,
   };
 }
 
@@ -186,20 +185,20 @@ watch([colorRef, xChannelKey, yChannelKey, zChannelKey], ([color]) => {
 
 function displayValuesToColor(xVal: number, yVal: number, zVal?: number): Color | undefined {
   if (!colorRef.value || !xConfig.value || !yConfig.value) return undefined;
-  const culoriX = displayToCulori(xConfig.value, xVal);
-  const culoriY = displayToCulori(yConfig.value, yVal);
+  const nativeX = displayToNative(xConfig.value, xVal);
+  const nativeY = displayToNative(yConfig.value, yVal);
   const updates: Record<string, number> = {};
-  if (!xIsAlpha.value) updates[xChannelKey.value] = culoriX;
-  if (!yIsAlpha.value) updates[yChannelKey.value] = culoriY;
+  if (!xIsAlpha.value) updates[xChannelKey.value] = nativeX;
+  if (!yIsAlpha.value) updates[yChannelKey.value] = nativeY;
   if (zChannelKey.value && zConfig.value && zVal != null) {
-    const culoriZ = displayToCulori(zConfig.value, zVal);
-    if (!zIsAlpha.value) updates[zChannelKey.value] = culoriZ;
+    const nativeZ = displayToNative(zConfig.value, zVal);
+    if (!zIsAlpha.value) updates[zChannelKey.value] = nativeZ;
   }
-  let result = colorRef.value.set({ mode: props.colorSpace, ...updates });
-  if (xIsAlpha.value) result = result.set({ alpha: culoriX });
-  if (yIsAlpha.value) result = result.set({ alpha: culoriY });
+  let result = colorRef.value.with({ space: props.colorSpace, ...updates });
+  if (xIsAlpha.value) result = result.withAlpha(nativeX);
+  if (yIsAlpha.value) result = result.withAlpha(nativeY);
   if (zChannelKey.value && zConfig.value && zVal != null && zIsAlpha.value) {
-    result = result.set({ alpha: displayToCulori(zConfig.value, zVal) });
+    result = result.withAlpha(displayToNative(zConfig.value, zVal));
   }
   return result;
 }

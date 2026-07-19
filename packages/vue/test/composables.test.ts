@@ -1,7 +1,6 @@
 import { describe, expect, it } from "bun:test";
 import { ref, nextTick, defineComponent, h } from "vue";
-import "internationalized-color/css";
-import { Color } from "internationalized-color";
+import { Color } from "@urcolor/core";
 import { mount } from "@vue/test-utils";
 import {
   useColor,

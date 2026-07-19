@@ -1,7 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/vue3";
-import "internationalized-color/css";
 import { defineComponent, h, shallowRef } from "vue";
-import type { Color } from "internationalized-color";
+import type { Color } from "@urcolor/core";
 import {
   ColorFieldRoot,
   ColorFieldInput,
@@ -98,25 +97,25 @@ export const Lab_a: Story = { name: "Lab / a", render: renderField({ colorSpace:
 export const Lab_b: Story = { name: "Lab / b", render: renderField({ colorSpace: "lab", channel: "b" }) };
 
 // RGB
-export const RGB_Red: Story = { name: "RGB / Red", render: renderField({ colorSpace: "rgb", channel: "r" }) };
-export const RGB_Green: Story = { name: "RGB / Green", render: renderField({ colorSpace: "rgb", channel: "g" }) };
-export const RGB_Blue: Story = { name: "RGB / Blue", render: renderField({ colorSpace: "rgb", channel: "b" }) };
-export const RGB_Alpha: Story = { name: "RGB / Alpha", render: renderField({ colorSpace: "rgb", channel: "alpha" }) };
+export const RGB_Red: Story = { name: "RGB / Red", render: renderField({ colorSpace: "srgb", channel: "r" }) };
+export const RGB_Green: Story = { name: "RGB / Green", render: renderField({ colorSpace: "srgb", channel: "g" }) };
+export const RGB_Blue: Story = { name: "RGB / Blue", render: renderField({ colorSpace: "srgb", channel: "b" }) };
+export const RGB_Alpha: Story = { name: "RGB / Alpha", render: renderField({ colorSpace: "srgb", channel: "alpha" }) };
 
 // Display P3
-export const DisplayP3_Red: Story = { name: "Display P3 / Red", render: renderField({ colorSpace: "p3", channel: "r" }) };
-export const DisplayP3_Green: Story = { name: "Display P3 / Green", render: renderField({ colorSpace: "p3", channel: "g" }) };
-export const DisplayP3_Blue: Story = { name: "Display P3 / Blue", render: renderField({ colorSpace: "p3", channel: "b" }) };
+export const DisplayP3_Red: Story = { name: "Display P3 / Red", render: renderField({ colorSpace: "display-p3", channel: "r" }) };
+export const DisplayP3_Green: Story = { name: "Display P3 / Green", render: renderField({ colorSpace: "display-p3", channel: "g" }) };
+export const DisplayP3_Blue: Story = { name: "Display P3 / Blue", render: renderField({ colorSpace: "display-p3", channel: "b" }) };
 
 // A98 RGB
-export const A98RGB_Red: Story = { name: "A98 RGB / Red", render: renderField({ colorSpace: "a98", channel: "r" }) };
-export const A98RGB_Green: Story = { name: "A98 RGB / Green", render: renderField({ colorSpace: "a98", channel: "g" }) };
-export const A98RGB_Blue: Story = { name: "A98 RGB / Blue", render: renderField({ colorSpace: "a98", channel: "b" }) };
+export const A98RGB_Red: Story = { name: "A98 RGB / Red", render: renderField({ colorSpace: "a98-rgb", channel: "r" }) };
+export const A98RGB_Green: Story = { name: "A98 RGB / Green", render: renderField({ colorSpace: "a98-rgb", channel: "g" }) };
+export const A98RGB_Blue: Story = { name: "A98 RGB / Blue", render: renderField({ colorSpace: "a98-rgb", channel: "b" }) };
 
 // ProPhoto RGB
-export const ProPhotoRGB_Red: Story = { name: "ProPhoto RGB / Red", render: renderField({ colorSpace: "prophoto", channel: "r" }) };
-export const ProPhotoRGB_Green: Story = { name: "ProPhoto RGB / Green", render: renderField({ colorSpace: "prophoto", channel: "g" }) };
-export const ProPhotoRGB_Blue: Story = { name: "ProPhoto RGB / Blue", render: renderField({ colorSpace: "prophoto", channel: "b" }) };
+export const ProPhotoRGB_Red: Story = { name: "ProPhoto RGB / Red", render: renderField({ colorSpace: "prophoto-rgb", channel: "r" }) };
+export const ProPhotoRGB_Green: Story = { name: "ProPhoto RGB / Green", render: renderField({ colorSpace: "prophoto-rgb", channel: "g" }) };
+export const ProPhotoRGB_Blue: Story = { name: "ProPhoto RGB / Blue", render: renderField({ colorSpace: "prophoto-rgb", channel: "b" }) };
 
 // Rec. 2020
 export const Rec2020_Red: Story = { name: "Rec. 2020 / Red", render: renderField({ colorSpace: "rec2020", channel: "r" }) };

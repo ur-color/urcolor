@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from "@storybook/vue3";
-import "internationalized-color/css";
 import { defineComponent, h, shallowRef } from "vue";
 import { ColorTriangleRoot, ColorTriangleGradient, ColorTriangleCheckerboard, ColorTriangleThumb } from "./index";
 
@@ -49,16 +48,16 @@ export const Rotated: Story = { name: "HSV / Rotated 90°", render: renderTriang
 export const Disabled: Story = { name: "Disabled", render: renderTriangle({ disabled: true }) };
 
 // 3-channel (Maxwell's triangle) stories
-export const Maxwell_RGB: Story = { name: "Maxwell's RGB Triangle", render: renderTriangle({ colorSpace: "rgb", channelX: "r", channelY: "g", channelZ: "b" }) };
+export const Maxwell_RGB: Story = { name: "Maxwell's RGB Triangle", render: renderTriangle({ colorSpace: "srgb", channelX: "r", channelY: "g", channelZ: "b" }) };
 export const OKLab_abL: Story = { name: "OKLab / a × b × L", render: renderTriangle({ colorSpace: "oklab", channelX: "a", channelY: "b", channelZ: "l" }) };
-export const P3_RGB: Story = { name: "Display P3 Triangle", render: renderTriangle({ colorSpace: "p3", channelX: "r", channelY: "g", channelZ: "b" }) };
+export const P3_RGB: Story = { name: "Display P3 Triangle", render: renderTriangle({ colorSpace: "display-p3", channelX: "r", channelY: "g", channelZ: "b" }) };
 export const HSL_HSL: Story = { name: "HSL / H × S × L", render: renderTriangle({ colorSpace: "hsl", channelX: "h", channelY: "s", channelZ: "l" }) };
 
 // Additional 2-channel stories
 export const OKLab_ab: Story = { name: "OKLab / a × b", render: renderTriangle({ colorSpace: "oklab", channelX: "a", channelY: "b" }) };
 export const Lab_ab: Story = { name: "Lab / a × b", render: renderTriangle({ colorSpace: "lab", channelX: "a", channelY: "b" }) };
-export const RGB_RG: Story = { name: "RGB / R × G", render: renderTriangle({ colorSpace: "rgb", channelX: "r", channelY: "g" }) };
+export const RGB_RG: Story = { name: "RGB / R × G", render: renderTriangle({ colorSpace: "srgb", channelX: "r", channelY: "g" }) };
 
 // Thumb alignment stories
 export const ThumbContain: Story = { name: "Thumb Contain", render: renderTriangle({ colorSpace: "hsv", channelX: "s", channelY: "v", thumbAlignment: "contain" }) };
-export const ThumbContain3Channel: Story = { name: "Thumb Contain / 3-Channel", render: renderTriangle({ colorSpace: "rgb", channelX: "r", channelY: "g", channelZ: "b", thumbAlignment: "contain" }) };
+export const ThumbContain3Channel: Story = { name: "Thumb Contain / 3-Channel", render: renderTriangle({ colorSpace: "srgb", channelX: "r", channelY: "g", channelZ: "b", thumbAlignment: "contain" }) };

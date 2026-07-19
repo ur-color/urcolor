@@ -3,8 +3,8 @@ import type { Ref } from "vue";
 import type { PrimitiveProps } from "reka-ui";
 import { createContext, useDirection, useForwardExpose, VisuallyHidden } from "reka-ui";
 import { computed, ref, shallowRef, toRefs, watch } from "vue";
-import { Color } from "internationalized-color";
-import { colorSpaces, getChannelConfig, displayToCulori, culoriToDisplay, type ChannelConfig } from "@urcolor/core";
+import { Color, type SpaceId } from "@urcolor/core";
+import { colorSpaces, getChannelConfig, displayToNative, nativeToDisplay, type ChannelConfig } from "@urcolor/core";
 import { cartesianToPolar, normalizeAngle } from "@urcolor/core";
 
 type Direction = "ltr" | "rtl";
@@ -18,7 +18,7 @@ export interface ColorRingRootProps extends /* @vue-ignore */ PrimitiveProps {
   defaultValue?: Color | string;
   disabled?: boolean;
   dir?: Direction;
-  colorSpace?: string;
+  colorSpace?: SpaceId;
   channel?: string;
   startAngle?: number;
   /** Inner radius as a ratio of the outer radius (0–1). Used for hit testing. Default 0.7 */
@@ -35,7 +35,7 @@ export interface ColorRingRootContext {
   min: Ref<number>;
   max: Ref<number>;
   step: Ref<number>;
-  colorSpace: Ref<string>;
+  colorSpace: Ref<SpaceId>;
   channelKey: Ref<string>;
   colorRef: Readonly<Ref<Color | undefined>>;
   currentValue: Ref<number>;
@@ -73,7 +73,7 @@ const dir = useDirection(propDir);
 const { forwardRef, currentElement } = useForwardExpose();
 
 const ALPHA_CONFIG: ChannelConfig = {
-  key: "alpha", label: "Alpha", min: 0, max: 100, step: 1, format: "percentage", culoriMin: 0, culoriMax: 1,
+  key: "alpha", label: "Alpha", min: 0, max: 100, step: 1, format: "percentage", nativeMin: 0, nativeMax: 1,
 };
 
 const spaceConfig = computed(() => colorSpaces[props.colorSpace]);
@@ -101,9 +101,8 @@ watch(() => props.modelValue, (val) => {
 function colorToDisplayValue(color: Color | undefined): number {
   if (!color || !channelConfig.value) return min.value;
   const converted = color.to(props.colorSpace);
-  if (!converted) return min.value;
-  const raw = isAlpha.value ? (color.alpha ?? 1) : converted.get(channelKey.value, 0);
-  return culoriToDisplay(channelConfig.value, raw);
+  const raw = isAlpha.value ? color.alpha : converted.get(channelKey.value);
+  return nativeToDisplay(channelConfig.value, raw);
 }
 
 const currentValue = ref(colorToDisplayValue(colorRef.value));
@@ -116,11 +115,11 @@ watch([colorRef, channelKey], ([color]) => {
 
 function displayValueToColor(val: number): Color | undefined {
   if (!colorRef.value || !channelConfig.value) return undefined;
-  const culoriVal = displayToCulori(channelConfig.value, val);
+  const nativeVal = displayToNative(channelConfig.value, val);
   if (isAlpha.value) {
-    return colorRef.value.set({ alpha: culoriVal });
+    return colorRef.value.withAlpha(nativeVal);
   }
-  return colorRef.value.set({ mode: props.colorSpace, [channelKey.value]: culoriVal });
+  return colorRef.value.with({ space: props.colorSpace, [channelKey.value]: nativeVal });
 }
 
 const thumbElement = ref<HTMLElement>();

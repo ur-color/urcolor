@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from "@storybook/vue3";
-import "internationalized-color/css";
 import { defineComponent, h, shallowRef } from "vue";
 import { ColorSliderRoot, ColorSliderTrack, ColorSliderGradient, ColorSliderCheckerboard, ColorSliderThumb } from "./index";
 
@@ -116,28 +115,28 @@ export const Lab_b: Story = { name: "Lab / b", render: renderSlider({ colorSpace
 export const Lab_Alpha: Story = { name: "Lab / Alpha", render: renderSlider({ colorSpace: "lab", channel: "alpha" }, { alpha: true }) };
 
 // RGB
-export const RGB_Red: Story = { name: "RGB / Red", render: renderSlider({ colorSpace: "rgb", channel: "r" }) };
-export const RGB_Green: Story = { name: "RGB / Green", render: renderSlider({ colorSpace: "rgb", channel: "g" }) };
-export const RGB_Blue: Story = { name: "RGB / Blue", render: renderSlider({ colorSpace: "rgb", channel: "b" }) };
-export const RGB_Alpha: Story = { name: "RGB / Alpha", render: renderSlider({ colorSpace: "rgb", channel: "alpha" }, { alpha: true }) };
+export const RGB_Red: Story = { name: "RGB / Red", render: renderSlider({ colorSpace: "srgb", channel: "r" }) };
+export const RGB_Green: Story = { name: "RGB / Green", render: renderSlider({ colorSpace: "srgb", channel: "g" }) };
+export const RGB_Blue: Story = { name: "RGB / Blue", render: renderSlider({ colorSpace: "srgb", channel: "b" }) };
+export const RGB_Alpha: Story = { name: "RGB / Alpha", render: renderSlider({ colorSpace: "srgb", channel: "alpha" }, { alpha: true }) };
 
 // Display P3
-export const DisplayP3_Red: Story = { name: "Display P3 / Red", render: renderSlider({ colorSpace: "p3", channel: "r" }) };
-export const DisplayP3_Green: Story = { name: "Display P3 / Green", render: renderSlider({ colorSpace: "p3", channel: "g" }) };
-export const DisplayP3_Blue: Story = { name: "Display P3 / Blue", render: renderSlider({ colorSpace: "p3", channel: "b" }) };
-export const DisplayP3_Alpha: Story = { name: "Display P3 / Alpha", render: renderSlider({ colorSpace: "p3", channel: "alpha" }, { alpha: true }) };
+export const DisplayP3_Red: Story = { name: "Display P3 / Red", render: renderSlider({ colorSpace: "display-p3", channel: "r" }) };
+export const DisplayP3_Green: Story = { name: "Display P3 / Green", render: renderSlider({ colorSpace: "display-p3", channel: "g" }) };
+export const DisplayP3_Blue: Story = { name: "Display P3 / Blue", render: renderSlider({ colorSpace: "display-p3", channel: "b" }) };
+export const DisplayP3_Alpha: Story = { name: "Display P3 / Alpha", render: renderSlider({ colorSpace: "display-p3", channel: "alpha" }, { alpha: true }) };
 
 // A98 RGB
-export const A98RGB_Red: Story = { name: "A98 RGB / Red", render: renderSlider({ colorSpace: "a98", channel: "r" }) };
-export const A98RGB_Green: Story = { name: "A98 RGB / Green", render: renderSlider({ colorSpace: "a98", channel: "g" }) };
-export const A98RGB_Blue: Story = { name: "A98 RGB / Blue", render: renderSlider({ colorSpace: "a98", channel: "b" }) };
-export const A98RGB_Alpha: Story = { name: "A98 RGB / Alpha", render: renderSlider({ colorSpace: "a98", channel: "alpha" }, { alpha: true }) };
+export const A98RGB_Red: Story = { name: "A98 RGB / Red", render: renderSlider({ colorSpace: "a98-rgb", channel: "r" }) };
+export const A98RGB_Green: Story = { name: "A98 RGB / Green", render: renderSlider({ colorSpace: "a98-rgb", channel: "g" }) };
+export const A98RGB_Blue: Story = { name: "A98 RGB / Blue", render: renderSlider({ colorSpace: "a98-rgb", channel: "b" }) };
+export const A98RGB_Alpha: Story = { name: "A98 RGB / Alpha", render: renderSlider({ colorSpace: "a98-rgb", channel: "alpha" }, { alpha: true }) };
 
 // ProPhoto RGB
-export const ProPhotoRGB_Red: Story = { name: "ProPhoto RGB / Red", render: renderSlider({ colorSpace: "prophoto", channel: "r" }) };
-export const ProPhotoRGB_Green: Story = { name: "ProPhoto RGB / Green", render: renderSlider({ colorSpace: "prophoto", channel: "g" }) };
-export const ProPhotoRGB_Blue: Story = { name: "ProPhoto RGB / Blue", render: renderSlider({ colorSpace: "prophoto", channel: "b" }) };
-export const ProPhotoRGB_Alpha: Story = { name: "ProPhoto RGB / Alpha", render: renderSlider({ colorSpace: "prophoto", channel: "alpha" }, { alpha: true }) };
+export const ProPhotoRGB_Red: Story = { name: "ProPhoto RGB / Red", render: renderSlider({ colorSpace: "prophoto-rgb", channel: "r" }) };
+export const ProPhotoRGB_Green: Story = { name: "ProPhoto RGB / Green", render: renderSlider({ colorSpace: "prophoto-rgb", channel: "g" }) };
+export const ProPhotoRGB_Blue: Story = { name: "ProPhoto RGB / Blue", render: renderSlider({ colorSpace: "prophoto-rgb", channel: "b" }) };
+export const ProPhotoRGB_Alpha: Story = { name: "ProPhoto RGB / Alpha", render: renderSlider({ colorSpace: "prophoto-rgb", channel: "alpha" }, { alpha: true }) };
 
 // Rec. 2020
 export const Rec2020_Red: Story = { name: "Rec. 2020 / Red", render: renderSlider({ colorSpace: "rec2020", channel: "r" }) };

@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from "@storybook/vue3";
-import "internationalized-color/css";
 import { defineComponent, h, shallowRef } from "vue";
 import { ColorAreaRoot, ColorAreaGradient, ColorAreaCheckerboard, ColorAreaThumb } from "./index";
 
@@ -80,24 +79,24 @@ export const Lab_Lightness_b: Story = { name: "Lab / Lightness × b", render: re
 export const Lab_a_b: Story = { name: "Lab / a × b", render: renderArea({ colorSpace: "lab", channelX: "a", channelY: "b" }) };
 
 // RGB
-export const RGB_Red_Green: Story = { name: "RGB / Red × Green", render: renderArea({ colorSpace: "rgb", channelX: "r", channelY: "g" }) };
-export const RGB_Red_Blue: Story = { name: "RGB / Red × Blue", render: renderArea({ colorSpace: "rgb", channelX: "r", channelY: "b" }) };
-export const RGB_Green_Blue: Story = { name: "RGB / Green × Blue", render: renderArea({ colorSpace: "rgb", channelX: "g", channelY: "b" }) };
+export const RGB_Red_Green: Story = { name: "RGB / Red × Green", render: renderArea({ colorSpace: "srgb", channelX: "r", channelY: "g" }) };
+export const RGB_Red_Blue: Story = { name: "RGB / Red × Blue", render: renderArea({ colorSpace: "srgb", channelX: "r", channelY: "b" }) };
+export const RGB_Green_Blue: Story = { name: "RGB / Green × Blue", render: renderArea({ colorSpace: "srgb", channelX: "g", channelY: "b" }) };
 
 // Display P3
-export const DisplayP3_Red_Green: Story = { name: "Display P3 / Red × Green", render: renderArea({ colorSpace: "p3", channelX: "r", channelY: "g" }) };
-export const DisplayP3_Red_Blue: Story = { name: "Display P3 / Red × Blue", render: renderArea({ colorSpace: "p3", channelX: "r", channelY: "b" }) };
-export const DisplayP3_Green_Blue: Story = { name: "Display P3 / Green × Blue", render: renderArea({ colorSpace: "p3", channelX: "g", channelY: "b" }) };
+export const DisplayP3_Red_Green: Story = { name: "Display P3 / Red × Green", render: renderArea({ colorSpace: "display-p3", channelX: "r", channelY: "g" }) };
+export const DisplayP3_Red_Blue: Story = { name: "Display P3 / Red × Blue", render: renderArea({ colorSpace: "display-p3", channelX: "r", channelY: "b" }) };
+export const DisplayP3_Green_Blue: Story = { name: "Display P3 / Green × Blue", render: renderArea({ colorSpace: "display-p3", channelX: "g", channelY: "b" }) };
 
 // A98 RGB
-export const A98RGB_Red_Green: Story = { name: "A98 RGB / Red × Green", render: renderArea({ colorSpace: "a98", channelX: "r", channelY: "g" }) };
-export const A98RGB_Red_Blue: Story = { name: "A98 RGB / Red × Blue", render: renderArea({ colorSpace: "a98", channelX: "r", channelY: "b" }) };
-export const A98RGB_Green_Blue: Story = { name: "A98 RGB / Green × Blue", render: renderArea({ colorSpace: "a98", channelX: "g", channelY: "b" }) };
+export const A98RGB_Red_Green: Story = { name: "A98 RGB / Red × Green", render: renderArea({ colorSpace: "a98-rgb", channelX: "r", channelY: "g" }) };
+export const A98RGB_Red_Blue: Story = { name: "A98 RGB / Red × Blue", render: renderArea({ colorSpace: "a98-rgb", channelX: "r", channelY: "b" }) };
+export const A98RGB_Green_Blue: Story = { name: "A98 RGB / Green × Blue", render: renderArea({ colorSpace: "a98-rgb", channelX: "g", channelY: "b" }) };
 
 // ProPhoto RGB
-export const ProPhotoRGB_Red_Green: Story = { name: "ProPhoto RGB / Red × Green", render: renderArea({ colorSpace: "prophoto", channelX: "r", channelY: "g" }) };
-export const ProPhotoRGB_Red_Blue: Story = { name: "ProPhoto RGB / Red × Blue", render: renderArea({ colorSpace: "prophoto", channelX: "r", channelY: "b" }) };
-export const ProPhotoRGB_Green_Blue: Story = { name: "ProPhoto RGB / Green × Blue", render: renderArea({ colorSpace: "prophoto", channelX: "g", channelY: "b" }) };
+export const ProPhotoRGB_Red_Green: Story = { name: "ProPhoto RGB / Red × Green", render: renderArea({ colorSpace: "prophoto-rgb", channelX: "r", channelY: "g" }) };
+export const ProPhotoRGB_Red_Blue: Story = { name: "ProPhoto RGB / Red × Blue", render: renderArea({ colorSpace: "prophoto-rgb", channelX: "r", channelY: "b" }) };
+export const ProPhotoRGB_Green_Blue: Story = { name: "ProPhoto RGB / Green × Blue", render: renderArea({ colorSpace: "prophoto-rgb", channelX: "g", channelY: "b" }) };
 
 // Rec. 2020
 export const Rec2020_Red_Green: Story = { name: "Rec. 2020 / Red × Green", render: renderArea({ colorSpace: "rec2020", channelX: "r", channelY: "g" }) };
@@ -111,9 +110,9 @@ export const HSL_Lightness_Alpha: Story = { name: "HSL / Lightness × Alpha", re
 export const HSV_Hue_Alpha: Story = { name: "HSV / Hue × Alpha", render: renderArea({ colorSpace: "hsv", channelX: "h", channelY: "alpha" }, { alpha: true }) };
 export const HSV_Saturation_Alpha: Story = { name: "HSV / Saturation × Alpha", render: renderArea({ colorSpace: "hsv", channelX: "s", channelY: "alpha" }, { alpha: true }) };
 export const HSV_Value_Alpha: Story = { name: "HSV / Value × Alpha", render: renderArea({ colorSpace: "hsv", channelX: "v", channelY: "alpha" }, { alpha: true }) };
-export const RGB_Red_Alpha: Story = { name: "RGB / Red × Alpha", render: renderArea({ colorSpace: "rgb", channelX: "r", channelY: "alpha" }, { alpha: true }) };
-export const RGB_Green_Alpha: Story = { name: "RGB / Green × Alpha", render: renderArea({ colorSpace: "rgb", channelX: "g", channelY: "alpha" }, { alpha: true }) };
-export const RGB_Blue_Alpha: Story = { name: "RGB / Blue × Alpha", render: renderArea({ colorSpace: "rgb", channelX: "b", channelY: "alpha" }, { alpha: true }) };
+export const RGB_Red_Alpha: Story = { name: "RGB / Red × Alpha", render: renderArea({ colorSpace: "srgb", channelX: "r", channelY: "alpha" }, { alpha: true }) };
+export const RGB_Green_Alpha: Story = { name: "RGB / Green × Alpha", render: renderArea({ colorSpace: "srgb", channelX: "g", channelY: "alpha" }, { alpha: true }) };
+export const RGB_Blue_Alpha: Story = { name: "RGB / Blue × Alpha", render: renderArea({ colorSpace: "srgb", channelX: "b", channelY: "alpha" }, { alpha: true }) };
 export const OKLCh_Lightness_Alpha: Story = { name: "OKLCh / Lightness × Alpha", render: renderArea({ colorSpace: "oklch", channelX: "l", channelY: "alpha" }, { alpha: true }) };
 export const OKLCh_Chroma_Alpha: Story = { name: "OKLCh / Chroma × Alpha", render: renderArea({ colorSpace: "oklch", channelX: "c", channelY: "alpha" }, { alpha: true }) };
 export const OKLCh_Hue_Alpha: Story = { name: "OKLCh / Hue × Alpha", render: renderArea({ colorSpace: "oklch", channelX: "h", channelY: "alpha" }, { alpha: true }) };

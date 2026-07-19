@@ -3,8 +3,8 @@ import type { Ref } from "vue";
 import type { PrimitiveProps } from "reka-ui";
 import { createContext, useDirection, useForwardExpose, VisuallyHidden } from "reka-ui";
 import { computed, ref, shallowRef, toRefs, watch } from "vue";
-import { Color } from "internationalized-color";
-import { colorSpaces, getChannelConfig, displayToCulori, culoriToDisplay, type ChannelConfig } from "@urcolor/core";
+import { Color, type SpaceId } from "@urcolor/core";
+import { colorSpaces, getChannelConfig, displayToNative, nativeToDisplay, type ChannelConfig } from "@urcolor/core";
 import { useCollection, useFormControl, ARROW_KEYS, PAGE_KEYS, getClosestThumbIndex, hasMinStepsBetweenValues, linearScale, snapToStep, type ActiveDirection } from "./utils";
 
 type Direction = "ltr" | "rtl";
@@ -30,7 +30,7 @@ export interface ColorAreaRootProps extends /* @vue-ignore */ PrimitiveProps {
   /** Whether the Y axis is visually inverted. */
   invertedY?: boolean;
   /** The color space mode to work in (e.g. 'hsl', 'oklch'). */
-  colorSpace?: string;
+  colorSpace?: SpaceId;
   /** Which channel maps to the X axis (e.g. 's' for HSL saturation, or 'alpha' for opacity). */
   channelX?: string;
   /** Which channel maps to the Y axis (e.g. 'l' for HSL lightness, or 'alpha' for opacity). */
@@ -68,7 +68,7 @@ export interface ColorAreaRootContext {
   isSlidingFromLeft: Ref<boolean>;
   isSlidingFromTop: Ref<boolean>;
   thumbAlignment: Ref<ThumbAlignment>;
-  colorSpace: Ref<string>;
+  colorSpace: Ref<SpaceId>;
   xChannelKey: Ref<string>;
   yChannelKey: Ref<string>;
   colorRef: Readonly<Ref<Color | undefined>>;
@@ -120,8 +120,8 @@ const ALPHA_CONFIG: ChannelConfig = {
   max: 100,
   step: 1,
   format: "percentage",
-  culoriMin: 0,
-  culoriMax: 1,
+  nativeMin: 0,
+  nativeMax: 1,
 };
 
 // Resolve default xChannel/yChannel from colorSpace
@@ -160,10 +160,9 @@ watch(() => props.modelValue, (val) => {
 function colorToDisplayValues(color: Color | undefined): number[][] {
   if (!color || !xConfig.value || !yConfig.value) return [[minX.value, minY.value]];
   const converted = color.to(props.colorSpace);
-  if (!converted) return [[minX.value, minY.value]];
-  const rawX = xIsAlpha.value ? (color.alpha ?? 1) : converted.get(xChannelKey.value, 0);
-  const rawY = yIsAlpha.value ? (color.alpha ?? 1) : converted.get(yChannelKey.value, 0);
-  return [[culoriToDisplay(xConfig.value, rawX), culoriToDisplay(yConfig.value, rawY)]];
+  const rawX = xIsAlpha.value ? color.alpha : converted.get(xChannelKey.value);
+  const rawY = yIsAlpha.value ? color.alpha : converted.get(yChannelKey.value);
+  return [[nativeToDisplay(xConfig.value, rawX), nativeToDisplay(yConfig.value, rawY)]];
 }
 
 // Internal numeric model for the slider mechanics
@@ -181,14 +180,14 @@ watch([colorRef, xChannelKey, yChannelKey], ([color]) => {
 // Rebuild Color from numeric display values
 function displayValuesToColor(vals: number[][]): Color | undefined {
   if (!vals[0] || !colorRef.value || !xConfig.value || !yConfig.value) return undefined;
-  const culoriX = displayToCulori(xConfig.value, vals[0][0] ?? 0);
-  const culoriY = displayToCulori(yConfig.value, vals[0][1] ?? 0);
+  const nativeX = displayToNative(xConfig.value, vals[0][0] ?? 0);
+  const nativeY = displayToNative(yConfig.value, vals[0][1] ?? 0);
   const channelUpdates: Record<string, number> = {};
-  if (!xIsAlpha.value) channelUpdates[xChannelKey.value] = culoriX;
-  if (!yIsAlpha.value) channelUpdates[yChannelKey.value] = culoriY;
-  let result = colorRef.value.set({ mode: props.colorSpace, ...channelUpdates });
-  if (xIsAlpha.value) result = result.set({ alpha: culoriX });
-  if (yIsAlpha.value) result = result.set({ alpha: culoriY });
+  if (!xIsAlpha.value) channelUpdates[xChannelKey.value] = nativeX;
+  if (!yIsAlpha.value) channelUpdates[yChannelKey.value] = nativeY;
+  let result = colorRef.value.with({ space: props.colorSpace, ...channelUpdates });
+  if (xIsAlpha.value) result = result.withAlpha(nativeX);
+  if (yIsAlpha.value) result = result.withAlpha(nativeY);
   return result;
 }
 

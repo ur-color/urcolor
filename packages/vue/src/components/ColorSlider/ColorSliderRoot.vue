@@ -1,13 +1,13 @@
 <script lang="ts">
 import type { Ref } from "vue";
 import { createContext, SliderRoot, useForwardExpose } from "reka-ui";
-import { Color } from "internationalized-color";
+import { Color, type SpaceId } from "@urcolor/core";
 
 export interface ColorSliderRootProps {
   /** The controlled color value. Can be bind as `v-model`. */
   modelValue?: Color | string | null;
   /** The color space mode (e.g. 'hsl', 'oklch'). */
-  colorSpace?: string;
+  colorSpace?: SpaceId;
   /** Which channel this slider controls (e.g. 'h', 's', 'l'). */
   channel?: string;
   /** When `true`, prevents the user from interacting with the slider. */
@@ -28,7 +28,7 @@ export type ColorSliderRootEmits = {
 export interface ColorSliderRootContext {
   colorRef: Ref<Color | undefined>;
   channel: Ref<string>;
-  colorSpace: Ref<string>;
+  colorSpace: Ref<SpaceId>;
   orientation: Ref<"horizontal" | "vertical">;
   inverted: Ref<boolean>;
 }
@@ -40,7 +40,7 @@ export const [injectColorSliderRootContext, provideColorSliderRootContext]
 <script setup lang="ts">
 import { computed, shallowRef, toRef, watch } from "vue";
 
-import { getChannelConfig, displayToCulori, culoriToDisplay } from "@urcolor/core";
+import { getChannelConfig, displayToNative, nativeToDisplay } from "@urcolor/core";
 
 const props = withDefaults(defineProps<ColorSliderRootProps>(), {
   colorSpace: "hsl",
@@ -68,7 +68,7 @@ watch(() => props.modelValue, (val) => {
 
 const isAlpha = computed(() => props.channel === "alpha");
 
-const alphaConfig = { key: "alpha", label: "Alpha", min: 0, max: 100, step: 1, format: "percentage" as const, culoriMin: 0, culoriMax: 1 };
+const alphaConfig = { key: "alpha", label: "Alpha", min: 0, max: 100, step: 1, format: "percentage" as const, nativeMin: 0, nativeMax: 1 };
 const channelConfig = computed(() => isAlpha.value ? alphaConfig : getChannelConfig(props.colorSpace, props.channel));
 
 // Extract display value from Color for the internal slider
@@ -76,23 +76,22 @@ const internalValue = computed<number[]>({
   get() {
     if (!colorRef.value || !channelConfig.value) return [channelConfig.value?.min ?? 0];
     if (isAlpha.value) {
-      return [Math.round((colorRef.value.alpha ?? 1) * 100)];
+      return [Math.round(colorRef.value.alpha * 100)];
     }
     const converted = colorRef.value.to(props.colorSpace);
-    if (!converted) return [channelConfig.value.min];
-    const raw = converted.get(props.channel, 0);
-    return [culoriToDisplay(channelConfig.value, raw)];
+    const raw = converted.get(props.channel);
+    return [nativeToDisplay(channelConfig.value, raw)];
   },
   set(val: number[]) {
     if (!colorRef.value || !channelConfig.value || val[0] === undefined) return;
     let newColor: Color | undefined;
     if (isAlpha.value) {
-      newColor = colorRef.value.set({ alpha: val[0] / 100 });
+      newColor = colorRef.value.withAlpha(val[0] / 100);
     } else {
-      const culoriVal = displayToCulori(channelConfig.value, val[0]);
-      newColor = colorRef.value.set({
-        mode: props.colorSpace,
-        [props.channel]: culoriVal,
+      const nativeVal = displayToNative(channelConfig.value, val[0]);
+      newColor = colorRef.value.with({
+        space: props.colorSpace,
+        [props.channel]: nativeVal,
       });
     }
     if (newColor) {

@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from "@storybook/vue3";
-import "internationalized-color/css";
 import { defineComponent, h, shallowRef } from "vue";
 import { ColorWheelRoot, ColorWheelGradient, ColorWheelCheckerboard, ColorWheelThumb } from "./index";
 

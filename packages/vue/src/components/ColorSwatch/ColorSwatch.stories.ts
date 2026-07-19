@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from "@storybook/vue3";
-import "internationalized-color/css";
 import { h } from "vue";
 import { ColorSwatchRoot } from "./index";
 
