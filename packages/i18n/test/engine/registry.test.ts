@@ -19,4 +19,29 @@ describe("source registry", () => {
   it("throws a helpful error for an unknown source", () => {
     expect(() => getSource("nope")).toThrow(/unknown source "nope".*uwdata/i);
   });
+
+  it("freezes the registered descriptor and its languages map so mutation attempts don't corrupt registry state", () => {
+    const source = getSource("uwdata");
+    expect(Object.isFrozen(source)).toBe(true);
+    expect(Object.isFrozen(source.languages)).toBe(true);
+
+    // ESM modules run in strict mode, so writing to a frozen object throws
+    // rather than silently no-op'ing.
+    expect(() => {
+      (source as unknown as { title: string }).title = "tampered";
+    }).toThrow(TypeError);
+    expect(() => {
+      (source.languages as Record<string, unknown>).ko = { model: "full", terms: 0, coverage: 0 };
+    }).toThrow(TypeError);
+    expect(() => {
+      (source.languages as Record<string, unknown>).zz = { model: "full", terms: 1, coverage: 1 };
+    }).toThrow(TypeError);
+
+    // A second lookup must see the original values, proving the mutation
+    // attempts above never reached the registry's stored state.
+    const again = getSource("uwdata");
+    expect(again.title).toBe("Color Naming in Different Languages");
+    expect(again.languages.ko?.terms).toBeGreaterThan(0);
+    expect(again.languages.zz).toBeUndefined();
+  });
 });

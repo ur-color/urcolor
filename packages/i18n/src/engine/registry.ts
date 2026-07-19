@@ -8,8 +8,18 @@ interface RegisteredSource {
 
 const registry = new Map<string, RegisteredSource>();
 
+/**
+ * Freezes the descriptor and its `languages` map before storing it, so a
+ * caller holding a reference from {@link getSource}/{@link listSources}
+ * can't mutate shared registry state — e.g. `ColorNames` re-reads
+ * `languages` on every construction and `resolvedOptions()` call, so an
+ * uncaught mutation there would silently corrupt locale negotiation for
+ * every subsequent use of the source, not just the caller that mutated it.
+ */
 export function registerSource(source: NameSource, loaders: ChunkLoaders): void {
-  registry.set(source.id, { source, loaders, chunks: new Map() });
+  const languages = Object.freeze({ ...source.languages });
+  const frozenSource = Object.freeze({ ...source, languages });
+  registry.set(source.id, { source: frozenSource, loaders, chunks: new Map() });
 }
 
 export function listSources(): NameSource[] {

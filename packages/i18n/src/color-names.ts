@@ -80,8 +80,15 @@ function hueProjectionDistanceOf(match: BinMatch | HueMatch): number | undefined
  *
  * ```ts
  * const names = await ColorNames.load("ko", { source: "uwdata" });
- * names.of(Color.parse("#3b82f6")!); // "파란색"
+ * names.of(Color.parse("#3b82f6")!); // "파랑색"
  * ```
+ *
+ * Upstream is internally inconsistent about this term's spelling:
+ * `basic_colors_info_ko.csv` (the standard Korean spelling) says `파란색`,
+ * while the binned file's `commonTerm` says `파랑색`. `TermTable`'s
+ * first-seen-wins interning policy (see `scripts/sync-uwdata/transform.ts`)
+ * reads the binned file first, so `파랑색` is what ships. Defensible, but
+ * worth knowing.
  */
 export class ColorNames {
   readonly #locale: string;
