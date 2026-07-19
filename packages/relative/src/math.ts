@@ -262,7 +262,10 @@ class Parser {
  * `none`, `180deg`). The entire input must be consumed — trailing junk is an
  * error, as is any malformed or non-finite result.
  *
- * @returns the resulting value, or `null` for any failure. Never throws.
+ * @returns the resulting value, or `null` on any syntax error, unknown
+ * identifier, division by zero, or non-finite result. Pathologically deep
+ * nesting (tens of thousands of levels) can still overflow the call stack —
+ * ordinary input comes nowhere near that depth.
  */
 export function evaluateMath(input: string, scope: MathScope): MathValue | null {
   const tokens = tokenize(input);
