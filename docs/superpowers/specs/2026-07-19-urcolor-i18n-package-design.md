@@ -8,7 +8,7 @@
 A localization package for urcolor covering two concerns:
 
 1. **Color-name translations** — given a color and a language, return the term speakers of that language use for it, with probabilities. Data-driven, sourced from human colour-perception studies.
-2. **Channel labels** — the hand-authored "Hue"/"Saturation"/"Lightness" strings for 79 languages, moved out of `@urcolor/core`.
+2. **Channel labels** — the hand-authored "Hue"/"Saturation"/"Lightness" strings for 77 languages, moved out of `@urcolor/core`.
 
 The package powers a colour-naming tool and is designed so additional naming datasets can be added later without conflicting with the first one.
 
@@ -55,24 +55,27 @@ packages/i18n/
     color-names.ts        # ColorNames class (Intl.DisplayNames-shaped)
     channel-names.ts      # ChannelNames class
     engine/
-      lookup.ts           # bin resolution, nearest-bin search, candidates
+      lookup-full.ts      # Oklab-cube bin resolution, nearest-bin search
+      lookup-hue.ts       # hue-circle projection and bin resolution
       locale.ts           # BCP 47 negotiation, supportedLocalesOf
-      registry.ts         # source registry, result tagging
+      registry.ts         # source registry, chunk cache, result tagging
       types.ts
-    channels/             # moved verbatim from packages/core/src/i18n (79 langs)
+    channels/             # moved verbatim from packages/core/src/i18n (77 langs)
       en.ts … index.ts
     sources/
       uwdata/
         source.ts         # descriptor: id, license, citation, coverage
-        load.ts           # dynamic import of generated chunks
-  data/uwdata/            # generated, committed to git
-    meta.json
-    full/{de,en,es,fa,fi,fr,ko,nl,pl,pt,ro,ru,sv,zh}.json
-    hue/<27 langs>.json
-  scripts/sync-uwdata.ts
+        chunks.ts         # generated lazy-import manifest
+    data/uwdata/          # generated, committed to git
+      meta.json
+      <locale>.js         # one ES module per language, 41 total
+  scripts/sync-uwdata/
+    fetch.ts              # download + schema validation
+    transform.ts          # upstream records -> chunks
+    main.ts               # CLI: fetch -> transform -> write -> report
 ```
 
-Each unit has one job: `engine/lookup` knows about Oklab bins and probability distributions but nothing about uwdata; `sources/uwdata` knows about the upstream schema but nothing about lookup; `channels/` is static data with no dependencies.
+Each unit has one job: the lookup engines know about Oklab bins and probability distributions but nothing about uwdata; `sources/uwdata` knows about the upstream schema but nothing about lookup; `channels/` is static data with no dependencies.
 
 ### Dependency direction
 
@@ -110,7 +113,7 @@ interface NameSource {
 }
 ```
 
-`nameColor` requires an explicit `source`. Omitting it throws, listing the sources that cover the requested language. Adding a source (xkcd, CSS keywords, Pantone) means a new directory under `sources/` and `data/` — no changes to the engine.
+`ColorNames` requires an explicit `source` option. Adding a source (xkcd, CSS keywords, Pantone) means a new directory under `sources/` and `data/` — no changes to the engine.
 
 ## Public API
 
@@ -137,7 +140,7 @@ ColorNames.supportedLocalesOf(["ko-KR", "xh"], { source: "uwdata" });  // ["ko-K
 `Intl` constructors are synchronous, but language data here is a lazily loaded chunk. Both paths exist:
 
 - `await ColorNames.load(locales, options)` — resolves the locale, loads its chunk, returns an instance. The primary path.
-- `new ColorNames(locales, options)` — synchronous, valid once the chunk is loaded (whether by a prior `load()` or by a static subpath import). Throws if the data is absent, naming the loader. No silent async.
+- `new ColorNames(locales, options)` — synchronous, valid once the chunk is loaded by a prior `load()`. Throws if the data is absent, naming the loader. No silent async.
 
 Loading is cached and idempotent.
 
@@ -215,7 +218,7 @@ channels.resolvedOptions();    // { locale: "ko" }
 ChannelNames.supportedLocalesOf(["ko", "xh"]);
 ```
 
-Synchronous, no loading, no `source` — the strings are hand-authored, not derived from a dataset. 79 locales, moved from core unchanged.
+Synchronous, no loading, no `source` — the strings are hand-authored, not derived from a dataset. 77 locales, moved from core unchanged.
 
 ## Data delivery
 
@@ -235,7 +238,9 @@ Chunk format: a term string-table plus flat index arrays, gzip-friendly.
 
 Estimated shipped sizes: `en` ~280 KB, `ko` ~90 KB, hue-model languages ~10–25 KB each.
 
-Subpath exports (`@urcolor/i18n/data/uwdata/full/ko`) let bundlers code-split statically; `loadLanguage` uses dynamic import for the runtime path.
+Chunks are generated as ES modules under `src/data/uwdata/`, reached through a generated static lazy-import manifest (`locale -> () => import(...)`). A static import map is what lets bundlers code-split reliably; an arbitrary dynamic path would not. The package is built with `bun build --splitting` so the chunks stay out of the main bundle.
+
+Upstream does not document whether bin indices are `floor(value / binSize)` or `round(value / binSize)`. The quantisation rule is determined empirically during implementation, by checking which rule lands each term's own average colour in a bin that actually contains that term, and is then locked in by test.
 
 ## Sync pipeline
 
