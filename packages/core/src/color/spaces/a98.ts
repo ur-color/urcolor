@@ -7,8 +7,8 @@ import { makeRgbSpace, type XyzBridge } from "./rgbSpace";
 const sign = (c: number): number => (c < 0 ? -1 : 1);
 
 export const a98: XyzBridge = makeRgbSpace({
-  toLinear: (c) => sign(c) * Math.abs(c) ** (563 / 256),
-  toGamma: (c) => sign(c) * Math.abs(c) ** (256 / 563),
+  toLinear: c => sign(c) * Math.abs(c) ** (563 / 256),
+  toGamma: c => sign(c) * Math.abs(c) ** (256 / 563),
   toXyzMatrix: [
     [0.5766690429101305, 0.1855582379065463, 0.1882286462349947],
     [0.29734497525053605, 0.6273635662554661, 0.07529145849399788],

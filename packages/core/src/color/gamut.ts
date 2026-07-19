@@ -20,13 +20,13 @@ const JND = 0.02;
 export function inGamut(color: ColorObject, dest: SpaceId = "srgb"): boolean {
   if (!RGB_GAMUTS.has(dest)) return true;
   const { coords } = color.space === dest ? color : convert(color, dest);
-  return coords.every((c) => c >= -EPSILON && c <= 1 + EPSILON);
+  return coords.every(c => c >= -EPSILON && c <= 1 + EPSILON);
 }
 
 /** Clamp each channel of an RGB-gamut color into `0..1`. */
 function clip(color: ColorObject, dest: SpaceId): ColorObject {
   const c = convert(color, dest);
-  const coords = c.coords.map((v) => (v < 0 ? 0 : v > 1 ? 1 : v)) as Coords;
+  const coords = c.coords.map(v => (v < 0 ? 0 : v > 1 ? 1 : v)) as Coords;
   return { space: dest, coords, alpha: c.alpha };
 }
 

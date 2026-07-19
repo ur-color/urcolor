@@ -25,20 +25,20 @@ export type ColorFormat = Exclude<SpaceId, "hsv"> | "hex";
 type Serializer = (color: ColorObject) => string;
 
 const SERIALIZERS: Record<SpaceId, Serializer> = {
-  srgb: serializeRgb,
+  "srgb": serializeRgb,
   "srgb-linear": serializeColorFn,
-  hsl: serializeHsl,
+  "hsl": serializeHsl,
   // hsv has no CSS notation; fall back to sRGB.
-  hsv: (color) => serializeRgb(convert(color, "srgb")),
-  hwb: serializeHwb,
-  lab: serializeLab,
-  lch: serializeLch,
-  oklab: serializeOklab,
-  oklch: serializeOklch,
+  "hsv": color => serializeRgb(convert(color, "srgb")),
+  "hwb": serializeHwb,
+  "lab": serializeLab,
+  "lch": serializeLch,
+  "oklab": serializeOklab,
+  "oklch": serializeOklch,
   "display-p3": serializeColorFn,
   "a98-rgb": serializeColorFn,
   "prophoto-rgb": serializeColorFn,
-  rec2020: serializeColorFn,
+  "rec2020": serializeColorFn,
   "xyz-d65": serializeColorFn,
   "xyz-d50": serializeColorFn,
 };

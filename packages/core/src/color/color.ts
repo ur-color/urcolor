@@ -77,30 +77,38 @@ export class Color {
   static fromHex(hex: string): Color {
     return Color.from(hex);
   }
+
   /** `r,g,b` in `0..255`. */
   static fromRgb(r: number, g: number, b: number, a = 1): Color {
     return new Color("srgb", [r / 255, g / 255, b / 255], a);
   }
+
   /** `h` in degrees, `s`/`l` in `0..1`. */
   static fromHsl(h: number, s: number, l: number, a = 1): Color {
     return new Color("hsl", [h, s, l], a);
   }
+
   /** `h` in degrees, `w`/`b` in `0..1`. */
   static fromHwb(h: number, w: number, b: number, a = 1): Color {
     return new Color("hwb", [h, w, b], a);
   }
+
   static fromLab(l: number, aa: number, bb: number, a = 1): Color {
     return new Color("lab", [l, aa, bb], a);
   }
+
   static fromLch(l: number, c: number, h: number, a = 1): Color {
     return new Color("lch", [l, c, h], a);
   }
+
   static fromOklab(l: number, aa: number, bb: number, a = 1): Color {
     return new Color("oklab", [l, aa, bb], a);
   }
+
   static fromOklch(l: number, c: number, h: number, a = 1): Color {
     return new Color("oklch", [l, c, h], a);
   }
+
   static fromXyz(x: number, y: number, z: number, a = 1): Color {
     return new Color("xyz-d65", [x, y, z], a);
   }
@@ -195,21 +203,27 @@ export class Color {
   lighten(amount?: number): Color {
     return Color.from(lighten(this.toObject(), amount));
   }
+
   darken(amount?: number): Color {
     return Color.from(darken(this.toObject(), amount));
   }
+
   saturate(amount?: number): Color {
     return Color.from(saturate(this.toObject(), amount));
   }
+
   desaturate(amount?: number): Color {
     return Color.from(desaturate(this.toObject(), amount));
   }
+
   rotateHue(degrees: number): Color {
     return Color.from(rotateHue(this.toObject(), degrees));
   }
+
   negate(): Color {
     return Color.from(negate(this.toObject()));
   }
+
   complement(): Color {
     return Color.from(complement(this.toObject()));
   }

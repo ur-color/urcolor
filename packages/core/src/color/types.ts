@@ -9,22 +9,22 @@
  */
 
 /** Identifier for every CSS Color 4 space this package understands. */
-export type SpaceId =
-  | "srgb"
-  | "srgb-linear"
-  | "hsl"
-  | "hsv"
-  | "hwb"
-  | "lab"
-  | "lch"
-  | "oklab"
-  | "oklch"
-  | "display-p3"
-  | "a98-rgb"
-  | "prophoto-rgb"
-  | "rec2020"
-  | "xyz-d65"
-  | "xyz-d50";
+export type SpaceId
+  = | "srgb"
+    | "srgb-linear"
+    | "hsl"
+    | "hsv"
+    | "hwb"
+    | "lab"
+    | "lch"
+    | "oklab"
+    | "oklch"
+    | "display-p3"
+    | "a98-rgb"
+    | "prophoto-rgb"
+    | "rec2020"
+    | "xyz-d65"
+    | "xyz-d50";
 
 /** Three ordered channel coordinates in a space's native units. */
 export type Coords = [number, number, number];

@@ -9,25 +9,25 @@ import type { ColorObject, Coords, SpaceId } from "../types";
 
 /** `color()` space keywords -> canonical {@link SpaceId} (with the `xyz` alias). */
 const COLOR_FN_SPACES: Readonly<Record<string, SpaceId>> = {
-  srgb: "srgb",
+  "srgb": "srgb",
   "srgb-linear": "srgb-linear",
   "display-p3": "display-p3",
   "a98-rgb": "a98-rgb",
   "prophoto-rgb": "prophoto-rgb",
-  rec2020: "rec2020",
-  xyz: "xyz-d65",
+  "rec2020": "rec2020",
+  "xyz": "xyz-d65",
   "xyz-d65": "xyz-d65",
   "xyz-d50": "xyz-d50",
 };
 
 /** SpaceId -> the keyword written inside `color()`. */
 const SPACE_TO_KEYWORD: Partial<Record<SpaceId, string>> = {
-  srgb: "srgb",
+  "srgb": "srgb",
   "srgb-linear": "srgb-linear",
   "display-p3": "display-p3",
   "a98-rgb": "a98-rgb",
   "prophoto-rgb": "prophoto-rgb",
-  rec2020: "rec2020",
+  "rec2020": "rec2020",
   "xyz-d65": "xyz-d65",
   "xyz-d50": "xyz-d50",
 };

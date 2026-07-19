@@ -26,7 +26,7 @@ const xyz = ["x", "y", "z"] as const;
 const identity = (c: Coords): Coords => [c[0], c[1], c[2]];
 
 export const SPACES: Readonly<Record<SpaceId, SpaceDef>> = {
-  srgb: {
+  "srgb": {
     channels: rgb,
     toXyz: srgbToXyz,
     fromXyz: srgbFromXyz,
@@ -37,10 +37,10 @@ export const SPACES: Readonly<Record<SpaceId, SpaceDef>> = {
     channels: rgb,
     toXyz: srgbLinear.toXyz,
     fromXyz: srgbLinear.fromXyz,
-    toSrgb: (c) => [delinearizeSrgb(c[0]), delinearizeSrgb(c[1]), delinearizeSrgb(c[2])],
-    fromSrgb: (c) => [linearizeSrgb(c[0]), linearizeSrgb(c[1]), linearizeSrgb(c[2])],
+    toSrgb: c => [delinearizeSrgb(c[0]), delinearizeSrgb(c[1]), delinearizeSrgb(c[2])],
+    fromSrgb: c => [linearizeSrgb(c[0]), linearizeSrgb(c[1]), linearizeSrgb(c[2])],
   },
-  hsl: {
+  "hsl": {
     channels: ["h", "s", "l"],
     hueIndex: 0,
     toXyz: hslToXyz,
@@ -48,7 +48,7 @@ export const SPACES: Readonly<Record<SpaceId, SpaceDef>> = {
     toSrgb: hslToSrgb,
     fromSrgb: srgbToHsl,
   },
-  hsv: {
+  "hsv": {
     channels: ["h", "s", "v"],
     hueIndex: 0,
     toXyz: hsvToXyz,
@@ -56,7 +56,7 @@ export const SPACES: Readonly<Record<SpaceId, SpaceDef>> = {
     toSrgb: hsvToSrgb,
     fromSrgb: srgbToHsv,
   },
-  hwb: {
+  "hwb": {
     channels: ["h", "w", "b"],
     hueIndex: 0,
     toXyz: hwbToXyz,
@@ -64,10 +64,10 @@ export const SPACES: Readonly<Record<SpaceId, SpaceDef>> = {
     toSrgb: hwbToSrgb,
     fromSrgb: srgbToHwb,
   },
-  lab: { channels: ["l", "a", "b"], toXyz: labToXyz, fromXyz: labFromXyz },
-  lch: { channels: ["l", "c", "h"], hueIndex: 2, toXyz: lchToXyz, fromXyz: lchFromXyz },
-  oklab: { channels: ["l", "a", "b"], toXyz: oklabToXyz, fromXyz: oklabFromXyz },
-  oklch: {
+  "lab": { channels: ["l", "a", "b"], toXyz: labToXyz, fromXyz: labFromXyz },
+  "lch": { channels: ["l", "c", "h"], hueIndex: 2, toXyz: lchToXyz, fromXyz: lchFromXyz },
+  "oklab": { channels: ["l", "a", "b"], toXyz: oklabToXyz, fromXyz: oklabFromXyz },
+  "oklch": {
     channels: ["l", "c", "h"],
     hueIndex: 2,
     toXyz: oklchToXyz,
@@ -80,7 +80,7 @@ export const SPACES: Readonly<Record<SpaceId, SpaceDef>> = {
     toXyz: prophoto.toXyz,
     fromXyz: prophoto.fromXyz,
   },
-  rec2020: { channels: rgb, toXyz: rec2020.toXyz, fromXyz: rec2020.fromXyz },
+  "rec2020": { channels: rgb, toXyz: rec2020.toXyz, fromXyz: rec2020.fromXyz },
   "xyz-d65": { channels: xyz, toXyz: xyzD65.toXyz, fromXyz: xyzD65.fromXyz },
   "xyz-d50": { channels: xyz, toXyz: xyzD50.toXyz, fromXyz: xyzD50.fromXyz },
 };

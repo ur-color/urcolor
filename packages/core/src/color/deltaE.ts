@@ -62,12 +62,12 @@ function ciede2000(a: ColorObject, b: ColorObject): number {
   else if (h1p + h2p < 360) hBarP = (h1p + h2p + 360) / 2;
   else hBarP = (h1p + h2p - 360) / 2;
 
-  const t =
-    1 -
-    0.17 * Math.cos(rad(hBarP - 30)) +
-    0.24 * Math.cos(rad(2 * hBarP)) +
-    0.32 * Math.cos(rad(3 * hBarP + 6)) -
-    0.2 * Math.cos(rad(4 * hBarP - 63));
+  const t
+    = 1
+      - 0.17 * Math.cos(rad(hBarP - 30))
+      + 0.24 * Math.cos(rad(2 * hBarP))
+      + 0.32 * Math.cos(rad(3 * hBarP + 6))
+      - 0.2 * Math.cos(rad(4 * hBarP - 63));
 
   const dTheta = 30 * Math.exp(-(((hBarP - 275) / 25) ** 2));
   const rc = 2 * Math.sqrt(cBarP ** 7 / (cBarP ** 7 + 25 ** 7));
