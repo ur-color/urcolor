@@ -215,6 +215,112 @@ describe("given default ColorArea", () => {
       expect(vals).toEqual([180, 60]);
     });
   });
+
+  describe("pointer interaction on the interaction surface", () => {
+    // happy-dom gives every element a zero-size getBoundingClientRect, which
+    // makes the area's linear scales divide by zero and produce NaN. Stub a
+    // realistic box so pointer coordinates map to real channel values.
+    // Default color is hsl(180, 50%, 50%) -> internal display values [180, 50]
+    // (h: 0-360, s: 0-100). With rect { left: 0, top: 0, width: 200, height: 100 }
+    // and no inversion, clientX=100/clientY=50 maps back to exactly [180, 50],
+    // i.e. "no movement" from the starting value.
+    //
+    // Note: the pointer maths in ColorAreaRoot.vue's getPointFromPointerEvent
+    // reads getBoundingClientRect() off the ROOT element (role="group"), not
+    // the interaction surface (role="application") that ColorAreaArea.vue
+    // renders and attaches the pointer listeners to. The rect must be stubbed
+    // on the root.
+    function stubAreaRect(w: VueWrapper) {
+      const root = w.find("[role=\"group\"]").element as HTMLElement;
+      root.getBoundingClientRect = () => ({
+        left: 0,
+        top: 0,
+        right: 200,
+        bottom: 100,
+        width: 200,
+        height: 100,
+        x: 0,
+        y: 0,
+        toJSON() { return {}; },
+      });
+    }
+
+    it("should expose no data-disabled/aria-disabled on the application region when enabled", () => {
+      const area = wrapper.find("[role=\"application\"]");
+      expect(area.attributes("data-disabled")).toBeUndefined();
+      expect(area.attributes("aria-disabled")).toBeUndefined();
+    });
+
+    it("should emit changeEnd exactly once for a full drag", async () => {
+      const area = wrapper.find<HTMLElement>("[role=\"application\"]");
+      stubAreaRect(wrapper);
+      await area.trigger("pointerdown", { pointerId: 1, clientX: 100, clientY: 50 });
+      await area.trigger("pointermove", { pointerId: 1, clientX: 150, clientY: 70 });
+      await area.trigger("pointerup", { pointerId: 1, clientX: 150, clientY: 70 });
+      expect(wrapper.emitted("changeEnd")).toHaveLength(1);
+    });
+
+    it("should not emit changeEnd when a drag does not move the value", async () => {
+      const area = wrapper.find<HTMLElement>("[role=\"application\"]");
+      stubAreaRect(wrapper);
+
+      // First, drag the value away from its initial position. This is
+      // essential to the test: valuesBeforeSlideStartRef is initialized once,
+      // at mount, to the starting value. If the second drag below happened to
+      // be the FIRST interaction, a snapshotValues() that did nothing at all
+      // would be indistinguishable from a working one, because the stale
+      // mount-time snapshot would coincidentally already equal the pre-drag
+      // value. Moving the value first, then dragging without moving it
+      // further, is what actually exercises snapshotValues() re-capturing the
+      // baseline on every slide start.
+      await area.trigger("pointerdown", { pointerId: 1, clientX: 150, clientY: 70 });
+      await area.trigger("pointerup", { pointerId: 1, clientX: 150, clientY: 70 });
+      expect(wrapper.emitted("changeEnd")).toHaveLength(1);
+
+      // Second drag starts and ends at the same point the value is now at:
+      // no movement, so no additional changeEnd should fire.
+      await area.trigger("pointerdown", { pointerId: 1, clientX: 150, clientY: 70 });
+      await area.trigger("pointerup", { pointerId: 1, clientX: 150, clientY: 70 });
+      expect(wrapper.emitted("changeEnd")).toHaveLength(1);
+    });
+
+    it("should focus the thumb without starting a slide when pointerdown lands on it", async () => {
+      stubAreaRect(wrapper);
+      const thumb = wrapper.find("[role=\"slider\"]");
+      // Use coordinates that map to a different point than the current value
+      // ([180, 50]): if pointerdown on the thumb incorrectly fell through to
+      // handleSlideStart, this would produce a "change" emission we can catch.
+      // Coordinates that happen to coincide with the current value would make
+      // this assertion pass even if the thumb-guard were broken.
+      await thumb.trigger("pointerdown", { pointerId: 1, clientX: 150, clientY: 70 });
+      expect(document.activeElement).toBe(thumb.element);
+      expect(wrapper.emitted("change")).toBeUndefined();
+      expect(wrapper.emitted("changeEnd")).toBeUndefined();
+    });
+
+    describe("when disabled", () => {
+      beforeEach(async () => {
+        await wrapper.setProps({ disabled: true });
+      });
+
+      it("should mark the application region as disabled", () => {
+        const area = wrapper.find("[role=\"application\"]");
+        expect(area.attributes("data-disabled")).toBe("");
+        expect(area.attributes("aria-disabled")).toBe("true");
+      });
+
+      it("should emit nothing for a pointerdown/move/up sequence", async () => {
+        const area = wrapper.find<HTMLElement>("[role=\"application\"]");
+        stubAreaRect(wrapper);
+        await area.trigger("pointerdown", { pointerId: 1, clientX: 150, clientY: 70 });
+        await area.trigger("pointermove", { pointerId: 1, clientX: 170, clientY: 90 });
+        await area.trigger("pointerup", { pointerId: 1, clientX: 170, clientY: 90 });
+        expect(wrapper.emitted("change")).toBeUndefined();
+        expect(wrapper.emitted("changeEnd")).toBeUndefined();
+        expect(wrapper.emitted("update:modelValue")).toBeUndefined();
+      });
+    });
+  });
 });
 
 describe("given slider area in a form", () => {
