@@ -1011,11 +1011,28 @@ export function getChannelConfig(colorSpace: SpaceId, channel: string): ChannelC
 
 - [ ] **Step 5: Flip the root barrel to the new names**
 
-In `packages/core/src/index.ts`, change the `color-spaces` line back to what Task 4 intended:
+In `packages/core/src/index.ts`, replace the two-line `NOTE:` comment and the `color-spaces` export line beneath it:
+
+```ts
+// NOTE: displayToCulori / culoriToDisplay are renamed to displayToNative /
+// nativeToDisplay in Task 5. Keep the old names here until then.
+export { colorSpaces, getChannelConfig, displayToCulori, culoriToDisplay, type ChannelConfig, type ColorSpaceConfig } from "./color-spaces";
+```
+
+with the comment gone and the new names in place:
 
 ```ts
 export { colorSpaces, getChannelConfig, displayToNative, nativeToDisplay, type ChannelConfig, type ColorSpaceConfig } from "./color-spaces";
 ```
+
+Confirm no stale marker survives:
+
+```bash
+cd /Users/grandmagus/Documents/Projects/urcolor
+grep -n 'Task 5\|displayToCulori\|culoriToDisplay' packages/core/src/index.ts || echo "CLEAN"
+```
+
+Expected: `CLEAN`.
 
 - [ ] **Step 6: Run the tests to confirm they pass**
 
