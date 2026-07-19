@@ -10,6 +10,7 @@ export interface ColorRingThumbProps extends /* @vue-ignore */ PrimitiveProps {
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted } from "vue";
 import { Primitive, useForwardExpose } from "reka-ui";
+import { channelLabel, formatChannelValue } from "../../shared/channel-labels";
 import { injectColorRingRootContext } from "./ColorRingRoot.vue";
 
 withDefaults(defineProps<ColorRingThumbProps>(), { as: "span" });
@@ -32,17 +33,22 @@ const angleDeg = computed(() => {
   const normalized = (rootContext.currentValue.value - rootContext.min.value) / range;
   return normalized * 360 + rootContext.startAngle.value;
 });
+
+const label = computed(() => channelLabel(rootContext.colorSpace.value, rootContext.channelKey.value));
+const ariaValueText = computed(() => formatChannelValue(rootContext.colorSpace.value, rootContext.channelKey.value, rootContext.currentValue.value));
 </script>
 
 <template>
   <Primitive
     :ref="forwardRef"
     role="slider"
-    tabindex="0"
+    :tabindex="rootContext.disabled.value ? undefined : 0"
+    :aria-label="($attrs['aria-label'] as string) || label"
     :aria-valuenow="rootContext.currentValue.value"
     :aria-valuemin="rootContext.min.value"
     :aria-valuemax="rootContext.max.value"
-    :aria-disabled="rootContext.disabled.value"
+    :aria-valuetext="ariaValueText"
+    :aria-disabled="rootContext.disabled.value || undefined"
     :data-disabled="rootContext.disabled.value ? '' : undefined"
     :as-child="asChild"
     :as="as"

@@ -6,6 +6,7 @@ import { computed, ref, shallowRef, toRefs, watch } from "vue";
 import { Color, type SpaceId } from "@urcolor/core";
 import { colorSpaces, getChannelConfig, displayToNative, nativeToDisplay, type ChannelConfig } from "@urcolor/core";
 import { cartesianToPolar, normalizeAngle } from "@urcolor/core";
+import { cyclicWrap, snapToStep } from "../../shared/utils";
 
 type Direction = "ltr" | "rtl";
 
@@ -26,8 +27,14 @@ export interface ColorRingRootProps extends /* @vue-ignore */ PrimitiveProps {
 }
 
 export type ColorRingRootEmits = {
+  /** Event handler called when the color value changes */
   "update:modelValue": [payload: Color | undefined];
-  "valueCommit": [payload: Color];
+  /** Event handler called when the color value changes. Mirrors `update:modelValue`; present for API parity. */
+  "update:color": [payload: Color];
+  /** Event handler called on every value change, including mid-drag. */
+  "change": [payload: Color];
+  /** Event handler called when the value changes at the end of an interaction. */
+  "changeEnd": [payload: Color];
 };
 
 export interface ColorRingRootContext {
@@ -128,13 +135,6 @@ const valueBeforeSlide = ref(currentValue.value);
 const rectRef = ref<DOMRect>();
 const isDragging = ref(false);
 
-function snapValue(value: number): number {
-  const decimals = (String(step.value).split(".")[1] || "").length;
-  const snapped = Math.round((value - min.value) / step.value) * step.value + min.value;
-  const factor = 10 ** decimals;
-  return Math.max(min.value, Math.min(max.value, Math.round(snapped * factor) / factor));
-}
-
 function getValueFromPointer(event: PointerEvent): number {
   const rect = rectRef.value || currentElement.value.getBoundingClientRect();
   rectRef.value = rect;
@@ -146,18 +146,20 @@ function getValueFromPointer(event: PointerEvent): number {
 }
 
 function updateValue(val: number, commit = false) {
-  const snapped = snapValue(val);
+  const snapped = snapToStep(val, min.value, max.value, step.value);
   const hasChanged = Math.abs(snapped - currentValue.value) > 0.001;
-  if (!hasChanged && !commit) return;
   currentValue.value = snapped;
+  if (!hasChanged) return;
 
-  if (hasChanged && !isDragging.value) thumbElement.value?.focus();
+  if (!isDragging.value) thumbElement.value?.focus();
 
   const newColor = displayValueToColor(snapped);
   if (newColor) {
     colorRef.value = newColor;
     emits("update:modelValue", newColor);
-    if (commit) emits("valueCommit", newColor);
+    emits("update:color", newColor);
+    emits("change", newColor);
+    if (commit) emits("changeEnd", newColor);
   }
 }
 
@@ -209,7 +211,7 @@ function handlePointerUp(event: PointerEvent) {
   isDragging.value = false;
   rectRef.value = undefined;
   if (valueBeforeSlide.value !== currentValue.value && colorRef.value) {
-    emits("valueCommit", colorRef.value);
+    emits("changeEnd", colorRef.value);
   }
 }
 
@@ -230,7 +232,7 @@ function handleKeyDown(event: KeyboardEvent) {
   let newVal = currentValue.value + offset;
   const isCyclic = channelConfig.value?.format === "degree";
   if (isCyclic) {
-    newVal = ((newVal - min.value) % (max.value - min.value) + (max.value - min.value)) % (max.value - min.value) + min.value;
+    newVal = cyclicWrap(newVal, min.value, max.value);
   } else {
     newVal = Math.max(min.value, Math.min(max.value, newVal));
   }
@@ -263,7 +265,7 @@ provideColorRingRootContext({
     :as-child="asChild"
     :as="as"
     :dir="dir"
-    :aria-disabled="disabled"
+    :aria-disabled="disabled || undefined"
     :data-disabled="disabled ? '' : undefined"
     @pointerdown="handlePointerDown"
     @pointermove="handlePointerMove"
