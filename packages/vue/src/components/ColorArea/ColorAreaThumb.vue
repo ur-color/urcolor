@@ -11,7 +11,8 @@ import { useMounted } from "@vueuse/core";
 import { computed, onMounted, onUnmounted } from "vue";
 import { Primitive, useForwardExpose } from "reka-ui";
 import { injectColorAreaRootContext } from "./ColorAreaRoot.vue";
-import { convertValueToPercentage, getLabel, getThumbInBoundsOffset, useCollection, useSize } from "../../shared/utils";
+import { convertValueToPercentage, getThumbInBoundsOffset, useCollection, useSize } from "../../shared/utils";
+import { channelLabel, formatChannelValue } from "../../shared/channel-labels";
 defineOptions({
   inheritAttrs: false,
 });
@@ -29,7 +30,19 @@ const index = computed(() => thumbElement.value ? getItems(true).findIndex(i => 
 const value = computed(() => rootContext.modelValue?.value?.[index.value]);
 const percentX = computed(() => value.value === undefined ? 0 : convertValueToPercentage(value.value[0] ?? 0, rootContext.minX.value ?? 0, rootContext.maxX.value ?? 100));
 const percentY = computed(() => value.value === undefined ? 0 : convertValueToPercentage(value.value[1] ?? 0, rootContext.minY.value ?? 0, rootContext.maxY.value ?? 100));
-const label = computed(() => getLabel(index.value, rootContext.modelValue?.value?.length ?? 0));
+
+const xLabel = computed(() => channelLabel(rootContext.colorSpace.value, rootContext.xChannelKey.value));
+const yLabel = computed(() => channelLabel(rootContext.colorSpace.value, rootContext.yChannelKey.value));
+const ariaLabel = computed(() => `${xLabel.value}, ${yLabel.value}`);
+const ariaValueText = computed(() => {
+  const v = value.value;
+  if (!v)
+    return undefined;
+  const space = rootContext.colorSpace.value;
+  const x = formatChannelValue(space, rootContext.xChannelKey.value, v[0] ?? 0);
+  const y = formatChannelValue(space, rootContext.yChannelKey.value, v[1] ?? 0);
+  return `${xLabel.value} ${x}, ${yLabel.value} ${y}`;
+});
 
 const size = useSize(thumbElement);
 const thumbInBoundsOffsetX = computed(() => {
@@ -62,12 +75,13 @@ onUnmounted(() => {
       :ref="forwardRef"
       role="slider"
       :tabindex="rootContext.disabled.value ? undefined : 0"
-      :aria-label="($attrs['aria-label'] as string) || label"
+      :aria-label="($attrs['aria-label'] as string) || ariaLabel"
       :aria-valuenow="value ? value[0] : undefined"
       :aria-valuemin="rootContext.minX.value"
       :aria-valuemax="rootContext.maxX.value"
+      :aria-valuetext="ariaValueText"
       :data-disabled="rootContext.disabled.value ? '' : undefined"
-      aria-roledescription="2D slider"
+      aria-roledescription="Color thumb"
       :as-child="asChild"
       :as="as"
       :style="{

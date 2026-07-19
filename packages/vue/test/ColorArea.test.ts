@@ -68,12 +68,23 @@ describe("given default ColorArea", () => {
     wrapper = mount(ColorArea, { props: { disabled: false }, attachTo: document.body });
   });
 
-  it("should have a single thumb with role=slider and 2D slider role description", () => {
-    const thumb = wrapper.find("[role=\"slider\"][aria-roledescription=\"2D slider\"]");
+  it("should have a single thumb with role=slider and a colour thumb role description", () => {
+    const thumb = wrapper.find("[role=\"slider\"][aria-roledescription=\"Color thumb\"]");
     expect(thumb.exists()).toBe(true);
     expect(thumb.attributes("aria-valuenow")).toBe("180");
     expect(thumb.attributes("aria-valuemin")).toBe("0");
     expect(thumb.attributes("aria-valuemax")).toBe("360");
+  });
+
+  it("should label the thumb with both channel names", () => {
+    const thumb = wrapper.find("[role=\"slider\"]");
+    expect(thumb.attributes("aria-label")).toBe("Hue, Saturation");
+    expect(thumb.attributes("aria-roledescription")).toBe("Color thumb");
+  });
+
+  it("should announce both channel values via aria-valuetext", () => {
+    const thumb = wrapper.find("[role=\"slider\"]");
+    expect(thumb.attributes("aria-valuetext")).toBe("Hue 180°, Saturation 50%");
   });
 
   it("should have tabindex 0 on the thumb when enabled", () => {
@@ -118,7 +129,7 @@ describe("given default ColorArea", () => {
     });
 
     it("should disable the thumb", () => {
-      const thumb = wrapper.find("[aria-roledescription=\"2D slider\"]");
+      const thumb = wrapper.find("[role=\"slider\"]");
       expect(thumb.attributes("data-disabled")).toBe("");
     });
 
