@@ -28,6 +28,8 @@ class TermTable {
     const existing = this.#indices.get(term);
     if (existing !== undefined) return existing;
 
+    // When the same term recurs with a different display name (commonTerm),
+    // the first-seen display name wins; subsequent recurrences are ignored.
     const index = this.entries.length;
     this.entries.push([term, name, this.centroids.get(term) ?? null]);
     this.#indices.set(term, index);
