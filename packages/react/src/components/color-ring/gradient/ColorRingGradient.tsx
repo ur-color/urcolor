@@ -47,7 +47,7 @@ export const ColorRingGradient = forwardRef<HTMLSpanElement, ColorRingGradientPr
       const updates: Record<string, number> = {};
       for (const [k, v] of Object.entries(channelOverrides)) {
         if (k === "alpha") result = result.withAlpha(v);
-        else updates[k] = v;
+        else if (getChannelConfig(cs, k)) updates[k] = v;
       }
       if (Object.keys(updates).length > 0) result = result.with({ space: cs, ...updates });
       return result;

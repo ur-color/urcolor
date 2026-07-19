@@ -47,7 +47,7 @@ export const ColorSliderGradient = forwardRef<HTMLSpanElement, ColorSliderGradie
         if (overrides && typeof overrides === "object") {
           const nonAlpha: Record<string, number> = {};
           for (const [k, v] of Object.entries(overrides)) {
-            if (k !== "alpha") nonAlpha[k] = v;
+            if (k !== "alpha" && getChannelConfig(colorSpace, k)) nonAlpha[k] = v;
           }
           if (Object.keys(nonAlpha).length > 0) {
             baseColor = colorRef.with({ space: colorSpace, ...nonAlpha });
@@ -68,7 +68,7 @@ export const ColorSliderGradient = forwardRef<HTMLSpanElement, ColorSliderGradie
       if (overrides && typeof overrides === "object") {
         const channelOverridesForSet: Record<string, number> = {};
         for (const [k, v] of Object.entries(overrides)) {
-          if (k !== "alpha") channelOverridesForSet[k] = v;
+          if (k !== "alpha" && getChannelConfig(colorSpace, k)) channelOverridesForSet[k] = v;
         }
         if (Object.keys(channelOverridesForSet).length > 0) {
           baseColor = colorRef.with({ space: colorSpace, ...channelOverridesForSet });

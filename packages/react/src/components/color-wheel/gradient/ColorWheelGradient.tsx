@@ -46,7 +46,7 @@ export const ColorWheelGradient = forwardRef<HTMLSpanElement, ColorWheelGradient
         const updates: Record<string, number> = {};
         for (const [k, v] of Object.entries(channelOverrides)) {
           if (k === "alpha") baseColor = baseColor.withAlpha(v);
-          else updates[k] = v;
+          else if (getChannelConfig(ctx.colorSpace, k)) updates[k] = v;
         }
         if (Object.keys(updates).length > 0) baseColor = baseColor.with({ space: ctx.colorSpace, ...updates });
       }
