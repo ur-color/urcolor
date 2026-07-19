@@ -1,5 +1,12 @@
 import { Glob, plugin } from "bun";
-import { compileScript, compileTemplate, parse, rewriteDefault } from "@vue/compiler-sfc";
+import { compileScript, compileTemplate, parse, registerTS, rewriteDefault } from "@vue/compiler-sfc";
+import * as ts from "typescript";
+
+// Cross-file type resolution (defineProps<T>() where T is imported from
+// another .vue/.ts file) requires the TypeScript compiler to be registered;
+// without it, @vue/compiler-sfc silently fails to resolve types like
+// `Omit<ImportedProps, "x">` that reference an external file.
+registerTS(() => ts);
 
 const cache = new Map<string, string>();
 
