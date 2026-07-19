@@ -54,6 +54,60 @@ describe("NOTATIONS", () => {
     expect(parseChannelToken("200grad", hslH)).toBeCloseTo(180, 9);
   });
 
+  it("pins every channel's percent reference against silent drift", () => {
+    // rgb: r, g, b -> percentRef 255, toNative divides by 255.
+    for (const ch of NOTATIONS.rgb!.channels) {
+      expect(parseChannelToken("50%", ch)).toBeCloseTo(0.5, 9);
+    }
+
+    // hsl: s, l -> percentRef 100, toNative divides by 100.
+    expect(parseChannelToken("50%", NOTATIONS.hsl!.channels[1]!)).toBeCloseTo(0.5, 9);
+    expect(parseChannelToken("50%", NOTATIONS.hsl!.channels[2]!)).toBeCloseTo(0.5, 9);
+
+    // hwb: w, b -> percentRef 100, toNative divides by 100.
+    expect(parseChannelToken("50%", NOTATIONS.hwb!.channels[1]!)).toBeCloseTo(0.5, 9);
+    expect(parseChannelToken("50%", NOTATIONS.hwb!.channels[2]!)).toBeCloseTo(0.5, 9);
+
+    // lab: l -> percentRef 100 (identity); a, b -> percentRef 125 (identity).
+    expect(parseChannelToken("50%", NOTATIONS.lab!.channels[0]!)).toBeCloseTo(50, 9);
+    expect(parseChannelToken("50%", NOTATIONS.lab!.channels[1]!)).toBeCloseTo(62.5, 9);
+    expect(parseChannelToken("50%", NOTATIONS.lab!.channels[2]!)).toBeCloseTo(62.5, 9);
+
+    // lch: l -> percentRef 100 (identity); c -> percentRef 150 (identity).
+    // 150 is the most unusual constant in the table and the likeliest to be
+    // mistyped, so pin it explicitly.
+    expect(parseChannelToken("50%", NOTATIONS.lch!.channels[0]!)).toBeCloseTo(50, 9);
+    expect(parseChannelToken("50%", NOTATIONS.lch!.channels[1]!)).toBeCloseTo(75, 9);
+
+    // oklab: l -> percentRef 1 (identity); a, b -> percentRef 0.4 (identity).
+    expect(parseChannelToken("50%", NOTATIONS.oklab!.channels[0]!)).toBeCloseTo(0.5, 9);
+    expect(parseChannelToken("50%", NOTATIONS.oklab!.channels[1]!)).toBeCloseTo(0.2, 9);
+    expect(parseChannelToken("50%", NOTATIONS.oklab!.channels[2]!)).toBeCloseTo(0.2, 9);
+
+    // oklch: l -> percentRef 1 (identity); c -> percentRef 0.4 (identity).
+    expect(parseChannelToken("50%", NOTATIONS.oklch!.channels[0]!)).toBeCloseTo(0.5, 9);
+    expect(parseChannelToken("50%", NOTATIONS.oklch!.channels[1]!)).toBeCloseTo(0.2, 9);
+
+    // color: r, g, b -> percentRef 1 (identity).
+    for (const ch of NOTATIONS.color!.channels) {
+      expect(parseChannelToken("50%", ch)).toBeCloseTo(0.5, 9);
+    }
+
+    // Angle channels (hsl.h, hwb.h, lch.h, oklch.h) don't take percentages:
+    // parseChannelToken returns at the `ch.angle` branch before any percent
+    // handling runs. Assert their actual unit handling instead — a bare
+    // number plus at least one of deg/grad/rad/turn.
+    for (const ch of [
+      NOTATIONS.hsl!.channels[0]!,
+      NOTATIONS.hwb!.channels[0]!,
+      NOTATIONS.lch!.channels[2]!,
+      NOTATIONS.oklch!.channels[2]!,
+    ]) {
+      expect(parseChannelToken("180", ch)).toBeCloseTo(180, 9);
+      expect(parseChannelToken("0.5turn", ch)).toBeCloseTo(180, 9);
+    }
+  });
+
   it("agrees with the real parsers end to end", () => {
     // If the refactor changed any unit, one of these shifts.
     expect(tryParse("rgb(255 0 0)")?.coords).toEqual([1, 0, 0]);

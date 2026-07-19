@@ -49,10 +49,14 @@ const scaled = (name: string, scale: number): NotationChannel => ({
 });
 
 /** A hue channel: degrees in, degrees stored. */
-const hue = (name = "h"): NotationChannel => ({
-  name,
+const hue = (): NotationChannel => ({
+  name: "h",
   toNative: identity,
   fromNative: identity,
+  // Inert: parseChannelToken returns at the `ch.angle` branch before any
+  // percent handling runs, and CSS doesn't permit percentage hues anyway.
+  // Kept only so `percentRef` stays a required, always-finite number; a
+  // generic reader (e.g. a plugin) must not treat this value as meaningful.
   percentRef: 360,
   angle: true,
 });
