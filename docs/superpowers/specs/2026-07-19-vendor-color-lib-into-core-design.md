@@ -62,7 +62,12 @@ packages/core/src/
   index.ts                   re-exports color/* alongside existing exports
 ```
 
-Not ported from urvis: `random.ts`, `tagged.ts` — unused by urcolor.
+Also ported: `tagged.ts` — it is 28 lines of compile-time-only space tagging, and both
+`convert.ts` (`ColorIn`) and `gamut.ts` (`OklchColor`) depend on its types. It is kept as an
+internal module; only its types are re-exported from the package root, not its `color()`
+helper.
+
+Not ported from urvis: `random.ts` — unused by urcolor.
 Not ported from `internationalized-color`: `naming.ts`, `kdtree.ts`, `locales/`,
 `bootstrap/css.ts`.
 
@@ -160,6 +165,15 @@ The `ColorSpaceConfig.mode` field is renamed to `space` and typed `SpaceId` rath
 `string`, so a bad id is a compile error. Every downstream `color-space` prop default,
 Storybook arg, and docs literal using the old ids is updated.
 
+Three more names in that module still say "culori" and become inaccurate once culori is
+gone. They are renamed with it, in the same breaking change:
+
+| old | new |
+| --- | --- |
+| `displayToCulori()` | `displayToNative()` |
+| `culoriToDisplay()` | `nativeToDisplay()` |
+| `ChannelConfig.culoriMin` / `.culoriMax` | `.nativeMin` / `.nativeMax` |
+
 ## The `hsv` space
 
 `hsv` is absent from the upstream library but required by `color-spaces.ts` and the
@@ -202,10 +216,15 @@ The naming feature disappears, so:
 ## Testing
 
 The upstream test suite is ported to `packages/core/test/color/`, adapted to CSS space ids,
-minus `random.test.ts` and `tagged.test.ts`. Ported files: `parse`, `convert`, `serialize`,
-`gamut`, `deltaE`, `contrast`, `interpolate`, `manipulate`, `named`, `color`, and the
-per-space tests (`spaces/hsl`, `hwb`, `lab`, `lch`, `oklab`, `srgb`, `xyz`, `colorFn`,
-`wideGamut`).
+minus `random.test.ts` (whose module is not ported). Ported files: `parse`, `convert`,
+`serialize`, `gamut`, `deltaE`, `contrast`, `interpolate`, `manipulate`, `named`, `color`,
+`tagged`, and the per-space tests (`spaces/hsl`, `hwb`, `lab`, `lch`, `oklab`, `srgb`,
+`xyz`, `colorFn`, `wideGamut`).
+
+Import specifiers in the vendored sources are rewritten to drop their `.ts` extensions,
+matching the existing `packages/core/src` convention. This is not cosmetic: core's
+`build:types` runs `tsc --emitDeclarationOnly`, which would otherwise emit `.d.ts` files
+containing `from "./types.ts"` specifiers that resolve to nothing in `dist/`.
 
 New tests:
 
