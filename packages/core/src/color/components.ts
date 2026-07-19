@@ -5,6 +5,8 @@
  * separation, an optional `/ alpha`, `none` keywords, and percentage tokens.
  */
 
+import type { NotationChannel } from "./notations";
+
 /** The channel tokens and alpha extracted from a functional notation body. */
 export interface Components {
   /** The raw inner text, before any splitting. */
@@ -77,4 +79,18 @@ export function num(n: number, prec = 4): number {
 /** Append ` / a` when alpha < 1, matching CSS modern serialisation. */
 export function alphaSuffix(alpha: number): string {
   return alpha < 1 ? ` / ${num(alpha)}` : "";
+}
+
+/**
+ * Resolve a channel token to its native storage value, using the channel's
+ * percent reference and unit mapping. `none` -> 0; angles go through
+ * {@link parseHue}; `%` scales by `percentRef`.
+ */
+export function parseChannelToken(token: string, ch: NotationChannel): number {
+  if (token === "none") return 0;
+  if (ch.angle) return parseHue(token);
+  const css = token.endsWith("%")
+    ? (Number.parseFloat(token) / 100) * ch.percentRef
+    : Number.parseFloat(token);
+  return ch.toNative(css);
 }

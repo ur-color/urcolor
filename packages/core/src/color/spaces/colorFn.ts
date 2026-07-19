@@ -4,7 +4,8 @@
  * percentages; `xyz` is an alias for `xyz-d65`.
  */
 
-import { alphaSuffix, num, parseAlpha, parseFn } from "../components";
+import { alphaSuffix, num, parseAlpha, parseChannelToken, parseFn } from "../components";
+import { NOTATIONS } from "../notations";
 import type { ColorObject, Coords, SpaceId } from "../types";
 
 /** `color()` space keywords -> canonical {@link SpaceId} (with the `xyz` alias). */
@@ -32,11 +33,6 @@ const SPACE_TO_KEYWORD: Partial<Record<SpaceId, string>> = {
   "xyz-d50": "xyz-d50",
 };
 
-const channel = (token: string): number => {
-  if (token === "none") return 0;
-  return token.endsWith("%") ? Number.parseFloat(token) / 100 : Number.parseFloat(token);
-};
-
 /** Parse a `color()` string, or `null` if it isn't one / the space is unknown. */
 export function parseColorFn(input: string): ColorObject | null {
   const c = parseFn(input, "color");
@@ -44,7 +40,12 @@ export function parseColorFn(input: string): ColorObject | null {
   const [keyword = "", x = "", y = "", z = "", a] = c.args;
   const space = COLOR_FN_SPACES[keyword.toLowerCase()];
   if (!space) return null;
-  const coords: Coords = [channel(x), channel(y), channel(z)];
+  const ch = NOTATIONS.color!.channels;
+  const coords: Coords = [
+    parseChannelToken(x, ch[0]),
+    parseChannelToken(y, ch[1]),
+    parseChannelToken(z, ch[2]),
+  ];
   const alpha = c.alpha ?? (a !== undefined ? parseAlpha(a) : 1);
   return { space, coords, alpha };
 }

@@ -3,7 +3,8 @@
  * `[L(0..100), C, H(deg)]`.
  */
 
-import { alphaSuffix, num, parseAlpha, parseFn, parseHue } from "../components";
+import { alphaSuffix, num, parseAlpha, parseChannelToken, parseFn } from "../components";
+import { NOTATIONS } from "../notations";
 import { fromPolar, toPolar } from "../polar";
 import type { ColorObject, Coords } from "../types";
 import { labFromXyz, labToXyz } from "./lab";
@@ -23,21 +24,17 @@ export function lchFromXyz(xyz: Coords): Coords {
   return labToLch(labFromXyz(xyz));
 }
 
-const lightness = (token: string): number => (token === "none" ? 0 : Number.parseFloat(token));
-
-/** Chroma token -> number (`%` maps 100% -> 150, per CSS Color 4). */
-const chroma = (token: string): number => {
-  if (token === "none") return 0;
-  if (token.endsWith("%")) return (Number.parseFloat(token) / 100) * 150;
-  return Number.parseFloat(token);
-};
-
 /** Parse `lch()`. */
 export function parseLch(input: string): ColorObject | null {
   const c = parseFn(input, "lch");
   if (!c || c.args.length < 3) return null;
   const [l = "", ch = "", h = "", a] = c.args;
-  const coords: Coords = [lightness(l), chroma(ch), parseHue(h)];
+  const chan = NOTATIONS.lch!.channels;
+  const coords: Coords = [
+    parseChannelToken(l, chan[0]),
+    parseChannelToken(ch, chan[1]),
+    parseChannelToken(h, chan[2]),
+  ];
   const alpha = c.alpha ?? (a !== undefined ? parseAlpha(a) : 1);
   return { space: "lch", coords, alpha };
 }

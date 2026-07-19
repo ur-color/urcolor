@@ -3,7 +3,8 @@
  * in `0..1`. Built on the HSL hue geometry; converts to the XYZ hub via sRGB.
  */
 
-import { alphaSuffix, num, parseFn, parseHue } from "../components";
+import { alphaSuffix, num, parseChannelToken, parseFn } from "../components";
+import { NOTATIONS } from "../notations";
 import type { ColorObject, Coords } from "../types";
 import { hslToSrgb } from "./hsl";
 import { srgbFromXyz, srgbToXyz } from "./xyz";
@@ -45,15 +46,17 @@ export function hwbFromXyz(xyz: Coords): Coords {
   return srgbToHwb(srgbFromXyz(xyz));
 }
 
-/** Whiteness/blackness token -> `0..1`. */
-const wb = (token: string): number => (token === "none" ? 0 : Number.parseFloat(token) / 100);
-
 /** Parse `hwb()`. */
 export function parseHwb(input: string): ColorObject | null {
   const c = parseFn(input, "hwb");
   if (!c || c.args.length < 3) return null;
   const [h = "", w = "", b = ""] = c.args;
-  const coords: Coords = [parseHue(h), wb(w), wb(b)];
+  const ch = NOTATIONS.hwb!.channels;
+  const coords: Coords = [
+    parseChannelToken(h, ch[0]),
+    parseChannelToken(w, ch[1]),
+    parseChannelToken(b, ch[2]),
+  ];
   return { space: "hwb", coords, alpha: c.alpha ?? 1 };
 }
 

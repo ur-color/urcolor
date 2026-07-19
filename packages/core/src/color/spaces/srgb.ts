@@ -5,7 +5,8 @@
  * {@link ./xyz.ts} and is attached to the registry there.
  */
 
-import { alphaSuffix, parseAlpha, parseFn } from "../components";
+import { alphaSuffix, parseAlpha, parseChannelToken, parseFn } from "../components";
+import { NOTATIONS } from "../notations";
 import type { ColorObject, Coords } from "../types";
 
 const clamp01 = (n: number): number => (n < 0 ? 0 : n > 1 ? 1 : n);
@@ -48,19 +49,17 @@ export function serializeHex(color: ColorObject): string {
   return out;
 }
 
-/** Parse one `rgb()`/`rgba()` channel token to `0..1` (`none` -> 0). */
-function channel(token: string): number {
-  if (token === "none") return 0;
-  if (token.endsWith("%")) return Number.parseFloat(token) / 100;
-  return Number.parseFloat(token) / 255;
-}
-
 /** Parse `rgb()` / `rgba()` in legacy (comma) or modern (space + `/`) syntax. */
 export function parseRgb(input: string): ColorObject | null {
   const c = parseFn(input, "rgba?");
   if (!c || c.args.length < 3) return null;
   const [r = "", g = "", b = "", a] = c.args;
-  const coords: Coords = [channel(r), channel(g), channel(b)];
+  const ch = NOTATIONS.rgb!.channels;
+  const coords: Coords = [
+    parseChannelToken(r, ch[0]),
+    parseChannelToken(g, ch[1]),
+    parseChannelToken(b, ch[2]),
+  ];
   // Modern `/ a`, else legacy 4th positional token.
   const alpha = c.alpha ?? (a !== undefined ? parseAlpha(a) : 1);
   return { space: "srgb", coords, alpha };

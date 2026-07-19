@@ -3,7 +3,8 @@
  * with `s`/`l` in `0..1`. Converts to the XYZ hub via sRGB.
  */
 
-import { alphaSuffix, num, parseAlpha, parseFn, parseHue } from "../components";
+import { alphaSuffix, num, parseAlpha, parseChannelToken, parseFn } from "../components";
+import { NOTATIONS } from "../notations";
 import type { ColorObject, Coords } from "../types";
 import { srgbFromXyz, srgbToXyz } from "./xyz";
 
@@ -45,15 +46,17 @@ export function hslFromXyz(xyz: Coords): Coords {
   return srgbToHsl(srgbFromXyz(xyz));
 }
 
-/** Saturation/lightness token -> `0..1` (both `%` and bare numbers use 100 = 1). */
-const sl = (token: string): number => (token === "none" ? 0 : Number.parseFloat(token) / 100);
-
 /** Parse `hsl()` / `hsla()` in legacy or modern syntax. */
 export function parseHsl(input: string): ColorObject | null {
   const c = parseFn(input, "hsla?");
   if (!c || c.args.length < 3) return null;
   const [h = "", s = "", l = "", a] = c.args;
-  const coords: Coords = [parseHue(h), sl(s), sl(l)];
+  const ch = NOTATIONS.hsl!.channels;
+  const coords: Coords = [
+    parseChannelToken(h, ch[0]),
+    parseChannelToken(s, ch[1]),
+    parseChannelToken(l, ch[2]),
+  ];
   // Modern `/ a`, else legacy 4th positional token.
   const alpha = c.alpha ?? (a !== undefined ? parseAlpha(a) : 1);
   return { space: "hsl", coords, alpha };

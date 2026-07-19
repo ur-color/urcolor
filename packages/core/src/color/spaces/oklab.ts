@@ -4,8 +4,9 @@
  * (cube root) -> Oklab, using Björn Ottosson's matrices.
  */
 
-import { alphaSuffix, num, parseAlpha, parseFn } from "../components";
+import { alphaSuffix, num, parseAlpha, parseChannelToken, parseFn } from "../components";
 import { type Mat3, mul } from "../matrix";
+import { NOTATIONS } from "../notations";
 import type { ColorObject, Coords } from "../types";
 
 /** XYZ (D65) -> LMS (cone response). */
@@ -48,25 +49,17 @@ export function oklabToXyz(lab: Coords): Coords {
   return mul(LMS_TO_XYZ, [lms[0] ** 3, lms[1] ** 3, lms[2] ** 3]);
 }
 
-/** Lightness token -> `0..1` (`%` scales 100% -> 1). */
-const lightness = (token: string): number => {
-  if (token === "none") return 0;
-  return token.endsWith("%") ? Number.parseFloat(token) / 100 : Number.parseFloat(token);
-};
-
-/** a/b token -> number (`%` maps 100% -> 0.4, per CSS Color 4). */
-const ab = (token: string): number => {
-  if (token === "none") return 0;
-  if (token.endsWith("%")) return (Number.parseFloat(token) / 100) * 0.4;
-  return Number.parseFloat(token);
-};
-
 /** Parse `oklab()`. */
 export function parseOklab(input: string): ColorObject | null {
   const c = parseFn(input, "oklab");
   if (!c || c.args.length < 3) return null;
   const [l = "", a = "", b = "", alpha] = c.args;
-  const coords: Coords = [lightness(l), ab(a), ab(b)];
+  const ch = NOTATIONS.oklab!.channels;
+  const coords: Coords = [
+    parseChannelToken(l, ch[0]),
+    parseChannelToken(a, ch[1]),
+    parseChannelToken(b, ch[2]),
+  ];
   return {
     space: "oklab",
     coords,

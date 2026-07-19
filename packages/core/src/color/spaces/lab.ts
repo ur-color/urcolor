@@ -4,7 +4,8 @@
  * with Bradford adaptation.
  */
 
-import { alphaSuffix, num, parseAlpha, parseFn } from "../components";
+import { alphaSuffix, num, parseAlpha, parseChannelToken, parseFn } from "../components";
+import { NOTATIONS } from "../notations";
 import type { ColorObject, Coords } from "../types";
 import { adaptD50toD65, adaptD65toD50 } from "./xyz";
 
@@ -37,22 +38,17 @@ export function labToXyz([l, a, b]: Coords): Coords {
   return adaptD50toD65(xyzD50);
 }
 
-/** Lightness token -> `0..100` (`50%` and bare `50` both mean 50). */
-const lightness = (token: string): number => (token === "none" ? 0 : Number.parseFloat(token));
-
-/** a/b token -> number (`%` maps 100% -> 125, per CSS Color 4). */
-const ab = (token: string): number => {
-  if (token === "none") return 0;
-  if (token.endsWith("%")) return (Number.parseFloat(token) / 100) * 125;
-  return Number.parseFloat(token);
-};
-
 /** Parse `lab()`. */
 export function parseLab(input: string): ColorObject | null {
   const c = parseFn(input, "lab");
   if (!c || c.args.length < 3) return null;
   const [l = "", a = "", b = "", alpha] = c.args;
-  const coords: Coords = [lightness(l), ab(a), ab(b)];
+  const ch = NOTATIONS.lab!.channels;
+  const coords: Coords = [
+    parseChannelToken(l, ch[0]),
+    parseChannelToken(a, ch[1]),
+    parseChannelToken(b, ch[2]),
+  ];
   return {
     space: "lab",
     coords,
