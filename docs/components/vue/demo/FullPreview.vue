@@ -60,6 +60,10 @@ const selectedYChannel = ref(channels.value[1]?.key ?? "s");
 watch(colorSpace, () => {
   selectedXChannel.value = channels.value[0]?.key ?? "h";
   selectedYChannel.value = channels.value[1]?.key ?? "s";
+  // Reset channel overrides too — an override key from the previous space
+  // (e.g. `v` from HSV) may not exist in the new space (e.g. HSL).
+  areaOverrides.value = {};
+  alphaSliderOverrides.value = {};
 });
 
 // Prevent both selects from having the same channel
