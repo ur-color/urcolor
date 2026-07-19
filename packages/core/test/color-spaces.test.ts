@@ -2,8 +2,8 @@ import { describe, expect, it } from "bun:test";
 import {
   colorSpaces,
   getChannelConfig,
-  displayToCulori,
-  culoriToDisplay,
+  displayToNative,
+  nativeToDisplay,
   type ChannelConfig,
 } from "../src/color-spaces";
 
@@ -11,15 +11,23 @@ describe("colorSpaces", () => {
   it("contains expected color spaces", () => {
     const keys = Object.keys(colorSpaces);
     expect(keys).toContain("hsl");
-    expect(keys).toContain("rgb");
+    expect(keys).toContain("hsv");
+    expect(keys).toContain("srgb");
     expect(keys).toContain("oklch");
     expect(keys).toContain("oklab");
-    expect(keys).toContain("p3");
+    expect(keys).toContain("display-p3");
   });
 
-  it("each space has mode, label, and 3 channels", () => {
+  it("uses no culori-era space ids", () => {
+    const keys = Object.keys(colorSpaces);
+    for (const stale of ["rgb", "p3", "a98", "prophoto"]) {
+      expect(keys).not.toContain(stale);
+    }
+  });
+
+  it("each space has space, label, and 3 channels", () => {
     for (const [key, space] of Object.entries(colorSpaces)) {
-      expect(space.mode).toBe(key);
+      expect(key).toBe(space.space);
       expect(space.label).toBeTruthy();
       expect(space.channels).toHaveLength(3);
     }
@@ -48,7 +56,7 @@ describe("getChannelConfig", () => {
   });
 
   it("returns undefined for invalid space", () => {
-    expect(getChannelConfig("xyz", "h")).toBeUndefined();
+    expect(getChannelConfig("xyz-d65", "h")).toBeUndefined();
   });
 
   it("returns undefined for invalid channel", () => {
@@ -56,53 +64,53 @@ describe("getChannelConfig", () => {
   });
 });
 
-describe("displayToCulori", () => {
+describe("displayToNative", () => {
   it("returns value as-is when no culori range differs", () => {
     const config: ChannelConfig = { key: "h", label: "Hue", min: 0, max: 360, step: 1, format: "degree" };
-    expect(displayToCulori(config, 180)).toBe(180);
+    expect(displayToNative(config, 180)).toBe(180);
   });
 
   it("maps display range to culori range", () => {
     // HSL saturation: display 0-100, culori 0-1
     const config = getChannelConfig("hsl", "s")!;
-    expect(displayToCulori(config, 0)).toBe(0);
-    expect(displayToCulori(config, 100)).toBe(1);
-    expect(displayToCulori(config, 50)).toBe(0.5);
+    expect(displayToNative(config, 0)).toBe(0);
+    expect(displayToNative(config, 100)).toBe(1);
+    expect(displayToNative(config, 50)).toBe(0.5);
   });
 
   it("maps RGB: display 0-255 to culori 0-1", () => {
-    const config = getChannelConfig("rgb", "r")!;
-    expect(displayToCulori(config, 0)).toBe(0);
-    expect(displayToCulori(config, 255)).toBe(1);
-    expect(displayToCulori(config, 127.5)).toBe(0.5);
+    const config = getChannelConfig("srgb", "r")!;
+    expect(displayToNative(config, 0)).toBe(0);
+    expect(displayToNative(config, 255)).toBe(1);
+    expect(displayToNative(config, 127.5)).toBe(0.5);
   });
 });
 
-describe("culoriToDisplay", () => {
+describe("nativeToDisplay", () => {
   it("returns value as-is when no culori range differs", () => {
     const config: ChannelConfig = { key: "h", label: "Hue", min: 0, max: 360, step: 1, format: "degree" };
-    expect(culoriToDisplay(config, 180)).toBe(180);
+    expect(nativeToDisplay(config, 180)).toBe(180);
   });
 
   it("maps culori range to display range", () => {
     const config = getChannelConfig("hsl", "s")!;
-    expect(culoriToDisplay(config, 0)).toBe(0);
-    expect(culoriToDisplay(config, 1)).toBe(100);
-    expect(culoriToDisplay(config, 0.5)).toBe(50);
+    expect(nativeToDisplay(config, 0)).toBe(0);
+    expect(nativeToDisplay(config, 1)).toBe(100);
+    expect(nativeToDisplay(config, 0.5)).toBe(50);
   });
 
   it("rounds to step precision", () => {
     // oklch chroma has step=0.01
     const config = getChannelConfig("oklch", "c")!;
-    const result = culoriToDisplay(config, 0.123456);
+    const result = nativeToDisplay(config, 0.123456);
     expect(result).toBe(0.12);
   });
 
-  it("round-trips with displayToCulori", () => {
-    const config = getChannelConfig("rgb", "r")!;
+  it("round-trips with displayToNative", () => {
+    const config = getChannelConfig("srgb", "r")!;
     const display = 128;
-    const culori = displayToCulori(config, display);
-    const back = culoriToDisplay(config, culori);
+    const culori = displayToNative(config, display);
+    const back = nativeToDisplay(config, culori);
     expect(back).toBe(128);
   });
 });

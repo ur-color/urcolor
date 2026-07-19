@@ -20,9 +20,7 @@ export { drawGradient, drawLinearGradient, interpolateStops, sampleBilinearGrid,
 export { polarToCartesian, cartesianToPolar, clampToCircle, normalizeAngle, triangleVertices, barycentricCoords, barycentricToCartesian, pointInTriangle, clampToTriangle, insetTriangle, type Point, type PolarCoord } from "./geometry";
 
 // Color-space UI configuration.
-// NOTE: displayToCulori / culoriToDisplay are renamed to displayToNative /
-// nativeToDisplay in Task 5. Keep the old names here until then.
-export { colorSpaces, getChannelConfig, displayToCulori, culoriToDisplay, type ChannelConfig, type ColorSpaceConfig } from "./color-spaces";
+export { colorSpaces, getChannelConfig, displayToNative, nativeToDisplay, type ChannelConfig, type ColorSpaceConfig } from "./color-spaces";
 
 // Channel-label translations.
 export { translations, getChannelLabel, type ChannelTranslations } from "./i18n";
