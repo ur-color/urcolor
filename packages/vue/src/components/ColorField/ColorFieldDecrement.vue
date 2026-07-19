@@ -24,7 +24,7 @@ useForwardExpose();
 
 const isDisabled = computed(() =>
   rootContext.disabled.value
-  || rootContext.readOnly.value
+  || rootContext.readonly.value
   || props.disabled
   || rootContext.isDecreaseDisabled.value,
 );

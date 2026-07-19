@@ -24,15 +24,24 @@ export interface ColorFieldRootProps extends /* @vue-ignore */ PrimitiveProps {
   /** Whether the field is disabled. */
   disabled?: boolean;
   /** Whether the field is read-only. */
-  readOnly?: boolean;
+  readonly?: boolean;
   /** Hidden input name for form submission. */
   name?: string;
   /** Whether required for form submission. */
   required?: boolean;
+  /** Placeholder text shown in the input when it has no value. */
+  placeholder?: string;
+  /** When `true`, disables stepping the value via the mouse wheel. */
+  disableWheelChange?: boolean;
+  /** The locale used for parsing/formatting. Reserved for future use. */
+  locale?: string;
+  /** The default color value when uncontrolled. */
+  defaultValue?: Color | string;
 }
 
 export type ColorFieldRootEmits = {
   "update:modelValue": [value: Color | undefined];
+  "update:color": [value: Color];
   "valueCommit": [value: Color];
 };
 
@@ -40,17 +49,25 @@ export interface ColorFieldRootContext {
   modelValue: Ref<number | undefined>;
   displayValue: Ref<string>;
   disabled: Ref<boolean>;
-  readOnly: Ref<boolean>;
+  readonly: Ref<boolean>;
   isDecreaseDisabled: Ref<boolean>;
   isIncreaseDisabled: Ref<boolean>;
   handleIncrease: (multiplier?: number) => void;
   handleDecrease: (multiplier?: number) => void;
   handleMinMaxValue: (type: "min" | "max") => void;
+  handleWheel: (event: WheelEvent) => void;
   commitValue: (val: number | undefined) => void;
   onInputChange: (text: string) => void;
   inputEl: Ref<HTMLInputElement | undefined>;
   onInputElement: (el: HTMLInputElement) => void;
   format: Ref<"number" | "degree" | "percentage" | "hex">;
+  channel: Ref<string>;
+  colorSpace: Ref<SpaceId>;
+  min: Ref<number>;
+  max: Ref<number>;
+  placeholder: Ref<string | undefined>;
+  disableWheelChange: Ref<boolean>;
+  locale: Ref<string | undefined>;
 }
 
 export const [injectColorFieldRootContext, provideColorFieldRootContext]
@@ -58,7 +75,7 @@ export const [injectColorFieldRootContext, provideColorFieldRootContext]
 </script>
 
 <script setup lang="ts">
-import { computed, ref, shallowRef, toRefs, watch } from "vue";
+import { computed, ref, shallowRef, toRef, toRefs, watch } from "vue";
 import { getChannelConfig, displayToNative, nativeToDisplay, type ChannelConfig } from "@urcolor/core";
 import { clamp, snapToStep, useFormControl } from "../../shared/utils";
 
@@ -67,13 +84,15 @@ const props = withDefaults(defineProps<ColorFieldRootProps>(), {
   colorSpace: "hsl",
   channel: "h",
   disabled: false,
-  readOnly: false,
+  readonly: false,
   required: false,
+  disableWheelChange: false,
+  defaultValue: "hsl(0, 100%, 50%)",
 });
 
 const emit = defineEmits<ColorFieldRootEmits>();
 
-const { disabled, readOnly } = toRefs(props);
+const { disabled, readonly } = toRefs(props);
 const { forwardRef, currentElement } = useForwardExpose();
 const isFormControl = useFormControl(currentElement);
 
@@ -83,7 +102,7 @@ function parseColor(v: Color | string | null | undefined): Color | undefined {
   return Color.parse(v) ?? undefined;
 }
 
-const colorRef = shallowRef<Color | undefined>(parseColor(props.modelValue));
+const colorRef = shallowRef<Color | undefined>(parseColor(props.modelValue ?? props.defaultValue));
 
 watch(() => props.modelValue, (val) => {
   const parsed = parseColor(val);
@@ -199,6 +218,7 @@ function emitColor(val: number) {
   if (newColor) {
     colorRef.value = newColor;
     emit("update:modelValue", newColor);
+    emit("update:color", newColor);
   }
   return newColor;
 }
@@ -226,7 +246,7 @@ function onInputChange(text: string) {
 }
 
 function handleIncrease(multiplier = 1) {
-  if (props.disabled || props.readOnly) return;
+  if (props.disabled || props.readonly) return;
   const current = numericValue.value ?? 0;
   const next = clampValue(current + effectiveStep.value * multiplier);
   numericValue.value = next;
@@ -236,7 +256,7 @@ function handleIncrease(multiplier = 1) {
 }
 
 function handleDecrease(multiplier = 1) {
-  if (props.disabled || props.readOnly) return;
+  if (props.disabled || props.readonly) return;
   const current = numericValue.value ?? 0;
   const next = clampValue(current - effectiveStep.value * multiplier);
   numericValue.value = next;
@@ -246,7 +266,7 @@ function handleDecrease(multiplier = 1) {
 }
 
 function handleMinMaxValue(type: "min" | "max") {
-  if (props.disabled || props.readOnly) return;
+  if (props.disabled || props.readonly) return;
   const val = type === "min" ? effectiveMin.value : effectiveMax.value;
   numericValue.value = val;
   displayValue.value = formatValue(val);
@@ -268,21 +288,39 @@ function onInputElement(el: HTMLInputElement) {
   inputEl.value = el;
 }
 
+function handleWheel(event: WheelEvent) {
+  if (props.disableWheelChange || props.disabled || props.readonly)
+    return;
+  event.preventDefault();
+  if (event.deltaY > 0)
+    handleDecrease();
+  else
+    handleIncrease();
+}
+
 provideColorFieldRootContext({
   modelValue: numericValue,
   displayValue,
   disabled,
-  readOnly,
+  readonly,
   isDecreaseDisabled,
   isIncreaseDisabled,
   handleIncrease,
   handleDecrease,
   handleMinMaxValue,
+  handleWheel,
   commitValue,
   onInputChange,
   inputEl,
   onInputElement,
   format: effectiveFormat,
+  channel: toRef(props, "channel"),
+  colorSpace: toRef(props, "colorSpace"),
+  min: effectiveMin,
+  max: effectiveMax,
+  placeholder: toRef(props, "placeholder"),
+  disableWheelChange: toRef(props, "disableWheelChange"),
+  locale: toRef(props, "locale"),
 });
 </script>
 
@@ -291,9 +329,10 @@ provideColorFieldRootContext({
     :ref="forwardRef"
     :as="as"
     :as-child="asChild"
+    role="group"
     :dir="undefined"
     :data-disabled="disabled ? '' : undefined"
-    :data-readonly="readOnly ? '' : undefined"
+    :data-readonly="readonly ? '' : undefined"
   >
     <slot />
 

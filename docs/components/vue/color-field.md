@@ -86,6 +86,7 @@ The root container that manages field state and color channel binding.
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
 | `modelValue` | `Color \| string \| null` | — | Controlled color value (v-model). |
+| `defaultValue` | `Color \| string` | `'hsl(0, 100%, 50%)'` | Initial color when uncontrolled. |
 | `colorSpace` | `SpaceId` | `'hsl'` | Color space (e.g. `'hsl'`, `'oklch'`, `'hex'`). |
 | `channel` | `string` | `'h'` | Channel to control (e.g. `'h'`, `'s'`, `'l'`, `'hex'`). |
 | `format` | `'number' \| 'degree' \| 'percentage' \| 'hex'` | Auto | Display format. Auto-derived from channel config if omitted. |
@@ -93,13 +94,17 @@ The root container that manages field state and color channel binding.
 | `max` | `number` | Auto | Maximum value. Auto-derived from channel config. |
 | `step` | `number` | Auto | Arrow key step increment. Auto-derived from channel config. |
 | `disabled` | `boolean` | `false` | Disables interaction. |
-| `readOnly` | `boolean` | `false` | Makes the field read-only. |
+| `readonly` | `boolean` | `false` | Makes the field read-only. |
+| `placeholder` | `string` | — | Placeholder text shown when the input has no value. |
+| `disableWheelChange` | `boolean` | `false` | Disables stepping the value with the mouse wheel. |
+| `locale` | `string` | — | Locale used for parsing/formatting. Reserved for future use. |
 | `name` | `string` | — | Hidden input name for form submission. |
 | `required` | `boolean` | `false` | Marks as required for form submission. |
 
 | Event | Payload | Description |
 |-------|---------|-------------|
 | `update:modelValue` | `Color \| undefined` | Emitted when color changes. |
+| `update:color` | `Color` | Emitted when color changes. Mirrors `update:modelValue`; present for API parity. |
 | `valueCommit` | `Color` | Emitted when interaction ends (blur or Enter). |
 
 ### ColorFieldInput

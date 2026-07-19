@@ -127,4 +127,4 @@ export const WithButtons: Story = { name: "With Increment/Decrement Buttons", re
 export const WithSwatch: Story = { name: "With Swatch", render: renderField({}, { showSwatch: true }) };
 export const WithSwatchAndButtons: Story = { name: "With Swatch and Buttons", render: renderField({}, { showSwatch: true, showButtons: true }) };
 export const Disabled: Story = { name: "Disabled", render: renderField({ disabled: true }) };
-export const ReadOnly: Story = { name: "Read Only", render: renderField({ readOnly: true }) };
+export const ReadOnly: Story = { name: "Read Only", render: renderField({ readonly: true }) };

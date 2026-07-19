@@ -8,9 +8,10 @@ export interface ColorFieldInputProps extends /* @vue-ignore */ PrimitiveProps {
 </script>
 
 <script setup lang="ts">
-import { nextTick, onMounted } from "vue";
+import { computed, nextTick, onMounted, ref } from "vue";
 import { Primitive, useForwardExpose } from "reka-ui";
 import { injectColorFieldRootContext } from "./ColorFieldRoot.vue";
+import { channelLabel } from "../../shared/channel-labels";
 
 withDefaults(defineProps<ColorFieldInputProps>(), {
   as: "input",
@@ -18,6 +19,9 @@ withDefaults(defineProps<ColorFieldInputProps>(), {
 
 const rootContext = injectColorFieldRootContext();
 const { forwardRef, currentElement } = useForwardExpose();
+
+const isFocused = ref(false);
+const channelName = computed(() => channelLabel(rootContext.colorSpace.value, rootContext.channel.value));
 
 onMounted(() => {
   if (currentElement.value)
@@ -30,12 +34,14 @@ function onInput(event: Event) {
 }
 
 function onFocus(event: FocusEvent) {
+  isFocused.value = true;
   const target = event.target as HTMLInputElement;
   nextTick(() => target.select()).catch(() => {});
 }
 
 function onBlur() {
-  const parsed = rootContext.displayValue.value;
+  isFocused.value = false;
+  if (rootContext.disabled.value || rootContext.readonly.value) return;
   rootContext.commitValue(
     rootContext.modelValue.value !== undefined
       ? rootContext.modelValue.value
@@ -43,8 +49,29 @@ function onBlur() {
   );
 }
 
+function onWheel(event: WheelEvent) {
+  if (!isFocused.value)
+    return;
+  rootContext.handleWheel(event);
+}
+
+function onBeforeInput(event: InputEvent) {
+  if (rootContext.format.value === "hex")
+    return;
+  if (event.data && /[^\d.-]/.test(event.data)) {
+    event.preventDefault();
+    return;
+  }
+  const target = event.target as HTMLInputElement;
+  const next = target.value.slice(0, target.selectionStart ?? 0) + (event.data ?? "") + target.value.slice(target.selectionEnd ?? 0);
+  if (next === "" || next === "-" || next === "." || next === "-.")
+    return;
+  if (Number.isNaN(Number(next)))
+    event.preventDefault();
+}
+
 function onKeydown(event: KeyboardEvent) {
-  if (rootContext.disabled.value || rootContext.readOnly.value) return;
+  if (rootContext.disabled.value || rootContext.readonly.value) return;
 
   if (event.key === "Enter") {
     rootContext.commitValue(rootContext.modelValue.value);
@@ -88,21 +115,26 @@ function onKeydown(event: KeyboardEvent) {
     type="text"
     role="spinbutton"
     :aria-valuenow="rootContext.modelValue.value"
-    :aria-valuemin="undefined"
-    :aria-valuemax="undefined"
+    :aria-valuemin="rootContext.min.value"
+    :aria-valuemax="rootContext.max.value"
+    :aria-valuetext="rootContext.displayValue.value"
+    :aria-label="($attrs['aria-label'] as string) || channelName"
     :value="rootContext.displayValue.value"
+    :placeholder="rootContext.placeholder.value"
     :disabled="rootContext.disabled.value || undefined"
-    :readonly="rootContext.readOnly.value || undefined"
+    :readonly="rootContext.readonly.value || undefined"
     :data-disabled="rootContext.disabled.value ? '' : undefined"
-    :data-readonly="rootContext.readOnly.value ? '' : undefined"
+    :data-readonly="rootContext.readonly.value ? '' : undefined"
     autocomplete="off"
     autocorrect="off"
     spellcheck="false"
-    inputmode="text"
+    :inputmode="rootContext.format.value === 'hex' ? 'text' : 'numeric'"
     @input="onInput"
     @focus="onFocus"
     @blur="onBlur"
     @keydown="onKeydown"
+    @wheel="onWheel"
+    @beforeinput="onBeforeInput"
   >
     <slot />
   </Primitive>
