@@ -1,8 +1,8 @@
 import { Color } from "@urcolor/core";
 import { filterSupportedLocales, negotiateLocale } from "./engine/locale";
 import { getLoadedChunk, getSource, loadChunk } from "./engine/registry";
-import { lookupFull, type Candidate } from "./engine/lookup-full";
-import { lookupHue } from "./engine/lookup-hue";
+import { lookupFull, type BinMatch, type Candidate } from "./engine/lookup-full";
+import { lookupHue, type HueMatch } from "./engine/lookup-hue";
 import type { Chunk } from "./engine/types";
 
 export interface ColorNamesOptions {
@@ -10,7 +10,13 @@ export interface ColorNamesOptions {
   source: string;
   /** `"long"` gives the display name, `"short"` the matching key. */
   style?: "long" | "short";
-  /** `"none"` makes `of()` return undefined unless the bin matched exactly. */
+  /**
+   * `"none"` makes `of()` return undefined unless the bin matched exactly.
+   * Only affects full-model locales: the hue model's lookup never reports
+   * `"nearest"` coverage (see {@link HueMatch}), so there is nothing for
+   * `fallback: "none"` to filter out for the 6 hue-model locales
+   * (`ar da el hu it tr`) — it's a no-op there.
+   */
   fallback?: "nearest" | "none";
   /** Oklab search radius used when `fallback` is `"nearest"`. */
   maxDistance?: number;
@@ -27,6 +33,12 @@ export interface ColorNameResolution {
   source: string;
   coverage: "exact" | "nearest" | "none";
   binDistance: number;
+  /**
+   * Oklab distance from the query to the fully saturated colour at the same
+   * hue. Present only when `model` is `"hue"` — the full model has no notion
+   * of "the hue ring", so this is `undefined` there. See {@link HueMatch}.
+   */
+  hueProjectionDistance?: number;
 }
 
 export interface ResolvedColorNamesOptions {
@@ -56,6 +68,11 @@ function localesOf(sourceId: string): string[] {
 function oklabOf(color: Color): [number, number, number] {
   const [l, a, b] = color.to("oklab").coords;
   return [l, a, b];
+}
+
+/** `undefined` for a full-model match; the hue model always sets this field. */
+function hueProjectionDistanceOf(match: BinMatch | HueMatch): number | undefined {
+  return "hueProjectionDistance" in match ? match.hueProjectionDistance : undefined;
 }
 
 /**
@@ -141,18 +158,22 @@ export class ColorNames {
     return this.#options.style === "short" ? result.term : result.name;
   }
 
-  /** The full result, including candidates, probabilities, and coverage. */
+  /**
+   * The full result, including candidates, probabilities, and coverage.
+   *
+   * Always looks up with the full `maxDistance` — `fallback` is not a
+   * lookup-time filter, it only decides what {@link of} does with a
+   * `"nearest"` result. `resolve()` itself reports the true `coverage` and
+   * `binDistance` regardless of `fallback`, so a caller who wants to know
+   * whether a *would-be* answer exists nearby can always find out here, even
+   * when `of()` is configured to withhold it.
+   */
   resolve(color: Color): ColorNameResolution {
-    const { source, topN, maxDistance, fallback } = this.#options;
-    const effectiveMaxDistance = fallback === "none" ? 0 : maxDistance;
+    const { source, topN, maxDistance } = this.#options;
 
     const match = this.#chunk.model === "full"
-      ? lookupFull(this.#chunk, oklabOf(color), { topN, maxDistance: effectiveMaxDistance })
-      : lookupHue(this.#chunk, color, {
-          topN,
-          maxDistance: effectiveMaxDistance,
-          maxHueDistance: MAX_HUE_DISTANCE,
-        });
+      ? lookupFull(this.#chunk, oklabOf(color), { topN, maxDistance })
+      : lookupHue(this.#chunk, color, { topN, maxHueDistance: MAX_HUE_DISTANCE });
 
     const best = match.candidates[0];
     return {
@@ -164,6 +185,7 @@ export class ColorNames {
       source,
       coverage: match.coverage,
       binDistance: match.binDistance,
+      hueProjectionDistance: hueProjectionDistanceOf(match),
     };
   }
 

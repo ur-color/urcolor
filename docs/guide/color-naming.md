@@ -55,6 +55,19 @@ names.resolve(Color.parse("#3b82f6")!);
 `coverage` is the honest bit. `"exact"` means the colour fell in a bin with real
 data. `"nearest"` means the answer came from a neighbouring bin. `"none"` means
 the dataset has nothing to say — `of()` returns `undefined` rather than guessing.
+`resolve()` always reports the *true* `coverage` and `binDistance`, regardless
+of the `fallback` option — `fallback` only changes what `of()` does with a
+`"nearest"` result, so you can always tell whether a nearby answer exists even
+when `of()` is configured to withhold it.
+
+For hue-model locales (`ar da el hu it tr`), `resolve()` also returns
+`hueProjectionDistance`: the Oklab distance from the query colour to the fully
+saturated colour at the same hue. The hue model only describes that saturated
+ring, so a large value means the model has nothing meaningful to say about
+this particular colour. It's `undefined` for full-model locales. Unlike the
+full model, the hue model can't fall back to a neighbouring bin — a lookup
+either lands in a populated bin (`"exact"`) or misses (`"none"`) — so it never
+reports `"nearest"`, and `fallback: "none"` is a no-op for these 6 locales.
 
 ::: warning Achromatic extremes are unreliable
 Colours near the edges of the sampled space — very light, very dark,
@@ -77,7 +90,7 @@ near those extremes.
 | --- | --- | --- | --- |
 | `source` | source id | *required* | Which dataset answers |
 | `style` | `"long"` \| `"short"` | `"long"` | Display name vs. matching key |
-| `fallback` | `"nearest"` \| `"none"` | `"nearest"` | Whether neighbouring bins may answer |
+| `fallback` | `"nearest"` \| `"none"` | `"nearest"` | Whether neighbouring bins may answer (full-model locales only — see above) |
 | `maxDistance` | number | `0.075` | Oklab search radius for `"nearest"` |
 | `topN` | number | `5` | Candidates returned by `resolve()` |
 

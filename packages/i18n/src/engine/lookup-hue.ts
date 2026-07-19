@@ -1,7 +1,14 @@
 import { Color } from "@urcolor/core";
-import type { BinMatch, Candidate, LookupOptions } from "./lookup-full";
+import type { BinMatch, Candidate } from "./lookup-full";
 import type { HueChunk } from "./types";
 
+/**
+ * The hue model's per-lookup result. `coverage` here is always `"exact"` or
+ * `"none"` — unlike the full model, a hue-bin miss has no neighbouring bin to
+ * fall back to (there is no "nearest hue bin" search), so this never reports
+ * `"nearest"`. Consequently `fallback: "none"` (see `ColorNamesOptions`) has
+ * nothing to filter for hue-model locales — it's a no-op there.
+ */
 export interface HueMatch extends BinMatch {
   /**
    * Oklab distance from the query to the fully saturated colour at the same
@@ -11,7 +18,14 @@ export interface HueMatch extends BinMatch {
   hueProjectionDistance: number;
 }
 
-export interface HueLookupOptions extends LookupOptions {
+/**
+ * Unlike {@link LookupOptions}, there is deliberately no `maxDistance` here:
+ * the hue model can only ever land in a populated bin (`"exact"`) or miss
+ * entirely (`"none"`, gated by `maxHueDistance`), so a bin-search radius has
+ * nothing to do. See {@link HueMatch}.
+ */
+export interface HueLookupOptions {
+  topN: number;
   /** Beyond this Oklab distance from the hue ring, report no coverage. */
   maxHueDistance: number;
 }

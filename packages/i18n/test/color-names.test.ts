@@ -74,7 +74,7 @@ describe("resolve", () => {
 });
 
 describe("fallback option", () => {
-  it("returns undefined from of() on a nearest match when fallback is none", async () => {
+  it("returns undefined from of() on a nearest match when fallback is none, while resolve() still reports the true coverage", async () => {
     const nearest = await ColorNames.load("ro", { source: "uwdata", fallback: "nearest" });
     const strict = await ColorNames.load("ro", { source: "uwdata", fallback: "none" });
 
@@ -85,10 +85,20 @@ describe("fallback option", () => {
     // would let this test pass while testing nothing.
     const probe = Color.fromOklab(0.45, -0.05, -0.2);
 
-    expect(nearest.resolve(probe).coverage).toBe("nearest");
+    const nearestResult = nearest.resolve(probe);
+    expect(nearestResult.coverage).toBe("nearest");
     expect(nearest.of(probe)).toBeString();
+
+    // `fallback` only changes what of() does with a "nearest" result — it
+    // must not change what resolve() reports. Both instances differ only in
+    // `fallback`, so their resolve() output (coverage, binDistance,
+    // candidates) must be identical; only of() may diverge.
+    const strictResult = strict.resolve(probe);
+    expect(strictResult.coverage).toBe("nearest");
+    expect(strictResult.binDistance).toBe(nearestResult.binDistance);
+    expect(strictResult.binDistance).toBeLessThan(Number.POSITIVE_INFINITY);
+    expect(strictResult.candidates).toEqual(nearestResult.candidates);
     expect(strict.of(probe)).toBeUndefined();
-    expect(strict.resolve(probe).coverage).toBe("none");
   });
 });
 
@@ -97,6 +107,36 @@ describe("hue-model languages", () => {
     const names = await ColorNames.load("ar", { source: "uwdata" });
     expect(names.resolve(Color.parse("#ff0000")!).model).toBe("hue");
     expect(names.of(Color.parse("#808080")!)).toBeUndefined();
+  });
+
+  it("reports hueProjectionDistance for a real hue chunk, small for a saturated colour and large for a grey", async () => {
+    const names = await ColorNames.load("ar", { source: "uwdata" });
+
+    const vivid = names.resolve(Color.parse("#ff0000")!);
+    expect(vivid.coverage).toBe("exact");
+    expect(vivid.hueProjectionDistance).toBeDefined();
+    expect(vivid.hueProjectionDistance!).toBeLessThan(0.05);
+
+    const grey = names.resolve(Color.parse("#808080")!);
+    expect(grey.coverage).toBe("none");
+    expect(grey.hueProjectionDistance).toBeDefined();
+    expect(grey.hueProjectionDistance!).toBeGreaterThan(0.2);
+  });
+
+  it("never reports fallback: none as filtering a hue-model result, since the hue model never returns nearest", async () => {
+    const names = await ColorNames.load("ar", { source: "uwdata", fallback: "none" });
+    const vivid = Color.parse("#ff0000")!;
+
+    // A hue-model exact hit is unaffected by fallback either way.
+    expect(names.resolve(vivid).coverage).toBe("exact");
+    expect(names.of(vivid)).toBeString();
+  });
+});
+
+describe("resolve: hueProjectionDistance is absent for full-model locales", () => {
+  it("does not set hueProjectionDistance on a full-model result", async () => {
+    const names = await ColorNames.load("ko", { source: "uwdata" });
+    expect(names.resolve(BLUE).hueProjectionDistance).toBeUndefined();
   });
 });
 

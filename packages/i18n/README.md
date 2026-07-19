@@ -9,7 +9,8 @@ import { Color } from "@urcolor/core";
 const names = await ColorNames.load("ko", { source: "uwdata" });
 names.of(Color.parse("#3b82f6")!); // "파랑색"
 names.resolve(Color.parse("#3b82f6")!);
-// { name, term, probability, candidates, model, source, coverage, binDistance }
+// { name, term, probability, candidates, model, source, coverage, binDistance,
+//   hueProjectionDistance }  // only set for hue-model locales
 
 new ChannelNames("ko").of("hue"); // "색조"
 ```
@@ -45,8 +46,16 @@ Korean, and to `浅蓝色` ("light blue", 22%, `binDistance` 0.071) in Chinese.
 
 The default is intentional — most callers want *an* answer rather than
 `undefined` — but if you need to know whether an answer came from real data
-or a reach, check `coverage` and `binDistance` on `resolve()`. Pass
-`fallback: "none"` if you'd rather get `undefined` than a nearest-bin guess.
+or a reach, check `coverage` and `binDistance` on `resolve()` (which always
+reports the true values, regardless of `fallback`). Pass `fallback: "none"`
+if you'd rather get `undefined` than a nearest-bin guess.
+
+This only matters for the 14 full-model languages. The 6 hue-model ones
+(`ar da el hu it tr`) either land in a populated hue bin or report no
+coverage at all — there's no neighbouring-bin fallback for `fallback: "none"`
+to have an opinion about, so it's a no-op there. `resolve()` on a hue-model
+locale also returns `hueProjectionDistance`, the Oklab distance from the
+query to the fully saturated colour at the same hue.
 
 ## Data source and attribution
 
