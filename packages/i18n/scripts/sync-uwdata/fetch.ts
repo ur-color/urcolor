@@ -58,6 +58,26 @@ function requireKeys(record: Record<string, unknown>, keys: string[], where: str
   }
 }
 
+function requireString(value: unknown, where: string, field: string): string {
+  if (typeof value !== "string" || value.length === 0) {
+    throw new SchemaError(
+      `Upstream schema drift in ${where}: ${field} must be a non-empty string, got ${JSON.stringify(value)}.`,
+    );
+  }
+  return value;
+}
+
+function requireFinite(value: unknown, where: string, field: string): number {
+  const isUsable = typeof value === "number" || (typeof value === "string" && value.trim().length > 0);
+  const parsed = isUsable ? Number(value) : NaN;
+  if (!isUsable || !Number.isFinite(parsed)) {
+    throw new SchemaError(
+      `Upstream schema drift in ${where}: ${field} must be a finite number, got ${JSON.stringify(value)}.`,
+    );
+  }
+  return parsed;
+}
+
 export function parseFullBinned(json: string): RawFullRecord[] {
   const parsed: unknown = JSON.parse(json);
   if (!Array.isArray(parsed)) {
@@ -66,19 +86,20 @@ export function parseFullBinned(json: string): RawFullRecord[] {
 
   return parsed.map((raw, index) => {
     const record = raw as Record<string, unknown>;
+    const where = `full_color_names_binned[${index}]`;
     requireKeys(
       record,
       ["langAbv", "term", "commonTerm", "binL", "binA", "binB", "pTC"],
-      `full_color_names_binned[${index}]`,
+      where,
     );
     return {
-      langAbv: String(record.langAbv),
-      term: String(record.term),
-      commonTerm: String(record.commonTerm),
-      binL: Number(record.binL),
-      binA: Number(record.binA),
-      binB: Number(record.binB),
-      pTC: Number(record.pTC),
+      langAbv: requireString(record.langAbv, where, "langAbv"),
+      term: requireString(record.term, where, "term"),
+      commonTerm: requireString(record.commonTerm, where, "commonTerm"),
+      binL: requireFinite(record.binL, where, "binL"),
+      binA: requireFinite(record.binA, where, "binA"),
+      binB: requireFinite(record.binB, where, "binB"),
+      pTC: requireFinite(record.pTC, where, "pTC"),
     };
   });
 }
@@ -94,14 +115,19 @@ export function parseHueBinned(json: string): Record<string, Record<string, RawH
     const terms: Record<string, RawHueTerm> = {};
     for (const [term, valueRaw] of Object.entries(termsRaw as Record<string, unknown>)) {
       const value = valueRaw as Record<string, unknown>;
-      requireKeys(value, ["simplifiedName", "commonName", "bins"], `hue[${lang}][${term}]`);
+      const where = `hue[${lang}][${term}]`;
+      requireKeys(value, ["simplifiedName", "commonName", "bins"], where);
       if (!Array.isArray(value.bins)) {
-        throw new SchemaError(`Upstream schema drift in hue[${lang}][${term}]: bins is not an array.`);
+        throw new SchemaError(`Upstream schema drift in ${where}: bins is not an array.`);
       }
       terms[term] = {
-        simplifiedName: String(value.simplifiedName),
-        commonName: String(value.commonName),
-        bins: value.bins.map(bin => ({ pTC: Number((bin as Record<string, unknown>).pTC) })),
+        simplifiedName: requireString(value.simplifiedName, where, "simplifiedName"),
+        commonName: requireString(value.commonName, where, "commonName"),
+        bins: value.bins.map((bin, binIndex) => {
+          const binWhere = `${where}.bins[${binIndex}]`;
+          const binRecord = bin as Record<string, unknown>;
+          return { pTC: requireFinite(binRecord.pTC, binWhere, "pTC") };
+        }),
       };
     }
     result[lang] = terms;
@@ -140,7 +166,10 @@ function parseCsvLine(line: string): string[] {
 }
 
 export function parseBasicInfo(csv: string): RawBasicRow[] {
-  const lines = csv.split("\n").filter(line => line.trim().length > 0);
+  const lines = csv
+    .split("\n")
+    .map(line => (line.endsWith("\r") ? line.slice(0, -1) : line))
+    .filter(line => line.trim().length > 0);
   const headerLine = lines[0];
   if (headerLine === undefined) {
     throw new SchemaError("Upstream schema drift in basic_colors_info: file is empty.");
@@ -157,15 +186,21 @@ export function parseBasicInfo(csv: string): RawBasicRow[] {
   }
 
   const index = (column: string) => header.indexOf(column);
-  return lines.slice(1).map((line) => {
+  return lines.slice(1).map((line, rowIndex) => {
     const fields = parseCsvLine(line);
+    const where = `basic_colors_info[${rowIndex}]`;
+    if (fields.length !== header.length) {
+      throw new SchemaError(
+        `Upstream schema drift in ${where}: expected ${header.length} columns, got ${fields.length}.`,
+      );
+    }
     return {
-      lang_abv: fields[index("lang_abv")] ?? "",
-      commonName: fields[index("commonName")] ?? "",
-      simplifiedName: fields[index("simplifiedName")] ?? "",
-      avgFullL: Number(fields[index("avgFullL")]),
-      avgFullA: Number(fields[index("avgFullA")]),
-      avgFullB: Number(fields[index("avgFullB")]),
+      lang_abv: requireString(fields[index("lang_abv")], where, "lang_abv"),
+      commonName: requireString(fields[index("commonName")], where, "commonName"),
+      simplifiedName: requireString(fields[index("simplifiedName")], where, "simplifiedName"),
+      avgFullL: requireFinite(fields[index("avgFullL")], where, "avgFullL"),
+      avgFullA: requireFinite(fields[index("avgFullA")], where, "avgFullA"),
+      avgFullB: requireFinite(fields[index("avgFullB")], where, "avgFullB"),
     };
   });
 }
