@@ -4,7 +4,7 @@ import { getSource, listSources } from "../../src/engine/registry";
 
 describe("source registry", () => {
   it("lists the uwdata source", () => {
-    const ids = listSources().map((s) => s.id);
+    const ids = listSources().map(s => s.id);
     expect(ids).toContain("uwdata");
   });
 
