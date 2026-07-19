@@ -40,7 +40,7 @@ dispose();
 dispose(); // no-op, does not throw
 ```
 
-Without calling `registerRelativeColor()`, `Color.parse()` and `Color.tryParse()` treat relative syntax as unparseable, exactly like any other unrecognised string.
+Without calling `registerRelativeColor()`, `Color.parse()` treats relative syntax as unparseable, exactly like any other unrecognised string — it returns `null`.
 
 ## Supported notations
 
@@ -86,7 +86,7 @@ These are **parse failures**, not silent defaults — `@urcolor/relative` has no
 - **`currentcolor`** and **`inherit`** as the origin color, for the same reason — there is no cascade to resolve them against.
 - **`attr()`** (and other substitution functions) as the origin color.
 
-Every failure — an unparseable origin, an unknown channel keyword, a number/percentage type mismatch, division by zero, unbalanced parentheses, or a wrong argument count to `clamp()` — returns `null` from `Color.parse()` / `Color.tryParse()`, and `Color.parse()` throws `SyntaxError`, exactly like any other unparseable colour. There is no new error type and no silent fallback.
+Every failure — an unparseable origin, an unknown channel keyword, a number/percentage type mismatch, division by zero, unbalanced parentheses, or a wrong argument count to `clamp()` — returns `null` from `Color.parse()`, exactly like any other unparseable colour. There is no new error type and no silent fallback.
 
 `none` also deviates from the CSS spec deliberately: CSS Color 5 carries `none` through relative colors as a genuine missing component that participates in interpolation. `@urcolor/relative` has no missing-component representation — matching the rest of this library's absolute parsers, `none` in a channel slot (or in an origin channel) collapses to `0`.
 

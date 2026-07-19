@@ -53,7 +53,7 @@ dispose();
 dispose(); // no-op
 ```
 
-Before registration (or after disposal), relative syntax is simply unparseable: `Color.parse()` throws `SyntaxError` and `Color.tryParse()` returns `null`, the same as any other string core doesn't recognise.
+Before registration (or after disposal), relative syntax is simply unparseable: `Color.parse()` returns `null`, the same as any other string core doesn't recognise.
 
 ## The `from` syntax
 
@@ -149,18 +149,18 @@ Color.parse("rgb(from red r g b / calc(alpha * 0.5))"); // half the origin's alp
 `@urcolor/relative` has no stylesheet, cascade, or custom-property registry. These are **parse failures**, not silent defaults — resolve them to a concrete color before passing a string in:
 
 ```ts
-Color.tryParse("rgb(from var(--brand) r g b)");   // null — var() origin
-Color.tryParse("rgb(from currentcolor r g b)");   // null — currentcolor origin
-Color.tryParse("rgb(from inherit r g b)");        // null — inherit origin
+Color.parse("rgb(from var(--brand) r g b)");   // null — var() origin
+Color.parse("rgb(from currentcolor r g b)");   // null — currentcolor origin
+Color.parse("rgb(from inherit r g b)");        // null — inherit origin
 ```
 
-Every other error path returns `null` too, with no new error type: an unparseable origin, an unknown channel keyword, a number/percentage type mismatch (`calc(s + 10%)`), division by zero, unbalanced parentheses, or a wrong argument count to `clamp()`. `Color.parse()` throws `SyntaxError` in all of these cases, exactly as it does for any other unparseable color string:
+Every other error path returns `null` too, with no new error type: an unparseable origin, an unknown channel keyword, a number/percentage type mismatch (`calc(s + 10%)`), division by zero, unbalanced parentheses, or a wrong argument count to `clamp()`. `Color.parse()` returns `null` in all of these cases, exactly as it does for any other unparseable color string:
 
 ```ts
-Color.tryParse("rgb(from nonsense r g b)");        // null — unparseable origin
-Color.tryParse("rgb(from red r g q)");             // null — unknown channel keyword
-Color.tryParse("hsl(from red h calc(s + 10%) l)"); // null — number/percentage mismatch
-Color.tryParse("rgb(from red calc(r / 0) g b)");   // null — division by zero
+Color.parse("rgb(from nonsense r g b)");        // null — unparseable origin
+Color.parse("rgb(from red r g q)");             // null — unknown channel keyword
+Color.parse("hsl(from red h calc(s + 10%) l)"); // null — number/percentage mismatch
+Color.parse("rgb(from red calc(r / 0) g b)");   // null — division by zero
 ```
 
 `none` is also a deliberate deviation from the spec: CSS Color 5 carries `none` through relative colors as a genuine missing component that participates in interpolation. This library has no missing-component representation anywhere — matching the rest of its absolute parsers, `none` in a channel slot, or in an origin channel, collapses to `0` rather than becoming a missing component:

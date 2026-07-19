@@ -19,6 +19,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   extension point `@urcolor/relative` uses.
 - `NOTATIONS` — the CSS-unit metadata for every functional notation, exported so
   plugins share core's unit conversions rather than duplicating them.
+- `parseChannelToken` — resolve a single channel token (`"50%"`, `"none"`,
+  `"0.5turn"`) to its native storage value, using a `NotationChannel`'s percent
+  reference and unit mapping. Exported alongside the `ColorParser`,
+  `NotationChannel`, and `NotationDef` types so plugins can parse or cross-check
+  channel tokens without duplicating core's unit logic.
 
 ### Changed
 
@@ -50,6 +55,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `getChannelLabel`) are unaffected.
 - The `internationalized-color/css` side-effect import is no longer needed or
   available — the vendored registry requires no bootstrapping.
+
+### Fixed
+
+- `parseFn` now splits a functional notation's alpha at the first **depth-0**
+  `/` rather than the first `/` anywhere, so a nested origin colour carrying
+  its own alpha (e.g. `rgb(from rgb(1 2 3 / 40%) r g b / alpha)`) no longer
+  mis-splits on the origin's own `/`.
+- `tryParse` now treats a non-finite built-in parse result as a miss.
+  Previously, a syntactically well-formed call with non-numeric tokens
+  (`rgb(a b c)`) returned a colour with `NaN` coordinates instead of `null`;
+  overflow literals like `rgb(1e999 0 0)` likewise returned `Infinity` instead
+  of being rejected. Both now correctly yield `null`, and — as a side
+  effect — this is what lets a registered parser (e.g. `@urcolor/relative`)
+  see inputs that a built-in notation matched syntactically but couldn't
+  parse numerically.
 
 ### Migration
 
