@@ -8,7 +8,6 @@ export default function ColorFieldHex() {
       <ColorField.Root
         value={color}
         onValueChange={setColor}
-        colorSpace="hex"
         channel="hex"
         format="hex"
         className="

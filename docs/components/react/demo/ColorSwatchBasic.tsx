@@ -15,7 +15,7 @@ export default function ColorSwatchBasic() {
   return (
     <div className="flex items-center gap-3">
       {colors.map((color, i) => (
-        <ColorSwatch.Root
+        <ColorSwatch
           key={i}
           value={color}
           alpha
@@ -34,7 +34,7 @@ export default function ColorSwatchBasic() {
           >
             <polyline points="20 6 9 17 4 12" />
           </svg>
-        </ColorSwatch.Root>
+        </ColorSwatch>
       ))}
     </div>
   );

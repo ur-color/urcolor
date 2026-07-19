@@ -12,7 +12,6 @@ const { color } = useColor("hsl(210, 80%, 50%)");
   <div class="flex items-center gap-3">
     <ColorFieldRoot
       v-model="color"
-      color-space="hex"
       channel="hex"
       format="hex"
       class="

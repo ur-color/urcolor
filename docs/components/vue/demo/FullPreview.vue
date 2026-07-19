@@ -124,7 +124,7 @@ watch(colorSpace, () => {
   sliderOverrides.value = init;
 }, { immediate: true });
 
-const spaceKeys = Object.keys(colorSpaces);
+const spaceKeys = Object.keys(colorSpaces) as SpaceId[];
 </script>
 
 <template>
@@ -466,7 +466,6 @@ const spaceKeys = Object.keys(colorSpaces);
         >Hex</Label>
         <ColorFieldRoot
           v-model="color"
-          color-space="hex"
           channel="hex"
           format="hex"
           class="
