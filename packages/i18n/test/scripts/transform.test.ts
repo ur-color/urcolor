@@ -1,7 +1,31 @@
+import { Color } from "@urcolor/core";
 import { describe, expect, it } from "bun:test";
+import type { FullChunk } from "../../src/engine/types";
 import type { RawBasicRow, RawFullRecord, RawHueTerm } from "../../scripts/sync-uwdata/fetch";
 import { parseBasicInfo, parseFullBinned, parseHueBinned } from "../../scripts/sync-uwdata/fetch";
 import { buildFullChunk, buildHueChunk, chunkCoverage } from "../../scripts/sync-uwdata/transform";
+
+/**
+ * Independently reproduces the reachable-bin measurement that `chunkCoverage`
+ * uses as its full-model denominator, so the test pins real behaviour instead
+ * of a hardcoded magic number. Mirrors the production grid resolution (40).
+ */
+function measureReachableBinCount(binSize: number): number {
+  const n = 40;
+  const bins = new Set<string>();
+  for (let ri = 0; ri < n; ri++) {
+    for (let gi = 0; gi < n; gi++) {
+      for (let bi = 0; bi < n; bi++) {
+        const r = (ri / (n - 1)) * 255;
+        const g = (gi / (n - 1)) * 255;
+        const b = (bi / (n - 1)) * 255;
+        const [l, a, bLab] = Color.fromRgb(r, g, b).to("oklab").coords;
+        bins.add(`${Math.round(l / binSize)},${Math.round(a / binSize)},${Math.round(bLab / binSize)}`);
+      }
+    }
+  }
+  return bins.size;
+}
 
 const fixture = (name: string) => Bun.file(`${import.meta.dir}/../fixtures/uwdata/${name}`).text();
 
@@ -126,5 +150,48 @@ describe("chunkCoverage", () => {
     expect(coverage.model).toBe("hue");
     expect(coverage.terms).toBe(1);
     expect(coverage.coverage).toBeCloseTo(2 / 72, 5);
+  });
+
+  it("reports full-model coverage against the sRGB-reachable bin count, not the Oklab bounding box", () => {
+    const binSize = 0.05;
+    const reachable = measureReachableBinCount(binSize);
+    const populatedCount = 5;
+
+    const chunk: FullChunk = {
+      lang: "test",
+      model: "full",
+      binSize,
+      terms: [],
+      bins: Object.fromEntries(
+        Array.from({ length: populatedCount }, (_, i) => [`${i},0,0`, []]),
+      ),
+    };
+
+    const coverage = chunkCoverage(chunk);
+    expect(coverage.model).toBe("full");
+    expect(coverage.terms).toBe(0);
+    // The old bug divided by a rectangular Oklab slab (5120 bins at binSize
+    // 0.05); the reachable sRGB gamut is a much smaller fraction of that.
+    expect(reachable).toBeLessThan(5120);
+    expect(coverage.coverage).toBeCloseTo(populatedCount / reachable, 10);
+  });
+
+  it("clamps full-model coverage to 1 for wide-gamut data that exceeds the sRGB-reachable bin count", () => {
+    const binSize = 0.05;
+    const reachable = measureReachableBinCount(binSize);
+
+    const chunk: FullChunk = {
+      lang: "test",
+      model: "full",
+      binSize,
+      terms: [],
+      // More populated bins than the sRGB gamut can reach (simulates p3/rec2020 samples).
+      bins: Object.fromEntries(
+        Array.from({ length: reachable + 50 }, (_, i) => [`${i},0,0`, []]),
+      ),
+    };
+
+    const coverage = chunkCoverage(chunk);
+    expect(coverage.coverage).toBe(1);
   });
 });

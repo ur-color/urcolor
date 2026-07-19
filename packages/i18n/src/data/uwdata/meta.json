@@ -1,79 +1,79 @@
 {
   "source": "uwdata",
   "commitSha": "f0d3e30db9e4b2c3b703bde0d816043eb48a6cb5",
-  "generatedAt": "2026-07-19T14:23:25.511Z",
+  "generatedAt": "2026-07-19T14:58:08.061Z",
   "binSize": 0.05,
   "hueBinCount": 72,
   "languages": {
     "zh": {
       "model": "full",
       "terms": 90,
-      "coverage": 0.1037109375
+      "coverage": 0.7344398340248963
     },
     "nl": {
       "model": "full",
       "terms": 22,
-      "coverage": 0.02265625
+      "coverage": 0.16044260027662519
     },
     "en": {
       "model": "full",
       "terms": 561,
-      "coverage": 0.135546875
+      "coverage": 0.9598893499308437
     },
     "fi": {
       "model": "full",
       "terms": 11,
-      "coverage": 0.00859375
+      "coverage": 0.06085753803596127
     },
     "fr": {
       "model": "full",
       "terms": 47,
-      "coverage": 0.0578125
+      "coverage": 0.4094052558782849
     },
     "de": {
       "model": "full",
       "terms": 49,
-      "coverage": 0.07578125
+      "coverage": 0.5366528354080221
     },
     "ko": {
       "model": "full",
       "terms": 139,
-      "coverage": 0.11796875
+      "coverage": 0.8354080221300139
     },
     "fa": {
       "model": "full",
       "terms": 44,
-      "coverage": 0.0548828125
+      "coverage": 0.38865836791147995
     },
     "pl": {
       "model": "full",
       "terms": 19,
-      "coverage": 0.0193359375
+      "coverage": 0.13692946058091288
     },
     "pt": {
       "model": "full",
       "terms": 28,
-      "coverage": 0.027734375
+      "coverage": 0.19640387275242047
     },
     "ro": {
       "model": "full",
       "terms": 4,
-      "coverage": 0.00625
+      "coverage": 0.04426002766251729
     },
     "ru": {
       "model": "full",
       "terms": 35,
-      "coverage": 0.030859375
+      "coverage": 0.21853388658367912
     },
     "es": {
       "model": "full",
       "terms": 51,
-      "coverage": 0.0828125
+      "coverage": 0.5864453665283541
     },
     "sv": {
       "model": "full",
       "terms": 16,
-      "coverage": 0.0130859375
+      "coverage": 0.09266943291839558
     },
     "ar": {
       "model": "hue",
