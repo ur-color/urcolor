@@ -1,10 +1,18 @@
 import { UWDATA_COMMIT } from "../../src/sources/uwdata/source";
 
-/** Raised when upstream's shape no longer matches what the transform expects. */
+/**
+ * Raised when upstream's shape no longer matches what the transform expects,
+ * or when a download itself fails. `status` is set only for HTTP failures
+ * (see {@link download}), letting callers distinguish "legitimately absent"
+ * (404) from real problems (network errors, 5xx, schema drift).
+ */
 export class SchemaError extends Error {
-  constructor(message: string) {
+  readonly status?: number;
+
+  constructor(message: string, status?: number) {
     super(message);
     this.name = "SchemaError";
+    this.status = status;
   }
 }
 
@@ -43,7 +51,7 @@ export async function download(path: string): Promise<string> {
   const url = upstreamUrl(path);
   const response = await fetch(url);
   if (!response.ok) {
-    throw new SchemaError(`Failed to download ${url}: HTTP ${response.status}`);
+    throw new SchemaError(`Failed to download ${url}: HTTP ${response.status}`, response.status);
   }
   return response.text();
 }

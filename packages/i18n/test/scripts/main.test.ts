@@ -1,6 +1,11 @@
 import { describe, expect, it } from "bun:test";
-import { parseBasicInfo, parseFullBinned, parseHueBinned } from "../../scripts/sync-uwdata/fetch";
-import { buildOutput, renderChunkModule, renderManifest } from "../../scripts/sync-uwdata/main";
+import { parseBasicInfo, parseFullBinned, parseHueBinned, SchemaError } from "../../scripts/sync-uwdata/fetch";
+import {
+  buildOutput,
+  isMissingUpstreamFile,
+  renderChunkModule,
+  renderManifest,
+} from "../../scripts/sync-uwdata/main";
 
 const fixture = (name: string) => Bun.file(`${import.meta.dir}/../fixtures/uwdata/${name}`).text();
 
@@ -61,5 +66,37 @@ describe("renderManifest", () => {
     const source = renderManifest(["ko", "ar"]);
     expect(source).toContain("\"ko\": () => import(\"../../data/uwdata/ko.js\")");
     expect(source).toContain("\"ar\": () => import(\"../../data/uwdata/ar.js\")");
+  });
+
+  it("asserts each loader's resolved type, since allowJs inference of the", () => {
+    // generated .js chunks widens literal/tuple types and would otherwise
+    // fail to type-check against ChunkLoaders (see Chunk in engine/types).
+    const source = renderManifest(["ko"]);
+    expect(source).toContain(
+      "\"ko\": () => import(\"../../data/uwdata/ko.js\") as unknown as Promise<{ default: Chunk }>,",
+    );
+    expect(source).toContain("import type { Chunk, ChunkLoaders } from \"../../engine/types\";");
+  });
+});
+
+describe("isMissingUpstreamFile", () => {
+  it("is true for a SchemaError with a 404 status", () => {
+    expect(isMissingUpstreamFile(new SchemaError("not found", 404))).toBe(true);
+  });
+
+  it("is false for a SchemaError with a non-404 status", () => {
+    expect(isMissingUpstreamFile(new SchemaError("server error", 500))).toBe(false);
+  });
+
+  it("is false for a SchemaError with no status (schema drift, not HTTP)", () => {
+    expect(isMissingUpstreamFile(new SchemaError("missing column"))).toBe(false);
+  });
+
+  it("is false for a non-SchemaError error", () => {
+    expect(isMissingUpstreamFile(new TypeError("network error"))).toBe(false);
+  });
+
+  it("is false for a non-error thrown value", () => {
+    expect(isMissingUpstreamFile("nope")).toBe(false);
   });
 });

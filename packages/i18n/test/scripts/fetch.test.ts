@@ -213,3 +213,15 @@ describe("upstreamUrl", () => {
     );
   });
 });
+
+describe("SchemaError", () => {
+  it("carries the HTTP status when given one", () => {
+    const error = new SchemaError("Failed to download x: HTTP 404", 404);
+    expect(error.status).toBe(404);
+  });
+
+  it("leaves status undefined for schema-drift errors", () => {
+    const error = new SchemaError("missing column");
+    expect(error.status).toBeUndefined();
+  });
+});
