@@ -32,9 +32,13 @@ export interface ColorAreaRootProps extends /* @vue-ignore */ PrimitiveProps {
   /** The color space mode to work in (e.g. 'hsl', 'oklch'). */
   colorSpace?: SpaceId;
   /** Which channel maps to the X axis (e.g. 's' for HSL saturation, or 'alpha' for opacity). */
-  channelX?: string;
+  xChannel?: string;
   /** Which channel maps to the Y axis (e.g. 'l' for HSL lightness, or 'alpha' for opacity). */
-  channelY?: string;
+  yChannel?: string;
+  /** The name of the hidden input carrying the raw X channel value for form submission. */
+  xName?: string;
+  /** The name of the hidden input carrying the raw Y channel value for form submission. */
+  yName?: string;
   /** The minimum permitted steps between multiple thumbs on the X axis. */
   minXStepsBetweenThumbs?: number;
   /** The minimum permitted steps between multiple thumbs on the Y axis. */
@@ -51,8 +55,12 @@ export interface ColorAreaRootProps extends /* @vue-ignore */ PrimitiveProps {
 export type ColorAreaRootEmits = {
   /** Event handler called when the color value changes */
   "update:modelValue": [payload: Color | undefined];
+  /** Event handler called when the color value changes. Mirrors `update:modelValue`; present for API parity. */
+  "update:color": [payload: Color];
+  /** Event handler called on every value change, including mid-drag. */
+  "change": [payload: Color];
   /** Event handler called when the value changes at the end of an interaction. */
-  "valueCommit": [payload: Color];
+  "changeEnd": [payload: Color];
 };
 
 export interface ColorAreaRootContext {
@@ -126,8 +134,8 @@ const ALPHA_CONFIG: ChannelConfig = {
 
 // Resolve default xChannel/yChannel from colorSpace
 const spaceConfig = computed(() => colorSpaces[props.colorSpace]);
-const xChannelKey = computed(() => props.channelX ?? spaceConfig.value?.channels[0]?.key ?? "h");
-const yChannelKey = computed(() => props.channelY ?? spaceConfig.value?.channels[1]?.key ?? "s");
+const xChannelKey = computed(() => props.xChannel ?? spaceConfig.value?.channels[0]?.key ?? "h");
+const yChannelKey = computed(() => props.yChannel ?? spaceConfig.value?.channels[1]?.key ?? "s");
 const xIsAlpha = computed(() => xChannelKey.value === "alpha");
 const yIsAlpha = computed(() => yChannelKey.value === "alpha");
 const xConfig = computed(() => xIsAlpha.value ? ALPHA_CONFIG : getChannelConfig(props.colorSpace, xChannelKey.value));
@@ -265,7 +273,7 @@ function handleSlideEnd() {
   const nextValue = currentModelValue.value[valueIndexToChangeRef.value];
   const hasChanged = prevValue?.[0] !== nextValue?.[0] || prevValue?.[1] !== nextValue?.[1];
   if (hasChanged && colorRef.value)
-    emits("valueCommit", colorRef.value);
+    emits("changeEnd", colorRef.value);
 }
 
 const minXStepsBetweenThumbs = computed(() => props.minXStepsBetweenThumbs);
@@ -305,7 +313,9 @@ function updateValues(point: number[], atIndex: number, { commit = false, skipFo
     if (newColor) {
       colorRef.value = newColor;
       emits("update:modelValue", newColor);
-      if (commit) emits("valueCommit", newColor);
+      emits("update:color", newColor);
+      emits("change", newColor);
+      if (commit) emits("changeEnd", newColor);
     }
   }
 }
@@ -396,7 +406,8 @@ provideColorAreaRootContext({
       :as-child="asChild"
       :as="as"
       :dir="dir"
-      :aria-disabled="disabled"
+      role="group"
+      :aria-disabled="disabled || undefined"
       :data-disabled="disabled ? '' : undefined"
       :style="{
         ['--reka-slider-area-thumb-transform' as any]: `translate(${!isSlidingFromLeft && thumbAlignment === 'overflow' ? '50%' : '-50%'}, ${!isSlidingFromTop && thumbAlignment === 'overflow' ? '50%' : '-50%'})`,
@@ -445,6 +456,24 @@ provideColorAreaRootContext({
         :value="colorRef?.toString() ?? ''"
         :name="name"
         :required="required"
+        :disabled="disabled"
+      />
+
+      <VisuallyHidden
+        v-if="isFormControl && xName"
+        as="input"
+        type="text"
+        :value="currentModelValue[0]?.[0] ?? ''"
+        :name="xName"
+        :disabled="disabled"
+      />
+
+      <VisuallyHidden
+        v-if="isFormControl && yName"
+        as="input"
+        type="text"
+        :value="currentModelValue[0]?.[1] ?? ''"
+        :name="yName"
         :disabled="disabled"
       />
     </Primitive>

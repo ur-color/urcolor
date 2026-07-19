@@ -14,24 +14,26 @@ const ColorArea = defineComponent({
     disabled: { type: Boolean, default: false },
     invertedX: { type: Boolean, default: false },
     invertedY: { type: Boolean, default: false },
+    yChannel: { type: String, default: "s" },
   },
-  emits: ["update:modelValue", "valueCommit"],
+  emits: ["update:modelValue", "update:color", "change", "changeEnd"],
   setup(props, { emit }) {
     return () =>
       h(ColorAreaRoot, {
         "defaultValue": "hsl(180, 50%, 50%)",
         "colorSpace": "hsl",
         "xChannel": "h",
-        "yChannel": "s",
+        "yChannel": props.yChannel,
         "disabled": props.disabled,
         "invertedX": props.invertedX,
         "invertedY": props.invertedY,
         "name": "slider-area",
         "onUpdate:modelValue": (v: Color | undefined) => emit("update:modelValue", v),
-        "onValueCommit": (v: Color) => emit("valueCommit", v),
+        "onUpdate:color": (v: Color) => emit("update:color", v),
+        "onChange": (v: Color) => emit("change", v),
+        "onChangeEnd": (v: Color) => emit("changeEnd", v),
       }, {
-        default: () =>
-          h(ColorAreaThumb),
+        default: () => h(ColorAreaThumb),
       });
   },
 });
@@ -76,6 +78,31 @@ describe("given default ColorArea", () => {
   it("should have tabindex 0 on the thumb when enabled", () => {
     const thumb = wrapper.find("[role=\"slider\"]");
     expect(thumb.attributes("tabindex")).toBe("0");
+  });
+
+  it("should not render aria-disabled when enabled", () => {
+    const root = wrapper.find("[role=\"group\"]");
+    expect(root.exists()).toBe(true);
+    expect(root.attributes("aria-disabled")).toBeUndefined();
+  });
+
+  it("should emit change and changeEnd alongside update:modelValue on a keyboard step", async () => {
+    const slider = wrapper.find("[role=\"slider\"]");
+    await slider.trigger("keydown", { key: "ArrowRight" });
+    expect(wrapper.emitted("update:modelValue")).toHaveLength(1);
+    expect(wrapper.emitted("change")).toHaveLength(1);
+    expect(wrapper.emitted("changeEnd")).toHaveLength(1);
+  });
+
+  it("should respect a non-default yChannel", async () => {
+    const local = mount(ColorArea, { props: { yChannel: "l" }, attachTo: document.body });
+    const slider = local.find("[role=\"slider\"]");
+    await slider.trigger("keydown", { key: "ArrowDown" });
+    const emitted = local.emitted("update:modelValue")?.[0]?.[0] as Color;
+    const hsl = emitted.to("hsl");
+    // lightness moved, saturation did not
+    expect(Math.round(hsl.get("l") * 100)).toBe(51);
+    expect(Math.round(hsl.get("s") * 100)).toBe(50);
   });
 
   describe("when disabled", () => {
