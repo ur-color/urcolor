@@ -59,7 +59,15 @@ export function tryParse(input: string): ColorObject | null {
     if (result) return result;
   }
   for (const p of registered) {
-    const result = p(input);
+    // Registered parsers are third-party code, unlike the built-ins above.
+    // A throwing plugin must not break parsing for every other notation, so
+    // treat a throw as a miss and keep consulting the remaining parsers.
+    let result: ColorObject | null;
+    try {
+      result = p(input);
+    } catch {
+      continue;
+    }
     if (result) return result;
   }
   return null;
