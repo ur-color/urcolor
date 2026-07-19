@@ -61,4 +61,27 @@ describe("Color#with", () => {
     expect(a.space).toBe("hsl");
     expect(a.get("l")).toBeCloseTo(0.5, 6);
   });
+
+  it("keeps alpha: 0 (falsy but valid)", () => {
+    const c = Color.from("hsl(210 80% 50%)").with({ alpha: 0 });
+    expect(c.alpha).toBe(0);
+  });
+
+  it("skips an explicit undefined channel value, leaving it unchanged", () => {
+    const c = Color.from("hsl(210 80% 50%)").with({ l: undefined });
+    expect(c.get("l")).toBeCloseTo(0.5, 6);
+  });
+
+  it("is a no-op for an empty patch", () => {
+    const a = Color.from("hsl(210 80% 50%)");
+    const b = a.with({});
+    expect(b.equals(a)).toBe(true);
+  });
+
+  it("throws TypeError when a non-number reaches a channel slot", () => {
+    // The `ColorPatch` type admits `SpaceId` strings so `space` can coexist
+    // with the index signature; this pins the runtime guard that rejects
+    // that string when it lands on a channel instead of `space`/`alpha`.
+    expect(() => Color.from("hsl(210 80% 50%)").with({ h: "hsv" })).toThrow(TypeError);
+  });
 });

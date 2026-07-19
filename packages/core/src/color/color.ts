@@ -152,7 +152,10 @@ export class Color {
       if (key === "space" || key === "alpha" || value === undefined) continue;
       const i = channels.indexOf(key);
       if (i < 0) throw new RangeError(`No channel "${key}" in ${target}`);
-      coords[i] = value as number;
+      if (typeof value !== "number") {
+        throw new TypeError(`Channel "${key}" must be a number, got ${JSON.stringify(value)}`);
+      }
+      coords[i] = value;
     }
     return new Color(target, coords, patch.alpha ?? base.alpha);
   }
