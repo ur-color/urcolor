@@ -74,6 +74,37 @@ describe("ColorField", () => {
     });
   }
 
+  // Mounts ColorFieldRoot directly with a caller-chosen `as` on
+  // ColorFieldInput (e.g. "span"). Needed to genuinely exercise the
+  // disabled/readonly JS guards: with the default as="input",
+  // @vue/test-utils' own trigger()/setValue() silently no-op for *any*
+  // event aimed at an element carrying the `disabled` attribute when that
+  // element's tag is on test-utils' own "disableable" list (INPUT among
+  // them — see DOMWrapper#isDisabled upstream). That check runs before the
+  // event ever reaches this component's code, so a disabled-branch test
+  // built on the default as="input" can never go red no matter what the
+  // application code does. A <span> isn't on that list, so the event
+  // genuinely dispatches and reaches the component's own guard.
+  function mountFieldWithInputAs(inputAs: string, rootProps: Record<string, any> = {}) {
+    const Wrapper = defineComponent({
+      emits: ["update:modelValue", "valueCommit"],
+      setup(_props, { emit }) {
+        return () =>
+          h(ColorFieldRoot, {
+            "modelValue": defaultColor,
+            "colorSpace": "hsl",
+            "channel": "h",
+            ...rootProps,
+            "onUpdate:modelValue": (v: Color | undefined) => emit("update:modelValue", v),
+            "onValueCommit": (v: Color) => emit("valueCommit", v),
+          }, {
+            default: () => h(ColorFieldInput, { as: inputAs }),
+          });
+      },
+    });
+    return mount(Wrapper, { attachTo: document.body });
+  }
+
   beforeEach(() => {
     document.body.innerHTML = "";
   });
@@ -169,6 +200,21 @@ describe("ColorField", () => {
     it("should disable decrement button", () => {
       wrapper = mountField({ disabled: true });
       expect(wrapper.find("[aria-label=\"Decrease\"]").attributes("disabled")).toBeDefined();
+    });
+
+    it("should not commit via typing", async () => {
+      // Regression test: onInputChange (the ColorFieldRoot context method
+      // ColorFieldInput's @input handler calls) had no disabled/readonly
+      // check of its own. Mounted with as="span" (see
+      // mountFieldWithInputAs) so the dispatch isn't swallowed by
+      // @vue/test-utils' own disabled-element handling before reaching the
+      // guard under test. Before the fix, setting `.value` and firing
+      // `input` still emitted update:modelValue with the typed value.
+      const local = mountFieldWithInputAs("span", { disabled: true });
+      const input = local.find("[role=\"spinbutton\"]");
+      (input.element as HTMLElement & { value?: string }).value = "200";
+      await input.trigger("input");
+      expect(local.emitted("update:modelValue")).toBeFalsy();
     });
   });
 
@@ -307,14 +353,40 @@ describe("ColorField", () => {
     });
 
     it("should ignore the wheel when disabled", async () => {
-      const local = mountField({ disabled: true });
-      const input = local.find("input");
+      // Mounted with as="span" (see mountFieldWithInputAs): with the
+      // default as="input", @vue/test-utils' own trigger() no-ops for any
+      // event — wheel included — dispatched at an element carrying the
+      // `disabled` attribute, before the event ever reaches handleWheel.
+      // That made the equivalent test unfalsifiable through any
+      // application-code change. A <span> isn't on test-utils' own
+      // disableable-tag list, so the event genuinely dispatches here.
+      //
+      // This still doesn't isolate handleWheel's own disabled guard in
+      // particular: handleWheel forwards to handleIncrease/handleDecrease,
+      // which carry their own independent disabled checks, so this test
+      // only proves the combination of guards blocks the wheel-driven
+      // commit — the same caveat that applies to the readonly wheel test
+      // below. It goes red only if the disabled check is removed from
+      // handleWheel *and* handleIncrease *and* handleDecrease at once.
+      const local = mountFieldWithInputAs("span", { disabled: true });
+      const input = local.find("[role=\"spinbutton\"]");
       await input.trigger("focus");
       await input.trigger("wheel", { deltaY: -1 });
       expect(local.emitted("update:modelValue")).toBeFalsy();
     });
 
     it("should ignore the wheel when readonly", async () => {
+      // Unlike the disabled case above, readonly doesn't trip
+      // @vue/test-utils' isDisabled() short-circuit, so this test reaches
+      // handleWheel even with the default as="input". It still can't
+      // isolate handleWheel's own readonly guard from handleIncrease's and
+      // handleDecrease's, though: handleWheel delegates to whichever of
+      // those two fires, and both independently no-op when readonly. This
+      // test only goes red if the readonly check is removed from all three
+      // functions simultaneously — it does not pin handleWheel's guard on
+      // its own. There is no mounting strategy that isolates it further
+      // without restructuring the guards themselves, which is out of scope
+      // here.
       const local = mountField({ readonly: true });
       const input = local.find("input");
       await input.trigger("focus");
@@ -405,6 +477,23 @@ describe("ColorField", () => {
       await input.trigger("focus");
       await input.trigger("wheel", { deltaY: -1 });
       expect(wrapper.emitted("valueCommit")).toBeFalsy();
+    });
+
+    it("should not commit via typing", async () => {
+      // Regression test: onInputChange (the ColorFieldRoot context method
+      // that ColorFieldInput's @input handler calls) had no readonly check
+      // of its own — unlike every other commit path here. setValue() sets
+      // `.value` and dispatches a real `input` event, exactly what
+      // ColorFieldInput listens for; this reaches the guard even with the
+      // default as="input" because readonly (unlike disabled) doesn't trip
+      // @vue/test-utils' isDisabled() short-circuit. Before the fix this
+      // emitted update:modelValue with the typed value despite
+      // readonly:true. onInputChange never emits valueCommit (only
+      // commitValue does, via Enter/blur/wheel/etc.), so the assertion here
+      // is on update:modelValue, matching what this path actually emits.
+      const input = wrapper.find("input");
+      await input.setValue("200");
+      expect(wrapper.emitted("update:modelValue")).toBeFalsy();
     });
 
     it("should have the readonly attribute on the input", () => {

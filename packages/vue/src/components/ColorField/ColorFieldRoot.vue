@@ -237,6 +237,7 @@ function commitValue(val: number | undefined) {
 }
 
 function onInputChange(text: string) {
+  if (props.disabled || props.readonly) return;
   displayValue.value = text;
   const parsed = parseValue(text);
   if (parsed !== undefined && !Number.isNaN(parsed)) {
