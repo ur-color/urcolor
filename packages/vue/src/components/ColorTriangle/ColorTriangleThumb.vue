@@ -11,10 +11,8 @@ export interface ColorTriangleThumbProps extends /* @vue-ignore */ PrimitiveProp
 import { computed, onMounted } from "vue";
 import { Primitive, useForwardExpose } from "reka-ui";
 import { barycentricToCartesian, insetTriangle } from "@urcolor/core";
+import { channelLabel, formatChannelValue } from "../../shared/channel-labels";
 import { injectColorTriangleRootContext } from "./ColorTriangleRoot.vue";
-import ColorTriangleThumbX from "./ColorTriangleThumbX.vue";
-import ColorTriangleThumbY from "./ColorTriangleThumbY.vue";
-import ColorTriangleThumbZ from "./ColorTriangleThumbZ.vue";
 
 withDefaults(defineProps<ColorTriangleThumbProps>(), { as: "span" });
 
@@ -82,13 +80,41 @@ const thumbPosition = computed(() => {
     top: `${pos.y * 100}%`,
   };
 });
+
+const space = computed(() => rootContext.colorSpace.value);
+const labels = computed(() => {
+  const base = [
+    channelLabel(space.value, rootContext.xChannelKey.value),
+    channelLabel(space.value, rootContext.yChannelKey.value),
+  ];
+  if (rootContext.isThreeChannel.value)
+    base.push(channelLabel(space.value, rootContext.zChannelKey.value ?? ""));
+  return base;
+});
+const ariaLabel = computed(() => labels.value.join(", "));
+const ariaValueText = computed(() => {
+  const parts = [
+    `${labels.value[0]} ${formatChannelValue(space.value, rootContext.xChannelKey.value, rootContext.currentXValue.value)}`,
+    `${labels.value[1]} ${formatChannelValue(space.value, rootContext.yChannelKey.value, rootContext.currentYValue.value)}`,
+  ];
+  if (rootContext.isThreeChannel.value)
+    parts.push(`${labels.value[2]} ${formatChannelValue(space.value, rootContext.zChannelKey.value ?? "", rootContext.currentZValue.value)}`);
+  return parts.join(", ");
+});
 </script>
 
 <template>
   <Primitive
     :ref="forwardRef"
-    aria-roledescription="2D slider"
-    :aria-disabled="rootContext.disabled.value"
+    role="slider"
+    :tabindex="rootContext.disabled.value ? undefined : 0"
+    :aria-label="($attrs['aria-label'] as string) || ariaLabel"
+    :aria-valuenow="rootContext.currentXValue.value"
+    :aria-valuemin="rootContext.xMin.value"
+    :aria-valuemax="rootContext.xMax.value"
+    :aria-valuetext="ariaValueText"
+    aria-roledescription="Color thumb"
+    :aria-disabled="rootContext.disabled.value || undefined"
     :data-disabled="rootContext.disabled.value ? '' : undefined"
     :as-child="asChild"
     :as="as"
@@ -99,9 +125,6 @@ const thumbPosition = computed(() => {
       transform: 'translate(-50%, -50%)',
     }"
   >
-    <ColorTriangleThumbX />
-    <ColorTriangleThumbY />
-    <ColorTriangleThumbZ v-if="rootContext.isThreeChannel.value" />
     <slot />
   </Primitive>
 </template>

@@ -14,8 +14,8 @@ const { color, hex } = useColor("hsl(210, 80%, 50%)");
   <ColorTriangleRoot
     v-model="color"
     color-space="hsv"
-    channel-x="s"
-    channel-y="v"
+    x-channel="s"
+    y-channel="v"
     class="relative block size-64"
   >
     <ColorTriangleGradient class="absolute inset-0 block" />

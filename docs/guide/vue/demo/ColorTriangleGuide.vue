@@ -13,8 +13,8 @@ const { color } = useColor("hsl(210, 80%, 50%)");
   <ColorTriangleRoot
     v-model="color"
     color-space="hsv"
-    channel-x="s"
-    channel-y="v"
+    x-channel="s"
+    y-channel="v"
     as="div"
     class="relative block size-64"
   >

@@ -42,9 +42,6 @@ import {
   ColorTriangleGradient,
   ColorTriangleCheckerboard,
   ColorTriangleThumb,
-  ColorTriangleThumbX,
-  ColorTriangleThumbY,
-  ColorTriangleThumbZ,
 } from "../components/ColorTriangle";
 
 export const ColorArea = {
@@ -100,7 +97,4 @@ export const ColorTriangle = {
   Gradient: ColorTriangleGradient,
   Checkerboard: ColorTriangleCheckerboard,
   Thumb: ColorTriangleThumb,
-  ThumbX: ColorTriangleThumbX,
-  ThumbY: ColorTriangleThumbY,
-  ThumbZ: ColorTriangleThumbZ,
 };
