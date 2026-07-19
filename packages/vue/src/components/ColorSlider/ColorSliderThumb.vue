@@ -1,7 +1,10 @@
 <script lang="ts">
 import type { SliderThumbProps } from "reka-ui";
 
-export interface ColorSliderThumbProps extends /* @vue-ignore */ SliderThumbProps {}
+export interface ColorSliderThumbProps extends /* @vue-ignore */ SliderThumbProps {
+  as?: string;
+  asChild?: boolean;
+}
 </script>
 
 <script setup lang="ts">

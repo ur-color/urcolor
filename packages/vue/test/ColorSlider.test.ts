@@ -213,6 +213,46 @@ describe("given a ColorSlider used with as/asChild", () => {
   });
 });
 
+describe("given a ColorSliderThumb used with as/asChild", () => {
+  // ColorSliderThumbProps used to extend SliderThumbProps with an empty
+  // body (`extends /* @vue-ignore */ SliderThumbProps {}`). Because the
+  // `@vue-ignore` comment blinds Vue's compiler to the extended type, that
+  // shape compiles `defineProps<ColorSliderThumbProps>()` down to a
+  // component with NO runtime `props` field at all — so `as`/`asChild`
+  // were type-level-only, not real Vue props. `wrapper.props()` below
+  // (which reflects the component's actual declared props, not just its
+  // TS type) would have returned `{}` under that shape, regardless of what
+  // was passed to the component.
+  function mountThumb(thumbProps: Record<string, unknown> = {}) {
+    return mount(defineComponent({
+      setup() {
+        return () =>
+          h(ColorSliderRoot, {
+            defaultValue: "hsl(180, 50%, 50%)",
+            colorSpace: "hsl",
+            channel: "h",
+          }, { default: () => h(ColorSliderTrack, null, { default: () => h(ColorSliderThumb, thumbProps) }) });
+      },
+    }));
+  }
+
+  it("should declare `as`/`asChild` as real runtime props, not just type-level members", () => {
+    const wrapper = mountThumb();
+    const thumb = wrapper.findComponent(ColorSliderThumb);
+    expect(Object.keys(thumb.props())).toEqual(expect.arrayContaining(["as", "asChild"]));
+  });
+
+  it("should render <span> by default via ColorSliderThumbProps' own withDefaults", () => {
+    const wrapper = mountThumb();
+    expect(wrapper.find("[role=\"slider\"]").element.tagName).toBe("SPAN");
+  });
+
+  it("should render the tag passed via `as`", () => {
+    const wrapper = mountThumb({ as: "button" });
+    expect(wrapper.find("[role=\"slider\"]").element.tagName).toBe("BUTTON");
+  });
+});
+
 describe("given a ColorSlider with a dragging probe", () => {
   let wrapper: VueWrapper;
 

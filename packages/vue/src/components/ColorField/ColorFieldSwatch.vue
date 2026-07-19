@@ -1,7 +1,17 @@
 <script lang="ts">
+import type { Color } from "@urcolor/core";
 import type { ColorSwatchRootProps } from "../ColorSwatch/ColorSwatchRoot.vue";
 
-export interface ColorFieldSwatchProps extends /* @vue-ignore */ ColorSwatchRootProps {}
+export interface ColorFieldSwatchProps extends /* @vue-ignore */ ColorSwatchRootProps {
+  as?: string;
+  asChild?: boolean;
+  /** The color value to display. */
+  modelValue?: Color | string | null;
+  /** The checkerboard size in pixels. */
+  checkerSize?: number;
+  /** When true, reflects the color's alpha channel. When false, displays the color as fully opaque. */
+  alpha?: boolean;
+}
 </script>
 
 <script setup lang="ts">
