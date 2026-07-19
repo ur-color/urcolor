@@ -1,11 +1,11 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Color } from "@urcolor/core";
 
 export type ColorInput = Color | string | null | undefined;
 
 export interface UseColorReturn {
   color: Color;
-  setColor: (color: Color) => void;
+  setColor: (color: Color | ((prev: Color) => Color)) => void;
   hex: string;
   setHex: (hex: string) => void;
   alpha: number;
@@ -22,6 +22,18 @@ export function parseColor(input: ColorInput): Color {
 
 export function useColor(input: ColorInput): UseColorReturn {
   const [color, setColor] = useState<Color>(() => parseColor(input));
+
+  // Resync when `input` changes, mirroring Vue's `watch(() => toValue(input), ...)`.
+  // Skips the initial mount (the `useState` initializer already covers it) so this
+  // never fires on mount and never fights an in-flight user edit unless `input` itself changes.
+  const isFirstRender = useRef(true);
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+    setColor(parseColor(input));
+  }, [input]);
 
   const hex = useMemo(() => color.toString("hex"), [color]);
 

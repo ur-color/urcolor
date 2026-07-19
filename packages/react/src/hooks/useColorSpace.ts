@@ -30,7 +30,7 @@ export function useColorSpace(input: ColorInput, spaceName: SpaceId) {
       const capitalizedKey = ch.key.charAt(0).toUpperCase() + ch.key.slice(1);
       result[`set${capitalizedKey}`] = (value: number) => {
         const nativeVal = displayToNative(ch, value);
-        setColor(color.with({
+        setColor(prev => prev.with({
           space: spaceConfig.space,
           [ch.key]: nativeVal,
         }));
