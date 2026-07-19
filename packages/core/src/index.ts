@@ -1,6 +1,8 @@
 // Color library (vendored; zero dependencies).
 export { Color, type ColorPatch } from "./color/color";
-export { parse, tryParse } from "./color/parse";
+export { parse, tryParse, registerParser, type ColorParser } from "./color/parse";
+export { NOTATIONS, type NotationChannel, type NotationDef } from "./color/notations";
+export { parseChannelToken } from "./color/components";
 export { serialize, type ColorFormat } from "./color/serialize";
 export { convert } from "./color/convert";
 export { gamutMap, inGamut } from "./color/gamut";
