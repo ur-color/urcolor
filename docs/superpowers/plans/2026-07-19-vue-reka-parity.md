@@ -22,6 +22,8 @@
 - `packages/react` is out of scope. Do not edit it.
 - Package manager is Bun. Run tests with `bun test`, never `npm`/`vitest`.
 - Run from repo root: `bun test`, `bun run lint`, `bun run docs:build`.
+- **Baseline at branch base (measured 2026-07-19):** `bun test` → 484 pass, 5 todo, 0 fail. `vue-tsc --noEmit` → exactly 2 errors, both `packages/core/test/geometry.test.ts(218)` `TS18048: 'inset' is possibly 'undefined'`. `bun run lint` eslint → ~182 pre-existing errors, all style rules.
+- **Gate:** no new failures and no new vue-tsc errors versus that baseline. Those 2 core errors are out of scope — do not fix them. eslint deltas are advisory: log any new ones to the ledger rather than blocking on the pre-existing 182.
 - Commit after every task. Conventional Commits. Body explains why, not what.
 
 ---
@@ -1596,12 +1598,6 @@ describe("given default ColorSlider", () => {
     expect(wrapper.find("[role=\"slider\"]").attributes("aria-valuenow")).toBe("180");
   });
 
-  it("should label the thumb with the channel name", () => {
-    const thumb = wrapper.find("[role=\"slider\"]");
-    expect(thumb.attributes("aria-label")).toBe("Hue");
-    expect(thumb.attributes("aria-valuetext")).toBe("180°");
-  });
-
   it("should emit change and changeEnd on a keyboard step", async () => {
     await wrapper.find("[role=\"slider\"]").trigger("keydown", { key: "ArrowRight" });
     expect(wrapper.emitted("change")).toBeTruthy();
@@ -1720,7 +1716,7 @@ Import `VisuallyHidden` from `reka-ui` and `useFormControl` from `../../shared/u
 - [ ] **Step 6: Run the tests**
 
 Run: `bun test packages/vue/test/ColorSlider.test.ts`
-Expected: the `aria-label` case still fails — that lands in Task 10. Every other case passes. If you prefer a fully green step, move the `aria-label` case into Task 10's test edit.
+Expected: PASS. The thumb's `aria-label` is Task 10's concern and its test lands there.
 
 - [ ] **Step 7: Commit**
 
@@ -1749,10 +1745,20 @@ frame."
 - Consumes: the widened context from Task 9, `channelLabel` / `formatChannelValue` from Task 5.
 - Produces: `ColorSliderThumb` slot props `{ channelName: string; channelValue: number }`.
 
-- [ ] **Step 1: Confirm the failing case**
+- [ ] **Step 1: Write the failing test**
+
+Add to `packages/vue/test/ColorSlider.test.ts`, inside `describe("given default ColorSlider", ...)`:
+
+```ts
+  it("should label the thumb with the channel name", () => {
+    const thumb = wrapper.find("[role=\"slider\"]");
+    expect(thumb.attributes("aria-label")).toBe("Hue");
+    expect(thumb.attributes("aria-valuetext")).toBe("180°");
+  });
+```
 
 Run: `bun test packages/vue/test/ColorSlider.test.ts`
-Expected: FAIL on `"should label the thumb with the channel name"`.
+Expected: FAIL — the thumb has no `aria-label`.
 
 - [ ] **Step 2: Label the thumb**
 
@@ -2946,7 +2952,7 @@ Expected: PASS, zero failures. Paste the summary line into the task notes.
 - [ ] **Step 2: Lint and typecheck**
 
 Run: `bun run lint`
-Expected: no eslint errors, no `vue-tsc` errors.
+Expected: `vue-tsc` reports exactly the 2 baseline `packages/core/test/geometry.test.ts(218)` errors and nothing else. eslint error count at or below the ~182 baseline; list any new ones in the report rather than treating them as a hard failure.
 
 - [ ] **Step 3: Docs build**
 
