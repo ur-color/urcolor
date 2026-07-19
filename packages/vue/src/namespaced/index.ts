@@ -21,9 +21,11 @@ import {
 } from "../components/ColorField";
 import { ColorSwatchRoot } from "../components/ColorSwatch";
 import {
-  ColorSwatchGroupRoot,
-  ColorSwatchGroupItem,
-} from "../components/ColorSwatchGroup";
+  ColorSwatchPickerRoot,
+  ColorSwatchPickerItem,
+  ColorSwatchPickerItemSwatch,
+  ColorSwatchPickerItemIndicator,
+} from "../components/ColorSwatchPicker";
 import {
   ColorRingRoot,
   ColorRingTrack,
@@ -72,9 +74,11 @@ export const ColorSwatch = {
   Root: ColorSwatchRoot,
 };
 
-export const ColorSwatchGroup = {
-  Root: ColorSwatchGroupRoot,
-  Item: ColorSwatchGroupItem,
+export const ColorSwatchPicker = {
+  Root: ColorSwatchPickerRoot,
+  Item: ColorSwatchPickerItem,
+  ItemSwatch: ColorSwatchPickerItemSwatch,
+  ItemIndicator: ColorSwatchPickerItemIndicator,
 };
 
 export const ColorRing = {
