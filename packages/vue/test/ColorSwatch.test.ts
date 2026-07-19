@@ -45,7 +45,10 @@ describe("ColorSwatch accessible name", () => {
 
   it("should fall back to the colour string", () => {
     const wrapper = mount(ColorSwatchRoot, { props: { modelValue: "#ff0000" } });
-    expect(wrapper.attributes("aria-label")).toBeTruthy();
+    // Asserted exactly, not merely truthy: a fallback that collapsed to "transparent"
+    // would announce every coloured swatch as transparent, which is the opposite of
+    // the accessible name this component is supposed to expose.
+    expect(wrapper.attributes("aria-label")).toBe("rgb(255 0 0)");
   });
 
   it("should mark an empty swatch with data-no-color", () => {
