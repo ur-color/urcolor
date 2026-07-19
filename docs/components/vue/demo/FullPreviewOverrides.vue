@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import { Color } from "internationalized-color";
-import { getChannelConfig } from "@urcolor/core";
+import { Color, getChannelConfig, type SpaceId } from "@urcolor/core";
 import {
   Label,
   CheckboxRoot,
@@ -17,7 +16,7 @@ import { Icon } from "@iconify/vue";
 
 const props = defineProps<{
   color: Color;
-  colorSpace: string;
+  colorSpace: SpaceId;
   channels: { key: string; label: string }[];
   areaOverrides: Record<string, number>;
   sliderOverrides: Record<string, Record<string, number>>;
@@ -83,9 +82,9 @@ function toggleChannel(gradient: GradientEntry, channelKey: string) {
   } else {
     let val: number;
     if (channelKey === "alpha") {
-      val = props.color.getChannelValue("alpha");
+      val = props.color.alpha;
     } else {
-      val = props.color.getChannelValue(props.colorSpace, channelKey);
+      val = props.color.to(props.colorSpace).get(channelKey);
     }
     gradient.update({ ...gradient.overrides, [channelKey]: val });
   }
@@ -95,9 +94,9 @@ function buildOverrideColor(overrides: Record<string, number>): Color {
   let c = props.color;
   for (const [key, val] of Object.entries(overrides)) {
     if (key === "alpha") {
-      c = c.set({ alpha: val });
+      c = c.withAlpha(val);
     } else {
-      c = c.set({ mode: props.colorSpace, [key]: val });
+      c = c.with({ space: props.colorSpace, [key]: val });
     }
   }
   return c;
@@ -114,9 +113,9 @@ function onFieldUpdate(
     : getChannelConfig(props.colorSpace, channelKey);
   let val: number;
   if (channelKey === "alpha") {
-    val = newColor.getChannelValue("alpha");
+    val = newColor.alpha;
   } else if (cfg) {
-    val = newColor.getChannelValue(props.colorSpace, channelKey);
+    val = newColor.to(props.colorSpace).get(channelKey);
   } else {
     return;
   }

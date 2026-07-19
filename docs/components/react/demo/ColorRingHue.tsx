@@ -1,4 +1,3 @@
-import "internationalized-color/css";
 import { ColorRing, useColor } from "@urcolor/react";
 
 export default function ColorRingHue() {

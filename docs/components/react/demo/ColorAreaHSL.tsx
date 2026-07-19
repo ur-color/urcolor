@@ -1,4 +1,3 @@
-import "internationalized-color/css";
 import { ColorArea, useColor } from "@urcolor/react";
 
 export default function ColorAreaHSL() {

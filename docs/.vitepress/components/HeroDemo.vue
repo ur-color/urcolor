@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import { shallowRef, ref, computed, watch } from "vue";
+import { shallowRef, watch } from "vue";
 import { inBrowser } from "vitepress";
 import { useBrandHue } from "../composables/useBrandHue";
-import { Color, nameColor, useLocale } from "internationalized-color";
-import * as allLocales from "internationalized-color/locales";
+import { Color } from "@urcolor/core";
 import {
   ColorAreaRoot,
   ColorAreaGradient,
@@ -21,18 +20,7 @@ import {
 } from "../../../packages/vue/src/components/ColorField";
 import { ColorSwatchRoot } from "../../../packages/vue/src/components/ColorSwatch";
 
-// Register all locales
-Object.values(allLocales).forEach(useLocale);
-
-// Detect browser locale — use "en" during SSR to avoid mismatch
-const browserLocale = ref("en");
-if (inBrowser) {
-  const lang = window.navigator.languages?.[0]?.split("-")[0]?.toLowerCase();
-  if (lang) browserLocale.value = lang;
-}
-const colorName = computed(() => nameColor(color.value, browserLocale.value)?.name ?? "unknown");
-
-const color = shallowRef<Color>(Color.create("hsv", { h: 328, s: 1, v: 1 }));
+const color = shallowRef<Color>(new Color("hsv", [328, 1, 1]));
 
 function onColorUpdate(c: Color | undefined) {
   if (c) {
@@ -233,9 +221,6 @@ if (inBrowser) {
 
       <!-- Cell 4: Hex Field & Channel Fields -->
       <div class="hero-cell-fields">
-        <div class="hero-field-name">
-          {{ colorName }}
-        </div>
         <ColorFieldRoot
           :model-value="color"
           color-space="hsv"
@@ -407,14 +392,6 @@ if (inBrowser) {
 .hero-demo-swatch {
   flex: 1;
   width: 100%;
-}
-
-.hero-field-name {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--vp-c-text-1);
-  text-transform: capitalize;
-  letter-spacing: 0.05em;
 }
 
 .hero-field-hex {

@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import "internationalized-color/css";
 import {
   ColorAreaRoot,
   ColorAreaGradient,

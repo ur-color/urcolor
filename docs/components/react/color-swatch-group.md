@@ -23,9 +23,9 @@ import ColorSwatchGroupMultiple from './demo/ColorSwatchGroupMultiple.tsx'
 
 ```tsx
 <ColorSwatchGroup.Root>
-  <ColorSwatchGroup.Item />
-  <ColorSwatchGroup.Item />
-  <ColorSwatchGroup.Item />
+  <ColorSwatch />
+  <ColorSwatch />
+  <ColorSwatch />
 </ColorSwatchGroup.Root>
 ```
 
@@ -72,9 +72,9 @@ The root container that manages selection state and keyboard navigation.
 | `orientation` | `'horizontal' \| 'vertical'` | `'horizontal'` | Orientation for arrow key navigation. |
 | `onValueChange` | `(value: string[]) => void` | — | Called when the selection changes. |
 
-### ColorSwatchGroup.Item
+### ColorSwatch
 
-An individual selectable swatch.
+There is no separate `Item` component — the ordinary `ColorSwatch` component detects when it's rendered inside a `ColorSwatchGroup.Root` and automatically becomes a selectable toggle.
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|

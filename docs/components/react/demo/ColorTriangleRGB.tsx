@@ -1,4 +1,3 @@
-import "internationalized-color/css";
 import { ColorTriangle, useColor } from "@urcolor/react";
 
 export default function ColorTriangleRGB() {
@@ -10,7 +9,7 @@ export default function ColorTriangleRGB() {
       <ColorTriangle.Root
         value={color}
         onValueChange={setColor}
-        colorSpace="rgb"
+        colorSpace="srgb"
         channelX="r"
         channelY="g"
         channelZ="b"

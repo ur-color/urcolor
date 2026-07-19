@@ -1,4 +1,3 @@
-import "internationalized-color/css";
 import { ColorSlider, useColor } from "@urcolor/react";
 
 export default function ColorSliderHue() {

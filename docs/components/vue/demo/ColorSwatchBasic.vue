@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { shallowRef } from "vue";
-import { Color } from "internationalized-color";
-import "internationalized-color/css";
+import { Color } from "@urcolor/core";
 import { ColorSwatchRoot } from "@urcolor/vue";
 import { Check } from "lucide-vue-next";
 

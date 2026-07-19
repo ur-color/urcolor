@@ -1,6 +1,5 @@
 import { useState } from "react";
-import "internationalized-color/css";
-import { ColorSwatchGroup } from "@urcolor/react";
+import { ColorSwatchGroup, ColorSwatch } from "@urcolor/react";
 
 const colors = [
   "hsl(210, 80%, 50%)",
@@ -23,7 +22,7 @@ export default function ColorSwatchGroupMultiple() {
         className="flex items-center gap-2"
       >
         {colors.map((color) => (
-          <ColorSwatchGroup.Item
+          <ColorSwatch
             key={color}
             value={color}
             className="
@@ -43,7 +42,7 @@ export default function ColorSwatchGroupMultiple() {
             >
               <polyline points="20 6 9 17 4 12" />
             </svg>
-          </ColorSwatchGroup.Item>
+          </ColorSwatch>
         ))}
       </ColorSwatchGroup.Root>
       <p className="text-sm text-gray-500">

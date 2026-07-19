@@ -2,7 +2,7 @@
 
 ## Internationalized {#languages}
 
-UrColor ships with full internationalization support for 74 languages powered by the [`internationalized-color`](https://github.com/GrandMagus02/internationalized-color) package.
+UrColor ships with channel-label translations for 74 languages, built into `@urcolor/core`'s `i18n` module (`translations` and `getChannelLabel`).
 
 <details>
 <summary>Full language list</summary>
@@ -54,11 +54,10 @@ UrColor ships with full internationalization support for 74 languages powered by
 
 </details>
 
-The locale is detected automatically from the browser, or can be set explicitly. All built-in strings — channel names, color format labels, and accessibility descriptions — are translated out of the box.
+Channel labels — the words behind abbreviations like `H`, `S`, `L`, `V`, `R`, `G`, `B` (Hue, Saturation, Lightness, Value, Red, Green, Blue, and so on) — are what's translated. Call `getChannelLabel(locale, channelName)` to look up a label for a given locale, or use the `translations` map directly if you need the full dictionary for a locale.
 
 ::: warning
-**Only color names are currently localized.**  
-At this time, only color names are translated; channel abbreviations (such as `H`, `S`, `V`, `R`, `G`, `B`) and color format codes (like `hex`, `rgb`, `hsl`) remain untranslated in all locales.
+**Only channel labels are localized.** Color format codes (like `hex`, `srgb`, `hsl`) and numeric values are not translated.
 :::
 
 
@@ -95,29 +94,27 @@ The runtime has zero external dependencies beyond the core color math, keeping b
 
 ## Any Color Space {#color-spaces}
 
-Under the hood, UrColor uses [Culori](https://culorijs.org/) for color conversion and manipulation. Culori supports a wide range of color spaces:
+Under the hood, UrColor uses its own zero-dependency, spec-accurate CSS Color 4 implementation for color conversion and manipulation. It supports a wide range of color spaces, identified with their CSS Color 4 ids:
 
 <details>
 <summary>Supported Color Spaces</summary>
 
-| Color Space | Mode |
+| Color Space | Id |
 | --- | --- |
-| sRGB | `rgb` |
-| Linear sRGB | `lrgb` |
+| sRGB | `srgb` |
+| Linear sRGB | `srgb-linear` |
 | HSL | `hsl` |
 | HSV / HSB | `hsv` |
 | HWB | `hwb` |
-| CIELAB (D50) | `lab` |
-| CIELAB (D65) | `lab65` |
-| CIELCh (D50) | `lch` |
-| CIELCh (D65) | `lch65` |
+| CIELAB | `lab` |
+| CIELCh | `lch` |
 | OKLab | `oklab` |
 | OKLCH | `oklch` |
-| Display P3 | `p3` |
-| Adobe RGB 1998 | `a98` |
-| ProPhoto RGB | `prophoto` |
+| Display P3 | `display-p3` |
+| Adobe RGB 1998 | `a98-rgb` |
+| ProPhoto RGB | `prophoto-rgb` |
 | Rec. 2020 | `rec2020` |
-| CIE XYZ (D50) | `xyz50` |
-| CIE XYZ (D65) | `xyz65` |
+| CIE XYZ (D65) | `xyz-d65` |
+| CIE XYZ (D50) | `xyz-d50` |
 
 </details>

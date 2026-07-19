@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { ref } from "vue";
-import "internationalized-color/css";
 import { ColorSwatchGroupRoot, ColorSwatchGroupItem } from "@urcolor/vue";
 import { Check } from "lucide-vue-next";
 

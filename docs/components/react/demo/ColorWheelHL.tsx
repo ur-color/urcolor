@@ -1,4 +1,3 @@
-import "internationalized-color/css";
 import { ColorWheel, useColor } from "@urcolor/react";
 
 export default function ColorWheelHL() {

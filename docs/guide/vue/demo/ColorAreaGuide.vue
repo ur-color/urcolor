@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import "internationalized-color/css"; // Import CSS for internationalized color
 import {
   useColor,
   ColorAreaRoot,

@@ -188,7 +188,7 @@ Set `channel` to `"hex"` and `format` to `"hex"` for a hex color input:
 Use `onValueChange` for real-time updates and `onValueCommit` for the final value (on blur or Enter):
 
 ```tsx{3-8,15-16}
-import { Color } from "internationalized-color";
+import { Color } from "@urcolor/core";
 
 const onColorChange = (color: Color) => {
   console.log("changing", color.toString("css"));

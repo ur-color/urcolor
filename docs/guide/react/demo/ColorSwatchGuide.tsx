@@ -1,6 +1,5 @@
 import { useState } from "react";
-import "internationalized-color/css";
-import { Color } from "internationalized-color";
+import { Color } from "@urcolor/core";
 import { ColorSwatch } from "@urcolor/react";
 
 const colors = [

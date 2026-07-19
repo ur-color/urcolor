@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import "internationalized-color/css";
 import { getChannelConfig } from "@urcolor/core";
 import {
   ColorSliderRoot,
@@ -18,12 +17,12 @@ const gradientColors = computed(() => {
   if (!cfg) return ["gray", "blue"];
   const steps = 7;
   const colors: string[] = [];
-  const cMin = cfg.culoriMin ?? cfg.min;
-  const cMax = cfg.culoriMax ?? cfg.max;
+  const cMin = cfg.nativeMin ?? cfg.min;
+  const cMax = cfg.nativeMax ?? cfg.max;
   for (let i = 0; i < steps; i++) {
     const t = i / (steps - 1);
     const val = cMin + t * (cMax - cMin);
-    colors.push(color.value.set({ mode: "hsl", s: val })?.toString() ?? "black");
+    colors.push(color.value.with({ space: "hsl", s: val }).toString());
   }
   return colors;
 });

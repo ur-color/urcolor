@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import "internationalized-color/css";
 import {
   ColorTriangleRoot,
   ColorTriangleGradient,
@@ -14,7 +13,7 @@ const { color, hex } = useColor("hsl(210, 80%, 50%)");
   <code>{{ hex }}</code>
   <ColorTriangleRoot
     v-model="color"
-    color-space="rgb"
+    color-space="srgb"
     channel-x="r"
     channel-y="g"
     channel-z="b"

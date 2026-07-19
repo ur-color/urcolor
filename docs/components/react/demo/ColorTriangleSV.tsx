@@ -1,4 +1,3 @@
-import "internationalized-color/css";
 import { ColorTriangle, useColor } from "@urcolor/react";
 
 export default function ColorTriangleSV() {

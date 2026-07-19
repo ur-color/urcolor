@@ -90,7 +90,7 @@ Render a palette by looping over an array of colors:
 
 ```tsx
 import { useState } from "react";
-import { Color } from "internationalized-color";
+import { Color } from "@urcolor/core";
 import { ColorSwatch } from "@urcolor/react";
 
 const colors = [

@@ -1,4 +1,3 @@
-import "internationalized-color/css";
 import { colorSpaces } from "@urcolor/core";
 import { ColorField, useColor } from "@urcolor/react";
 

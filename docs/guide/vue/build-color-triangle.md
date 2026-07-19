@@ -160,7 +160,7 @@ Add `channel-z` to enable barycentric three-channel mode. This maps all three ch
 <template>
   <ColorTriangleRoot
     v-model="color"
-    color-space="rgb"
+    color-space="srgb"
     channel-x="r"
     channel-y="g"
     channel-z="b"

@@ -80,11 +80,11 @@ function MyGroup() {
 
 ## Step 3: Add swatch items
 
-`ColorSwatchGroup.Item` renders each selectable color. The `value` prop is both the selection value and the displayed color.
+`ColorSwatchGroup.Root` looks for a `ColorSwatchGroupContext` on its descendants, and the ordinary `ColorSwatch` component picks it up automatically — inside a group, it renders itself as a selectable toggle instead of a static swatch. The `value` prop is both the selection value and the displayed color.
 
 ```tsx
 import { useState } from "react";
-import { ColorSwatchGroup } from "@urcolor/react";
+import { ColorSwatchGroup, ColorSwatch } from "@urcolor/react";
 
 function MyGroup() {
   const colors = [
@@ -104,7 +104,7 @@ function MyGroup() {
     >
       {/* [!code ++:10] */}
       {colors.map((color) => (
-        <ColorSwatchGroup.Item
+        <ColorSwatch
           key={color}
           value={color}
           className="
@@ -134,7 +134,7 @@ Change `type` to `"multiple"` to allow selecting more than one color:
   className="flex items-center gap-2"
 >
   {colors.map((color) => (
-    <ColorSwatchGroup.Item key={color} value={color} className="..." />
+    <ColorSwatch key={color} value={color} className="..." />
   ))}
 </ColorSwatchGroup.Root>
 ```

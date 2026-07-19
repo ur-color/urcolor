@@ -1,108 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, watch } from "vue";
-import { usePreferredLanguages } from "@vueuse/core";
-import "internationalized-color/css";
-import { useLocale, nameColor } from "internationalized-color";
-import * as allLocales from "internationalized-color/locales";
-
-const localeOptions = [
-  { code: "aa", flag: "\u{1F1EA}\u{1F1F9}", label: "AA" },
-  { code: "ab", flag: "\u{1F1EC}\u{1F1EA}", label: "AB" },
-  { code: "af", flag: "\u{1F1FF}\u{1F1E6}", label: "AF" },
-  { code: "ak", flag: "\u{1F1EC}\u{1F1ED}", label: "AK" },
-  { code: "am", flag: "\u{1F1EA}\u{1F1F9}", label: "AM" },
-  { code: "ar", flag: "\u{1F1F8}\u{1F1E6}", label: "AR" },
-  { code: "az", flag: "\u{1F1E6}\u{1F1FF}", label: "AZ" },
-  { code: "bg", flag: "\u{1F1E7}\u{1F1EC}", label: "BG" },
-  { code: "bn", flag: "\u{1F1E7}\u{1F1E9}", label: "BN" },
-  { code: "ca", flag: "\u{1F1EA}\u{1F1F8}", label: "CA" },
-  { code: "cr", flag: "\u{1F1E8}\u{1F1E6}", label: "CR" },
-  { code: "cs", flag: "\u{1F1E8}\u{1F1FF}", label: "CS" },
-  { code: "cy", flag: "\u{1F3F4}\u{E0067}\u{E0062}\u{E0077}\u{E006C}\u{E0073}\u{E007F}", label: "CY" },
-  { code: "da", flag: "\u{1F1E9}\u{1F1F0}", label: "DA" },
-  { code: "de", flag: "\u{1F1E9}\u{1F1EA}", label: "DE" },
-  { code: "el", flag: "\u{1F1EC}\u{1F1F7}", label: "EL" },
-  { code: "en", flag: "\u{1F1EC}\u{1F1E7}", label: "EN" },
-  { code: "es", flag: "\u{1F1EA}\u{1F1F8}", label: "ES" },
-  { code: "et", flag: "\u{1F1EA}\u{1F1EA}", label: "ET" },
-  { code: "fa", flag: "\u{1F1EE}\u{1F1F7}", label: "FA" },
-  { code: "fi", flag: "\u{1F1EB}\u{1F1EE}", label: "FI" },
-  { code: "fr", flag: "\u{1F1EB}\u{1F1F7}", label: "FR" },
-  { code: "ga", flag: "\u{1F1EE}\u{1F1EA}", label: "GA" },
-  { code: "gu", flag: "\u{1F1EE}\u{1F1F3}", label: "GU" },
-  { code: "he", flag: "\u{1F1EE}\u{1F1F1}", label: "HE" },
-  { code: "hi", flag: "\u{1F1EE}\u{1F1F3}", label: "HI" },
-  { code: "hr", flag: "\u{1F1ED}\u{1F1F7}", label: "HR" },
-  { code: "hu", flag: "\u{1F1ED}\u{1F1FA}", label: "HU" },
-  { code: "id", flag: "\u{1F1EE}\u{1F1E9}", label: "ID" },
-  { code: "is", flag: "\u{1F1EE}\u{1F1F8}", label: "IS" },
-  { code: "it", flag: "\u{1F1EE}\u{1F1F9}", label: "IT" },
-  { code: "ja", flag: "\u{1F1EF}\u{1F1F5}", label: "JA" },
-  { code: "ka", flag: "\u{1F1EC}\u{1F1EA}", label: "KA" },
-  { code: "kn", flag: "\u{1F1EE}\u{1F1F3}", label: "KN" },
-  { code: "ko", flag: "\u{1F1F0}\u{1F1F7}", label: "KO" },
-  { code: "lb", flag: "\u{1F1F1}\u{1F1FA}", label: "LB" },
-  { code: "lt", flag: "\u{1F1F1}\u{1F1F9}", label: "LT" },
-  { code: "lv", flag: "\u{1F1F1}\u{1F1FB}", label: "LV" },
-  { code: "mk", flag: "\u{1F1F2}\u{1F1F0}", label: "MK" },
-  { code: "ml", flag: "\u{1F1EE}\u{1F1F3}", label: "ML" },
-  { code: "ms", flag: "\u{1F1F2}\u{1F1FE}", label: "MS" },
-  { code: "my", flag: "\u{1F1F2}\u{1F1F2}", label: "MY" },
-  { code: "na", flag: "\u{1F1F3}\u{1F1F7}", label: "NA" },
-  { code: "nb", flag: "\u{1F1F3}\u{1F1F4}", label: "NB" },
-  { code: "ne", flag: "\u{1F1F3}\u{1F1F5}", label: "NE" },
-  { code: "nl", flag: "\u{1F1F3}\u{1F1F1}", label: "NL" },
-  { code: "nn", flag: "\u{1F1F3}\u{1F1F4}", label: "NN" },
-  { code: "no", flag: "\u{1F1F3}\u{1F1F4}", label: "NO" },
-  { code: "ny", flag: "\u{1F1F2}\u{1F1FC}", label: "NY" },
-  { code: "oc", flag: "\u{1F1EB}\u{1F1F7}", label: "OC" },
-  { code: "pa", flag: "\u{1F1EE}\u{1F1F3}", label: "PA" },
-  { code: "pl", flag: "\u{1F1F5}\u{1F1F1}", label: "PL" },
-  { code: "ps", flag: "\u{1F1E6}\u{1F1EB}", label: "PS" },
-  { code: "pt", flag: "\u{1F1F5}\u{1F1F9}", label: "PT" },
-  { code: "ro", flag: "\u{1F1F7}\u{1F1F4}", label: "RO" },
-  { code: "ru", flag: "\u{1F1F7}\u{1F1FA}", label: "RU" },
-  { code: "si", flag: "\u{1F1F1}\u{1F1F0}", label: "SI" },
-  { code: "sk", flag: "\u{1F1F8}\u{1F1F0}", label: "SK" },
-  { code: "sl", flag: "\u{1F1F8}\u{1F1EE}", label: "SL" },
-  { code: "sm", flag: "\u{1F1FC}\u{1F1F8}", label: "SM" },
-  { code: "so", flag: "\u{1F1F8}\u{1F1F4}", label: "SO" },
-  { code: "sq", flag: "\u{1F1E6}\u{1F1F1}", label: "SQ" },
-  { code: "sr", flag: "\u{1F1F7}\u{1F1F8}", label: "SR" },
-  { code: "su", flag: "\u{1F1EE}\u{1F1E9}", label: "SU" },
-  { code: "sv", flag: "\u{1F1F8}\u{1F1EA}", label: "SV" },
-  { code: "ta", flag: "\u{1F1EE}\u{1F1F3}", label: "TA" },
-  { code: "te", flag: "\u{1F1EE}\u{1F1F3}", label: "TE" },
-  { code: "th", flag: "\u{1F1F9}\u{1F1ED}", label: "TH" },
-  { code: "tl", flag: "\u{1F1F5}\u{1F1ED}", label: "TL" },
-  { code: "tr", flag: "\u{1F1F9}\u{1F1F7}", label: "TR" },
-  { code: "uk", flag: "\u{1F1FA}\u{1F1E6}", label: "UK" },
-  { code: "ur", flag: "\u{1F1F5}\u{1F1F0}", label: "UR" },
-  { code: "vi", flag: "\u{1F1FB}\u{1F1F3}", label: "VI" },
-  { code: "zh", flag: "\u{1F1E8}\u{1F1F3}", label: "ZH" },
-  { code: "ja_traditional", flag: "\u{1F1EF}\u{1F1F5}", label: "JA-T" },
-  { code: "zh_traditional", flag: "\u{1F1E8}\u{1F1F3}", label: "ZH-T" },
-  { code: "ko_traditional", flag: "\u{1F1F0}\u{1F1F7}", label: "KO-T" },
-] as const;
-
-// RTL locales
-const rtlLocales = new Set(["ar", "fa", "he", "ps", "ur"]);
-
-// Register all locales
-Object.values(allLocales).forEach(useLocale);
-
-// Detect browser language and match to available locales
-const browserLanguages = usePreferredLanguages();
-const defaultLocale = computed(() => {
-  for (const lang of browserLanguages.value) {
-    const code = lang?.split("-")[0]?.toLowerCase();
-    if (code && localeOptions.some(l => l.code === code)) return code;
-  }
-  return "en";
-});
-
-const selectedLocale = ref(defaultLocale.value);
-import { colorSpaces, getChannelConfig } from "@urcolor/core";
+import { colorSpaces, getChannelConfig, type SpaceId } from "@urcolor/core";
 import {
   SelectRoot,
   SelectTrigger,
@@ -143,7 +41,7 @@ import {
   useColor,
 } from "@urcolor/vue";
 
-const colorSpace = ref("hsv");
+const colorSpace = ref<SpaceId>("hsv");
 const invertedX = ref(false);
 const invertedY = ref(false);
 
@@ -185,13 +83,12 @@ const sliderChannels = computed(() => channels.value);
 
 // Generate slider gradient colors for each slider channel
 function getSliderColors(channelKey: string): string[] {
-  if (!color.value) return ["black", "white"];
   if (channelKey === "alpha") {
     const steps = 7;
     const colors: string[] = [];
     for (let i = 0; i < steps; i++) {
       const t = i / (steps - 1);
-      colors.push(color.value.set({ alpha: t }).toString() ?? "transparent");
+      colors.push(color.value.withAlpha(t).toString());
     }
     return colors;
   }
@@ -199,24 +96,19 @@ function getSliderColors(channelKey: string): string[] {
   if (!cfg) return ["black", "white"];
   const steps = 7;
   const colors: string[] = [];
-  const cMin = cfg.culoriMin ?? cfg.min;
-  const cMax = cfg.culoriMax ?? cfg.max;
+  const cMin = cfg.nativeMin ?? cfg.min;
+  const cMax = cfg.nativeMax ?? cfg.max;
   for (let i = 0; i < steps; i++) {
     const t = i / (steps - 1);
     const val = cMin + t * (cMax - cMin);
-    colors.push(color.value.set({ mode: colorSpace.value, [channelKey]: val }).toString() ?? "black");
+    colors.push(color.value.with({ space: colorSpace.value, [channelKey]: val }).toString());
   }
   return colors;
 }
 
-const colorName = computed(() => {
-  const result = nameColor(color.value, selectedLocale.value);
-  return result?.name ?? "";
-});
-
-const currentLocaleOption = computed(() =>
-  localeOptions.find(l => l.code === selectedLocale.value) ?? localeOptions[0],
-);
+// A short, informative label for a11y announcements — no color-naming
+// feature is available, so we describe the color by its hex value.
+const colorHex = computed(() => color.value.toString("hex"));
 
 // Channel override refs for each gradient
 const areaOverrides = ref<Record<string, number>>({ });
@@ -464,7 +356,7 @@ const spaceKeys = Object.keys(colorSpaces);
         relative block h-[200px] w-full cursor-crosshair touch-none
         overflow-clip rounded-xl self-start
       "
-      :aria-label="`Color picker, selected: ${colorName}`"
+      :aria-label="`Color picker, selected: ${colorHex}`"
     >
       <ColorAreaCheckerboard />
       <ColorAreaGradient
@@ -479,7 +371,7 @@ const spaceKeys = Object.keys(colorSpaces);
           rounded-full border-2 border-white
           shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_2px_4px_rgba(0,0,0,0.3)]
         "
-        :aria-label="`Color: ${colorName}`"
+        :aria-label="`Color: ${colorHex}`"
       />
     </ColorAreaRoot>
 
@@ -517,7 +409,7 @@ const spaceKeys = Object.keys(colorSpaces);
               shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_2px_4px_rgba(0,0,0,0.3)]
               focus-visible:shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_0_0_3px_rgba(66,153,225,0.6)]
             "
-            :aria-label="`${ch.label} slider, color: ${colorName}`"
+            :aria-label="`${ch.label} slider, color: ${colorHex}`"
           />
         </ColorSliderTrack>
       </ColorSliderRoot>
@@ -554,7 +446,7 @@ const spaceKeys = Object.keys(colorSpaces);
             outline-none
             focus-visible:shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_0_0_3px_rgba(66,153,225,0.6)]
           "
-          :aria-label="`Alpha slider, color: ${colorName}`"
+          :aria-label="`Alpha slider, color: ${colorHex}`"
         />
       </ColorSliderTrack>
     </ColorSliderRoot>
@@ -691,62 +583,6 @@ const spaceKeys = Object.keys(colorSpaces);
           </ColorFieldIncrement>
         </ColorFieldRoot>
       </div>
-    </div>
-
-    <!-- Bottom row: [locale select] [color name] -->
-    <div />
-    <div
-      class="flex items-center justify-between gap-2"
-    >
-      <code
-        class="
-          box-border inline-flex h-8 w-full items-center rounded-md border
-          border-(--vp-c-divider) bg-(--vp-c-bg) px-3 py-1.5 font-mono
-          text-[13px] whitespace-nowrap text-(--vp-c-brand-1,#3451b2)
-        "
-        :dir="rtlLocales.has(selectedLocale) ? 'rtl' : 'ltr'"
-      >{{ colorName }}</code>
-      <SelectRoot v-model="selectedLocale">
-        <SelectTrigger
-          class="
-            box-border inline-flex h-8 max-w-[92px] shrink-0 cursor-pointer
-            items-center justify-between gap-0.5 overflow-hidden rounded-md
-            border! border-(--vp-c-divider)! bg-(--vp-c-bg) px-2! py-1
-            text-[13px]
-          "
-          aria-label="Language"
-        >
-          <SelectValue>{{ currentLocaleOption.flag }} {{ currentLocaleOption.label }}</SelectValue>
-          <SelectIcon class="size-3.5 shrink-0 text-(--vp-c-text-2)">
-            <Icon icon="lucide:chevron-down" />
-          </SelectIcon>
-        </SelectTrigger>
-        <SelectPortal>
-          <SelectContent
-            class="select-content"
-            position="popper"
-            :side-offset="4"
-            :body-lock="false"
-          >
-            <SelectViewport class="max-h-[200px] overflow-y-auto">
-              <SelectItem
-                v-for="loc in localeOptions"
-                :key="loc.code"
-                :value="loc.code"
-                class="
-                  cursor-pointer rounded-md px-2.5 py-1.5 text-[13px]
-                  outline-none
-                  hover:bg-(--vp-c-bg-soft)
-                  data-highlighted:bg-(--vp-c-bg-soft)
-                  data-[state=checked]:font-semibold
-                "
-              >
-                <SelectItemText>{{ loc.flag }} {{ loc.label }}</SelectItemText>
-              </SelectItem>
-            </SelectViewport>
-          </SelectContent>
-        </SelectPortal>
-      </SelectRoot>
     </div>
   </div>
 

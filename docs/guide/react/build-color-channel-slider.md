@@ -205,7 +205,7 @@ Switch the `channel` prop to control different color properties. For example, a 
 Use `onValueChange` for real-time updates (while dragging) and `onValueCommit` for the final value (on release):
 
 ```tsx{3-8,15-16}
-import { Color } from "internationalized-color";
+import { Color } from "@urcolor/core";
 
 const onColorChange = (color: Color) => {
   console.log("dragging", color.toString("css"));

@@ -13,7 +13,7 @@ const features = [
     icon: Globe,
     title: "74 Languages",
     details:
-      "Full internationalization powered by the internationalized-color package.",
+      "Channel labels translated across 74 languages, with zero runtime dependencies.",
     href: "/guide/features#languages",
   },
   {
@@ -48,7 +48,7 @@ const features = [
     icon: Palette,
     title: "Any Color Space",
     details:
-      "sRGB, HSL, HSB, LCH, OKLCH, and more via culori package.",
+      "sRGB, HSL, HSB, LCH, OKLCH, and more via a zero-dependency CSS Color 4 engine.",
     href: "/guide/features#color-spaces",
   },
 ];

@@ -98,7 +98,7 @@ Render a palette by looping over an array of colors:
 ```vue{6-7,13,15,19-35}
 <script setup lang="ts">
 import { shallowRef } from "vue";
-import { Color } from "internationalized-color";
+import { Color } from "@urcolor/core";
 import { ColorSwatchRoot } from "@urcolor/vue";
 import { Check } from "lucide-vue-next";
 
