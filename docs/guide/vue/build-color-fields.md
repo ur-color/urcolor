@@ -208,10 +208,10 @@ Use `@update:model-value` for real-time updates and `@value-commit` for the fina
 <script setup lang="ts">
 // ...
 const onColorChange = (color: Color) => {
-  console.log("changing", color.toString("css"));
+  console.log("changing", color.toString());
 };
 const onColorCommit = (color: Color) => {
-  console.log("committed", color.toString("css"));
+  console.log("committed", color.toString());
 };
 </script>
 

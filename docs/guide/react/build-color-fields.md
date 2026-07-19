@@ -191,10 +191,10 @@ Use `onValueChange` for real-time updates and `onValueCommit` for the final valu
 import { Color } from "@urcolor/core";
 
 const onColorChange = (color: Color) => {
-  console.log("changing", color.toString("css"));
+  console.log("changing", color.toString());
 };
 const onColorCommit = (color: Color) => {
-  console.log("committed", color.toString("css"));
+  console.log("committed", color.toString());
 };
 
 <ColorField.Root

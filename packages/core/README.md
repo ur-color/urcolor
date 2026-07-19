@@ -1,6 +1,6 @@
 # @urcolor/core
 
-Color space utilities and WebGL-accelerated gradient rendering for color picker components.
+A self-contained CSS Color 4 library, plus WebGL-accelerated gradient rendering for color picker components. Zero runtime dependencies.
 
 ## Installation
 
@@ -10,10 +10,11 @@ bun add @urcolor/core
 
 ## Features
 
+- **Vendored CSS Color 4 engine** — parsing, serialising, conversion, gamut mapping, interpolation, `deltaE`, contrast, and manipulation helpers, all built in
 - **WebGL Gradient Rendering** — GPU-accelerated bilinear and linear gradients on canvas
-- **12 Color Spaces** — HSL, HSV, HWB, OKLCh, OKLab, LCh, Lab, RGB, Display P3, A98 RGB, ProPhoto RGB, Rec. 2020
+- **12 Color Spaces** — HSL, HSV, HWB, OKLCh, OKLab, LCh, Lab, sRGB, Display P3, A98 RGB, ProPhoto RGB, Rec. 2020 (plus sRGB Linear and XYZ at the color-model level)
 - **Channel Configuration** — Standardized metadata for color channels (ranges, steps, formats)
-- **Display/Internal Conversion** — Automatic mapping between display values and culori internals
+- **Display/Native Conversion** — Automatic mapping between display values and the color model's native internal ranges
 
 ## Usage
 
@@ -36,7 +37,7 @@ import { colorSpaces, getChannelConfig } from '@urcolor/core'
 
 // Get all channels for HSL
 const hsl = colorSpaces.hsl
-// => { mode: 'hsl', label: 'HSL', channels: [...] }
+// => { space: 'hsl', label: 'HSL', channels: [...] }
 
 // Get config for a specific channel
 const hue = getChannelConfig('hsl', 'hue')
@@ -88,8 +89,8 @@ All spaces include an Alpha channel (0–100%).
 
 - `colorSpaces` — Configuration object for all 12 supported color spaces
 - `getChannelConfig(colorSpace, channel)` — Get metadata for a specific channel
-- `displayToCulori(config, displayValue)` — Convert display value to culori internal value
-- `culoriToDisplay(config, culoriValue)` — Convert culori value to display value
+- `displayToNative(config, displayValue)` — Convert display value to the color model's native internal value
+- `nativeToDisplay(config, nativeValue)` — Convert a native internal value to display value
 
 ## License
 

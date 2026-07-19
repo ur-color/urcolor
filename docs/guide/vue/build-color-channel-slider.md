@@ -216,10 +216,10 @@ Use `@update:model-value` for real-time updates (while dragging) and `@value-com
 <script setup lang="ts">
 // ...
 const onColorChange = (color: Color) => {
-  console.log("dragging", color.toString("css"));
+  console.log("dragging", color.toString());
 };
 const onColorCommit = (color: Color) => {
-  console.log("committed", color.toString("css"));
+  console.log("committed", color.toString());
 };
 </script>
 

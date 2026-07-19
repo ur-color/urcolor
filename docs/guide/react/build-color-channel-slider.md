@@ -208,10 +208,10 @@ Use `onValueChange` for real-time updates (while dragging) and `onValueCommit` f
 import { Color } from "@urcolor/core";
 
 const onColorChange = (color: Color) => {
-  console.log("dragging", color.toString("css"));
+  console.log("dragging", color.toString());
 };
 const onColorCommit = (color: Color) => {
-  console.log("committed", color.toString("css"));
+  console.log("committed", color.toString());
 };
 
 <ColorSlider.Root

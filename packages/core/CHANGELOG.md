@@ -5,7 +5,48 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## Unreleased
+
+### Added
+
+- A vendored, zero-dependency CSS Color 4 library: `Color`, `parse`, `tryParse`,
+  `serialize`, `convert`, `gamutMap`, `inGamut`, `interpolate`, `mix`, `deltaE`,
+  `contrast`, the `manipulate` helpers, `NAMED_COLORS`, and the space registry.
+- An `hsv` working space. It has no CSS notation, so it cannot be parsed or named as
+  a serialisation format; an `hsv` color serialises down to `rgb()`.
+
+### Changed
+
+- **BREAKING:** The `internationalized-color` dependency is removed. `@urcolor/core`
+  now has no runtime dependencies.
+- **BREAKING:** Color spaces are identified by CSS Color 4 ids. `rgb` → `srgb`,
+  `p3` → `display-p3`, `a98` → `a98-rgb`, `prophoto` → `prophoto-rgb`.
+- **BREAKING:** `ColorSpaceConfig.mode` is renamed to `.space` and typed `SpaceId`.
+- **BREAKING:** `displayToCulori` / `culoriToDisplay` are renamed to `displayToNative`
+  / `nativeToDisplay`; `ChannelConfig.culoriMin` / `.culoriMax` become `.nativeMin` /
+  `.nativeMax`.
+- **BREAKING:** Gradient functions take `SpaceId` rather than `string`.
+
+### Removed
+
+- **BREAKING:** Color naming (`nameColor`, `useLocale`, `nearestColors`,
+  `lookupColor`, `listColorNames`, `translateColor`) and its 74 locale dictionaries.
+  The unrelated 74-language *channel label* translations (`translations`,
+  `getChannelLabel`) are unaffected.
+- The `internationalized-color/css` side-effect import is no longer needed or
+  available — the vendored registry requires no bootstrapping.
+
+### Migration
+
+| old | new |
+| --- | --- |
+| `Color.parse(v)` → `Color \| undefined` | `Color.parse(v)` → `Color \| null` |
+| `.set({ mode, ...channels })` | `.with({ space, ...channels })` |
+| `.set({ alpha: n })` | `.withAlpha(n)` |
+| `.to("rgb")` → nullable | `.to("srgb")` → non-null |
+| `.toHex()` → nullable | `.toString("hex")` → `string` |
+| `.mode` | `.space` |
+| `import "internationalized-color/css"` | delete the line |
 
 ## [0.0.4] - 2026-02-27
 

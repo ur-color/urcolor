@@ -65,20 +65,20 @@ describe("getChannelConfig", () => {
 });
 
 describe("displayToNative", () => {
-  it("returns value as-is when no culori range differs", () => {
+  it("returns value as-is when no native range differs", () => {
     const config: ChannelConfig = { key: "h", label: "Hue", min: 0, max: 360, step: 1, format: "degree" };
     expect(displayToNative(config, 180)).toBe(180);
   });
 
-  it("maps display range to culori range", () => {
-    // HSL saturation: display 0-100, culori 0-1
+  it("maps display range to native range", () => {
+    // HSL saturation: display 0-100, native 0-1
     const config = getChannelConfig("hsl", "s")!;
     expect(displayToNative(config, 0)).toBe(0);
     expect(displayToNative(config, 100)).toBe(1);
     expect(displayToNative(config, 50)).toBe(0.5);
   });
 
-  it("maps RGB: display 0-255 to culori 0-1", () => {
+  it("maps RGB: display 0-255 to native 0-1", () => {
     const config = getChannelConfig("srgb", "r")!;
     expect(displayToNative(config, 0)).toBe(0);
     expect(displayToNative(config, 255)).toBe(1);
@@ -87,12 +87,12 @@ describe("displayToNative", () => {
 });
 
 describe("nativeToDisplay", () => {
-  it("returns value as-is when no culori range differs", () => {
+  it("returns value as-is when no native range differs", () => {
     const config: ChannelConfig = { key: "h", label: "Hue", min: 0, max: 360, step: 1, format: "degree" };
     expect(nativeToDisplay(config, 180)).toBe(180);
   });
 
-  it("maps culori range to display range", () => {
+  it("maps native range to display range", () => {
     const config = getChannelConfig("hsl", "s")!;
     expect(nativeToDisplay(config, 0)).toBe(0);
     expect(nativeToDisplay(config, 1)).toBe(100);
@@ -109,8 +109,8 @@ describe("nativeToDisplay", () => {
   it("round-trips with displayToNative", () => {
     const config = getChannelConfig("srgb", "r")!;
     const display = 128;
-    const culori = displayToNative(config, display);
-    const back = nativeToDisplay(config, culori);
+    const native = displayToNative(config, display);
+    const back = nativeToDisplay(config, native);
     expect(back).toBe(128);
   });
 });

@@ -14,7 +14,7 @@ Universal, headless color picker component library. Unstyled, composable primiti
 ## Features
 
 - **Headless** — Radix/Reka UI-style unstyled primitives, full styling freedom
-- **Any color space** — sRGB, HSL, HSB, LCH, OKLCH, and more via [`internationalized-color`](https://github.com/user/internationalized-color)
+- **Any color space** — sRGB, HSL, HSV, HWB, Lab, LCH, Oklab, OKLCH, Display P3, A98, ProPhoto, Rec.2020, and XYZ, with zero runtime dependencies
 - **Flexible color areas** — Any two-channel combination (Hue+Saturation, Hue+Chroma, etc.)
 - **WebGL gradients** — GPU-accelerated canvas backgrounds for color area sliders
 - **Reactive** — Vue composables for working with color state reactively

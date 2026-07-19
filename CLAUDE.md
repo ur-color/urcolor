@@ -30,7 +30,7 @@ Component pages follow this structure:
 
 ### Demo Components (`docs/guide/vue/demo/*.vue`)
 
-- Import order: Vue composables → `import "internationalized-color/css"` → Color model → `@urcolor/vue` components
+- Import order: Vue composables → `import { Color } from "@urcolor/core"` → `@urcolor/vue` components
 - Use `shallowRef<Color>(Color.parse("hsl(210, 80%, 50%)")!)` for color state
 - Use `as="div"` on all components
 - Use `style="container-type: inline-size"` on root components
