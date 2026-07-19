@@ -73,6 +73,7 @@ export interface ColorAreaRootContext {
   currentModelValue: Ref<number[][]>;
   valueIndexToChangeRef: Ref<number>;
   thumbRef: Ref<HTMLElement | undefined>;
+  areaElement: Ref<HTMLElement | undefined>;
   isSlidingFromLeft: Ref<boolean>;
   isSlidingFromTop: Ref<boolean>;
   thumbAlignment: Ref<ThumbAlignment>;
@@ -218,7 +219,7 @@ const isSlidingFromLeft = computed(() => {
 const isSlidingFromTop = computed(() => !props.invertedY);
 
 function getPointFromPointerEvent(event: PointerEvent, slideStart?: boolean): number[] {
-  const rect = rectRef.value || currentElement.value.getBoundingClientRect();
+  const rect = rectRef.value || (areaElement.value ?? currentElement.value).getBoundingClientRect();
   rectRef.value = rect;
 
   const thumb = thumbRef.value;
@@ -404,6 +405,7 @@ function snapshotValues() {
 }
 
 const thumbRef = ref<HTMLElement | undefined>();
+const areaElement = ref<HTMLElement | undefined>();
 const isDragging = ref(false);
 
 provideColorAreaRootContext({
@@ -411,6 +413,7 @@ provideColorAreaRootContext({
   currentModelValue,
   valueIndexToChangeRef,
   thumbRef,
+  areaElement,
   minX,
   maxX,
   minY,

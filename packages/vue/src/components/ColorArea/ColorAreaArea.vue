@@ -8,6 +8,7 @@ export interface ColorAreaAreaProps extends /* @vue-ignore */ PrimitiveProps {
 </script>
 
 <script setup lang="ts">
+import { onMounted, onUnmounted } from "vue";
 import { Primitive, useForwardExpose } from "reka-ui";
 import { injectColorAreaRootContext } from "./ColorAreaRoot.vue";
 
@@ -16,7 +17,16 @@ withDefaults(defineProps<ColorAreaAreaProps>(), {
 });
 
 const rootContext = injectColorAreaRootContext();
-useForwardExpose();
+const { forwardRef, currentElement: areaElement } = useForwardExpose();
+
+onMounted(() => {
+  if (areaElement.value)
+    rootContext.areaElement.value = areaElement.value;
+});
+onUnmounted(() => {
+  if (rootContext.areaElement.value === areaElement.value)
+    rootContext.areaElement.value = undefined;
+});
 
 function onPointerDown(event: PointerEvent) {
   if (rootContext.disabled.value)
@@ -54,6 +64,7 @@ function onPointerUp(event: PointerEvent) {
 
 <template>
   <Primitive
+    :ref="forwardRef"
     :as-child="asChild"
     :as="as"
     role="application"

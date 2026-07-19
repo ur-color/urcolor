@@ -225,14 +225,13 @@ describe("given default ColorArea", () => {
     // and no inversion, clientX=100/clientY=50 maps back to exactly [180, 50],
     // i.e. "no movement" from the starting value.
     //
-    // Note: the pointer maths in ColorAreaRoot.vue's getPointFromPointerEvent
-    // reads getBoundingClientRect() off the ROOT element (role="group"), not
-    // the interaction surface (role="application") that ColorAreaArea.vue
-    // renders and attaches the pointer listeners to. The rect must be stubbed
-    // on the root.
+    // The pointer maths in ColorAreaRoot.vue's getPointFromPointerEvent measures
+    // the interaction surface (role="application", ColorAreaArea.vue) that
+    // actually receives the pointer events, not the root (role="group"). The
+    // rect must be stubbed on the area element.
     function stubAreaRect(w: VueWrapper) {
-      const root = w.find("[role=\"group\"]").element as HTMLElement;
-      root.getBoundingClientRect = () => ({
+      const area = w.find("[role=\"application\"]").element as HTMLElement;
+      area.getBoundingClientRect = () => ({
         left: 0,
         top: 0,
         right: 200,
@@ -244,6 +243,47 @@ describe("given default ColorArea", () => {
         toJSON() { return {}; },
       });
     }
+
+    it("should measure the interaction surface's own box, not the root's", async () => {
+      // Root gets a DIFFERENT box than the area: left 0, width 200 (so a
+      // clientX of 100 would land on hue 180 if the maths (incorrectly) used
+      // the root's rect). The area is offset and narrower: left 50, width 100.
+      // A pointer at clientX=100 is 50px into the area's 100px-wide box, i.e.
+      // 50% across -> hue 180 (midpoint of the 0-360 range) is NOT what we're
+      // testing for (that would coincide with root-based maths by chance).
+      // Instead pick clientX=75: 25px into the area's 100px box = 25% across
+      // -> hue 90. Measuring the root's 200px-wide box would instead read
+      // clientX=75 as 37.5% across -> hue 135. The two predictions diverge,
+      // so this fails under the old root-measuring behavior.
+      const root = wrapper.find("[role=\"group\"]").element as HTMLElement;
+      root.getBoundingClientRect = () => ({
+        left: 0,
+        top: 0,
+        right: 200,
+        bottom: 100,
+        width: 200,
+        height: 100,
+        x: 0,
+        y: 0,
+        toJSON() { return {}; },
+      });
+      const area = wrapper.find<HTMLElement>("[role=\"application\"]");
+      area.element.getBoundingClientRect = () => ({
+        left: 50,
+        top: 0,
+        right: 150,
+        bottom: 100,
+        width: 100,
+        height: 100,
+        x: 50,
+        y: 0,
+        toJSON() { return {}; },
+      });
+
+      await area.trigger("pointerdown", { pointerId: 1, clientX: 75, clientY: 50 });
+      const vals = getEmittedDisplayValues(wrapper);
+      expect(vals).toEqual([90, 50]);
+    });
 
     it("should expose no data-disabled/aria-disabled on the application region when enabled", () => {
       const area = wrapper.find("[role=\"application\"]");
