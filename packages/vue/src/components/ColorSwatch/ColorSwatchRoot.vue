@@ -11,6 +11,8 @@ export interface ColorSwatchRootProps extends /* @vue-ignore */ PrimitiveProps {
   checkerSize?: number;
   /** When true, reflects the color's alpha channel. When false, displays the color as fully opaque. */
   alpha?: boolean;
+  /** Accessible name for the swatch. Falls back to the resolved colour string, then "transparent". */
+  label?: string;
 }
 </script>
 
@@ -61,6 +63,15 @@ const swatchStyle = computed(() => {
     "background": `linear-gradient(${colorString.value}, ${colorString.value}), ${checkerboard}`,
   };
 });
+
+// An invisible swatch: either there's no color at all, or the color's
+// alpha channel is fully transparent. Either way, nothing is visible.
+const hasColor = computed(() => Boolean(color.value) && alphaValue.value > 0);
+const accessibleName = computed(() => props.label ?? (hasColor.value ? colorString.value : "transparent"));
+
+defineSlots<{
+  default?: (props: { color: string; alpha: number }) => any;
+}>();
 </script>
 
 <template>
@@ -69,8 +80,14 @@ const swatchStyle = computed(() => {
     :as="as"
     :as-child="asChild"
     role="img"
+    :aria-label="accessibleName"
+    aria-roledescription="color swatch"
+    :data-no-color="hasColor ? undefined : ''"
     :style="swatchStyle"
   >
-    <slot />
+    <slot
+      :color="colorString"
+      :alpha="alphaValue"
+    />
   </Primitive>
 </template>
