@@ -62,6 +62,65 @@ describe("channel substitution and arithmetic", () => {
   });
 });
 
+describe("component keywords are <number>, not <percentage>", () => {
+  // CSS Color 5: "The component keywords return a <number>, or none". `s`, `l`,
+  // `w` and `b` are numbers on a 0..100 scale, so plain addition is legal and
+  // mixing in a percentage is the type error.
+  it("adds a bare number to hsl's s", () => {
+    const c = tryParse("hsl(from red h calc(s + 10) l)");
+    expect(c).not.toBeNull();
+    expect(c!.coords[1]).toBeCloseTo(1.1, 6);
+  });
+
+  it("adds a bare number to hwb's w", () => {
+    const c = tryParse("hwb(from red h calc(w + 10) b)");
+    expect(c).not.toBeNull();
+    expect(c!.coords[1]).toBeCloseTo(0.1, 6);
+  });
+
+  it("rejects a percentage added to a keyword", () => {
+    expect(tryParse("hsl(from red h calc(s + 10%) l)")).toBeNull();
+  });
+
+  it("treats a keyword as a number in an alpha expression", () => {
+    // `s` is 100 (a number), so `s / 100` is 1 — not the 0.01 a percentage
+    // typing would silently produce.
+    const c = tryParse("hsl(from red h s l / calc(s / 100))");
+    expect(c).not.toBeNull();
+    expect(c!.alpha).toBeCloseTo(1, 6);
+  });
+});
+
+describe("color() channel keywords follow the resolved space", () => {
+  it("names the xyz spaces' channels x/y/z", () => {
+    same("color(from red xyz x y z)", "red");
+    same("color(from red xyz-d50 x y z)", "red");
+    same("color(from red xyz-d65 x y z)", "red");
+  });
+
+  it("keeps r/g/b for the rgb-family spaces", () => {
+    same("color(from red display-p3 r g b)", "red");
+    expect(tryParse("color(from red display-p3 x y z)")).toBeNull();
+  });
+});
+
+describe("the percent path resolves against each channel's own reference", () => {
+  // Bare-keyword identity round-trips fromNative -> toNative, so it cannot
+  // catch a wrong percentRef. These do: 50% of lch's c is 75 (ref 150), and of
+  // oklch's c is 0.2 (ref 0.4).
+  it("lch c uses a reference of 150", () => {
+    const c = tryParse("lch(from red l 50% h)");
+    expect(c).not.toBeNull();
+    expect(c!.coords[1]).toBeCloseTo(75, 6);
+  });
+
+  it("oklch c uses a reference of 0.4", () => {
+    const c = tryParse("oklch(from red l 50% h)");
+    expect(c).not.toBeNull();
+    expect(c!.coords[1]).toBeCloseTo(0.2, 6);
+  });
+});
+
 describe("alpha", () => {
   it("passes alpha through", () => {
     const c = tryParse("rgb(from rgb(255 0 0 / 40%) r g b / alpha)");
@@ -104,7 +163,8 @@ describe("failure modes all return null", () => {
   it("unknown channel keyword", () => expect(tryParse("rgb(from red r g q)")).toBeNull());
   it("channel from another notation", () => expect(tryParse("rgb(from red r g l)")).toBeNull());
   it("too few channels", () => expect(tryParse("rgb(from red r g)")).toBeNull());
-  it("type mismatch", () => expect(tryParse("hsl(from red h calc(s + 10) l)")).toBeNull());
+  it("type mismatch: number plus percentage", () => expect(tryParse("hsl(from red h calc(s + 10%) l)")).toBeNull());
+  it("color() keywords from the wrong space", () => expect(tryParse("color(from red xyz r g b)")).toBeNull());
   it("division by zero", () => expect(tryParse("rgb(from red calc(r / 0) g b)")).toBeNull());
   it("unknown color() space", () => expect(tryParse("color(from red nope r g b)")).toBeNull());
 });

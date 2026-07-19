@@ -106,6 +106,24 @@ function resolveColorFnSpace(keyword: string): SpaceId | null {
   return tryParse(`color(${keyword} 0 0 0)`)?.space ?? null;
 }
 
+/**
+ * `color()` covers both the RGB-family spaces and the XYZ ones with a single
+ * channel triple, so core's `NOTATIONS.color` can only name one of the two
+ * keyword sets — it names `r`/`g`/`b`. For `xyz`, `xyz-d50` and `xyz-d65` the
+ * spec's keywords are `x`/`y`/`z` instead. Only the names differ; the unit
+ * metadata is identical, so it is rebound here, where the space is known.
+ */
+const XYZ_CHANNEL_NAMES = ["x", "y", "z"] as const;
+
+function channelsForColorFn(
+  channels: readonly [NotationChannel, NotationChannel, NotationChannel],
+  space: SpaceId,
+): [NotationChannel, NotationChannel, NotationChannel] {
+  if (space !== "xyz-d50" && space !== "xyz-d65") return [...channels];
+  return channels.map((ch, i) => ({ ...ch, name: XYZ_CHANNEL_NAMES[i]! })) as
+    [NotationChannel, NotationChannel, NotationChannel];
+}
+
 /** Map an evaluated channel value from CSS units to native storage units. */
 function toNative(value: MathValue, ch: NotationChannel): number | null {
   // CSS has no percentage hues, and a hue channel's percentRef is inert.
@@ -149,25 +167,28 @@ function parseRelative(input: string, name: string): ColorObject | null {
 
   let space: SpaceId;
   let channelExprs: string[];
+  let channels: [NotationChannel, NotationChannel, NotationChannel];
   if (name === "color") {
     if (tokens.length !== 4) return null;
     const resolved = resolveColorFnSpace(tokens[0]!);
     if (!resolved) return null;
     space = resolved;
     channelExprs = tokens.slice(1);
+    channels = channelsForColorFn(def.channels, space);
   } else {
     if (tokens.length !== 3) return null;
     space = def.space;
     channelExprs = tokens;
+    channels = def.channels;
   }
 
-  const scope = buildScope(originColor, def, space);
+  const scope = buildScope(originColor, channels, space);
 
   const coords = [0, 0, 0] as unknown as Coords;
   for (let i = 0; i < 3; i++) {
     const value = evalIn(channelExprs[i]!, scope);
     if (!value) return null;
-    const native = toNative(value, def.channels[i]!);
+    const native = toNative(value, channels[i]!);
     if (native === null || !Number.isFinite(native)) return null;
     coords[i] = native;
   }
