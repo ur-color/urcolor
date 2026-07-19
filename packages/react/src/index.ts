@@ -1,11 +1,11 @@
-export * from "./components/ColorSwatch";
-export * from "./components/ColorSwatchGroup";
-export * from "./components/ColorSlider";
-export * from "./components/ColorField";
-export * from "./components/ColorArea";
-export * from "./components/ColorRing";
-export * from "./components/ColorWheel";
-export * from "./components/ColorTriangle";
+export * from "./components/color-swatch";
+export * from "./components/color-swatch-group";
+export * from "./components/color-slider";
+export * from "./components/color-field";
+export * from "./components/color-area";
+export * from "./components/color-ring";
+export * from "./components/color-wheel";
+export * from "./components/color-triangle";
 export {
   useColor,
   useColorSpace,

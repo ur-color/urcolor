@@ -2,16 +2,9 @@ import type { MaybeElementRef } from "@vueuse/core";
 import type { PropType, Ref } from "vue";
 import { unrefElement } from "@vueuse/core";
 import { computed, defineComponent, h, inject, markRaw, onMounted, provide, ref, toValue, watch, watchEffect } from "vue";
-import { createContext, Slot } from "reka-ui";
+import { Slot } from "reka-ui";
 
 export type ActiveDirection = "x" | "y";
-
-export interface ColorAreaThumbContext {
-  index: Ref<number>;
-}
-
-export const [injectColorAreaThumbContext, provideColorAreaThumbContext]
-  = createContext<ColorAreaThumbContext>("ColorAreaThumb");
 
 // --- Math utilities ---
 

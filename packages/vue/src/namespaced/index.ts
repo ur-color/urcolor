@@ -1,12 +1,8 @@
 import {
   ColorAreaRoot,
-  ColorAreaTrack,
   ColorAreaGradient,
   ColorAreaCheckerboard,
   ColorAreaThumb,
-  ColorAreaThumbX,
-  ColorAreaThumbY,
-  ColorAreaRegion,
 } from "../components/ColorArea";
 import {
   ColorSliderRoot,
@@ -55,13 +51,9 @@ import {
 
 export const ColorArea = {
   Root: ColorAreaRoot,
-  Track: ColorAreaTrack,
   Gradient: ColorAreaGradient,
   Checkerboard: ColorAreaCheckerboard,
   Thumb: ColorAreaThumb,
-  ThumbX: ColorAreaThumbX,
-  ThumbY: ColorAreaThumbY,
-  Region: ColorAreaRegion,
 };
 
 export const ColorSlider = {

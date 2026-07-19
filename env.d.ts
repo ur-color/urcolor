@@ -26,5 +26,4 @@ declare module "*.vue" {
   export type ColorAreaThumbProps = any;
   export type ColorAreaThumbXProps = any;
   export type ColorAreaThumbYProps = any;
-  export type ColorAreaTrackProps = any;
 }

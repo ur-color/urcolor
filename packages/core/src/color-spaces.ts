@@ -79,7 +79,7 @@ export const colorSpaces: Record<string, ColorSpaceConfig> = {
     channels: [
       { key: "h", label: "Hue", min: 0, max: 360, step: 1, format: "degree" },
       { key: "s", label: "Saturation", min: 0, max: 100, step: 1, format: "percentage", culoriMin: 0, culoriMax: 1 },
-      { key: "v", label: "Value", min: 0, max: 100, step: 1, format: "percentage", culoriMin: 0, culoriMax: 1 },
+      { key: "v", label: "Brightness", min: 0, max: 100, step: 1, format: "percentage", culoriMin: 0, culoriMax: 1 },
     ],
   },
   hwb: {

@@ -1,26 +1,21 @@
 import type { Meta, StoryObj } from "@storybook/vue3";
 import "internationalized-color/css";
 import { defineComponent, h, shallowRef } from "vue";
-import { ColorAreaRoot, ColorAreaTrack, ColorAreaGradient, ColorAreaCheckerboard, ColorAreaThumb } from "./index";
+import { ColorAreaRoot, ColorAreaGradient, ColorAreaCheckerboard, ColorAreaThumb } from "./index";
 
 type Story = StoryObj<typeof ColorAreaRoot>;
 
 function singleArea(props: Record<string, unknown> = {}, { alpha = false } = {}) {
   return h(
     ColorAreaRoot,
-    { class: "block size-64", ...props },
-    () =>
-      h(
-        ColorAreaTrack,
-        { class: "block relative size-full rounded overflow-hidden" },
-        () => [
-          ...(alpha ? [h(ColorAreaCheckerboard, { class: "block absolute inset-0" })] : []),
-          h(ColorAreaGradient, { class: "block absolute inset-0" }),
-          h(ColorAreaThumb, {
-            class: "absolute size-4 rounded-full border-2 border-white shadow",
-          }),
-        ],
-      ),
+    { class: "block relative size-64 rounded overflow-hidden", ...props },
+    () => [
+      ...(alpha ? [h(ColorAreaCheckerboard, { class: "block absolute inset-0" })] : []),
+      h(ColorAreaGradient, { class: "block absolute inset-0" }),
+      h(ColorAreaThumb, {
+        class: "absolute size-4 rounded-full border-2 border-white shadow",
+      }),
+    ],
   );
 }
 

@@ -6,11 +6,8 @@ import { Color, nameColor, useLocale } from "internationalized-color";
 import * as allLocales from "internationalized-color/locales";
 import {
   ColorAreaRoot,
-  ColorAreaTrack,
   ColorAreaGradient,
   ColorAreaThumb,
-  ColorAreaThumbX,
-  ColorAreaThumbY,
 } from "../../../packages/vue/src/components/ColorArea";
 import {
   ColorSliderRoot,
@@ -82,39 +79,25 @@ if (inBrowser) {
           channel-x="s"
           channel-y="v"
           as="div"
-          class="block"
+          class="hero-area-track block"
           inverted-y
           aria-label="Color picker"
           @update:model-value="onColorUpdate"
         >
-          <ColorAreaTrack
+          <ColorAreaGradient
             as="div"
-            class="hero-area-track"
-          >
-            <ColorAreaGradient
-              as="div"
-              class="absolute inset-0"
-            />
-            <ColorAreaThumb
-              as="div"
-              class="
-                absolute size-5 transform-(--reka-slider-area-thumb-transform)
-                rounded-full border-[2.5px] border-white
-                shadow-[0_0_0_1px_rgba(0,0,0,0.2),0_2px_8px_rgba(0,0,0,0.3)]
-                outline-none
-                focus-visible:shadow-[0_0_0_1px_rgba(0,0,0,0.2),0_0_0_3px_rgba(255,64,129,0.5)]
-              "
-            >
-              <ColorAreaThumbX
-                as="div"
-                class="outline-none"
-              />
-              <ColorAreaThumbY
-                as="div"
-                class="outline-none"
-              />
-            </ColorAreaThumb>
-          </ColorAreaTrack>
+            class="absolute inset-0"
+          />
+          <ColorAreaThumb
+            as="div"
+            class="
+              absolute size-5 transform-(--reka-slider-area-thumb-transform)
+              rounded-full border-[2.5px] border-white
+              shadow-[0_0_0_1px_rgba(0,0,0,0.2),0_2px_8px_rgba(0,0,0,0.3)]
+              outline-none
+              focus-visible:shadow-[0_0_0_1px_rgba(0,0,0,0.2),0_0_0_3px_rgba(255,64,129,0.5)]
+            "
+          />
         </ColorAreaRoot>
       </div>
 

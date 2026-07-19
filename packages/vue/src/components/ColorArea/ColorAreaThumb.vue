@@ -8,10 +8,10 @@ export interface ColorAreaThumbProps extends /* @vue-ignore */ PrimitiveProps {
 
 <script setup lang="ts">
 import { useMounted } from "@vueuse/core";
-import { computed } from "vue";
+import { computed, onMounted, onUnmounted } from "vue";
 import { Primitive, useForwardExpose } from "reka-ui";
 import { injectColorAreaRootContext } from "./ColorAreaRoot.vue";
-import { convertValueToPercentage, getLabel, getThumbInBoundsOffset, provideColorAreaThumbContext, useCollection, useSize } from "./utils";
+import { convertValueToPercentage, getLabel, getThumbInBoundsOffset, useCollection, useSize } from "./utils";
 defineOptions({
   inheritAttrs: false,
 });
@@ -21,17 +21,17 @@ withDefaults(defineProps<ColorAreaThumbProps>(), {
 });
 
 const rootContext = injectColorAreaRootContext();
-const { forwardRef, currentElement: groupElement } = useForwardExpose();
+const { forwardRef, currentElement: thumbElement } = useForwardExpose();
 const { CollectionItem, getItems } = useCollection();
 
-const index = computed(() => groupElement.value ? getItems(true).findIndex(i => i.ref === groupElement.value) : -1);
+const index = computed(() => thumbElement.value ? getItems(true).findIndex(i => i.ref === thumbElement.value) : -1);
 
 const value = computed(() => rootContext.modelValue?.value?.[index.value]);
 const percentX = computed(() => value.value === undefined ? 0 : convertValueToPercentage(value.value[0] ?? 0, rootContext.minX.value ?? 0, rootContext.maxX.value ?? 100));
 const percentY = computed(() => value.value === undefined ? 0 : convertValueToPercentage(value.value[1] ?? 0, rootContext.minY.value ?? 0, rootContext.maxY.value ?? 100));
 const label = computed(() => getLabel(index.value, rootContext.modelValue?.value?.length ?? 0));
 
-const size = useSize(groupElement);
+const size = useSize(thumbElement);
 const thumbInBoundsOffsetX = computed(() => {
   if (rootContext.thumbAlignment.value === "overflow" || !size.width.value)
     return 0;
@@ -45,8 +45,13 @@ const thumbInBoundsOffsetY = computed(() => {
 
 const isMounted = useMounted();
 
-provideColorAreaThumbContext({
-  index,
+onMounted(() => {
+  if (thumbElement.value)
+    rootContext.thumbRef.value = thumbElement.value;
+});
+onUnmounted(() => {
+  if (rootContext.thumbRef.value === thumbElement.value)
+    rootContext.thumbRef.value = undefined;
 });
 </script>
 
@@ -55,7 +60,12 @@ provideColorAreaThumbContext({
     <Primitive
       v-bind="$attrs"
       :ref="forwardRef"
+      role="slider"
+      :tabindex="rootContext.disabled.value ? undefined : 0"
       :aria-label="($attrs['aria-label'] as string) || label"
+      :aria-valuenow="value ? value[0] : undefined"
+      :aria-valuemin="rootContext.minX.value"
+      :aria-valuemax="rootContext.maxX.value"
       :data-disabled="rootContext.disabled.value ? '' : undefined"
       aria-roledescription="2D slider"
       :as-child="asChild"
@@ -66,6 +76,9 @@ provideColorAreaThumbContext({
         [rootContext.isSlidingFromLeft.value ? 'left' : 'right']: `calc(${percentX}% + ${thumbInBoundsOffsetX}px)`,
         [rootContext.isSlidingFromTop.value ? 'top' : 'bottom']: `calc(${percentY}% + ${thumbInBoundsOffsetY}px)`,
         display: !isMounted && value === undefined ? 'none' : undefined,
+      }"
+      @focus="() => {
+        rootContext.valueIndexToChangeRef.value = index
       }"
     >
       <slot />

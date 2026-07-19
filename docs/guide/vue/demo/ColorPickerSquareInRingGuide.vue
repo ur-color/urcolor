@@ -7,11 +7,8 @@ import {
   ColorRingGradient,
   ColorRingThumb,
   ColorAreaRoot,
-  ColorAreaTrack,
   ColorAreaGradient,
   ColorAreaThumb,
-  ColorAreaThumbX,
-  ColorAreaThumbY,
 } from "@urcolor/vue";
 
 const { color } = useColor("hsl(210, 80%, 50%)");
@@ -55,29 +52,21 @@ const { color } = useColor("hsl(210, 80%, 50%)");
       channel-y="v"
       :inverted-y="true"
       as="div"
-      class="absolute inset-[20.3%]"
+      class="absolute inset-[20.3%] relative size-full cursor-crosshair touch-none overflow-clip rounded-sm"
     >
-      <ColorAreaTrack
+      <ColorAreaGradient
         as="div"
-        class="relative size-full cursor-crosshair touch-none overflow-clip rounded-sm"
-      >
-        <ColorAreaGradient
-          as="div"
-          class="absolute inset-0"
-        />
-        <ColorAreaThumb
-          as="div"
-          class="
-            absolute size-5 transform-(--reka-slider-area-thumb-transform)
-            rounded-full border-2 border-white
-            shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_2px_4px_rgba(0,0,0,0.3)]
-            focus-visible:shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_0_0_3px_rgba(66,153,225,0.6)]
-          "
-        >
-          <ColorAreaThumbX class="outline-none" />
-          <ColorAreaThumbY class="outline-none" />
-        </ColorAreaThumb>
-      </ColorAreaTrack>
+        class="absolute inset-0"
+      />
+      <ColorAreaThumb
+        as="div"
+        class="
+          absolute size-5 transform-(--reka-slider-area-thumb-transform)
+          rounded-full border-2 border-white
+          shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_2px_4px_rgba(0,0,0,0.3)]
+          focus-visible:shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_0_0_3px_rgba(66,153,225,0.6)]
+        "
+      />
     </ColorAreaRoot>
   </div>
 </template>

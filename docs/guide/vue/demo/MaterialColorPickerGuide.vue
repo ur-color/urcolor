@@ -6,11 +6,8 @@ import { Label } from "reka-ui";
 import {
   useColor,
   ColorAreaRoot,
-  ColorAreaTrack,
   ColorAreaGradient,
   ColorAreaThumb,
-  ColorAreaThumbX,
-  ColorAreaThumbY,
   ColorSliderRoot,
   ColorSliderTrack,
   ColorSliderGradient,
@@ -35,29 +32,21 @@ const channels = computed(() => colorSpaces["hsl"]?.channels ?? []);
       channel-y="v"
       :inverted-y="true"
       as="div"
-      class="block"
+      class="relative block h-[180px] w-full cursor-crosshair touch-none overflow-clip rounded-lg"
     >
-      <ColorAreaTrack
+      <ColorAreaGradient
         as="div"
-        class="relative h-[180px] w-full cursor-crosshair touch-none overflow-clip rounded-lg"
-      >
-        <ColorAreaGradient
-          as="div"
-          class="absolute inset-0"
-        />
-        <ColorAreaThumb
-          as="div"
-          class="
-            absolute size-5 transform-(--reka-slider-area-thumb-transform)
-            rounded-full border-2 border-white
-            shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_2px_4px_rgba(0,0,0,0.3)]
-            focus-visible:shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_0_0_3px_rgba(66,153,225,0.6)]
-          "
-        >
-          <ColorAreaThumbX class="outline-none" />
-          <ColorAreaThumbY class="outline-none" />
-        </ColorAreaThumb>
-      </ColorAreaTrack>
+        class="absolute inset-0"
+      />
+      <ColorAreaThumb
+        as="div"
+        class="
+          absolute size-5 transform-(--reka-slider-area-thumb-transform)
+          rounded-full border-2 border-white
+          shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_2px_4px_rgba(0,0,0,0.3)]
+          focus-visible:shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_0_0_3px_rgba(66,153,225,0.6)]
+        "
+      />
     </ColorAreaRoot>
 
     <ColorSliderRoot

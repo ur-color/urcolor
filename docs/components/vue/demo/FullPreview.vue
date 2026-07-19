@@ -127,12 +127,9 @@ import { Icon } from "@iconify/vue";
 import FullPreviewOverrides from "./FullPreviewOverrides.vue";
 import {
   ColorAreaRoot,
-  ColorAreaTrack,
   ColorAreaGradient,
   ColorAreaCheckerboard,
   ColorAreaThumb,
-  ColorAreaThumbX,
-  ColorAreaThumbY,
   ColorSliderRoot,
   ColorSliderTrack,
   ColorSliderGradient,
@@ -463,35 +460,27 @@ const spaceKeys = Object.keys(colorSpaces);
       :inverted-y="invertedY"
       as="div"
       alpha
-      class="block self-start"
+      class="
+        relative block h-[200px] w-full cursor-crosshair touch-none
+        overflow-clip rounded-xl self-start
+      "
       :aria-label="`Color picker, selected: ${colorName}`"
     >
-      <ColorAreaTrack
+      <ColorAreaCheckerboard />
+      <ColorAreaGradient
+        as="div"
+        class="absolute inset-0"
+        :channel-overrides="areaOverrides"
+      />
+      <ColorAreaThumb
         as="div"
         class="
-          relative h-[200px] w-full cursor-crosshair touch-none overflow-clip
-          rounded-xl
+          absolute size-6 transform-(--reka-slider-area-thumb-transform)
+          rounded-full border-2 border-white
+          shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_2px_4px_rgba(0,0,0,0.3)]
         "
-      >
-        <ColorAreaCheckerboard />
-        <ColorAreaGradient
-          as="div"
-          class="absolute inset-0"
-          :channel-overrides="areaOverrides"
-        />
-        <ColorAreaThumb
-          as="div"
-          class="
-            absolute size-6 transform-(--reka-slider-area-thumb-transform)
-            rounded-full border-2 border-white
-            shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_2px_4px_rgba(0,0,0,0.3)]
-          "
-          :aria-label="`Color: ${colorName}`"
-        >
-          <ColorAreaThumbX class="outline-none" />
-          <ColorAreaThumbY class="outline-none" />
-        </ColorAreaThumb>
-      </ColorAreaTrack>
+        :aria-label="`Color: ${colorName}`"
+      />
     </ColorAreaRoot>
 
     <!-- N-channel slider rows: [label] [slider] -->

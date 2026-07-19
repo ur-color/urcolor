@@ -23,14 +23,9 @@ import ColorAreaOKLCh from './demo/ColorAreaOKLCh.vue'
 ```vue
 <template>
   <ColorAreaRoot>
-    <ColorAreaTrack>
-      <ColorAreaCheckerboard />
-      <ColorAreaGradient />
-      <ColorAreaThumb>
-        <ColorAreaThumbX />
-        <ColorAreaThumbY />
-      </ColorAreaThumb>
-    </ColorAreaTrack>
+    <ColorAreaCheckerboard />
+    <ColorAreaGradient />
+    <ColorAreaThumb />
   </ColorAreaRoot>
 </template>
 ```
@@ -76,14 +71,9 @@ Pass `:channel-overrides="false"` on `ColorAreaGradient` to reflect the color's 
     channel-y="l"
     @update:model-value="onColorUpdate"
   >
-    <ColorAreaTrack>
-      <ColorAreaCheckerboard />
-      <ColorAreaGradient :channel-overrides="false" />
-      <ColorAreaThumb>
-        <ColorAreaThumbX />
-        <ColorAreaThumbY />
-      </ColorAreaThumb>
-    </ColorAreaTrack>
+    <ColorAreaCheckerboard />
+    <ColorAreaGradient :channel-overrides="false" />
+    <ColorAreaThumb />
   </ColorAreaRoot>
 </template>
 ```
@@ -114,10 +104,6 @@ The root container that manages slider state.
 | `update:modelValue` | `Color \| undefined` | Emitted when color changes. |
 | `valueCommit` | `Color` | Emitted when interaction ends. |
 
-### ColorAreaTrack
-
-The track area that contains thumbs and receives pointer events.
-
 ### ColorAreaGradient
 
 Renders a 2D gradient canvas for the color area. Automatically samples the gradient from the root's color space and channel configuration.
@@ -133,26 +119,22 @@ Renders a 2D gradient canvas for the color area. Automatically samples the gradi
 
 ### ColorAreaCheckerboard
 
-Renders a checkerboard pattern behind the gradient to visualize alpha transparency. Place it inside `ColorAreaTrack` before `ColorAreaGradient`.
+Renders a checkerboard pattern behind the gradient to visualize alpha transparency. Place it inside `ColorAreaRoot` before `ColorAreaGradient`.
 
 ### ColorAreaThumb
 
-Wrapper for the thumb indicator. Position is set automatically via CSS custom properties.
-
-### ColorAreaThumbX / ColorAreaThumbY
-
-Individual axis thumb elements. Both are required inside `ColorAreaThumb` for keyboard navigation to work on both axes.
+The thumb indicator. Position is set automatically via CSS custom properties. Handles both axes internally, including accessible `role="slider"` elements for screen readers.
 
 ## Accessibility
 
-ColorArea provides a 2D slider interface with two independently focusable thumb elements for keyboard access to both axes.
+ColorArea provides a 2D slider interface with keyboard access to both axes.
 
 ### ARIA Labels
 
 | Attribute | Description |
 |-----------|-------------|
 | `aria-label` | Labels the root element with the color area's purpose. |
-| `role="slider"` | Applied to each thumb element (ThumbX, ThumbY) for screen reader recognition. |
+| `role="slider"` | Applied internally to each axis for screen reader recognition. |
 | `aria-valuemin` / `aria-valuemax` | Defines the range for each axis channel. |
 | `aria-valuenow` | Current value of the focused channel. |
 

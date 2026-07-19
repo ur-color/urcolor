@@ -64,16 +64,15 @@ const { color } = useColor("hsl(210, 80%, 50%)");
 - `channel-x` — the channel mapped to the horizontal axis
 - `channel-y` — the channel mapped to the vertical axis
 
-## Step 3: Add the track and gradient
+## Step 3: Add the gradient
 
-`ColorAreaTrack` is the interactive area that handles pointer events. `ColorAreaGradient` renders the 2D gradient on a canvas.
+`ColorAreaGradient` renders the 2D gradient on a canvas.
 
 ```vue
 <script setup lang="ts">
 import {
   useColor,
   ColorAreaRoot,
-  ColorAreaTrack, // [!code ++]
   ColorAreaGradient, // [!code ++]
 } from "@urcolor/vue";
 
@@ -86,38 +85,29 @@ const { color } = useColor("hsl(210, 80%, 50%)");
     color-space="hsl"
     channel-x="h"
     channel-y="s"
+    class="
+      relative h-[200px] w-full cursor-crosshair
+      touch-none overflow-clip rounded-lg
+    "
   >
-    <!-- [!code ++:9] -->
-    <ColorAreaTrack
-      class="
-        relative h-[200px] w-full cursor-crosshair
-        touch-none overflow-clip rounded-lg
-      "
-    >
-      <ColorAreaGradient class="absolute inset-0" />
-    </ColorAreaTrack>
+    <ColorAreaGradient class="absolute inset-0" /> <!-- [!code ++] -->
   </ColorAreaRoot>
 </template>
 ```
 
-The track needs a fixed height and `position: relative` so the thumb can be positioned inside it. `touch-none` prevents scroll interference on mobile.
+The root needs a fixed height and `position: relative` so the thumb can be positioned inside it. `touch-none` prevents scroll interference on mobile.
 
 ## Step 4: Add the thumb
 
-The thumb is composed of three parts: `ColorAreaThumb` (the visible, styled handle), `ColorAreaThumbX` and `ColorAreaThumbY` (hidden inputs that provide accessible `role="slider"` for each axis).
-
-You only need to style `ColorAreaThumb` — the inner X/Y elements can be left unstyled.
+`ColorAreaThumb` is the visible, styled handle. It handles both axes internally, including accessible `role="slider"` elements for screen readers.
 
 ```vue
 <script setup lang="ts">
 import {
   useColor,
   ColorAreaRoot,
-  ColorAreaTrack,
   ColorAreaGradient,
   ColorAreaThumb, // [!code ++]
-  ColorAreaThumbX, // [!code ++]
-  ColorAreaThumbY, // [!code ++]
 } from "@urcolor/vue";
 
 const { color } = useColor("hsl(210, 80%, 50%)");
@@ -129,32 +119,25 @@ const { color } = useColor("hsl(210, 80%, 50%)");
     color-space="hsl"
     channel-x="h"
     channel-y="s"
+    class="
+      relative h-[200px] w-full cursor-crosshair
+      touch-none overflow-clip rounded-lg
+    "
   >
-    <ColorAreaTrack
+    <ColorAreaGradient class="absolute inset-0" />
+    <!-- [!code ++:7] -->
+    <ColorAreaThumb
       class="
-        relative h-[200px] w-full cursor-crosshair
-        touch-none overflow-clip rounded-lg
+        absolute size-5 transform-(--reka-slider-area-thumb-transform)
+        rounded-full border-2 border-white
+        shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_2px_4px_rgba(0,0,0,0.3)]
       "
-    >
-      <ColorAreaGradient class="absolute inset-0" />
-      <!-- [!code ++:11] -->
-      <ColorAreaThumb
-        class="
-          absolute size-5 transform-(--reka-slider-area-thumb-transform)
-          rounded-full border-2 border-white
-          shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_2px_4px_rgba(0,0,0,0.3)]
-        "
-      >
-        <ColorAreaThumbX class="outline-none" />
-        <ColorAreaThumbY class="outline-none" />
-      </ColorAreaThumb>
-    </ColorAreaTrack>
+    />
   </ColorAreaRoot>
 </template>
 ```
 
 - `transform-(--reka-slider-area-thumb-transform)` — a CSS variable set by the component to position the thumb at the correct coordinates
-- `ColorAreaThumbX` and `ColorAreaThumbY` are visually hidden by default — they provide separate `role="slider"` elements for screen readers to navigate each axis independently
 
 ::: tip
 All components are completely unstyled — the classes above are just an example using Tailwind CSS. Use any styling approach you prefer.

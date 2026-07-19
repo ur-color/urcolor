@@ -7,9 +7,6 @@ import { Color } from "internationalized-color";
 import {
   ColorAreaRoot,
   ColorAreaThumb,
-  ColorAreaThumbX,
-  ColorAreaThumbY,
-  ColorAreaTrack,
 } from "../src/components/ColorArea";
 import { handleSubmit } from "./utils";
 
@@ -35,15 +32,7 @@ const ColorArea = defineComponent({
         "onValueCommit": (v: Color) => emit("valueCommit", v),
       }, {
         default: () =>
-          h(ColorAreaTrack, null, {
-            default: () =>
-              h(ColorAreaThumb, null, {
-                default: () => [
-                  h(ColorAreaThumbX),
-                  h(ColorAreaThumbY),
-                ],
-              }),
-          }),
+          h(ColorAreaThumb),
       });
   },
 });
@@ -78,54 +67,17 @@ describe("given default ColorArea", () => {
     wrapper = mount(ColorArea, { props: { disabled: false }, attachTo: document.body });
   });
 
-  it("should have 2D slider role description on the thumb group", () => {
-    const group = wrapper.find("[aria-roledescription=\"2D slider\"]");
-    expect(group.exists()).toBe(true);
+  it("should have a single thumb with role=slider and 2D slider role description", () => {
+    const thumb = wrapper.find("[role=\"slider\"][aria-roledescription=\"2D slider\"]");
+    expect(thumb.exists()).toBe(true);
+    expect(thumb.attributes("aria-valuenow")).toBe("180");
+    expect(thumb.attributes("aria-valuemin")).toBe("0");
+    expect(thumb.attributes("aria-valuemax")).toBe("360");
   });
 
-  it("should have a horizontal ThumbX with correct ARIA attributes", () => {
-    const thumbX = wrapper.find("[role=\"slider\"][aria-orientation=\"horizontal\"]");
-    expect(thumbX.exists()).toBe(true);
-    expect(thumbX.attributes("aria-valuenow")).toBe("180");
-    expect(thumbX.attributes("aria-valuemin")).toBe("0");
-    expect(thumbX.attributes("aria-valuemax")).toBe("360");
-  });
-
-  it("should have a vertical ThumbY with correct ARIA attributes", () => {
-    const thumbY = wrapper.find("[role=\"slider\"][aria-orientation=\"vertical\"]");
-    expect(thumbY.exists()).toBe(true);
-    expect(thumbY.attributes("aria-valuenow")).toBe("50");
-    expect(thumbY.attributes("aria-valuemin")).toBe("0");
-    expect(thumbY.attributes("aria-valuemax")).toBe("100");
-  });
-
-  describe("roving tabindex", () => {
-    it("should have tabindex 0 on ThumbX and -1 on ThumbY by default (activeDirection=x)", () => {
-      const thumbX = wrapper.find("[role=\"slider\"][aria-orientation=\"horizontal\"]");
-      const thumbY = wrapper.find("[role=\"slider\"][aria-orientation=\"vertical\"]");
-      expect(thumbX.attributes("tabindex")).toBe("0");
-      expect(thumbY.attributes("tabindex")).toBe("-1");
-    });
-
-    it("should switch tabindex when pressing Down arrow (activeDirection switches to y)", async () => {
-      const thumbX = wrapper.find("[role=\"slider\"][aria-orientation=\"horizontal\"]");
-      await thumbX.trigger("keydown", { key: "ArrowDown" });
-      const thumbXAfter = wrapper.find("[role=\"slider\"][aria-orientation=\"horizontal\"]");
-      const thumbYAfter = wrapper.find("[role=\"slider\"][aria-orientation=\"vertical\"]");
-      expect(thumbXAfter.attributes("tabindex")).toBe("-1");
-      expect(thumbYAfter.attributes("tabindex")).toBe("0");
-    });
-
-    it("should switch back to x when pressing Right arrow after being on y", async () => {
-      const thumbX = wrapper.find("[role=\"slider\"][aria-orientation=\"horizontal\"]");
-      await thumbX.trigger("keydown", { key: "ArrowDown" });
-      const thumbY = wrapper.find("[role=\"slider\"][aria-orientation=\"vertical\"]");
-      await thumbY.trigger("keydown", { key: "ArrowRight" });
-      const thumbXAfter = wrapper.find("[role=\"slider\"][aria-orientation=\"horizontal\"]");
-      const thumbYAfter = wrapper.find("[role=\"slider\"][aria-orientation=\"vertical\"]");
-      expect(thumbXAfter.attributes("tabindex")).toBe("0");
-      expect(thumbYAfter.attributes("tabindex")).toBe("-1");
-    });
+  it("should have tabindex 0 on the thumb when enabled", () => {
+    const thumb = wrapper.find("[role=\"slider\"]");
+    expect(thumb.attributes("tabindex")).toBe("0");
   });
 
   describe("when disabled", () => {
@@ -133,23 +85,14 @@ describe("given default ColorArea", () => {
       await wrapper.setProps({ disabled: true });
     });
 
-    it("should disable the thumb group", () => {
-      const group = wrapper.find("[aria-roledescription=\"2D slider\"]");
-      expect(group.attributes("data-disabled")).toBe("");
+    it("should disable the thumb", () => {
+      const thumb = wrapper.find("[aria-roledescription=\"2D slider\"]");
+      expect(thumb.attributes("data-disabled")).toBe("");
     });
 
-    it("should remove tabindex from both thumbs", () => {
-      const thumbX = wrapper.find("[role=\"slider\"][aria-orientation=\"horizontal\"]");
-      const thumbY = wrapper.find("[role=\"slider\"][aria-orientation=\"vertical\"]");
-      expect(thumbX.attributes("tabindex")).toBeUndefined();
-      expect(thumbY.attributes("tabindex")).toBeUndefined();
-    });
-  });
-
-  describe("when enabled", () => {
-    it("should have tabindex on ThumbX (active direction)", () => {
-      const thumbX = wrapper.find("[role=\"slider\"][aria-orientation=\"horizontal\"]");
-      expect(thumbX.attributes("tabindex")).toBe("0");
+    it("should remove tabindex from the thumb", () => {
+      const thumb = wrapper.find("[role=\"slider\"]");
+      expect(thumb.attributes("tabindex")).toBeUndefined();
     });
   });
 

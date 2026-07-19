@@ -11,24 +11,20 @@ export default function ColorAreaOKLCh() {
       colorSpace="oklch"
       channelX="c"
       channelY="l"
-      className="block"
+      className="
+        relative block h-[200px] w-full cursor-crosshair touch-none
+        overflow-clip rounded-lg
+      "
       aria-label="OKLCh color area"
     >
-      <ColorArea.Track
+      <ColorArea.Gradient className="absolute inset-0" />
+      <ColorArea.Thumb
         className="
-          relative h-[200px] w-full cursor-crosshair touch-none overflow-clip
-          rounded-lg
+          absolute size-5
+          rounded-full border-2 border-white
+          shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_2px_4px_rgba(0,0,0,0.3)]
         "
-      >
-        <ColorArea.Gradient className="absolute inset-0" />
-        <ColorArea.Thumb
-          className="
-            absolute size-5
-            rounded-full border-2 border-white
-            shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_2px_4px_rgba(0,0,0,0.3)]
-          "
-        />
-      </ColorArea.Track>
+      />
     </ColorArea.Root>
   );
 }

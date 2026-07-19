@@ -5,8 +5,7 @@ import { createContext, useDirection, useForwardExpose, VisuallyHidden } from "r
 import { computed, ref, shallowRef, toRefs, watch } from "vue";
 import { Color } from "internationalized-color";
 import { colorSpaces, getChannelConfig, displayToCulori, culoriToDisplay, type ChannelConfig } from "@urcolor/core";
-import type { ActiveDirection } from "./utils";
-import { useCollection, useFormControl, ARROW_KEYS, getClosestThumbIndex, hasMinStepsBetweenValues, linearScale, snapToStep } from "./utils";
+import { useCollection, useFormControl, ARROW_KEYS, PAGE_KEYS, getClosestThumbIndex, hasMinStepsBetweenValues, linearScale, snapToStep, type ActiveDirection } from "./utils";
 
 type Direction = "ltr" | "rtl";
 type ThumbAlignment = "contain" | "overflow";
@@ -65,9 +64,7 @@ export interface ColorAreaRootContext {
   modelValue?: Readonly<Ref<number[][] | null | undefined>>;
   currentModelValue: Ref<number[][]>;
   valueIndexToChangeRef: Ref<number>;
-  thumbXElements: Ref<HTMLElement[]>;
-  thumbYElements: Ref<HTMLElement[]>;
-  activeDirection: Ref<ActiveDirection>;
+  thumbRef: Ref<HTMLElement | undefined>;
   isSlidingFromLeft: Ref<boolean>;
   isSlidingFromTop: Ref<boolean>;
   thumbAlignment: Ref<ThumbAlignment>;
@@ -84,7 +81,7 @@ export const [injectColorAreaRootContext, provideColorAreaRootContext]
 </script>
 
 <script setup lang="ts">
-import ColorAreaImpl from "./ColorAreaImpl.vue";
+import { Primitive } from "reka-ui";
 defineOptions({
   inheritAttrs: false,
 });
@@ -208,23 +205,16 @@ const isSlidingFromLeft = computed(() => {
 });
 const isSlidingFromTop = computed(() => !props.invertedY);
 
-function getThumbGroupElement(): HTMLElement | undefined {
-  const thumbX = thumbXElements.value[valueIndexToChangeRef.value];
-  const thumbY = thumbYElements.value[valueIndexToChangeRef.value];
-  const thumb = thumbX || thumbY;
-  return thumb?.parentElement as HTMLElement | undefined;
-}
-
 function getPointFromPointerEvent(event: PointerEvent, slideStart?: boolean): number[] {
   const rect = rectRef.value || currentElement.value.getBoundingClientRect();
   rectRef.value = rect;
 
-  const thumbGroup = getThumbGroupElement();
-  const thumbWidth = thumbAlignment.value === "contain" && thumbGroup ? thumbGroup.clientWidth : 0;
-  const thumbHeight = thumbAlignment.value === "contain" && thumbGroup ? thumbGroup.clientHeight : 0;
+  const thumb = thumbRef.value;
+  const thumbWidth = thumbAlignment.value === "contain" && thumb ? thumb.clientWidth : 0;
+  const thumbHeight = thumbAlignment.value === "contain" && thumb ? thumb.clientHeight : 0;
 
-  if (!offsetPosition.value && !slideStart && thumbAlignment.value === "contain" && thumbGroup) {
-    const thumbRect = thumbGroup.getBoundingClientRect();
+  if (!offsetPosition.value && !slideStart && thumbAlignment.value === "contain" && thumb) {
+    const thumbRect = thumb.getBoundingClientRect();
     offsetPosition.value = {
       x: event.clientX - thumbRect.left,
       y: event.clientY - thumbRect.top,
@@ -263,11 +253,6 @@ function handleSlideStart(event: PointerEvent) {
 
 function handleSlideMove(event: PointerEvent) {
   const point = getPointFromPointerEvent(event);
-  if (lastPointerPosition.value) {
-    const dx = Math.abs(event.clientX - lastPointerPosition.value.x);
-    const dy = Math.abs(event.clientY - lastPointerPosition.value.y);
-    activeDirection.value = dx >= dy ? "x" : "y";
-  }
   lastPointerPosition.value = { x: event.clientX, y: event.clientY };
   updateValues(point, valueIndexToChangeRef.value);
 }
@@ -312,8 +297,7 @@ function updateValues(point: number[], atIndex: number, { commit = false, skipFo
 
   if (hasChanged) {
     if (!skipFocus) {
-      const thumbs = activeDirection.value === "x" ? thumbXElements.value : thumbYElements.value;
-      thumbs[valueIndexToChangeRef.value]?.focus();
+      thumbRef.value?.focus();
     }
     internalValue.value = nextValues;
 
@@ -345,7 +329,6 @@ function handleStepKeyDown(event: KeyboardEvent) {
     return;
 
   const multiplier = (event.shiftKey && ARROW_KEYS.includes(event.key)) ? 10 : 1;
-  activeDirection.value = delta.axis;
 
   const dirMultiplier = delta.axis === "x"
     ? (isSlidingFromLeft.value ? 1 : -1)
@@ -363,7 +346,6 @@ function handleStepKeyDown(event: KeyboardEvent) {
 }
 
 function handleBoundaryKey(axis: ActiveDirection, boundaryValue: number) {
-  activeDirection.value = axis;
   const atIndex = valueIndexToChangeRef.value;
   const value = currentModelValue.value[atIndex];
   if (!value)
@@ -382,18 +364,14 @@ function handleBoundaryKey(axis: ActiveDirection, boundaryValue: number) {
   updateValues(point, atIndex, { commit: true });
 }
 
-const thumbXElements = ref<HTMLElement[]>([]);
-const thumbYElements = ref<HTMLElement[]>([]);
-const activeDirection = ref<ActiveDirection>("x");
+const thumbRef = ref<HTMLElement | undefined>();
 const isDragging = ref(false);
 
 provideColorAreaRootContext({
   modelValue: internalValue,
   currentModelValue,
   valueIndexToChangeRef,
-  thumbXElements,
-  thumbYElements,
-  activeDirection,
+  thumbRef,
   minX,
   maxX,
   minY,
@@ -413,7 +391,7 @@ provideColorAreaRootContext({
 
 <template>
   <CollectionSlot>
-    <ColorAreaImpl
+    <Primitive
       v-bind="$attrs"
       :ref="forwardRef"
       :as-child="asChild"
@@ -424,18 +402,39 @@ provideColorAreaRootContext({
       :style="{
         ['--reka-slider-area-thumb-transform' as any]: `translate(${!isSlidingFromLeft && thumbAlignment === 'overflow' ? '50%' : '-50%'}, ${!isSlidingFromTop && thumbAlignment === 'overflow' ? '50%' : '-50%'})`,
       }"
-      @pointerdown="() => {
-        if (!disabled) valuesBeforeSlideStartRef = currentModelValue
+      @keydown="(event: KeyboardEvent) => {
+        if (disabled) return;
+        if (event.key === 'Home') { handleBoundaryKey('x', minX); event.preventDefault(); }
+        else if (event.key === 'End') { handleBoundaryKey('x', maxX); event.preventDefault(); }
+        else if (event.key === 'PageUp') { handleBoundaryKey('y', minY); event.preventDefault(); }
+        else if (event.key === 'PageDown') { handleBoundaryKey('y', maxY); event.preventDefault(); }
+        else if (PAGE_KEYS.concat(ARROW_KEYS).includes(event.key)) { handleStepKeyDown(event); event.preventDefault(); }
       }"
-      @slide-start="!disabled && handleSlideStart($event)"
-      @slide-move="!disabled && handleSlideMove($event)"
-      @slide-end="!disabled && handleSlideEnd()"
-      @home-key-down="!disabled && handleBoundaryKey('x', minX)"
-      @end-key-down="!disabled && handleBoundaryKey('x', maxX)"
-      @page-up-key-down="!disabled && handleBoundaryKey('y', minY)"
-      @page-down-key-down="!disabled && handleBoundaryKey('y', maxY)"
-      @step-key-down="(event) => {
-        if (!disabled) handleStepKeyDown(event)
+      @pointerdown="(event: PointerEvent) => {
+        if (disabled) return;
+        const target = event.target as HTMLElement;
+        target.setPointerCapture(event.pointerId);
+        event.preventDefault();
+        if (thumbRef && thumbRef.contains(target)) {
+          thumbRef.focus();
+        }
+        else {
+          valuesBeforeSlideStartRef = currentModelValue;
+          handleSlideStart(event);
+        }
+      }"
+      @pointermove="(event: PointerEvent) => {
+        if (disabled) return;
+        const target = event.target as HTMLElement;
+        if (target.hasPointerCapture(event.pointerId)) handleSlideMove(event);
+      }"
+      @pointerup="(event: PointerEvent) => {
+        if (disabled) return;
+        const target = event.target as HTMLElement;
+        if (target.hasPointerCapture(event.pointerId)) {
+          target.releasePointerCapture(event.pointerId);
+          handleSlideEnd();
+        }
       }"
     >
       <slot :model-value="colorRef" />
@@ -449,6 +448,6 @@ provideColorAreaRootContext({
         :required="required"
         :disabled="disabled"
       />
-    </ColorAreaImpl>
+    </Primitive>
   </CollectionSlot>
 </template>

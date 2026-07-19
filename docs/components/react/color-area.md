@@ -23,11 +23,9 @@ import ColorAreaOKLCh from './demo/ColorAreaOKLCh.tsx'
 
 ```tsx
 <ColorArea.Root>
-  <ColorArea.Track>
-    <ColorArea.Checkerboard />
-    <ColorArea.Gradient />
-    <ColorArea.Thumb />
-  </ColorArea.Track>
+  <ColorArea.Checkerboard />
+  <ColorArea.Gradient />
+  <ColorArea.Thumb />
 </ColorArea.Root>
 ```
 
@@ -79,10 +77,6 @@ The root container that manages slider state.
 | `thumbAlignment` | `'contain' \| 'overflow'` | `'overflow'` | How thumb is positioned relative to track bounds. |
 | `onValueChange` | `(color: Color) => void` | — | Called when color changes. |
 | `onValueCommit` | `(color: Color) => void` | — | Called when interaction ends. |
-
-### ColorArea.Track
-
-The track area that contains thumbs and receives pointer events.
 
 ### ColorArea.Gradient
 

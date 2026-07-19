@@ -27,7 +27,6 @@ Two-dimensional color selection for any pair of channels.
 <script setup>
 import {
   ColorAreaRoot,
-  ColorAreaTrack,
   ColorAreaThumb,
   ColorAreaGradient,
 } from '@urcolor/vue'
@@ -37,17 +36,15 @@ const color = ref('hsl(200, 100%, 50%)')
 
 <template>
   <ColorAreaRoot v-model="color" color-space="hsl" channel-x="saturation" channel-y="lightness">
-    <ColorAreaTrack>
-      <ColorAreaGradient />
-      <ColorAreaThumb />
-    </ColorAreaTrack>
+    <ColorAreaGradient />
+    <ColorAreaThumb />
   </ColorAreaRoot>
 </template>
 ```
 
 **Props:** `modelValue`, `colorSpace`, `channelX`, `channelY`, `disabled`, `invertedX`, `invertedY`, `thumbAlignment` ("contain" | "overflow"), `name`, `dir`
 
-**Sub-components:** `ColorAreaRoot`, `ColorAreaTrack`, `ColorAreaThumb`, `ColorAreaGradient`, `ColorAreaCheckerboard`
+**Sub-components:** `ColorAreaRoot`, `ColorAreaThumb`, `ColorAreaGradient`, `ColorAreaCheckerboard`
 
 ### ColorSlider
 
