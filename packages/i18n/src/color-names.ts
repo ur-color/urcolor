@@ -122,7 +122,18 @@ export class ColorNames {
     return filterSupportedLocales(locales, localesOf(options.source));
   }
 
-  /** The colour's name in this locale, or `undefined` when unavailable. */
+  /**
+   * The colour's name in this locale, or `undefined` when unavailable.
+   *
+   * With the default `fallback: "nearest"`, colours near the achromatic
+   * extremes (very light, very dark, near-grey) can return a wrong but
+   * confident-looking name: those regions sit at the edge of the sampled
+   * space, where the nearest populated bin can be a real perceptual
+   * distance away. Pure white, for instance, resolves to "light pink" in
+   * Korean and "light blue" in Chinese. Check `coverage` and `binDistance`
+   * on {@link resolve} to detect this, or pass `fallback: "none"` to opt
+   * out of nearest-bin guesses entirely.
+   */
   of(color: Color): string | undefined {
     const result = this.resolve(color);
     if (result.coverage === "none") return undefined;
