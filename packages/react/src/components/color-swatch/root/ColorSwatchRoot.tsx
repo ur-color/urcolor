@@ -24,8 +24,10 @@ export const ColorSwatchRoot = forwardRef<HTMLDivElement, ColorSwatchRootProps>(
       if (!color) {
         const checkerboard = `repeating-conic-gradient(rgb(230, 230, 230) 0%, rgb(230, 230, 230) 25%, white 0%, white 50%) 0% 50% / ${checkerSize}px ${checkerSize}px`;
         return {
-          "--swatch-color": "transparent",
+          "--swatch-color-opaque": "transparent",
+          "--swatch-alpha": 1,
           "--swatch-checkerboard": checkerboard,
+          "--swatch-color": "transparent",
           background: `linear-gradient(transparent, transparent), ${checkerboard}`,
         } as React.CSSProperties;
       }
