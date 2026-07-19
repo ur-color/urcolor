@@ -11,7 +11,7 @@ import { useMounted } from "@vueuse/core";
 import { computed, onMounted, onUnmounted } from "vue";
 import { Primitive, useForwardExpose } from "reka-ui";
 import { injectColorAreaRootContext } from "./ColorAreaRoot.vue";
-import { convertValueToPercentage, getLabel, getThumbInBoundsOffset, useCollection, useSize } from "./utils";
+import { convertValueToPercentage, getLabel, getThumbInBoundsOffset, useCollection, useSize } from "../../shared/utils";
 defineOptions({
   inheritAttrs: false,
 });

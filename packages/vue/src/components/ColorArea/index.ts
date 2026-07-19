@@ -16,6 +16,4 @@ export {
   default as ColorAreaCheckerboard,
   type ColorAreaCheckerboardProps,
 } from "./ColorAreaCheckerboard.vue";
-export {
-  type ActiveDirection,
-} from "./utils";
+export type { ActiveDirection } from "../../shared/utils";

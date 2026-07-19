@@ -5,7 +5,7 @@ import { createContext, useDirection, useForwardExpose, VisuallyHidden } from "r
 import { computed, ref, shallowRef, toRefs, watch } from "vue";
 import { Color, type SpaceId } from "@urcolor/core";
 import { colorSpaces, getChannelConfig, displayToNative, nativeToDisplay, type ChannelConfig } from "@urcolor/core";
-import { useCollection, useFormControl, ARROW_KEYS, PAGE_KEYS, getClosestThumbIndex, hasMinStepsBetweenValues, linearScale, snapToStep, type ActiveDirection } from "./utils";
+import { useCollection, useFormControl, ARROW_KEYS, PAGE_KEYS, getClosestThumbIndex, hasMinStepsBetweenValues, linearScale, snapToStep, type ActiveDirection } from "../../shared/utils";
 
 type Direction = "ltr" | "rtl";
 type ThumbAlignment = "contain" | "overflow";

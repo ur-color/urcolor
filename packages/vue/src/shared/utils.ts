@@ -97,6 +97,17 @@ export function getClosestThumbIndex(values: number[][], point: number[], minX: 
   return distances.indexOf(closestDistance);
 }
 
+/**
+ * Wrap a value cyclically into [min, max), used for angular channels such as hue
+ * where stepping past 360 should land back near 0 rather than clamping.
+ */
+export function cyclicWrap(value: number, min: number, max: number): number {
+  const range = max - min;
+  if (range <= 0)
+    return min;
+  return ((value - min) % range + range) % range + min;
+}
+
 export const PAGE_KEYS = ["PageUp", "PageDown"];
 export const ARROW_KEYS = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"];
 
