@@ -1,0 +1,50 @@
+name: Sync uwdata color names
+
+on:
+  schedule:
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - run: bun install --frozen-lockfile
+
+      - name: Regenerate data from upstream master
+        id: sync
+        run: |
+          bun run --cwd packages/i18n sync:uwdata 2>&1 | tee /tmp/sync-report.txt
+          {
+            echo 'report<<EOF'
+            cat /tmp/sync-report.txt
+            echo EOF
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Verify the regenerated data still passes tests
+        run: bun test packages/i18n/
+
+      - uses: peter-evans/create-pull-request@v6
+        with:
+          branch: chore/sync-uwdata
+          title: "chore(i18n): sync uwdata color names"
+          commit-message: "chore(i18n): sync uwdata color names"
+          body: |
+            Automated regeneration of `packages/i18n/src/data/uwdata/` from upstream.
+
+            Review the coverage and chunk-size deltas below before merging. A large
+            size jump or a coverage drop means upstream changed something material.
+
+            ```
+            ${{ steps.sync.outputs.report }}
+            ```
