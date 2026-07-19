@@ -98,7 +98,7 @@ function applyOverrides(baseColor: Color, colorSpace: SpaceId): Color {
   for (const [k, v] of Object.entries(overrides)) {
     if (k === "alpha") {
       result = result.withAlpha(v);
-    } else {
+    } else if (getChannelConfig(colorSpace, k)) {
       channelUpdates[k] = v;
     }
   }

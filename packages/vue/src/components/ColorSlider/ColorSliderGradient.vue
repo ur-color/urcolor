@@ -54,7 +54,7 @@ const canvasOpacity = computed(() => {
   const overrides = props.channelOverrides;
   // If overrides is false or doesn't include alpha, reflect color's alpha (unless this IS the alpha channel)
   if (isAlphaChannel.value) return 1;
-  if (overrides === false || !overrides.alpha) {
+  if (overrides === false || (typeof overrides === "object" && overrides.alpha === undefined)) {
     return rootContext.colorRef.value?.alpha ?? 1;
   }
   return 1;
@@ -77,7 +77,7 @@ const autoColors = computed<Color[] | null>(() => {
     if (overrides && typeof overrides === "object") {
       const nonAlphaOverrides: Record<string, number> = {};
       for (const [k, v] of Object.entries(overrides)) {
-        if (k !== "alpha") nonAlphaOverrides[k] = v;
+        if (k !== "alpha" && getChannelConfig(colorSpace, k)) nonAlphaOverrides[k] = v;
       }
       if (Object.keys(nonAlphaOverrides).length > 0) {
         baseColor = color.with({ space: colorSpace, ...nonAlphaOverrides });
@@ -101,7 +101,7 @@ const autoColors = computed<Color[] | null>(() => {
   if (overrides && typeof overrides === "object") {
     const channelOverridesForSet: Record<string, number> = {};
     for (const [k, v] of Object.entries(overrides)) {
-      if (k !== "alpha") channelOverridesForSet[k] = v;
+      if (k !== "alpha" && getChannelConfig(colorSpace, k)) channelOverridesForSet[k] = v;
     }
     if (Object.keys(channelOverridesForSet).length > 0) {
       baseColor = color.with({ space: colorSpace, ...channelOverridesForSet });

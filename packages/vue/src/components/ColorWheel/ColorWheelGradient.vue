@@ -33,7 +33,7 @@ function applyOverrides(baseColor: Color, colorSpace: SpaceId): Color {
   const channelUpdates: Record<string, number> = {};
   for (const [k, v] of Object.entries(overrides)) {
     if (k === "alpha") result = result.withAlpha(v);
-    else channelUpdates[k] = v;
+    else if (getChannelConfig(colorSpace, k)) channelUpdates[k] = v;
   }
   if (Object.keys(channelUpdates).length > 0) {
     result = result.with({ space: colorSpace, ...channelUpdates });
