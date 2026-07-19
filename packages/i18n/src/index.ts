@@ -13,3 +13,12 @@ registerSource(uwdataSource, uwdataChunks);
 
 export { listSources, getSource } from "./engine/registry";
 export type { LanguageCoverage, NameSource } from "./engine/types";
+
+// Colour-name lookup.
+export { ColorNames } from "./color-names";
+export type {
+  ColorNameResolution,
+  ColorNamesOptions,
+  ResolvedColorNamesOptions,
+} from "./color-names";
+export type { Candidate } from "./engine/lookup-full";

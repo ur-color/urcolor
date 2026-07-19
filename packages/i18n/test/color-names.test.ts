@@ -1,0 +1,168 @@
+import { describe, expect, it } from "bun:test";
+import { Color } from "@urcolor/core";
+import { ColorNames } from "../src/index";
+
+const BLUE = Color.parse("#3b82f6")!;
+
+describe("ColorNames.load", () => {
+  it("loads a full-model language and names a colour", async () => {
+    const names = await ColorNames.load("ko", { source: "uwdata" });
+    const name = names.of(BLUE);
+    expect(name).toBeString();
+    expect(name!.length).toBeGreaterThan(0);
+  });
+
+  it("negotiates a regional tag down to the base language", async () => {
+    const names = await ColorNames.load("ko-KR", { source: "uwdata" });
+    expect(names.resolvedOptions().locale).toBe("ko");
+  });
+
+  it("throws RangeError for an unsupported locale", async () => {
+    // bun-types mistypes `.rejects.toThrow()` as returning `void`, though it
+    // is a Promise at runtime and must be awaited for the assertion to run.
+    // eslint-disable-next-line @typescript-eslint/await-thenable
+    await expect(ColorNames.load("xh", { source: "uwdata" })).rejects.toThrow(RangeError);
+  });
+
+  it("throws for an unknown source", async () => {
+    // eslint-disable-next-line @typescript-eslint/await-thenable
+    await expect(ColorNames.load("ko", { source: "nope" })).rejects.toThrow(/unknown source/i);
+  });
+});
+
+describe("ColorNames constructor", () => {
+  it("throws when the chunk has not been loaded", () => {
+    expect(() => new ColorNames("ru", { source: "uwdata" })).toThrow(/ColorNames\.load/);
+  });
+
+  it("works synchronously once loaded", async () => {
+    await ColorNames.load("en", { source: "uwdata" });
+    expect(new ColorNames("en", { source: "uwdata" }).of(BLUE)).toBeString();
+  });
+});
+
+describe("style option", () => {
+  it("returns the display name for style long and the key for style short", async () => {
+    const long = await ColorNames.load("ko", { source: "uwdata", style: "long" });
+    const short = await ColorNames.load("ko", { source: "uwdata", style: "short" });
+    expect(long.of(BLUE)).toBe(long.resolve(BLUE).candidates[0]!.name);
+    expect(short.of(BLUE)).toBe(short.resolve(BLUE).candidates[0]!.term);
+  });
+});
+
+describe("resolve", () => {
+  it("returns candidates sorted by probability with full metadata", async () => {
+    const names = await ColorNames.load("en", { source: "uwdata" });
+    const result = names.resolve(BLUE);
+
+    expect(result.source).toBe("uwdata");
+    expect(result.model).toBe("full");
+    expect(["exact", "nearest"]).toContain(result.coverage);
+    expect(result.probability).toBeGreaterThan(0);
+    expect(result.candidates.length).toBeGreaterThan(0);
+    for (let i = 1; i < result.candidates.length; i++) {
+      expect(result.candidates[i - 1]!.probability).toBeGreaterThanOrEqual(
+        result.candidates[i]!.probability,
+      );
+    }
+  });
+
+  it("honours topN", async () => {
+    const names = await ColorNames.load("en", { source: "uwdata", topN: 2 });
+    expect(names.resolve(BLUE).candidates.length).toBeLessThanOrEqual(2);
+  });
+});
+
+describe("fallback option", () => {
+  it("returns undefined from of() on a nearest match when fallback is none", async () => {
+    const nearest = await ColorNames.load("ro", { source: "uwdata", fallback: "nearest" });
+    const strict = await ColorNames.load("ro", { source: "uwdata", fallback: "none" });
+
+    // Found by walking a grid of Oklab values (L 0.1->0.9 step 0.05, a and b
+    // -0.2->0.2 step 0.05) and taking the first that resolves as "nearest"
+    // for Romanian: binDistance ~= 0.0707, nearest term "albastru". The
+    // assertions below are unconditional on purpose; a guarded assertion
+    // would let this test pass while testing nothing.
+    const probe = Color.fromOklab(0.45, -0.05, -0.2);
+
+    expect(nearest.resolve(probe).coverage).toBe("nearest");
+    expect(nearest.of(probe)).toBeString();
+    expect(strict.of(probe)).toBeUndefined();
+    expect(strict.resolve(probe).coverage).toBe("none");
+  });
+});
+
+describe("hue-model languages", () => {
+  it("names a saturated colour and refuses a grey", async () => {
+    const names = await ColorNames.load("ar", { source: "uwdata" });
+    expect(names.resolve(Color.parse("#ff0000")!).model).toBe("hue");
+    expect(names.of(Color.parse("#808080")!)).toBeUndefined();
+  });
+});
+
+describe("reverse lookup", () => {
+  it("returns a Color for a known term", async () => {
+    const names = await ColorNames.load("ko", { source: "uwdata" });
+    const term = names.resolve(BLUE).term!;
+    const color = names.colorOf(term);
+    expect(color).toBeInstanceOf(Color);
+  });
+
+  it("returns undefined for an unknown term", async () => {
+    const names = await ColorNames.load("ko", { source: "uwdata" });
+    expect(names.colorOf("definitely-not-a-korean-colour-term")).toBeUndefined();
+  });
+});
+
+describe("supportedLocalesOf", () => {
+  it("filters requested tags to those the source covers", () => {
+    const supported = ColorNames.supportedLocalesOf(["ko-KR", "xh", "de"], { source: "uwdata" });
+    expect(supported).toEqual(["ko-KR", "de"]);
+  });
+});
+
+describe("known limitation: white falls back into a pale chromatic bin", () => {
+  // Pure white sits in a near-degenerate top bin with almost no data, so the
+  // nearest-bin search reaches sideways into a pale chromatic bin instead.
+  // This is honestly labelled (coverage: "nearest", with a binDistance) but
+  // the default settings answer confidently with a name that is not white.
+  // These tests pin the measured behaviour rather than hide it.
+  const WHITE = Color.parse("#ffffff")!;
+
+  it("resolves #ffffff to a light-pink term for Korean", async () => {
+    const names = await ColorNames.load("ko", { source: "uwdata" });
+    const result = names.resolve(WHITE);
+
+    expect(result.coverage).toBe("nearest");
+    // Source data stores Hangul in NFD; normalize before comparing so the
+    // assertion isn't sensitive to Unicode composition form.
+    expect(result.name?.normalize("NFC")).toBe("연분홍색".normalize("NFC"));
+    expect(result.term?.normalize("NFC")).toBe("연분홍".normalize("NFC"));
+    // Measured distance from #ffffff's Oklab bin to the nearest populated
+    // bin's centre.
+    expect(result.binDistance).toBeCloseTo(0.05, 5);
+  });
+
+  it("resolves #ffffff to a light-blue term for Chinese", async () => {
+    const names = await ColorNames.load("zh", { source: "uwdata" });
+    const result = names.resolve(WHITE);
+
+    expect(result.coverage).toBe("nearest");
+    expect(result.name).toBe("浅蓝色");
+    expect(result.term).toBe("浅蓝");
+    expect(result.binDistance).toBeCloseTo(0.0707, 4);
+  });
+});
+
+describe("resolvedOptions", () => {
+  it("reports the negotiated locale, model, and defaults", async () => {
+    const names = await ColorNames.load("ko", { source: "uwdata" });
+    expect(names.resolvedOptions()).toMatchObject({
+      locale: "ko",
+      source: "uwdata",
+      model: "full",
+      style: "long",
+      fallback: "nearest",
+    });
+  });
+});
