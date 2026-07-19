@@ -7,9 +7,23 @@
 
 /** The channel tokens and alpha extracted from a functional notation body. */
 export interface Components {
+  /** The raw inner text, before any splitting. */
+  body: string;
   args: string[];
   /** `undefined` when no alpha was written (caller defaults to 1). */
   alpha: number | undefined;
+}
+
+/** Index of the first `/` at parenthesis depth 0, or -1. */
+function topLevelSlash(body: string): number {
+  let depth = 0;
+  for (let i = 0; i < body.length; i++) {
+    const ch = body[i];
+    if (ch === "(") depth++;
+    else if (ch === ")") depth--;
+    else if (ch === "/" && depth === 0) return i;
+  }
+  return -1;
 }
 
 /**
@@ -21,14 +35,14 @@ export function parseFn(input: string, name: string): Components | null {
   const m = input.trim().match(re);
   const body = m?.[1];
   if (body === undefined) return null;
-  const slash = body.indexOf("/");
+  const slash = topLevelSlash(body);
   const main = slash >= 0 ? body.slice(0, slash) : body;
   const args = main
     .trim()
     .split(/[\s,]+/)
     .filter(Boolean);
   const alpha = slash >= 0 ? parseAlpha(body.slice(slash + 1).trim()) : undefined;
-  return { args, alpha };
+  return { body, args, alpha };
 }
 
 /** Parse an alpha token (`none` -> 0, `50%` -> 0.5, `0.5` -> 0.5). */
