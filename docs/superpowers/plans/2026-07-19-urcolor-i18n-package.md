@@ -20,7 +20,7 @@
   > Kim, Y., Thayer, K., Silva Gorsky, G., & Heer, J. (2019). Color Names Across Languages: Salient Colors and Term Translation in Multilingual Color Naming Models. EuroVis.
 - Required disclaimer, reproduced verbatim wherever the source is documented:
   > We represent the color labels provided by the participants in our study, which may include misspellings, but also whatever racial biases they have (e.g., the color 'skin'). This is not meant to be a prescriptive definition of what colors fit what labels.
-- **Do not publish this package to npm.** The upstream dataset has no license. Publishing is gated on Task 12's licensing issue being answered. `"private": true` stays in `package.json` until then.
+- The upstream dataset declares no license. The project's decision is to attribute the source in code comments, in the package README, and in the VitePress docs, and to ship on that basis — no upstream licensing issue is filed. Every file that embeds or generates upstream-derived data carries a comment naming the source repo, the pinned commit, and the citation.
 - Full-space model languages (14): `de en es fa fi fr ko nl pl pt ro ru sv zh`.
 - Hue-only model languages (27): `ar bg ca cs da el et he hi hr hu id it ja ka lt mk ms nb sk sl sr th tr uk ur vi`.
 
@@ -102,13 +102,12 @@ Expected: FAIL — `Cannot find module '../src/index'`.
 
 - [ ] **Step 3: Create the package manifest**
 
-Create `packages/i18n/package.json`. Note `private: true` — this stays until the licensing question in Task 12 is resolved.
+Create `packages/i18n/package.json`:
 
 ```json
 {
   "name": "@urcolor/i18n",
   "version": "0.0.4",
-  "private": true,
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -2196,12 +2195,16 @@ describe("fallback option", () => {
     const nearest = await ColorNames.load("ro", { source: "uwdata", fallback: "nearest" });
     const strict = await ColorNames.load("ro", { source: "uwdata", fallback: "none" });
 
-    // Romanian is sparse, so some colour resolves only via a neighbour bin.
-    const probe = Color.fromOklab(0.62, 0.11, -0.09);
-    if (nearest.resolve(probe).coverage === "nearest") {
-      expect(nearest.of(probe)).toBeString();
-      expect(strict.of(probe)).toBeUndefined();
-    }
+    // PROBE: replace with a colour verified to resolve as "nearest" for
+    // Romanian — see the step below. The assertions are unconditional on
+    // purpose; a guarded assertion would let this test pass while testing
+    // nothing.
+    const probe = Color.fromOklab(0, 0, 0);
+
+    expect(nearest.resolve(probe).coverage).toBe("nearest");
+    expect(nearest.of(probe)).toBeString();
+    expect(strict.of(probe)).toBeUndefined();
+    expect(strict.resolve(probe).coverage).toBe("none");
   });
 });
 
@@ -2461,17 +2464,30 @@ export type {
 export type { Candidate } from "./engine/lookup-full";
 ```
 
-- [ ] **Step 5: Run the tests**
+- [ ] **Step 5: Find a real "nearest" probe colour for the fallback test**
+
+The fallback test above ships with a placeholder probe. Find a real one: write a
+throwaway script that loads the Romanian chunk, walks a grid of Oklab values
+(L from 0.1 to 0.9 in steps of 0.05, a and b from -0.2 to 0.2 in steps of 0.05),
+and prints the first colour whose `resolve()` returns `coverage: "nearest"`.
+Paste that colour into the test and delete the script.
+
+If no colour in the grid yields `"nearest"` — possible if Romanian's bins are
+too sparse for anything to fall within `maxDistance` — use a different sparse
+language from `meta.json`, or widen `maxDistance` in that test's options until a
+probe exists. Do not re-guard the assertions.
+
+- [ ] **Step 6: Run the tests**
 
 Run: `bun test packages/i18n/`
-Expected: PASS, all suites.
+Expected: PASS, all suites, with the fallback test asserting unconditionally.
 
-- [ ] **Step 6: Verify the build ships split chunks**
+- [ ] **Step 7: Verify the build ships split chunks**
 
 Run: `bun run --cwd packages/i18n build && ls packages/i18n/dist`
 Expected: `index.js`, `index.d.ts`, and separate chunk files — the data must not be inlined into `index.js`. Check with `ls -la packages/i18n/dist/index.js`; it should be well under 100 KB.
 
-- [ ] **Step 7: Lint and commit**
+- [ ] **Step 8: Lint and commit**
 
 ```bash
 bun run lint
@@ -2626,14 +2642,10 @@ The dataset authors' own caveat, which applies to every name this package return
 
 ## Licensing status
 
-**This package is not published.** The upstream dataset carries no license file,
-so redistribution of the derived data is legally unclear. Tracking issue:
-`https://github.com/uwdata/color-naming-in-different-languages/issues` — we have
-asked the maintainers to declare one.
-
-Before publishing, `private: true` must be removed from `package.json`, and only
-once an explicit license grant exists. If the answer is no, the fallback is an
-engine-only package that fetches data from the maintainers' own site at runtime.
+The upstream repository declares no license file. Its README asks only that the
+paper be cited, which this package does — in the source, in this README, and in
+the documentation. Downstream users redistributing the data should make their own
+assessment.
 
 ## Adding a source
 
@@ -2778,24 +2790,54 @@ with:
 Run: `bun run docs:build`
 Expected: exits 0, no dead-link warnings for `/guide/color-naming`.
 
-- [ ] **Step 5: Open the licensing issue**
+- [ ] **Step 5: Verify attribution reaches every generated artifact**
 
-This is a real action, not a code change. Open an issue on
-`uwdata/color-naming-in-different-languages` asking the maintainers to declare an
-explicit license — CC-BY-4.0 for the data, MIT or BSD for the code — explaining
-that the dataset is being redistributed in a derived form in an open-source npm
-package and that the absence of a license blocks publication. Reference the issue
-URL in `packages/i18n/README.md`, replacing the placeholder issues link.
+The project's decision is that attribution in code and docs is how this data is
+credited. Confirm the citation is present in all four places, and add it where
+it is missing:
 
-**Do not remove `private: true` from `packages/i18n/package.json` until a license
-grant exists.**
+1. `packages/i18n/src/sources/uwdata/source.ts` — the `citation` and `disclaimer`
+   fields (already present from Task 3).
+2. `packages/i18n/scripts/sync-uwdata/main.ts` — `renderChunkModule` must emit
+   the attribution into every generated chunk, so the credit survives into
+   `dist/`. Change the header it writes to:
 
-- [ ] **Step 6: Final verification**
+```ts
+export function renderChunkModule(chunk: FullChunk | HueChunk): string {
+  return [
+    "// Generated by scripts/sync-uwdata. Do not edit by hand.",
+    "//",
+    "// Colour-name data derived from:",
+    "//   https://github.com/uwdata/color-naming-in-different-languages",
+    `//   at commit ${UWDATA_COMMIT}`,
+    "//",
+    "// Kim, Y., Thayer, K., Silva Gorsky, G., & Heer, J. (2019). Color Names Across",
+    "// Languages: Salient Colors and Term Translation in Multilingual Color Naming",
+    "// Models. EuroVis.",
+    `export default ${JSON.stringify(chunk)};`,
+    "",
+  ].join("\n");
+}
+```
+
+The existing test in `test/scripts/main.test.ts` asserts the module starts with
+`"// Generated by scripts/sync-uwdata"`, which still holds. Add an assertion that
+the emitted source contains `"EuroVis"`.
+
+3. `packages/i18n/README.md` — the attribution section (written in Step 1).
+4. `docs/guide/color-naming.md` — the sources section (written in Step 2).
+
+- [ ] **Step 6: Regenerate the data so chunks carry the attribution**
+
+Run: `bun run --cwd packages/i18n sync:uwdata && bun test packages/i18n/`
+Expected: chunks regenerate with the attribution header; all tests still pass.
+
+- [ ] **Step 7: Final verification**
 
 Run: `bun test && bun run lint && bun run build && bun run docs:build`
 Expected: all four exit 0.
 
-- [ ] **Step 7: Commit**
+- [ ] **Step 8: Commit**
 
 ```bash
 git add -A
