@@ -14,6 +14,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `contrast`, the `manipulate` helpers, `NAMED_COLORS`, and the space registry.
 - An `hsv` working space. It has no CSS notation, so it cannot be parsed or named as
   a serialisation format; an `hsv` color serialises down to `rgb()`.
+- `registerParser(parser)` — register an additional color parser, consulted
+  after all built-ins. Returns an idempotent dispose function. This is the
+  extension point `@urcolor/relative` uses.
+- `NOTATIONS` — the CSS-unit metadata for every functional notation, exported so
+  plugins share core's unit conversions rather than duplicating them.
 
 ### Changed
 
@@ -26,6 +31,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   / `nativeToDisplay`; `ChannelConfig.culoriMin` / `.culoriMax` become `.nativeMin` /
   `.nativeMax`.
 - **BREAKING:** Gradient functions take `SpaceId` rather than `string`.
+- **BREAKING:** `Color.from()`, `Color#with()`, and `Color#get()` now **throw**
+  where the previous library returned `null`/`undefined`. `Color.from()` throws
+  on unparseable input — use `Color.parse()`, which returns `Color | null`, when
+  a failure is a value rather than an error. `with()` throws `RangeError` for a
+  channel absent from the target space and `TypeError` for a non-numeric channel
+  value; `get()` throws `RangeError` for an unknown channel.
+- **BREAKING:** `gamutMap()` changed in kind, not just in precision. It reduces
+  Oklch chroma per CSS Color 4 and returns an Oklch color, where the previous
+  implementation clipped channels in the destination space. Out-of-gamut colors
+  will map to visibly different results.
 
 ### Removed
 

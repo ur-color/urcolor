@@ -7,6 +7,7 @@ Universal, headless color picker component library. Unstyled, composable primiti
 | Package | Description |
 |---------|-------------|
 | [`@urcolor/core`](./packages/core) | Color conversion utilities and WebGL canvas gradient generator |
+| [`@urcolor/relative`](./packages/relative) | Opt-in CSS Color 5 relative color syntax (`rgb(from red r g b)`) |
 | [`@urcolor/vue`](./packages/vue) | Headless Vue 3 components and composables |
 
 > React, Svelte, Angular, and other framework adapters are planned.

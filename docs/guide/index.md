@@ -5,6 +5,7 @@ UrColor is a universal, headless color picker component library. It provides uns
 ## Packages
 
 - `@urcolor/core` — A zero-dependency CSS Color 4 library (parse, convert, serialize, gamut-map, interpolate) plus WebGL canvas gradient generators for color area sliders.
+- `@urcolor/relative` — Opt-in CSS Color 5 relative color syntax (`rgb(from red r g b)`) for `@urcolor/core`. See [Relative Colors](/guide/relative-colors).
 - `@urcolor/vue` — Headless Vue 3 components and composables for building color pickers.
 
 ## Philosophy
