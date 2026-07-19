@@ -36,8 +36,6 @@ import {
   ColorWheelGradient,
   ColorWheelCheckerboard,
   ColorWheelThumb,
-  ColorWheelThumbX,
-  ColorWheelThumbY,
 } from "../components/ColorWheel";
 import {
   ColorTriangleRoot,
@@ -95,8 +93,6 @@ export const ColorWheel = {
   Gradient: ColorWheelGradient,
   Checkerboard: ColorWheelCheckerboard,
   Thumb: ColorWheelThumb,
-  ThumbX: ColorWheelThumbX,
-  ThumbY: ColorWheelThumbY,
 };
 
 export const ColorTriangle = {

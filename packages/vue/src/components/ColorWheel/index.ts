@@ -16,11 +16,3 @@ export {
   default as ColorWheelThumb,
   type ColorWheelThumbProps,
 } from "./ColorWheelThumb.vue";
-export {
-  default as ColorWheelThumbX,
-  type ColorWheelThumbXProps,
-} from "./ColorWheelThumbX.vue";
-export {
-  default as ColorWheelThumbY,
-  type ColorWheelThumbYProps,
-} from "./ColorWheelThumbY.vue";

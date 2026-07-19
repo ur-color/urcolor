@@ -8,16 +8,24 @@ export interface ColorWheelThumbProps extends /* @vue-ignore */ PrimitiveProps {
 </script>
 
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, onMounted, onUnmounted } from "vue";
 import { Primitive, useForwardExpose } from "reka-ui";
+import { channelLabel, formatChannelValue } from "../../shared/channel-labels";
 import { injectColorWheelRootContext } from "./ColorWheelRoot.vue";
-import ColorWheelThumbX from "./ColorWheelThumbX.vue";
-import ColorWheelThumbY from "./ColorWheelThumbY.vue";
 
 withDefaults(defineProps<ColorWheelThumbProps>(), { as: "span" });
 
 const rootContext = injectColorWheelRootContext();
-useForwardExpose();
+const { forwardRef, currentElement: thumbElement } = useForwardExpose();
+
+onMounted(() => {
+  if (thumbElement.value)
+    rootContext.thumbElement.value = thumbElement.value;
+});
+onUnmounted(() => {
+  if (rootContext.thumbElement.value === thumbElement.value)
+    rootContext.thumbElement.value = undefined;
+});
 
 const angleDeg = computed(() => {
   const range = rootContext.angleMax.value - rootContext.angleMin.value;
@@ -31,12 +39,30 @@ const radiusPercent = computed(() => {
   if (range === 0) return 0;
   return (rootContext.currentRadiusValue.value - rootContext.radiusMin.value) / range * 50;
 });
+
+const angleLabel = computed(() => channelLabel(rootContext.colorSpace.value, rootContext.angleChannelKey.value));
+const radiusLabel = computed(() => channelLabel(rootContext.colorSpace.value, rootContext.radiusChannelKey.value));
+const ariaLabel = computed(() => `${angleLabel.value}, ${radiusLabel.value}`);
+const ariaValueText = computed(() => {
+  const space = rootContext.colorSpace.value;
+  const a = formatChannelValue(space, rootContext.angleChannelKey.value, rootContext.currentAngleValue.value);
+  const r = formatChannelValue(space, rootContext.radiusChannelKey.value, rootContext.currentRadiusValue.value);
+  return `${angleLabel.value} ${a}, ${radiusLabel.value} ${r}`;
+});
 </script>
 
 <template>
   <Primitive
-    aria-roledescription="2D slider"
-    :aria-disabled="rootContext.disabled.value"
+    :ref="forwardRef"
+    role="slider"
+    :tabindex="rootContext.disabled.value ? undefined : 0"
+    :aria-label="($attrs['aria-label'] as string) || ariaLabel"
+    :aria-valuenow="rootContext.currentAngleValue.value"
+    :aria-valuemin="rootContext.angleMin.value"
+    :aria-valuemax="rootContext.angleMax.value"
+    :aria-valuetext="ariaValueText"
+    aria-roledescription="Color thumb"
+    :aria-disabled="rootContext.disabled.value || undefined"
     :data-disabled="rootContext.disabled.value ? '' : undefined"
     :as-child="asChild"
     :as="as"
@@ -48,8 +74,6 @@ const radiusPercent = computed(() => {
       transformOrigin: '0 0',
     }"
   >
-    <ColorWheelThumbX />
-    <ColorWheelThumbY />
     <slot />
   </Primitive>
 </template>

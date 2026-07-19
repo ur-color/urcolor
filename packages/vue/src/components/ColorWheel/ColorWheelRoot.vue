@@ -6,6 +6,7 @@ import { computed, ref, shallowRef, toRefs, watch } from "vue";
 import { Color, type SpaceId } from "@urcolor/core";
 import { colorSpaces, getChannelConfig, displayToNative, nativeToDisplay, type ChannelConfig } from "@urcolor/core";
 import { cartesianToPolar, normalizeAngle, clampToCircle } from "@urcolor/core";
+import { cyclicWrap, snapToStep } from "../../shared/utils";
 
 type Direction = "ltr" | "rtl";
 
@@ -19,17 +20,21 @@ export interface ColorWheelRootProps extends /* @vue-ignore */ PrimitiveProps {
   disabled?: boolean;
   dir?: Direction;
   colorSpace?: SpaceId;
-  channelAngle?: string;
-  channelRadius?: string;
+  angleChannel?: string;
+  radiusChannel?: string;
   startAngle?: number;
 }
 
 export type ColorWheelRootEmits = {
+  /** Event handler called when the color value changes */
   "update:modelValue": [payload: Color | undefined];
-  "valueCommit": [payload: Color];
+  /** Event handler called when the color value changes. Mirrors `update:modelValue`; present for API parity. */
+  "update:color": [payload: Color];
+  /** Event handler called on every value change, including mid-drag. */
+  "change": [payload: Color];
+  /** Event handler called when the value changes at the end of an interaction. */
+  "changeEnd": [payload: Color];
 };
-
-export type ActiveDirection = "x" | "y";
 
 export interface ColorWheelRootContext {
   disabled: Ref<boolean>;
@@ -45,9 +50,7 @@ export interface ColorWheelRootContext {
   radiusMax: Ref<number>;
   startAngle: Ref<number>;
   dir: Ref<Direction>;
-  activeDirection: Ref<ActiveDirection>;
-  thumbXElement: Ref<HTMLElement | undefined>;
-  thumbYElement: Ref<HTMLElement | undefined>;
+  thumbElement: Ref<HTMLElement | undefined>;
   isDragging: Ref<boolean>;
 }
 
@@ -80,8 +83,8 @@ const ALPHA_CONFIG: ChannelConfig = {
 };
 
 const spaceConfig = computed(() => colorSpaces[props.colorSpace]);
-const angleChannelKey = computed(() => props.channelAngle ?? spaceConfig.value?.channels[0]?.key ?? "h");
-const radiusChannelKey = computed(() => props.channelRadius ?? spaceConfig.value?.channels[1]?.key ?? "s");
+const angleChannelKey = computed(() => props.angleChannel ?? spaceConfig.value?.channels[0]?.key ?? "h");
+const radiusChannelKey = computed(() => props.radiusChannel ?? spaceConfig.value?.channels[1]?.key ?? "s");
 
 const angleIsAlpha = computed(() => angleChannelKey.value === "alpha");
 const radiusIsAlpha = computed(() => radiusChannelKey.value === "alpha");
@@ -143,16 +146,7 @@ function displayValuesToColor(angle: number, radius: number): Color | undefined 
   return result;
 }
 
-function snap(value: number, min: number, max: number, step: number): number {
-  const decimals = (String(step).split(".")[1] || "").length;
-  const snapped = Math.round((value - min) / step) * step + min;
-  const factor = 10 ** decimals;
-  return Math.max(min, Math.min(max, Math.round(snapped * factor) / factor));
-}
-
-const activeDirection = ref<ActiveDirection>("x");
-const thumbXElement = ref<HTMLElement>();
-const thumbYElement = ref<HTMLElement>();
+const thumbElement = ref<HTMLElement>();
 const isDragging = ref(false);
 
 const valueBeforeSlide = ref({ angle: currentAngleValue.value, radius: currentRadiusValue.value });
@@ -177,8 +171,8 @@ function getValuesFromPointer(event: PointerEvent): { angle: number; radius: num
 }
 
 function updateValues(angle: number, radius: number, commit = false) {
-  const snappedAngle = snap(angle, angleMin.value, angleMax.value, angleStep.value);
-  const snappedRadius = snap(radius, radiusMin.value, radiusMax.value, radiusStep.value);
+  const snappedAngle = snapToStep(angle, angleMin.value, angleMax.value, angleStep.value);
+  const snappedRadius = snapToStep(radius, radiusMin.value, radiusMax.value, radiusStep.value);
 
   const hasChanged = Math.abs(snappedAngle - currentAngleValue.value) > 0.001
     || Math.abs(snappedRadius - currentRadiusValue.value) > 0.001;
@@ -186,16 +180,18 @@ function updateValues(angle: number, radius: number, commit = false) {
   currentAngleValue.value = snappedAngle;
   currentRadiusValue.value = snappedRadius;
 
-  if (hasChanged && !isDragging.value) {
-    const thumb = activeDirection.value === "x" ? thumbXElement.value : thumbYElement.value;
-    thumb?.focus();
-  }
+  if (!hasChanged) return;
+
+  if (!isDragging.value)
+    thumbElement.value?.focus();
 
   const newColor = displayValuesToColor(snappedAngle, snappedRadius);
   if (newColor) {
     colorRef.value = newColor;
     emits("update:modelValue", newColor);
-    if (commit) emits("valueCommit", newColor);
+    emits("update:color", newColor);
+    emits("change", newColor);
+    if (commit) emits("changeEnd", newColor);
   }
 }
 
@@ -215,14 +211,9 @@ function handlePointerDown(event: PointerEvent) {
   target.setPointerCapture(event.pointerId);
   event.preventDefault();
 
-  // Focus thumb if pointer is on or inside a thumb element
-  if (thumbXElement.value && (target === thumbXElement.value || thumbXElement.value.contains(target))) {
-    activeDirection.value = "x";
-    thumbXElement.value.focus();
-  } else if (thumbYElement.value && (target === thumbYElement.value || thumbYElement.value.contains(target))) {
-    activeDirection.value = "y";
-    thumbYElement.value.focus();
-  }
+  // Focus the thumb if the pointer is on or inside it
+  if (thumbElement.value && (target === thumbElement.value || thumbElement.value.contains(target)))
+    thumbElement.value.focus();
 
   isDragging.value = true;
   valueBeforeSlide.value = { angle: currentAngleValue.value, radius: currentRadiusValue.value };
@@ -243,11 +234,6 @@ function handlePointerMove(event: PointerEvent) {
   const pointerId = event.pointerId;
   requestAnimationFrame(() => {
     rafPending = false;
-    if (lastPointerPosition.value) {
-      const dx = Math.abs(clientX - lastPointerPosition.value.x);
-      const dy = Math.abs(clientY - lastPointerPosition.value.y);
-      activeDirection.value = dx >= dy ? "x" : "y";
-    }
     lastPointerPosition.value = { x: clientX, y: clientY };
     const vals = getValuesFromPointer({ clientX, clientY, pointerId } as PointerEvent);
     updateValues(vals.angle, vals.radius);
@@ -263,7 +249,7 @@ function handlePointerUp(event: PointerEvent) {
   lastPointerPosition.value = undefined;
   const prev = valueBeforeSlide.value;
   if (prev.angle !== currentAngleValue.value || prev.radius !== currentRadiusValue.value) {
-    if (colorRef.value) emits("valueCommit", colorRef.value);
+    if (colorRef.value) emits("changeEnd", colorRef.value);
   }
 }
 
@@ -292,14 +278,11 @@ function handleKeyDown(event: KeyboardEvent) {
   }
 
   event.preventDefault();
-  if (angleOffset !== 0) activeDirection.value = "x";
-  if (radiusOffset !== 0) activeDirection.value = "y";
 
   let newAngle = currentAngleValue.value + angleOffset;
   const isCyclic = angleConfig.value?.format === "degree";
   if (isCyclic) {
-    const range = angleMax.value - angleMin.value;
-    newAngle = ((newAngle - angleMin.value) % range + range) % range + angleMin.value;
+    newAngle = cyclicWrap(newAngle, angleMin.value, angleMax.value);
   } else {
     newAngle = Math.max(angleMin.value, Math.min(angleMax.value, newAngle));
   }
@@ -324,9 +307,7 @@ provideColorWheelRootContext({
   radiusMax,
   startAngle: computed(() => props.startAngle),
   dir: direction,
-  activeDirection,
-  thumbXElement,
-  thumbYElement,
+  thumbElement,
   isDragging,
 });
 </script>
@@ -338,7 +319,7 @@ provideColorWheelRootContext({
     :as-child="asChild"
     :as="as"
     :dir="direction"
-    :aria-disabled="disabled"
+    :aria-disabled="disabled || undefined"
     :data-disabled="disabled ? '' : undefined"
     @pointerdown="handlePointerDown"
     @pointermove="handlePointerMove"
