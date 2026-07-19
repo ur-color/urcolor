@@ -157,13 +157,3 @@ export const translations: Record<string, ChannelTranslations> = {
   "zh-traditional": zh_traditional,
   "ko-traditional": ko_traditional,
 };
-
-/**
- * Get a translated channel label for a given locale.
- * Falls back to English if the locale or channel name is not found.
- */
-export function getChannelLabel(locale: string, channelName: keyof ChannelTranslations): string {
-  const t = translations[locale];
-  if (t) return t[channelName];
-  return translations.en![channelName];
-}

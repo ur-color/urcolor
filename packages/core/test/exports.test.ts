@@ -34,15 +34,13 @@ describe("@urcolor/core exports", () => {
     }
   });
 
-  it("still exposes the gradient, geometry, space-config and i18n surface", () => {
+  it("still exposes the gradient, geometry and space-config surface", () => {
     for (const name of [
       "drawGradient",
       "sampleChannelGrid",
       "polarToCartesian",
       "colorSpaces",
       "getChannelConfig",
-      "translations",
-      "getChannelLabel",
     ]) {
       expect(core).toHaveProperty(name);
     }

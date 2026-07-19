@@ -23,6 +23,3 @@ export { polarToCartesian, cartesianToPolar, clampToCircle, normalizeAngle, tria
 
 // Color-space UI configuration.
 export { colorSpaces, getChannelConfig, displayToNative, nativeToDisplay, type ChannelConfig, type ColorSpaceConfig } from "./color-spaces";
-
-// Channel-label translations.
-export { translations, getChannelLabel, type ChannelTranslations } from "./i18n";

@@ -2,7 +2,7 @@
 
 ## Internationalized {#languages}
 
-UrColor ships with channel-label translations for 74 languages, built into `@urcolor/core`'s `i18n` module (`translations` and `getChannelLabel`).
+UrColor ships with channel-label translations for 77 languages in `@urcolor/i18n`, exposed through the `ChannelNames` class.
 
 <details>
 <summary>Full language list</summary>
@@ -54,7 +54,15 @@ UrColor ships with channel-label translations for 74 languages, built into `@urc
 
 </details>
 
-Channel labels — the words behind abbreviations like `H`, `S`, `L`, `V`, `R`, `G`, `B` (Hue, Saturation, Lightness, Value, Red, Green, Blue, and so on) — are what's translated. Call `getChannelLabel(locale, channelName)` to look up a label for a given locale, or use the `translations` map directly if you need the full dictionary for a locale.
+Channel labels — the words behind abbreviations like `H`, `S`, `L`, `V`, `R`, `G`, `B` (Hue, Saturation, Lightness, Value, Red, Green, Blue, and so on) — are what's translated. Construct a `ChannelNames` for a locale and call `of()`, or use the `translations` map directly if you need the full dictionary for a locale.
+
+```ts
+import { ChannelNames } from "@urcolor/i18n";
+
+const channels = new ChannelNames("ko");
+channels.of("hue"); // "색상"
+channels.resolvedOptions(); // { locale: "ko" }
+```
 
 ::: warning
 **Only channel labels are localized.** Color format codes (like `hex`, `srgb`, `hsl`) and numeric values are not translated.
