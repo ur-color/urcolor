@@ -15,8 +15,12 @@ import { serializeOklch } from "./spaces/oklch";
 import { serializeHex, serializeRgb } from "./spaces/srgb";
 import type { ColorObject, SpaceId } from "./types";
 
-/** Output format: any space id, or `"hex"` for `#rrggbb[aa]`. */
-export type ColorFormat = SpaceId | "hex";
+/**
+ * Output format: any space id with a CSS notation, or `"hex"` for
+ * `#rrggbb[aa]`. `hsv` is excluded — it has no CSS form, and an `hsv` color
+ * serialises down to `rgb()` instead.
+ */
+export type ColorFormat = Exclude<SpaceId, "hsv"> | "hex";
 
 type Serializer = (color: ColorObject) => string;
 
@@ -24,6 +28,8 @@ const SERIALIZERS: Record<SpaceId, Serializer> = {
   srgb: serializeRgb,
   "srgb-linear": serializeColorFn,
   hsl: serializeHsl,
+  // hsv has no CSS notation; fall back to sRGB.
+  hsv: (color) => serializeRgb(convert(color, "srgb")),
   hwb: serializeHwb,
   lab: serializeLab,
   lch: serializeLch,

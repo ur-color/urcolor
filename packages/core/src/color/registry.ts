@@ -8,6 +8,7 @@
 
 import { a98 } from "./spaces/a98";
 import { hslFromXyz, hslToSrgb, hslToXyz, srgbToHsl } from "./spaces/hsl";
+import { hsvFromXyz, hsvToSrgb, hsvToXyz, srgbToHsv } from "./spaces/hsv";
 import { hwbFromXyz, hwbToSrgb, hwbToXyz, srgbToHwb } from "./spaces/hwb";
 import { labFromXyz, labToXyz } from "./spaces/lab";
 import { lchFromXyz, lchToXyz } from "./spaces/lch";
@@ -46,6 +47,14 @@ export const SPACES: Readonly<Record<SpaceId, SpaceDef>> = {
     fromXyz: hslFromXyz,
     toSrgb: hslToSrgb,
     fromSrgb: srgbToHsl,
+  },
+  hsv: {
+    channels: ["h", "s", "v"],
+    hueIndex: 0,
+    toXyz: hsvToXyz,
+    fromXyz: hsvFromXyz,
+    toSrgb: hsvToSrgb,
+    fromSrgb: srgbToHsv,
   },
   hwb: {
     channels: ["h", "w", "b"],

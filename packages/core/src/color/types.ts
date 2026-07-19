@@ -13,6 +13,7 @@ export type SpaceId =
   | "srgb"
   | "srgb-linear"
   | "hsl"
+  | "hsv"
   | "hwb"
   | "lab"
   | "lch"
