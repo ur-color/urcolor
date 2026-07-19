@@ -67,7 +67,7 @@ The root container that manages field state and color channel binding.
 |------|------|---------|-------------|
 | `value` | `Color \| string \| null` | — | Controlled color value. |
 | `defaultValue` | `Color \| string \| null` | — | Initial color when uncontrolled. |
-| `colorSpace` | `string` | `'hsl'` | Color space mode (e.g. `'hsl'`, `'oklch'`, `'hex'`). |
+| `colorSpace` | `SpaceId` | `'hsl'` | Color space (e.g. `'hsl'`, `'oklch'`, `'hex'`). |
 | `channel` | `string` | `'h'` | Channel to control (e.g. `'h'`, `'s'`, `'l'`, `'hex'`). |
 | `format` | `'number' \| 'degree' \| 'percentage' \| 'hex'` | Auto | Display format. Auto-derived from channel config if omitted. |
 | `min` | `number` | Auto | Minimum value. Auto-derived from channel config. |

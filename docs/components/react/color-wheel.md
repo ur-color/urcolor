@@ -81,7 +81,7 @@ The root container that manages wheel state and color channel binding.
 |------|------|---------|-------------|
 | `value` | `Color \| string \| null` | — | Controlled color value. |
 | `defaultValue` | `Color \| string` | `'hsl(0, 100%, 50%)'` | Initial color when uncontrolled. |
-| `colorSpace` | `string` | `'hsl'` | Color space mode (e.g. `'hsl'`, `'oklch'`). |
+| `colorSpace` | `SpaceId` | `'hsl'` | Color space (e.g. `'hsl'`, `'oklch'`). |
 | `channelAngle` | `string` | Auto | Channel mapped to the angle axis. Auto-derived from color space. |
 | `channelRadius` | `string` | Auto | Channel mapped to the radius axis. Auto-derived from color space. |
 | `startAngle` | `number` | `0` | Starting angle offset in degrees. |

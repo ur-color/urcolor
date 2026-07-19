@@ -69,7 +69,7 @@ The root container that manages ring state and color channel binding.
 |------|------|---------|-------------|
 | `value` | `Color \| string \| null` | — | Controlled color value. |
 | `defaultValue` | `Color \| string` | `'hsl(0, 100%, 50%)'` | Initial color when uncontrolled. |
-| `colorSpace` | `string` | `'hsl'` | Color space mode (e.g. `'hsl'`, `'oklch'`). |
+| `colorSpace` | `SpaceId` | `'hsl'` | Color space (e.g. `'hsl'`, `'oklch'`). |
 | `channel` | `string` | Auto | Channel to control. Auto-derived from color space. |
 | `startAngle` | `number` | `0` | Starting angle offset in degrees. |
 | `innerRadius` | `number` | `0.7` | Inner radius ratio (0–1) controlling ring thickness. |

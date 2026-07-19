@@ -81,7 +81,7 @@ The root container that manages triangle state and color channel binding.
 |------|------|---------|-------------|
 | `value` | `Color \| string \| null` | — | Controlled color value. |
 | `defaultValue` | `Color \| string` | `'hsl(0, 100%, 50%)'` | Initial color when uncontrolled. |
-| `colorSpace` | `string` | `'hsv'` | Color space mode (e.g. `'hsv'`, `'hsl'`, `'rgb'`). |
+| `colorSpace` | `SpaceId` | `'hsv'` | Color space (e.g. `'hsv'`, `'hsl'`, `'srgb'`). |
 | `channelX` | `string` | Auto | Channel for the X axis. Auto-derived from color space. |
 | `channelY` | `string` | Auto | Channel for the Y axis. Auto-derived from color space. |
 | `channelZ` | `string` | — | Optional third channel for barycentric three-channel mode. |

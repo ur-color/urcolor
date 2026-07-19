@@ -91,7 +91,7 @@ The root container that manages slider state and color channel binding.
 |------|------|---------|-------------|
 | `value` | `Color \| string \| null` | — | Controlled color value. |
 | `defaultValue` | `Color \| string \| null` | — | Initial color when uncontrolled. |
-| `colorSpace` | `string` | `'hsl'` | Color space mode (e.g. `'hsl'`, `'oklch'`). |
+| `colorSpace` | `SpaceId` | `'hsl'` | Color space (e.g. `'hsl'`, `'oklch'`). |
 | `channel` | `string` | `'h'` | Channel to control (e.g. `'h'`, `'s'`, `'l'`). |
 | `disabled` | `boolean` | `false` | Disables interaction. |
 | `dir` | `'ltr' \| 'rtl'` | — | Reading direction. |

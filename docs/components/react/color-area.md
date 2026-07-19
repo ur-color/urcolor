@@ -67,7 +67,7 @@ The root container that manages slider state.
 |------|------|---------|-------------|
 | `value` | `Color \| string \| null` | — | Controlled color value. |
 | `defaultValue` | `Color \| string` | `'hsl(0, 100%, 50%)'` | Initial color when uncontrolled. |
-| `colorSpace` | `string` | `'hsl'` | Color space mode (e.g. `'hsl'`, `'oklch'`). |
+| `colorSpace` | `SpaceId` | `'hsl'` | Color space (e.g. `'hsl'`, `'oklch'`). |
 | `channelX` | `string` | Auto | Channel for the X axis. Auto-derived from color space. |
 | `channelY` | `string` | Auto | Channel for the Y axis. Auto-derived from color space. |
 | `disabled` | `boolean` | `false` | Disables interaction. |
