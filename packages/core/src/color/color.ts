@@ -11,13 +11,19 @@ import { type DeltaEMethod, deltaE } from "./deltaE";
 import { gamutMap, inGamut } from "./gamut";
 import { type MixOptions, mix } from "./interpolate";
 import { complement, darken, desaturate, lighten, negate, rotateHue, saturate } from "./manipulate";
-import { parse } from "./parse";
+import { parse, tryParse } from "./parse";
 import { spaceDef } from "./registry";
 import { type ColorFormat, serialize } from "./serialize";
 import type { ColorObject, Coords, SpaceId } from "./types";
 
-/** A `with()` patch: any subset of the current space's channels, plus alpha. */
-export type ColorPatch = Record<string, number>;
+/**
+ * A `with()` patch: any subset of a space's channels, plus `alpha`, plus an
+ * optional `space` to convert into *before* the channels are applied.
+ */
+export type ColorPatch = {
+  space?: SpaceId;
+  alpha?: number;
+} & Record<string, number | SpaceId | undefined>;
 
 export class Color {
   /** Space of this color's stored coordinates. */
@@ -57,6 +63,15 @@ export class Color {
       return new Color(o.space, o.coords, o.alpha);
     }
     return new Color(input.space, input.coords, input.alpha);
+  }
+
+  /**
+   * Parse a CSS color string, or `null` when it isn't one. The nullable
+   * counterpart to {@link Color.from}, which throws.
+   */
+  static parse(input: string): Color | null {
+    const o = tryParse(input);
+    return o === null ? null : new Color(o.space, o.coords, o.alpha);
   }
 
   static fromHex(hex: string): Color {
@@ -123,17 +138,23 @@ export class Color {
     return this.#coords[i] as number;
   }
 
-  /** Copy with the given channels and/or `alpha` overridden. */
+  /**
+   * Copy with the given channels and/or `alpha` overridden. When `patch.space`
+   * is present the color is converted into that space first, and the channel
+   * names are resolved against it — a convert-and-set in one call.
+   */
   with(patch: ColorPatch): Color {
-    const { channels } = spaceDef(this.space);
-    const coords = this.coords;
+    const target = patch.space ?? this.space;
+    const base = target === this.space ? this : this.to(target);
+    const { channels } = spaceDef(target);
+    const coords = base.coords;
     for (const [key, value] of Object.entries(patch)) {
-      if (key === "alpha") continue;
+      if (key === "space" || key === "alpha" || value === undefined) continue;
       const i = channels.indexOf(key);
-      if (i < 0) throw new RangeError(`No channel "${key}" in ${this.space}`);
-      coords[i] = value;
+      if (i < 0) throw new RangeError(`No channel "${key}" in ${target}`);
+      coords[i] = value as number;
     }
-    return new Color(this.space, coords, patch.alpha ?? this.alpha);
+    return new Color(target, coords, patch.alpha ?? base.alpha);
   }
 
   /** Copy with alpha set to `value`. */
