@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "bun:test";
 import { defineComponent, h } from "vue";
 import { Color } from "@urcolor/core";
 import {
+  ColorAreaArea,
   ColorAreaRoot,
   ColorAreaThumb,
 } from "../src/components/ColorArea";
@@ -33,7 +34,7 @@ const ColorArea = defineComponent({
         "onChange": (v: Color) => emit("change", v),
         "onChangeEnd": (v: Color) => emit("changeEnd", v),
       }, {
-        default: () => h(ColorAreaThumb),
+        default: () => h(ColorAreaArea, null, { default: () => h(ColorAreaThumb) }),
       });
   },
 });
@@ -84,6 +85,12 @@ describe("given default ColorArea", () => {
     const root = wrapper.find("[role=\"group\"]");
     expect(root.exists()).toBe(true);
     expect(root.attributes("aria-disabled")).toBeUndefined();
+  });
+
+  it("should expose the interaction surface as an application region", () => {
+    const area = wrapper.find("[role=\"application\"]");
+    expect(area.exists()).toBe(true);
+    expect(area.attributes("aria-roledescription")).toBe("Color picker");
   });
 
   it("should emit change and changeEnd alongside update:modelValue on a keyboard step", async () => {

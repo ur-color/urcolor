@@ -5,7 +5,7 @@ import { createContext, useDirection, useForwardExpose, VisuallyHidden } from "r
 import { computed, ref, shallowRef, toRefs, watch } from "vue";
 import { Color, type SpaceId } from "@urcolor/core";
 import { colorSpaces, getChannelConfig, displayToNative, nativeToDisplay, type ChannelConfig } from "@urcolor/core";
-import { useCollection, useFormControl, ARROW_KEYS, PAGE_KEYS, getClosestThumbIndex, hasMinStepsBetweenValues, linearScale, snapToStep, type ActiveDirection } from "../../shared/utils";
+import { useCollection, useFormControl, ARROW_KEYS, getClosestThumbIndex, hasMinStepsBetweenValues, linearScale, snapToStep, type ActiveDirection } from "../../shared/utils";
 
 type Direction = "ltr" | "rtl";
 type ThumbAlignment = "contain" | "overflow";
@@ -82,6 +82,11 @@ export interface ColorAreaRootContext {
   colorRef: Readonly<Ref<Color | undefined>>;
   dir: Ref<Direction>;
   isDragging: Ref<boolean>;
+  handleKeyDown: (event: KeyboardEvent) => void;
+  handleSlideStart: (event: PointerEvent) => void;
+  handleSlideMove: (event: PointerEvent) => void;
+  handleSlideEnd: () => void;
+  snapshotValues: () => void;
 }
 
 export const [injectColorAreaRootContext, provideColorAreaRootContext]
@@ -373,6 +378,31 @@ function handleBoundaryKey(axis: ActiveDirection, boundaryValue: number) {
   updateValues(point, atIndex, { commit: true });
 }
 
+function handleKeyDown(event: KeyboardEvent) {
+  if (disabled.value)
+    return;
+  if (event.key === "Home") {
+    handleBoundaryKey("x", minX.value);
+    event.preventDefault();
+  } else if (event.key === "End") {
+    handleBoundaryKey("x", maxX.value);
+    event.preventDefault();
+  } else if (event.key === "PageUp") {
+    handleBoundaryKey("y", minY.value);
+    event.preventDefault();
+  } else if (event.key === "PageDown") {
+    handleBoundaryKey("y", maxY.value);
+    event.preventDefault();
+  } else if (ARROW_KEYS.includes(event.key)) {
+    handleStepKeyDown(event);
+    event.preventDefault();
+  }
+}
+
+function snapshotValues() {
+  valuesBeforeSlideStartRef.value = currentModelValue.value;
+}
+
 const thumbRef = ref<HTMLElement | undefined>();
 const isDragging = ref(false);
 
@@ -395,6 +425,11 @@ provideColorAreaRootContext({
   colorRef,
   dir,
   isDragging,
+  handleKeyDown,
+  handleSlideStart,
+  handleSlideMove,
+  handleSlideEnd,
+  snapshotValues,
 });
 </script>
 
@@ -411,40 +446,6 @@ provideColorAreaRootContext({
       :data-disabled="disabled ? '' : undefined"
       :style="{
         ['--reka-slider-area-thumb-transform' as any]: `translate(${!isSlidingFromLeft && thumbAlignment === 'overflow' ? '50%' : '-50%'}, ${!isSlidingFromTop && thumbAlignment === 'overflow' ? '50%' : '-50%'})`,
-      }"
-      @keydown="(event: KeyboardEvent) => {
-        if (disabled) return;
-        if (event.key === 'Home') { handleBoundaryKey('x', minX); event.preventDefault(); }
-        else if (event.key === 'End') { handleBoundaryKey('x', maxX); event.preventDefault(); }
-        else if (event.key === 'PageUp') { handleBoundaryKey('y', minY); event.preventDefault(); }
-        else if (event.key === 'PageDown') { handleBoundaryKey('y', maxY); event.preventDefault(); }
-        else if (PAGE_KEYS.concat(ARROW_KEYS).includes(event.key)) { handleStepKeyDown(event); event.preventDefault(); }
-      }"
-      @pointerdown="(event: PointerEvent) => {
-        if (disabled) return;
-        const target = event.target as HTMLElement;
-        target.setPointerCapture(event.pointerId);
-        event.preventDefault();
-        if (thumbRef && thumbRef.contains(target)) {
-          thumbRef.focus();
-        }
-        else {
-          valuesBeforeSlideStartRef = currentModelValue;
-          handleSlideStart(event);
-        }
-      }"
-      @pointermove="(event: PointerEvent) => {
-        if (disabled) return;
-        const target = event.target as HTMLElement;
-        if (target.hasPointerCapture(event.pointerId)) handleSlideMove(event);
-      }"
-      @pointerup="(event: PointerEvent) => {
-        if (disabled) return;
-        const target = event.target as HTMLElement;
-        if (target.hasPointerCapture(event.pointerId)) {
-          target.releasePointerCapture(event.pointerId);
-          handleSlideEnd();
-        }
       }"
     >
       <slot :model-value="colorRef" />
