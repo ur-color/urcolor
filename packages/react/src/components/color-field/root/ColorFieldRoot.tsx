@@ -1,6 +1,6 @@
 import { forwardRef, useCallback, useMemo, useRef, useState } from "react";
-import { Color } from "internationalized-color";
-import { getChannelConfig, displayToCulori, culoriToDisplay, type ChannelConfig } from "@urcolor/core";
+import { Color, type SpaceId } from "@urcolor/core";
+import { getChannelConfig, displayToNative, nativeToDisplay, type ChannelConfig } from "@urcolor/core";
 import { clamp, snapToStep } from "../../../utils";
 import { ColorFieldContext, type ColorFieldContextValue } from "./ColorFieldRootContext";
 
@@ -10,7 +10,7 @@ export interface ColorFieldRootProps {
   /** The default color value when uncontrolled. */
   defaultValue?: Color | string | null;
   /** The color space mode (e.g. 'hsl', 'oklch'). */
-  colorSpace?: string;
+  colorSpace?: SpaceId;
   /** Which channel this field controls (e.g. 'h', 's', 'l'). */
   channel?: string;
   /** Channel display format. Auto-derived from colorSpace config if not set. */
@@ -41,7 +41,7 @@ function parseColor(v: Color | string | null | undefined): Color | undefined {
   return Color.parse(v) ?? undefined;
 }
 
-const ALPHA_CONFIG: ChannelConfig = { key: "alpha", label: "Alpha", min: 0, max: 100, step: 1, format: "percentage", culoriMin: 0, culoriMax: 1 };
+const ALPHA_CONFIG: ChannelConfig = { key: "alpha", label: "Alpha", min: 0, max: 100, step: 1, format: "percentage", nativeMin: 0, nativeMax: 1 };
 
 export const ColorFieldRoot = forwardRef<HTMLDivElement, ColorFieldRootProps>(
   function ColorFieldRoot(props, ref) {
@@ -90,16 +90,15 @@ export const ColorFieldRoot = forwardRef<HTMLDivElement, ColorFieldRootProps>(
     function getDisplayValue(): number | undefined {
       if (!colorRef) return undefined;
       if (isHexMode) {
-        const hex = colorRef.toHex()?.replace(/^#/, "");
+        const hex = colorRef.toString("hex").replace(/^#/, "");
         if (!hex) return undefined;
         return Number.parseInt(hex.slice(0, 6), 16);
       }
       if (!channelConfig) return undefined;
-      if (isAlpha) return Math.round((colorRef.alpha ?? 1) * 100);
+      if (isAlpha) return Math.round(colorRef.alpha * 100);
       const converted = colorRef.to(colorSpace);
-      if (!converted) return undefined;
-      const raw = converted.get(channel, 0);
-      return culoriToDisplay(channelConfig, raw);
+      const raw = converted.get(channel);
+      return nativeToDisplay(channelConfig, raw);
     }
 
     const [numericValue, setNumericValue] = useState<number | undefined>(() => getDisplayValue());
@@ -161,9 +160,9 @@ export const ColorFieldRoot = forwardRef<HTMLDivElement, ColorFieldRootProps>(
         return Color.parse(hexStr) ?? undefined;
       }
       if (!channelConfig) return undefined;
-      if (isAlpha) return colorRef.set({ alpha: displayVal / 100 });
-      const culoriVal = displayToCulori(channelConfig, displayVal);
-      return colorRef.set({ mode: colorSpace, [channel]: culoriVal });
+      if (isAlpha) return colorRef.withAlpha(displayVal / 100);
+      const nativeVal = displayToNative(channelConfig, displayVal);
+      return colorRef.with({ space: colorSpace, [channel]: nativeVal });
     }
 
     function emitColor(val: number): Color | undefined {

@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import "internationalized-color/css";
 import { ColorSwatch } from "./ColorSwatch";
 
 type Story = StoryObj<typeof ColorSwatch>;

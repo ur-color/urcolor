@@ -1,6 +1,6 @@
 import { forwardRef, useCallback, useMemo, useRef, useState } from "react";
-import { Color } from "internationalized-color";
-import { colorSpaces, getChannelConfig, displayToCulori, culoriToDisplay, type ChannelConfig } from "@urcolor/core";
+import { Color, type SpaceId } from "@urcolor/core";
+import { colorSpaces, getChannelConfig, displayToNative, nativeToDisplay, type ChannelConfig } from "@urcolor/core";
 import { cartesianToPolar, normalizeAngle } from "@urcolor/core";
 import { ColorRingContext, type ColorRingContextValue } from "./ColorRingRootContext";
 
@@ -8,7 +8,7 @@ export interface ColorRingRootProps {
   value?: Color | string | null;
   defaultValue?: Color | string;
   disabled?: boolean;
-  colorSpace?: string;
+  colorSpace?: SpaceId;
   channel?: string;
   startAngle?: number;
   innerRadius?: number;
@@ -25,7 +25,7 @@ function parseColor(v: Color | string | null | undefined): Color | undefined {
   return Color.parse(v) ?? undefined;
 }
 
-const ALPHA_CONFIG: ChannelConfig = { key: "alpha", label: "Alpha", min: 0, max: 100, step: 1, format: "percentage", culoriMin: 0, culoriMax: 1 };
+const ALPHA_CONFIG: ChannelConfig = { key: "alpha", label: "Alpha", min: 0, max: 100, step: 1, format: "percentage", nativeMin: 0, nativeMax: 1 };
 
 export const ColorRingRoot = forwardRef<HTMLDivElement, ColorRingRootProps>(
   function ColorRingRoot(props, ref) {
@@ -68,9 +68,8 @@ export const ColorRingRoot = forwardRef<HTMLDivElement, ColorRingRootProps>(
     function colorToDisplayValue(color: Color | undefined): number {
       if (!color || !channelConfig) return min;
       const converted = color.to(colorSpace);
-      if (!converted) return min;
-      const raw = isAlpha ? (color.alpha ?? 1) : converted.get(channelKey, 0);
-      return culoriToDisplay(channelConfig, raw);
+      const raw = isAlpha ? color.alpha : converted.get(channelKey);
+      return nativeToDisplay(channelConfig, raw);
     }
 
     const [currentValue, setCurrentValue] = useState(() => colorToDisplayValue(colorRef));
@@ -97,9 +96,9 @@ export const ColorRingRoot = forwardRef<HTMLDivElement, ColorRingRootProps>(
 
     function displayValueToColor(val: number): Color | undefined {
       if (!colorRef || !channelConfig) return undefined;
-      const culoriVal = displayToCulori(channelConfig, val);
-      if (isAlpha) return colorRef.set({ alpha: culoriVal });
-      return colorRef.set({ mode: colorSpace, [channelKey]: culoriVal });
+      const nativeVal = displayToNative(channelConfig, val);
+      if (isAlpha) return colorRef.withAlpha(nativeVal);
+      return colorRef.with({ space: colorSpace, [channelKey]: nativeVal });
     }
 
     function getValueFromPointer(clientX: number, clientY: number): number {

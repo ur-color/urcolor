@@ -1,5 +1,5 @@
 import { forwardRef, useCallback, useEffect, useRef, type ComponentPropsWithoutRef } from "react";
-import { Color } from "internationalized-color";
+import { Color } from "@urcolor/core";
 import { samplePolarGrid, getChannelConfig } from "@urcolor/core";
 import { useColorWheelContext } from "../root/ColorWheelRootContext";
 
@@ -45,20 +45,20 @@ export const ColorWheelGradient = forwardRef<HTMLSpanElement, ColorWheelGradient
       if (channelOverrides) {
         const updates: Record<string, number> = {};
         for (const [k, v] of Object.entries(channelOverrides)) {
-          if (k === "alpha") baseColor = baseColor.set({ alpha: v });
+          if (k === "alpha") baseColor = baseColor.withAlpha(v);
           else updates[k] = v;
         }
-        if (Object.keys(updates).length > 0) baseColor = baseColor.set({ mode: ctx.colorSpace, ...updates });
+        if (Object.keys(updates).length > 0) baseColor = baseColor.with({ space: ctx.colorSpace, ...updates });
       }
 
       const angleCfg = getChannelConfig(ctx.colorSpace, ctx.angleChannelKey);
       const radiusCfg = getChannelConfig(ctx.colorSpace, ctx.radiusChannelKey);
       if (!angleCfg || !radiusCfg) return;
 
-      const aMin = angleCfg.culoriMin ?? angleCfg.min;
-      const aMax = angleCfg.culoriMax ?? angleCfg.max;
-      const rMin = radiusCfg.culoriMin ?? radiusCfg.min;
-      const rMax = radiusCfg.culoriMax ?? radiusCfg.max;
+      const aMin = angleCfg.nativeMin ?? angleCfg.min;
+      const aMax = angleCfg.nativeMax ?? angleCfg.max;
+      const rMin = radiusCfg.nativeMin ?? radiusCfg.min;
+      const rMax = radiusCfg.nativeMax ?? radiusCfg.max;
 
       const size = 128;
       const pixels = samplePolarGrid(

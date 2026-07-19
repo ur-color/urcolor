@@ -1,5 +1,5 @@
 import { forwardRef, useCallback, useEffect, useMemo, useRef, type ComponentPropsWithoutRef } from "react";
-import { Color } from "internationalized-color";
+import { Color, type SpaceId } from "@urcolor/core";
 import { drawLinearGradient, interpolateStops, getChannelConfig } from "@urcolor/core";
 import { useColorSliderContext } from "../root/ColorSliderRootContext";
 
@@ -9,7 +9,7 @@ export interface ColorSliderGradientProps extends ComponentPropsWithoutRef<"span
   /** Rotation angle in degrees. When using vertical orientation, defaults to 90. */
   angle?: number;
   /** When set to a non-RGB color space, interpolates stops in that space for perceptual accuracy. */
-  interpolationSpace?: string;
+  interpolationSpace?: SpaceId;
   /**
    * Lock specific channels to fixed values in the gradient.
    * - `{ alpha: 1 }` (default) - lock alpha to 1
@@ -50,10 +50,10 @@ export const ColorSliderGradient = forwardRef<HTMLSpanElement, ColorSliderGradie
             if (k !== "alpha") nonAlpha[k] = v;
           }
           if (Object.keys(nonAlpha).length > 0) {
-            baseColor = colorRef.set({ mode: colorSpace, ...nonAlpha });
+            baseColor = colorRef.with({ space: colorSpace, ...nonAlpha });
           }
         }
-        return [baseColor.set({ alpha: 0 }), baseColor.set({ alpha: 1 })];
+        return [baseColor.withAlpha(0), baseColor.withAlpha(1)];
       }
 
       const cfg = getChannelConfig(colorSpace, channel);
@@ -61,8 +61,8 @@ export const ColorSliderGradient = forwardRef<HTMLSpanElement, ColorSliderGradie
 
       const steps = 12;
       const colors: Color[] = [];
-      const cMin = cfg.culoriMin ?? cfg.min;
-      const cMax = cfg.culoriMax ?? cfg.max;
+      const cMin = cfg.nativeMin ?? cfg.min;
+      const cMax = cfg.nativeMax ?? cfg.max;
 
       let baseColor = colorRef;
       if (overrides && typeof overrides === "object") {
@@ -71,18 +71,18 @@ export const ColorSliderGradient = forwardRef<HTMLSpanElement, ColorSliderGradie
           if (k !== "alpha") channelOverridesForSet[k] = v;
         }
         if (Object.keys(channelOverridesForSet).length > 0) {
-          baseColor = colorRef.set({ mode: colorSpace, ...channelOverridesForSet });
+          baseColor = colorRef.with({ space: colorSpace, ...channelOverridesForSet });
         }
         if (overrides.alpha !== undefined) {
-          baseColor = baseColor.set({ alpha: overrides.alpha });
+          baseColor = baseColor.withAlpha(overrides.alpha);
         }
       }
 
       for (let i = 0; i < steps; i++) {
         const t = i / (steps - 1);
         const val = cMin + t * (cMax - cMin);
-        const c = baseColor.set({ mode: colorSpace, [channel]: val });
-        if (c) colors.push(c);
+        const c = baseColor.with({ space: colorSpace, [channel]: val });
+        colors.push(c);
       }
       return colors;
     }, [colorsProp, colorRef, isAlphaChannel, channelOverrides, colorSpace, channel]);

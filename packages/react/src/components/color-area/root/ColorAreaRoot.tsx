@@ -1,6 +1,6 @@
 import { forwardRef, useCallback, useMemo, useRef, useState } from "react";
-import { Color } from "internationalized-color";
-import { colorSpaces, getChannelConfig, displayToCulori, culoriToDisplay, type ChannelConfig } from "@urcolor/core";
+import { Color, type SpaceId } from "@urcolor/core";
+import { colorSpaces, getChannelConfig, displayToNative, nativeToDisplay, type ChannelConfig } from "@urcolor/core";
 import { snapToStep, linearScale, getClosestThumbIndex, hasMinStepsBetweenValues, ARROW_KEYS } from "../../../utils";
 import { ColorAreaContext, type ColorAreaContextValue } from "./ColorAreaRootContext";
 
@@ -18,7 +18,7 @@ export interface ColorAreaRootProps {
   /** Whether the Y axis is visually inverted. */
   invertedY?: boolean;
   /** The color space mode. */
-  colorSpace?: string;
+  colorSpace?: SpaceId;
   /** Which channel maps to the X axis. */
   channelX?: string;
   /** Which channel maps to the Y axis. */
@@ -40,7 +40,7 @@ function parseColor(v: Color | string | null | undefined): Color | undefined {
   return Color.parse(v) ?? undefined;
 }
 
-const ALPHA_CONFIG: ChannelConfig = { key: "alpha", label: "Alpha", min: 0, max: 100, step: 1, format: "percentage", culoriMin: 0, culoriMax: 1 };
+const ALPHA_CONFIG: ChannelConfig = { key: "alpha", label: "Alpha", min: 0, max: 100, step: 1, format: "percentage", nativeMin: 0, nativeMax: 1 };
 
 export const ColorAreaRoot = forwardRef<HTMLDivElement, ColorAreaRootProps>(
   function ColorAreaRoot(props, ref) {
@@ -94,10 +94,9 @@ export const ColorAreaRoot = forwardRef<HTMLDivElement, ColorAreaRootProps>(
     function colorToDisplayValues(color: Color | undefined): number[][] {
       if (!color || !xConfig || !yConfig) return [[minX, minY]];
       const converted = color.to(colorSpace);
-      if (!converted) return [[minX, minY]];
-      const rawX = xIsAlpha ? (color.alpha ?? 1) : converted.get(xChannelKey, 0);
-      const rawY = yIsAlpha ? (color.alpha ?? 1) : converted.get(yChannelKey, 0);
-      return [[culoriToDisplay(xConfig, rawX), culoriToDisplay(yConfig, rawY)]];
+      const rawX = xIsAlpha ? color.alpha : converted.get(xChannelKey);
+      const rawY = yIsAlpha ? color.alpha : converted.get(yChannelKey);
+      return [[nativeToDisplay(xConfig, rawX), nativeToDisplay(yConfig, rawY)]];
     }
 
     const [internalValue, setInternalValue] = useState<number[][]>(() => colorToDisplayValues(colorRef));
@@ -127,14 +126,14 @@ export const ColorAreaRoot = forwardRef<HTMLDivElement, ColorAreaRootProps>(
 
     function displayValuesToColor(vals: number[][]): Color | undefined {
       if (!vals[0] || !colorRef || !xConfig || !yConfig) return undefined;
-      const culoriX = displayToCulori(xConfig, vals[0][0] ?? 0);
-      const culoriY = displayToCulori(yConfig, vals[0][1] ?? 0);
+      const nativeX = displayToNative(xConfig, vals[0][0] ?? 0);
+      const nativeY = displayToNative(yConfig, vals[0][1] ?? 0);
       const channelUpdates: Record<string, number> = {};
-      if (!xIsAlpha) channelUpdates[xChannelKey] = culoriX;
-      if (!yIsAlpha) channelUpdates[yChannelKey] = culoriY;
-      let result = colorRef.set({ mode: colorSpace, ...channelUpdates });
-      if (xIsAlpha) result = result.set({ alpha: culoriX });
-      if (yIsAlpha) result = result.set({ alpha: culoriY });
+      if (!xIsAlpha) channelUpdates[xChannelKey] = nativeX;
+      if (!yIsAlpha) channelUpdates[yChannelKey] = nativeY;
+      let result = colorRef.with({ space: colorSpace, ...channelUpdates });
+      if (xIsAlpha) result = result.withAlpha(nativeX);
+      if (yIsAlpha) result = result.withAlpha(nativeY);
       return result;
     }
 

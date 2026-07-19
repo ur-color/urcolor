@@ -1,7 +1,7 @@
 import { forwardRef, useCallback, useMemo, useRef, useState } from "react";
 import { Slider } from "@base-ui-components/react/slider";
-import { Color } from "internationalized-color";
-import { getChannelConfig, displayToCulori, culoriToDisplay } from "@urcolor/core";
+import { Color, type SpaceId } from "@urcolor/core";
+import { getChannelConfig, displayToNative, nativeToDisplay } from "@urcolor/core";
 import { ColorSliderContext, type ColorSliderContextValue } from "./ColorSliderRootContext";
 
 export interface ColorSliderRootProps {
@@ -10,7 +10,7 @@ export interface ColorSliderRootProps {
   /** The default color value when uncontrolled. */
   defaultValue?: Color | string | null;
   /** The color space mode (e.g. 'hsl', 'oklch'). */
-  colorSpace?: string;
+  colorSpace?: SpaceId;
   /** Which channel this slider controls (e.g. 'h', 's', 'l'). */
   channel?: string;
   /** When true, prevents the user from interacting with the slider. */
@@ -38,7 +38,7 @@ function parseColor(v: Color | string | null | undefined): Color | undefined {
 
 const DEFAULT_COLOR = Color.parse("hsl(210, 80%, 50%)")!;
 
-const ALPHA_CONFIG = { key: "alpha", label: "Alpha", min: 0, max: 100, step: 1, format: "percentage" as const, culoriMin: 0, culoriMax: 1 };
+const ALPHA_CONFIG = { key: "alpha", label: "Alpha", min: 0, max: 100, step: 1, format: "percentage" as const, nativeMin: 0, nativeMax: 1 };
 
 export const ColorSliderRoot = forwardRef<HTMLDivElement, ColorSliderRootProps>(
   function ColorSliderRoot(props, ref) {
@@ -78,21 +78,20 @@ export const ColorSliderRoot = forwardRef<HTMLDivElement, ColorSliderRootProps>(
 
     const sliderValue = useMemo(() => {
       if (!colorRef || !channelConfig) return channelConfig?.min ?? 0;
-      if (isAlpha) return Math.round((colorRef.alpha ?? 1) * 100);
+      if (isAlpha) return Math.round(colorRef.alpha * 100);
       const converted = colorRef.to(colorSpace);
-      if (!converted) return channelConfig.min;
-      const raw = converted.get(channel, 0);
-      return culoriToDisplay(channelConfig, raw);
+      const raw = converted.get(channel);
+      return nativeToDisplay(channelConfig, raw);
     }, [colorRef, channelConfig, isAlpha, colorSpace, channel]);
 
     const handleValueChange = useCallback((val: number) => {
       if (!channelConfig) return;
       let newColor: Color | undefined;
       if (isAlpha) {
-        newColor = colorRef.set({ alpha: val / 100 });
+        newColor = colorRef.withAlpha(val / 100);
       } else {
-        const culoriVal = displayToCulori(channelConfig, val);
-        newColor = colorRef.set({ mode: colorSpace, [channel]: culoriVal });
+        const nativeVal = displayToNative(channelConfig, val);
+        newColor = colorRef.with({ space: colorSpace, [channel]: nativeVal });
       }
       if (newColor) {
         if (!isControlled) setInternalColor(newColor);
@@ -104,10 +103,10 @@ export const ColorSliderRoot = forwardRef<HTMLDivElement, ColorSliderRootProps>(
       if (!channelConfig) return;
       let newColor: Color | undefined;
       if (isAlpha) {
-        newColor = colorRef.set({ alpha: val / 100 });
+        newColor = colorRef.withAlpha(val / 100);
       } else {
-        const culoriVal = displayToCulori(channelConfig, val);
-        newColor = colorRef.set({ mode: colorSpace, [channel]: culoriVal });
+        const nativeVal = displayToNative(channelConfig, val);
+        newColor = colorRef.with({ space: colorSpace, [channel]: nativeVal });
       }
       if (newColor) onValueCommit?.(newColor);
     }, [channelConfig, isAlpha, colorRef, colorSpace, channel, onValueCommit]);

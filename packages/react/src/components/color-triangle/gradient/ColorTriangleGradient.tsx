@@ -1,5 +1,5 @@
 import { forwardRef, useEffect, useRef, type ComponentPropsWithoutRef } from "react";
-import { Color } from "internationalized-color";
+import { Color, type SpaceId } from "@urcolor/core";
 import { sampleTriangleGrid, getChannelConfig } from "@urcolor/core";
 import { useColorTriangleContext } from "../root/ColorTriangleRootContext";
 
@@ -7,16 +7,16 @@ export interface ColorTriangleGradientProps extends ComponentPropsWithoutRef<"sp
   channelOverrides?: Record<string, number> | false;
 }
 
-function applyOverrides(baseColor: Color, colorSpace: string, overrides: Record<string, number> | false | undefined): Color {
+function applyOverrides(baseColor: Color, colorSpace: SpaceId, overrides: Record<string, number> | false | undefined): Color {
   if (!overrides) return baseColor;
   let result = baseColor;
   const channelUpdates: Record<string, number> = {};
   for (const [k, v] of Object.entries(overrides)) {
-    if (k === "alpha") result = result.set({ alpha: v });
+    if (k === "alpha") result = result.withAlpha(v);
     else channelUpdates[k] = v;
   }
   if (Object.keys(channelUpdates).length > 0) {
-    result = result.set({ mode: colorSpace, ...channelUpdates });
+    result = result.with({ space: colorSpace, ...channelUpdates });
   }
   return result;
 }
@@ -65,16 +65,16 @@ export const ColorTriangleGradient = forwardRef<HTMLSpanElement, ColorTriangleGr
         const zCfg = getChannelConfig(ctx.colorSpace, ctx.zChannelKey);
         if (zCfg) {
           zChannel = ctx.zChannelKey;
-          zMinVal = zCfg.culoriMin ?? zCfg.min;
-          zMaxVal = zCfg.culoriMax ?? zCfg.max;
+          zMinVal = zCfg.nativeMin ?? zCfg.min;
+          zMaxVal = zCfg.nativeMax ?? zCfg.max;
         }
       }
 
       const pixels = sampleTriangleGrid(
         overriddenBase, ctx.colorSpace,
         ctx.xChannelKey, ctx.yChannelKey,
-        xCfg.culoriMin ?? xCfg.min, xCfg.culoriMax ?? xCfg.max,
-        yCfg.culoriMin ?? yCfg.min, yCfg.culoriMax ?? yCfg.max,
+        xCfg.nativeMin ?? xCfg.min, xCfg.nativeMax ?? xCfg.max,
+        yCfg.nativeMin ?? yCfg.min, yCfg.nativeMax ?? yCfg.max,
         v0, v1, v2,
         sampleSize, sampleSize,
         false,

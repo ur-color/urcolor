@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from "react";
-import { colorSpaces, culoriToDisplay, displayToCulori } from "@urcolor/core";
+import { colorSpaces, nativeToDisplay, displayToNative, type SpaceId } from "@urcolor/core";
 import { useColor, type ColorInput, type UseColorReturn } from "./useColor";
 
 export type UseColorSpaceReturn<K extends string> = UseColorReturn & {
@@ -8,7 +8,7 @@ export type UseColorSpaceReturn<K extends string> = UseColorReturn & {
   [P in K as `set${Capitalize<P>}`]: (value: number) => void;
 };
 
-export function useColorSpace(input: ColorInput, spaceName: string) {
+export function useColorSpace(input: ColorInput, spaceName: SpaceId) {
   const { color, setColor, hex, setHex, alpha, setAlpha } = useColor(input);
   const spaceConfig = colorSpaces[spaceName];
 
@@ -16,13 +16,9 @@ export function useColorSpace(input: ColorInput, spaceName: string) {
     if (!spaceConfig) return {};
     const result: Record<string, number> = {};
     for (const ch of spaceConfig.channels) {
-      const converted = color.to(spaceConfig.mode);
-      if (!converted) {
-        result[ch.key] = 0;
-        continue;
-      }
-      const raw = converted.get(ch.key, 0);
-      result[ch.key] = culoriToDisplay(ch, raw);
+      const converted = color.to(spaceConfig.space);
+      const raw = converted.get(ch.key);
+      result[ch.key] = nativeToDisplay(ch, raw);
     }
     return result;
   }, [color, spaceConfig]);
@@ -33,10 +29,10 @@ export function useColorSpace(input: ColorInput, spaceName: string) {
     for (const ch of spaceConfig.channels) {
       const capitalizedKey = ch.key.charAt(0).toUpperCase() + ch.key.slice(1);
       result[`set${capitalizedKey}`] = (value: number) => {
-        const culoriVal = displayToCulori(ch, value);
-        setColor(color.set({
-          mode: spaceConfig.mode,
-          [ch.key]: culoriVal,
+        const nativeVal = displayToNative(ch, value);
+        setColor(color.with({
+          space: spaceConfig.space,
+          [ch.key]: nativeVal,
         }));
       };
     }

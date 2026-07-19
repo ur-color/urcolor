@@ -1,10 +1,10 @@
 import { createContext, useContext } from "react";
-import type { Color } from "internationalized-color";
+import type { Color, SpaceId } from "@urcolor/core";
 
 export interface ColorSliderContextValue {
   colorRef: Color | undefined;
   channel: string;
-  colorSpace: string;
+  colorSpace: SpaceId;
   orientation: "horizontal" | "vertical";
   inverted: boolean;
 }

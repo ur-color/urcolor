@@ -1,5 +1,5 @@
 import { createContext, useContext } from "react";
-import type { Color } from "internationalized-color";
+import type { Color, SpaceId } from "@urcolor/core";
 
 export interface ColorAreaContextValue {
   disabled: boolean;
@@ -14,7 +14,7 @@ export interface ColorAreaContextValue {
   isSlidingFromLeft: boolean;
   isSlidingFromTop: boolean;
   thumbAlignment: "contain" | "overflow";
-  colorSpace: string;
+  colorSpace: SpaceId;
   xChannelKey: string;
   yChannelKey: string;
   colorRef: Color | undefined;

@@ -1,13 +1,13 @@
 import { forwardRef, useCallback, useMemo, useRef, useState } from "react";
-import { Color } from "internationalized-color";
-import { colorSpaces, getChannelConfig, displayToCulori, culoriToDisplay, type ChannelConfig, triangleVertices, clampToTriangle, barycentricCoords, pointInTriangle, type Point } from "@urcolor/core";
+import { Color, type SpaceId } from "@urcolor/core";
+import { colorSpaces, getChannelConfig, displayToNative, nativeToDisplay, type ChannelConfig, triangleVertices, clampToTriangle, barycentricCoords, pointInTriangle, type Point } from "@urcolor/core";
 import { ColorTriangleContext, type ColorTriangleContextValue, type ActiveDirection } from "./ColorTriangleRootContext";
 
 export interface ColorTriangleRootProps {
   value?: Color | string | null;
   defaultValue?: Color | string;
   disabled?: boolean;
-  colorSpace?: string;
+  colorSpace?: SpaceId;
   channelX?: string;
   channelY?: string;
   channelZ?: string;
@@ -27,7 +27,7 @@ function parseColor(v: Color | string | null | undefined): Color | undefined {
   return Color.parse(v) ?? undefined;
 }
 
-const ALPHA_CONFIG: ChannelConfig = { key: "alpha", label: "Alpha", min: 0, max: 100, step: 1, format: "percentage", culoriMin: 0, culoriMax: 1 };
+const ALPHA_CONFIG: ChannelConfig = { key: "alpha", label: "Alpha", min: 0, max: 100, step: 1, format: "percentage", nativeMin: 0, nativeMax: 1 };
 
 export const ColorTriangleRoot = forwardRef<HTMLDivElement, ColorTriangleRootProps>(
   function ColorTriangleRoot(props, ref) {
@@ -97,14 +97,13 @@ export const ColorTriangleRoot = forwardRef<HTMLDivElement, ColorTriangleRootPro
     function colorToDisplayValues(color: Color | undefined): { x: number; y: number; z: number } {
       if (!color || !xConfig || !yConfig) return { x: xMin, y: yMin, z: zMin };
       const converted = color.to(colorSpace);
-      if (!converted) return { x: xMin, y: yMin, z: zMin };
-      const rawX = xIsAlpha ? (color.alpha ?? 1) : converted.get(xChannelKey, 0);
-      const rawY = yIsAlpha ? (color.alpha ?? 1) : converted.get(yChannelKey, 0);
-      const rawZ = zChannelKey ? (zIsAlpha ? (color.alpha ?? 1) : converted.get(zChannelKey, 0)) : 0;
+      const rawX = xIsAlpha ? color.alpha : converted.get(xChannelKey);
+      const rawY = yIsAlpha ? color.alpha : converted.get(yChannelKey);
+      const rawZ = zChannelKey ? (zIsAlpha ? color.alpha : converted.get(zChannelKey)) : 0;
       return {
-        x: culoriToDisplay(xConfig, rawX),
-        y: culoriToDisplay(yConfig, rawY),
-        z: zConfig ? culoriToDisplay(zConfig, rawZ) : zMin,
+        x: nativeToDisplay(xConfig, rawX),
+        y: nativeToDisplay(yConfig, rawY),
+        z: zConfig ? nativeToDisplay(zConfig, rawZ) : zMin,
       };
     }
 
@@ -141,20 +140,20 @@ export const ColorTriangleRoot = forwardRef<HTMLDivElement, ColorTriangleRootPro
 
     function displayValuesToColor(xVal: number, yVal: number, zVal?: number): Color | undefined {
       if (!colorRef || !xConfig || !yConfig) return undefined;
-      const culoriX = displayToCulori(xConfig, xVal);
-      const culoriY = displayToCulori(yConfig, yVal);
+      const nativeX = displayToNative(xConfig, xVal);
+      const nativeY = displayToNative(yConfig, yVal);
       const updates: Record<string, number> = {};
-      if (!xIsAlpha) updates[xChannelKey] = culoriX;
-      if (!yIsAlpha) updates[yChannelKey] = culoriY;
+      if (!xIsAlpha) updates[xChannelKey] = nativeX;
+      if (!yIsAlpha) updates[yChannelKey] = nativeY;
       if (zChannelKey && zConfig && zVal != null) {
-        const culoriZ = displayToCulori(zConfig, zVal);
-        if (!zIsAlpha) updates[zChannelKey] = culoriZ;
+        const nativeZ = displayToNative(zConfig, zVal);
+        if (!zIsAlpha) updates[zChannelKey] = nativeZ;
       }
-      let result = colorRef.set({ mode: colorSpace, ...updates });
-      if (xIsAlpha) result = result.set({ alpha: culoriX });
-      if (yIsAlpha) result = result.set({ alpha: culoriY });
+      let result = colorRef.with({ space: colorSpace, ...updates });
+      if (xIsAlpha) result = result.withAlpha(nativeX);
+      if (yIsAlpha) result = result.withAlpha(nativeY);
       if (zChannelKey && zConfig && zVal != null && zIsAlpha) {
-        result = result.set({ alpha: displayToCulori(zConfig, zVal) });
+        result = result.withAlpha(displayToNative(zConfig, zVal));
       }
       return result;
     }

@@ -1,7 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import "internationalized-color/css";
 import { useState } from "react";
-import { Color } from "internationalized-color";
+import { Color } from "@urcolor/core";
 import * as ColorWheel from "./index.parts";
 
 type Story = StoryObj<typeof ColorWheel.Root>;

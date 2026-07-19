@@ -1,11 +1,11 @@
 import { createContext, useContext } from "react";
-import type { Color } from "internationalized-color";
+import type { Color, SpaceId } from "@urcolor/core";
 
 export type ActiveDirection = "x" | "y";
 
 export interface ColorWheelContextValue {
   disabled: boolean;
-  colorSpace: string;
+  colorSpace: SpaceId;
   angleChannelKey: string;
   radiusChannelKey: string;
   colorRef: Color | undefined;

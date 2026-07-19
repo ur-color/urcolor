@@ -1,5 +1,5 @@
 import { forwardRef, useCallback, useEffect, useRef, useMemo, type ComponentPropsWithoutRef } from "react";
-import { Color } from "internationalized-color";
+import { Color, type SpaceId } from "@urcolor/core";
 import { sampleConicRing, getChannelConfig } from "@urcolor/core";
 import { useColorRingContext } from "../root/ColorRingRootContext";
 
@@ -41,15 +41,15 @@ export const ColorRingGradient = forwardRef<HTMLSpanElement, ColorRingGradientPr
     const rootCtx = useColorRingContext();
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
-    function applyOverrides(baseColor: Color, cs: string): Color {
+    function applyOverrides(baseColor: Color, cs: SpaceId): Color {
       if (!channelOverrides) return baseColor;
       let result = baseColor;
       const updates: Record<string, number> = {};
       for (const [k, v] of Object.entries(channelOverrides)) {
-        if (k === "alpha") result = result.set({ alpha: v });
+        if (k === "alpha") result = result.withAlpha(v);
         else updates[k] = v;
       }
-      if (Object.keys(updates).length > 0) result = result.set({ mode: cs, ...updates });
+      if (Object.keys(updates).length > 0) result = result.with({ space: cs, ...updates });
       return result;
     }
 
@@ -61,8 +61,8 @@ export const ColorRingGradient = forwardRef<HTMLSpanElement, ColorRingGradientPr
       const overriddenBase = applyOverrides(baseColor, rootCtx.colorSpace);
       const cfg = getChannelConfig(rootCtx.colorSpace, rootCtx.channelKey);
       if (!cfg) return;
-      const cMin = cfg.culoriMin ?? cfg.min;
-      const cMax = cfg.culoriMax ?? cfg.max;
+      const cMin = cfg.nativeMin ?? cfg.min;
+      const cMax = cfg.nativeMax ?? cfg.max;
       const sampleSize = 128;
       const pixels = sampleConicRing(overriddenBase, rootCtx.colorSpace, rootCtx.channelKey, cMin, cMax, sampleSize, sampleSize, rootCtx.startAngle);
       renderToCanvas(canvas, pixels, sampleSize, sampleSize, rootCtx.innerRadius);

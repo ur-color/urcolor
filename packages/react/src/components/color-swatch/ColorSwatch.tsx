@@ -1,5 +1,5 @@
 import { forwardRef, useContext, useMemo, type ComponentPropsWithoutRef } from "react";
-import { Color } from "internationalized-color";
+import { Color } from "@urcolor/core";
 import { Toggle } from "@base-ui-components/react/toggle";
 import { ColorSwatchGroupContext } from "../color-swatch-group/root/ColorSwatchGroupRootContext";
 
@@ -33,23 +33,23 @@ function useSwatchStyle(value: string | Color | null | undefined, checkerSize: n
       } as React.CSSProperties;
     }
 
-    const opaque = color.set({ alpha: 1 });
-    const srgbOpaque = opaque?.to("rgb");
-    const opaqueStr = srgbOpaque?.toString("css") ?? "transparent";
+    const opaque = color.withAlpha(1);
+    const srgbOpaque = opaque.to("srgb");
+    const opaqueStr = srgbOpaque.toString();
 
     let colorStr: string;
     if (!showAlpha) {
       colorStr = opaqueStr;
     } else {
-      const srgb = color.to("rgb");
-      colorStr = srgb?.toString("css") ?? "transparent";
+      const srgb = color.to("srgb");
+      colorStr = srgb.toString();
     }
 
     const checkerboard = `repeating-conic-gradient(rgb(230, 230, 230) 0%, rgb(230, 230, 230) 25%, white 0%, white 50%) 0% 50% / ${checkerSize}px ${checkerSize}px`;
 
     return {
       "--swatch-color-opaque": opaqueStr,
-      "--swatch-alpha": color.alpha ?? 1,
+      "--swatch-alpha": color.alpha,
       "--swatch-checkerboard": checkerboard,
       "--swatch-color": colorStr,
       background: `linear-gradient(${colorStr}, ${colorStr}), ${checkerboard}`,

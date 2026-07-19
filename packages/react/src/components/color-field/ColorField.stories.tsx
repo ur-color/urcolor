@@ -1,7 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import "internationalized-color/css";
 import { useState } from "react";
-import { Color } from "internationalized-color";
+import { Color } from "@urcolor/core";
 import * as ColorField from "./index.parts";
 
 type Story = StoryObj<typeof ColorField.Root>;
@@ -32,7 +31,7 @@ export const HSL_Hue: Story = { name: "HSL / Hue", render: () => <FieldDemo colo
 export const HSL_Saturation: Story = { name: "HSL / Saturation", render: () => <FieldDemo colorSpace="hsl" channel="s" /> };
 export const HSL_Lightness: Story = { name: "HSL / Lightness", render: () => <FieldDemo colorSpace="hsl" channel="l" /> };
 export const HSL_Alpha: Story = { name: "HSL / Alpha", render: () => <FieldDemo colorSpace="hsl" channel="alpha" /> };
-export const RGB_Red: Story = { name: "RGB / Red", render: () => <FieldDemo colorSpace="rgb" channel="r" /> };
-export const Hex: Story = { name: "Hex", render: () => <FieldDemo colorSpace="rgb" channel="r" format="hex" /> };
+export const RGB_Red: Story = { name: "RGB / Red", render: () => <FieldDemo colorSpace="srgb" channel="r" /> };
+export const Hex: Story = { name: "Hex", render: () => <FieldDemo colorSpace="srgb" channel="r" format="hex" /> };
 export const Disabled: Story = { name: "Disabled", render: () => <FieldDemo colorSpace="hsl" channel="h" disabled /> };
 export const ReadOnly: Story = { name: "ReadOnly", render: () => <FieldDemo colorSpace="hsl" channel="h" readOnly /> };

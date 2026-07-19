@@ -1,6 +1,6 @@
 import { forwardRef, useCallback, useMemo, useRef, useState } from "react";
-import { Color } from "internationalized-color";
-import { colorSpaces, getChannelConfig, displayToCulori, culoriToDisplay, type ChannelConfig } from "@urcolor/core";
+import { Color, type SpaceId } from "@urcolor/core";
+import { colorSpaces, getChannelConfig, displayToNative, nativeToDisplay, type ChannelConfig } from "@urcolor/core";
 import { cartesianToPolar, normalizeAngle, clampToCircle } from "@urcolor/core";
 import { ColorWheelContext, type ActiveDirection, type ColorWheelContextValue } from "./ColorWheelRootContext";
 
@@ -8,7 +8,7 @@ export interface ColorWheelRootProps {
   value?: Color | string | null;
   defaultValue?: Color | string;
   disabled?: boolean;
-  colorSpace?: string;
+  colorSpace?: SpaceId;
   channelAngle?: string;
   channelRadius?: string;
   startAngle?: number;
@@ -25,7 +25,7 @@ function parseColor(v: Color | string | null | undefined): Color | undefined {
   return Color.parse(v) ?? undefined;
 }
 
-const ALPHA_CONFIG: ChannelConfig = { key: "alpha", label: "Alpha", min: 0, max: 100, step: 1, format: "percentage", culoriMin: 0, culoriMax: 1 };
+const ALPHA_CONFIG: ChannelConfig = { key: "alpha", label: "Alpha", min: 0, max: 100, step: 1, format: "percentage", nativeMin: 0, nativeMax: 1 };
 
 export const ColorWheelRoot = forwardRef<HTMLDivElement, ColorWheelRootProps>(
   function ColorWheelRoot(props, ref) {
@@ -57,10 +57,9 @@ export const ColorWheelRoot = forwardRef<HTMLDivElement, ColorWheelRootProps>(
     function colorToDisplayValues(color: Color | undefined) {
       if (!color || !angleConfig || !radiusConfig) return { angle: angleMin, radius: radiusMin };
       const converted = color.to(colorSpace);
-      if (!converted) return { angle: angleMin, radius: radiusMin };
-      const rawAngle = angleIsAlpha ? (color.alpha ?? 1) : converted.get(angleChannelKey, 0);
-      const rawRadius = radiusIsAlpha ? (color.alpha ?? 1) : converted.get(radiusChannelKey, 0);
-      return { angle: culoriToDisplay(angleConfig, rawAngle), radius: culoriToDisplay(radiusConfig, rawRadius) };
+      const rawAngle = angleIsAlpha ? color.alpha : converted.get(angleChannelKey);
+      const rawRadius = radiusIsAlpha ? color.alpha : converted.get(radiusChannelKey);
+      return { angle: nativeToDisplay(angleConfig, rawAngle), radius: nativeToDisplay(radiusConfig, rawRadius) };
     }
 
     const init = colorToDisplayValues(colorRef);
@@ -85,14 +84,14 @@ export const ColorWheelRoot = forwardRef<HTMLDivElement, ColorWheelRootProps>(
 
     function displayValuesToColor(angle: number, radius: number): Color | undefined {
       if (!colorRef || !angleConfig || !radiusConfig) return undefined;
-      const ca = displayToCulori(angleConfig, angle);
-      const cr = displayToCulori(radiusConfig, radius);
+      const ca = displayToNative(angleConfig, angle);
+      const cr = displayToNative(radiusConfig, radius);
       const updates: Record<string, number> = {};
       if (!angleIsAlpha) updates[angleChannelKey] = ca;
       if (!radiusIsAlpha) updates[radiusChannelKey] = cr;
-      let result = colorRef.set({ mode: colorSpace, ...updates });
-      if (angleIsAlpha) result = result.set({ alpha: ca });
-      if (radiusIsAlpha) result = result.set({ alpha: cr });
+      let result = colorRef.with({ space: colorSpace, ...updates });
+      if (angleIsAlpha) result = result.withAlpha(ca);
+      if (radiusIsAlpha) result = result.withAlpha(cr);
       return result;
     }
 

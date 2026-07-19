@@ -1,12 +1,12 @@
 import { createContext, useContext } from "react";
-import type { Color } from "internationalized-color";
+import type { Color, SpaceId } from "@urcolor/core";
 
 export interface ColorRingContextValue {
   disabled: boolean;
   min: number;
   max: number;
   step: number;
-  colorSpace: string;
+  colorSpace: SpaceId;
   channelKey: string;
   colorRef: Color | undefined;
   currentValue: number;

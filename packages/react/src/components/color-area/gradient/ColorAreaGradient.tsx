@@ -1,5 +1,5 @@
 import { forwardRef, useCallback, useEffect, useMemo, useRef, type ComponentPropsWithoutRef } from "react";
-import { Color } from "internationalized-color";
+import { Color, type SpaceId } from "@urcolor/core";
 import { drawGradient, sampleBilinearGrid, sampleChannelGrid, getChannelConfig } from "@urcolor/core";
 import { useColorAreaContext } from "../root/ColorAreaRootContext";
 
@@ -8,7 +8,7 @@ export interface ColorAreaGradientProps extends ComponentPropsWithoutRef<"span">
   topRight?: string;
   bottomLeft?: string;
   bottomRight?: string;
-  interpolationSpace?: string;
+  interpolationSpace?: SpaceId;
   channelOverrides?: Record<string, number> | false;
 }
 
@@ -50,15 +50,15 @@ export const ColorAreaGradient = forwardRef<HTMLSpanElement, ColorAreaGradientPr
       return 1;
     }, [hasAlphaAxis, channelOverrides, rootCtx.colorRef]);
 
-    function applyOverrides(baseColor: Color, cs: string): Color {
+    function applyOverrides(baseColor: Color, cs: SpaceId): Color {
       if (!channelOverrides) return baseColor;
       let result = baseColor;
       const updates: Record<string, number> = {};
       for (const [k, v] of Object.entries(channelOverrides)) {
-        if (k === "alpha") result = result.set({ alpha: v });
+        if (k === "alpha") result = result.withAlpha(v);
         else updates[k] = v;
       }
-      if (Object.keys(updates).length > 0) result = result.set({ mode: cs, ...updates });
+      if (Object.keys(updates).length > 0) result = result.with({ space: cs, ...updates });
       return result;
     }
 
@@ -103,10 +103,10 @@ export const ColorAreaGradient = forwardRef<HTMLSpanElement, ColorAreaGradientPr
           const xCfg = getChannelConfig(cs, effectiveXChannel);
           const yCfg = getChannelConfig(cs, effectiveYChannel);
           if (!xCfg || !yCfg) return;
-          const xMin = xCfg.culoriMin ?? xCfg.min;
-          const xMax = xCfg.culoriMax ?? xCfg.max;
-          const yMin = yCfg.culoriMin ?? yCfg.min;
-          const yMax = yCfg.culoriMax ?? yCfg.max;
+          const xMin = xCfg.nativeMin ?? xCfg.min;
+          const xMax = xCfg.nativeMax ?? xCfg.max;
+          const yMin = yCfg.nativeMin ?? yCfg.min;
+          const yMax = yCfg.nativeMax ?? yCfg.max;
           const pixels = sampleChannelGrid(
             overriddenBase, cs,
             effectiveXChannel, effectiveYChannel,
@@ -119,8 +119,8 @@ export const ColorAreaGradient = forwardRef<HTMLSpanElement, ColorAreaGradientPr
           const channelKey = effectiveXChannel ?? effectiveYChannel!;
           const cfg = getChannelConfig(cs, channelKey);
           if (!cfg) return;
-          const cMin = cfg.culoriMin ?? cfg.min;
-          const cMax = cfg.culoriMax ?? cfg.max;
+          const cMin = cfg.nativeMin ?? cfg.min;
+          const cMax = cfg.nativeMax ?? cfg.max;
           const isXReal = !!effectiveXChannel;
           const slidingForwardReal = isXReal ? slidingFromLeft : slidingFromTop;
           const slidingForwardAlpha = isXReal ? slidingFromTop : slidingFromLeft;
@@ -135,14 +135,12 @@ export const ColorAreaGradient = forwardRef<HTMLSpanElement, ColorAreaGradientPr
               const vx = x / 63;
               const realVal = isXReal ? realMin + vx * (realMax - realMin) : realMin + vy * (realMax - realMin);
               const alphaVal = isXReal ? alphaMin + vy * (alphaMax - alphaMin) : alphaMin + vx * (alphaMax - alphaMin);
-              const c = overriddenBase.set({ mode: cs, [channelKey]: realVal });
-              if (!c) continue;
-              const rgb = c.to("rgb");
-              if (!rgb) continue;
+              const c = overriddenBase.with({ space: cs, [channelKey]: realVal });
+              const rgb = c.to("srgb");
               const idx = (y * 64 + x) * 4;
-              data[idx] = Math.round(Math.max(0, Math.min(1, rgb.get("r", 0))) * 255);
-              data[idx + 1] = Math.round(Math.max(0, Math.min(1, rgb.get("g", 0))) * 255);
-              data[idx + 2] = Math.round(Math.max(0, Math.min(1, rgb.get("b", 0))) * 255);
+              data[idx] = Math.round(Math.max(0, Math.min(1, rgb.get("r"))) * 255);
+              data[idx + 1] = Math.round(Math.max(0, Math.min(1, rgb.get("g"))) * 255);
+              data[idx + 2] = Math.round(Math.max(0, Math.min(1, rgb.get("b"))) * 255);
               data[idx + 3] = Math.round(Math.max(0, Math.min(1, alphaVal)) * 255);
             }
           }

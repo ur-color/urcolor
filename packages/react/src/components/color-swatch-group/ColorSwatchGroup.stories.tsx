@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import "internationalized-color/css";
 import * as ColorSwatchGroup from "./index.parts";
 import { ColorSwatch } from "../color-swatch/ColorSwatch";
 

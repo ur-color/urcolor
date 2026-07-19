@@ -1,7 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import "internationalized-color/css";
 import { useState } from "react";
-import { Color } from "internationalized-color";
+import { Color } from "@urcolor/core";
 import * as ColorTriangle from "./index.parts";
 
 type Story = StoryObj<typeof ColorTriangle.Root>;
@@ -37,5 +36,5 @@ export const HSL_SaturationLightness: Story = { name: "HSL / S × L", render: ()
 export const OKLCh_ChromaLightness: Story = { name: "OKLCh / C × L", render: () => <TriangleDemo colorSpace="oklch" channelX="c" channelY="l" /> };
 export const Rotated: Story = { name: "HSV / Rotated 90°", render: () => <TriangleDemo colorSpace="hsv" channelX="s" channelY="v" rotation={90} /> };
 export const Disabled: Story = { name: "Disabled", render: () => <TriangleDemo disabled /> };
-export const Maxwell_RGB: Story = { name: "Maxwell's RGB Triangle", render: () => <TriangleDemo colorSpace="rgb" channelX="r" channelY="g" channelZ="b" /> };
-export const P3_RGB: Story = { name: "Display P3 Triangle", render: () => <TriangleDemo colorSpace="p3" channelX="r" channelY="g" channelZ="b" /> };
+export const Maxwell_RGB: Story = { name: "Maxwell's RGB Triangle", render: () => <TriangleDemo colorSpace="srgb" channelX="r" channelY="g" channelZ="b" /> };
+export const P3_RGB: Story = { name: "Display P3 Triangle", render: () => <TriangleDemo colorSpace="display-p3" channelX="r" channelY="g" channelZ="b" /> };

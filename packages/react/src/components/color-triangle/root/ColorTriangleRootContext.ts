@@ -1,12 +1,12 @@
 import { createContext, useContext } from "react";
-import type { Color } from "internationalized-color";
+import type { Color, SpaceId } from "@urcolor/core";
 import type { Point } from "@urcolor/core";
 
 export type ActiveDirection = "x" | "y" | "z";
 
 export interface ColorTriangleContextValue {
   disabled: boolean;
-  colorSpace: string;
+  colorSpace: SpaceId;
   xChannelKey: string;
   yChannelKey: string;
   zChannelKey: string | undefined;

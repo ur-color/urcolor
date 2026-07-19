@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from "react";
-import { Color } from "internationalized-color";
+import { Color } from "@urcolor/core";
 
 export type ColorInput = Color | string | null | undefined;
 
@@ -23,17 +23,17 @@ export function parseColor(input: ColorInput): Color {
 export function useColor(input: ColorInput): UseColorReturn {
   const [color, setColor] = useState<Color>(() => parseColor(input));
 
-  const hex = useMemo(() => color.toHex() ?? "#000000", [color]);
+  const hex = useMemo(() => color.toString("hex"), [color]);
 
   const setHex = useCallback((v: string) => {
     const parsed = Color.parse(v);
     if (parsed) setColor(parsed);
   }, []);
 
-  const alpha = useMemo(() => Math.round((color.alpha ?? 1) * 100), [color]);
+  const alpha = useMemo(() => Math.round(color.alpha * 100), [color]);
 
   const setAlpha = useCallback((v: number) => {
-    setColor(prev => prev.set({ alpha: v / 100 }));
+    setColor(prev => prev.withAlpha(v / 100));
   }, []);
 
   return { color, setColor, hex, setHex, alpha, setAlpha };

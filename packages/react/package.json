@@ -55,8 +55,7 @@
   },
   "dependencies": {
     "@urcolor/core": "workspace:*",
-    "@base-ui-components/react": "^1.0.0-rc.0",
-    "internationalized-color": "1.1.1"
+    "@base-ui-components/react": "^1.0.0-rc.0"
   },
   "peerDependencies": {
     "react": "^18 || ^19",

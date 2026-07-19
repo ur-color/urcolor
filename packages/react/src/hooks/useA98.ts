@@ -2,5 +2,5 @@ import type { ColorInput } from "./useColor";
 import { useColorSpace, type UseColorSpaceReturn } from "./useColorSpace";
 
 export function useA98(input: ColorInput) {
-  return useColorSpace(input, "a98") as UseColorSpaceReturn<"r" | "g" | "b">;
+  return useColorSpace(input, "a98-rgb") as UseColorSpaceReturn<"r" | "g" | "b">;
 }

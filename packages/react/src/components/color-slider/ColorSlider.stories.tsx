@@ -1,7 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import "internationalized-color/css";
 import { useState } from "react";
-import { Color } from "internationalized-color";
+import { Color } from "@urcolor/core";
 import * as ColorSlider from "./index.parts";
 
 type Story = StoryObj<typeof ColorSlider.Root>;
@@ -91,8 +90,8 @@ export const OKLCh_Chroma: Story = { name: "OKLCh / Chroma", render: renderSlide
 export const OKLCh_Hue: Story = { name: "OKLCh / Hue", render: renderSlider({ colorSpace: "oklch", channel: "h" }) };
 
 // RGB
-export const RGB_Red: Story = { name: "RGB / Red", render: renderSlider({ colorSpace: "rgb", channel: "r" }) };
-export const RGB_Green: Story = { name: "RGB / Green", render: renderSlider({ colorSpace: "rgb", channel: "g" }) };
-export const RGB_Blue: Story = { name: "RGB / Blue", render: renderSlider({ colorSpace: "rgb", channel: "b" }) };
+export const RGB_Red: Story = { name: "RGB / Red", render: renderSlider({ colorSpace: "srgb", channel: "r" }) };
+export const RGB_Green: Story = { name: "RGB / Green", render: renderSlider({ colorSpace: "srgb", channel: "g" }) };
+export const RGB_Blue: Story = { name: "RGB / Blue", render: renderSlider({ colorSpace: "srgb", channel: "b" }) };
 
 export const Disabled: Story = { name: "Disabled", render: renderSlider({ disabled: true }) };
