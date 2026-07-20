@@ -40,9 +40,14 @@ export interface ColorFieldRootProps extends /* @vue-ignore */ PrimitiveProps {
 }
 
 export type ColorFieldRootEmits = {
+  /** Event handler called when the color value changes */
   "update:modelValue": [value: Color | undefined];
+  /** Event handler called when the color value changes. Mirrors `update:modelValue`; present for API parity. */
   "update:color": [value: Color];
-  "valueCommit": [value: Color];
+  /** Event handler called on every value change, including mid-typing. */
+  "change": [value: Color];
+  /** Event handler called when the value changes at the end of an interaction (blur, Enter, arrow keys, wheel, or increment/decrement). */
+  "changeEnd": [value: Color];
 };
 
 export interface ColorFieldRootContext {
@@ -219,6 +224,7 @@ function emitColor(val: number) {
     colorRef.value = newColor;
     emit("update:modelValue", newColor);
     emit("update:color", newColor);
+    emit("change", newColor);
   }
   return newColor;
 }
@@ -233,7 +239,7 @@ function commitValue(val: number | undefined) {
   numericValue.value = clamped;
   displayValue.value = formatValue(clamped);
   const newColor = emitColor(clamped);
-  if (newColor) emit("valueCommit", newColor);
+  if (newColor) emit("changeEnd", newColor);
 }
 
 function onInputChange(text: string) {
@@ -253,7 +259,7 @@ function handleIncrease(multiplier = 1) {
   numericValue.value = next;
   displayValue.value = formatValue(next);
   const newColor = emitColor(next);
-  if (newColor) emit("valueCommit", newColor);
+  if (newColor) emit("changeEnd", newColor);
 }
 
 function handleDecrease(multiplier = 1) {
@@ -263,7 +269,7 @@ function handleDecrease(multiplier = 1) {
   numericValue.value = next;
   displayValue.value = formatValue(next);
   const newColor = emitColor(next);
-  if (newColor) emit("valueCommit", newColor);
+  if (newColor) emit("changeEnd", newColor);
 }
 
 function handleMinMaxValue(type: "min" | "max") {
@@ -272,7 +278,7 @@ function handleMinMaxValue(type: "min" | "max") {
   numericValue.value = val;
   displayValue.value = formatValue(val);
   const newColor = emitColor(val);
-  if (newColor) emit("valueCommit", newColor);
+  if (newColor) emit("changeEnd", newColor);
 }
 
 const isDecreaseDisabled = computed(() => {

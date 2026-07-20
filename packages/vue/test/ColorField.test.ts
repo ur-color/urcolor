@@ -30,7 +30,7 @@ const ColorField = defineComponent({
     locale: { type: String, default: undefined },
     defaultValue: { type: [Object, String], default: undefined },
   },
-  emits: ["update:modelValue", "valueCommit"],
+  emits: ["update:modelValue", "change", "changeEnd"],
   setup(props, { emit }) {
     return () =>
       h(ColorFieldRoot, {
@@ -50,7 +50,8 @@ const ColorField = defineComponent({
         "locale": props.locale,
         "defaultValue": props.defaultValue as Color | string | undefined,
         "onUpdate:modelValue": (v: Color | undefined) => emit("update:modelValue", v),
-        "onValueCommit": (v: Color) => emit("valueCommit", v),
+        "onChange": (v: Color) => emit("change", v),
+        "onChangeEnd": (v: Color) => emit("changeEnd", v),
       }, {
         default: () => [
           h(ColorFieldDecrement, null, { default: () => "-" }),
@@ -87,7 +88,7 @@ describe("ColorField", () => {
   // genuinely dispatches and reaches the component's own guard.
   function mountFieldWithInputAs(inputAs: string, rootProps: Record<string, any> = {}) {
     const Wrapper = defineComponent({
-      emits: ["update:modelValue", "valueCommit"],
+      emits: ["update:modelValue", "changeEnd"],
       setup(_props, { emit }) {
         return () =>
           h(ColorFieldRoot, {
@@ -96,7 +97,7 @@ describe("ColorField", () => {
             "channel": "h",
             ...rootProps,
             "onUpdate:modelValue": (v: Color | undefined) => emit("update:modelValue", v),
-            "onValueCommit": (v: Color) => emit("valueCommit", v),
+            "onChangeEnd": (v: Color) => emit("changeEnd", v),
           }, {
             default: () => h(ColorFieldInput, { as: inputAs }),
           });
@@ -235,11 +236,33 @@ describe("ColorField", () => {
       expect(emitted).toBeInstanceOf(Color);
     });
 
-    it("should emit valueCommit on ArrowUp", async () => {
+    it("should emit changeEnd on ArrowUp", async () => {
       wrapper = mountField();
       await wrapper.find("input").trigger("keydown", { key: "ArrowUp" });
-      const emitted = wrapper.emitted("valueCommit")?.[0]?.[0];
+      const emitted = wrapper.emitted("changeEnd")?.[0]?.[0];
       expect(emitted).toBeInstanceOf(Color);
+    });
+
+    it("should emit change alongside changeEnd on ArrowUp", async () => {
+      // ArrowUp is a single, discrete, already-complete interaction (like a
+      // slider's keyboard step), so it fires `change` and `changeEnd`
+      // together in the same tick — mirroring how the other roots' shared
+      // channel model treats a `commit: true` value set.
+      wrapper = mountField();
+      await wrapper.find("input").trigger("keydown", { key: "ArrowUp" });
+      expect(wrapper.emitted("change")?.[0]?.[0]).toBeInstanceOf(Color);
+      expect(wrapper.emitted("changeEnd")?.[0]?.[0]).toBeInstanceOf(Color);
+    });
+
+    it("should emit change but not changeEnd while typing", async () => {
+      // Typing is the mid-interaction, uncommitted phase for a text field —
+      // analogous to a mid-drag pointer move on a slider/area. `changeEnd`
+      // only fires once the interaction completes (blur, Enter, arrow keys,
+      // wheel, or the increment/decrement buttons).
+      wrapper = mountField();
+      await wrapper.find("input").setValue("200");
+      expect(wrapper.emitted("change")?.[0]?.[0]).toBeInstanceOf(Color);
+      expect(wrapper.emitted("changeEnd")).toBeFalsy();
     });
   });
 
@@ -462,21 +485,21 @@ describe("ColorField", () => {
     it("should not commit on Enter", async () => {
       const input = wrapper.find("input");
       await input.trigger("keydown", { key: "Enter" });
-      expect(wrapper.emitted("valueCommit")).toBeFalsy();
+      expect(wrapper.emitted("changeEnd")).toBeFalsy();
     });
 
     it("should not commit on blur", async () => {
       const input = wrapper.find("input");
       await input.trigger("focus");
       await input.trigger("blur");
-      expect(wrapper.emitted("valueCommit")).toBeFalsy();
+      expect(wrapper.emitted("changeEnd")).toBeFalsy();
     });
 
     it("should not commit via the wheel", async () => {
       const input = wrapper.find("input");
       await input.trigger("focus");
       await input.trigger("wheel", { deltaY: -1 });
-      expect(wrapper.emitted("valueCommit")).toBeFalsy();
+      expect(wrapper.emitted("changeEnd")).toBeFalsy();
     });
 
     it("should not commit via typing", async () => {
@@ -488,7 +511,7 @@ describe("ColorField", () => {
       // default as="input" because readonly (unlike disabled) doesn't trip
       // @vue/test-utils' isDisabled() short-circuit. Before the fix this
       // emitted update:modelValue with the typed value despite
-      // readonly:true. onInputChange never emits valueCommit (only
+      // readonly:true. onInputChange never emits changeEnd (only
       // commitValue does, via Enter/blur/wheel/etc.), so the assertion here
       // is on update:modelValue, matching what this path actually emits.
       const input = wrapper.find("input");
