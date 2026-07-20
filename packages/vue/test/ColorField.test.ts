@@ -1,7 +1,7 @@
 import type { VueWrapper } from "@vue/test-utils";
 import { mount } from "@vue/test-utils";
 import { beforeEach, describe, expect, it } from "bun:test";
-import { defineComponent, h, nextTick } from "vue";
+import { defineComponent, h } from "vue";
 import { Color, type SpaceId } from "@urcolor/core";
 import {
   ColorFieldRoot,
@@ -298,17 +298,13 @@ describe("ColorField", () => {
       handleSubmit.mockClear();
     });
 
-    // The hidden input only appears once the root element exists, so the
-    // enclosing form can be detected — one patch after the initial render.
-    it("should have hidden input field", async () => {
+    it("should have hidden input field", () => {
       const w = mount(FormWrapper, { props: { handleSubmit }, attachTo: document.body });
-      await nextTick();
       expect(w.find("[type=\"hidden\"]").exists()).toBe(true);
     });
 
     it("should submit correct value", async () => {
       const w = mount(FormWrapper, { props: { handleSubmit }, attachTo: document.body });
-      await nextTick();
       await w.find("form").trigger("submit");
       expect(handleSubmit).toHaveBeenCalledTimes(1);
       const result = handleSubmit.mock.results[0]!.value as Record<string, string>;

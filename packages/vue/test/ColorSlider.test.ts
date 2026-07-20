@@ -158,22 +158,30 @@ describe("given a ColorSlider thumb with a default slot", () => {
 });
 
 describe("given a ColorSlider in a form", () => {
-  let wrapper: VueWrapper;
-
   beforeEach(() => {
     document.body.innerHTML = "";
-    wrapper = mount(defineComponent({
+  });
+
+  // Mounted and flushed inside the `it` body (not `beforeEach`) so this test's
+  // pass/fail doesn't depend on the implicit microtask flush that a mount in
+  // `beforeEach` happens to get for free before the `it` callback runs.
+  async function mountInForm() {
+    const wrapper = mount(defineComponent({
       setup() {
         return () => h("form", [h(ColorSlider)]);
       },
     }), { attachTo: document.body });
-  });
+    await nextTick();
+    return wrapper;
+  }
 
-  it("should render a hidden input", () => {
+  it("should render a hidden input", async () => {
+    const wrapper = await mountInForm();
     expect(wrapper.find("input[name=\"hue\"]").exists()).toBe(true);
   });
 
-  it("should carry the current colour on the hidden input", () => {
+  it("should carry the current colour on the hidden input", async () => {
+    const wrapper = await mountInForm();
     const input = wrapper.find<HTMLInputElement>("input[name=\"hue\"]");
     expect(input.element.value).toBe(Color.parse("hsl(180, 50%, 50%)")!.toString());
   });

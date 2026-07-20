@@ -1,7 +1,7 @@
 import type { DOMWrapper, VueWrapper } from "@vue/test-utils";
 import { mount } from "@vue/test-utils";
 import { beforeEach, describe, expect, it, vi } from "bun:test";
-import { defineComponent, h } from "vue";
+import { defineComponent, h, nextTick } from "vue";
 import { Color } from "@urcolor/core";
 import {
   ColorAreaArea,
@@ -227,6 +227,30 @@ describe("given default ColorArea", () => {
     });
   });
 
+  describe("the hasChanged emit gate", () => {
+    it("should emit nothing on a second Home press once already at the hue minimum", async () => {
+      const slider = wrapper.find("[role=\"slider\"]");
+
+      // First Home press genuinely moves the value: default is [180, 50],
+      // Home drives X (hue) to minX = 0, giving [0, 50].
+      await slider.trigger("keydown", { key: "Home" });
+      expect(getEmittedDisplayValues(wrapper)).toEqual([0, 50]);
+      expect(wrapper.emitted("update:modelValue")).toHaveLength(1);
+      expect(wrapper.emitted("changeEnd")).toHaveLength(1);
+
+      // Second Home press targets the same X minimum the value is already
+      // at, so updateValues' hasChanged check is false and the whole emit
+      // block (including changeEnd) must be skipped - this is the only key
+      // that is guaranteed to be a genuine no-op, since it doesn't depend on
+      // step size or current position beyond "already at the minimum".
+      await slider.trigger("keydown", { key: "Home" });
+      expect(wrapper.emitted("update:modelValue")).toHaveLength(1);
+      expect(wrapper.emitted("update:color")).toHaveLength(1);
+      expect(wrapper.emitted("change")).toHaveLength(1);
+      expect(wrapper.emitted("changeEnd")).toHaveLength(1);
+    });
+  });
+
   describe("pointer interaction on the interaction surface", () => {
     // happy-dom gives every element a zero-size getBoundingClientRect, which
     // makes the area's linear scales divide by zero and produce NaN. Stub a
@@ -385,8 +409,6 @@ describe("given slider area in a form", () => {
   window.HTMLElement.prototype.releasePointerCapture = vi.fn();
   window.HTMLElement.prototype.setPointerCapture = vi.fn();
 
-  let wrapper: VueWrapper;
-
   const FormWrapper = defineComponent({
     props: { handleSubmit: { type: Function, default: undefined } },
     setup(props) {
@@ -397,22 +419,30 @@ describe("given slider area in a form", () => {
   beforeEach(() => {
     handleSubmit.mockClear();
     document.body.innerHTML = "";
-    wrapper = mount(FormWrapper, {
+  });
+
+  // Mounted and flushed inside the `it` body (not `beforeEach`) so this
+  // test's pass/fail doesn't depend on the implicit microtask flush that a
+  // mount in `beforeEach` happens to get for free before the `it` callback
+  // runs.
+  async function mountInForm() {
+    const wrapper = mount(FormWrapper, {
       props: { handleSubmit },
       attachTo: document.body,
     });
-  });
+    await nextTick();
+    return wrapper;
+  }
 
   it("should have hidden input field", async () => {
+    const wrapper = await mountInForm();
     expect(wrapper.find("[type=\"hidden\"]").exists()).toBe(true);
   });
 
   describe("after clicking submit button", () => {
-    beforeEach(async () => {
+    it("should trigger submit once", async () => {
+      const wrapper = await mountInForm();
       await wrapper.find("form").trigger("submit");
-    });
-
-    it("should trigger submit once", () => {
       expect(handleSubmit).toHaveBeenCalledTimes(1);
       // The hidden input now contains the Color's string representation
       const result = handleSubmit.mock.results[0]!.value as Record<string, string>;
