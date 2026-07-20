@@ -14,9 +14,9 @@ export interface ColorAreaRootProps {
   /** The reading direction. */
   dir?: "ltr" | "rtl";
   /** Whether the X axis is visually inverted. */
-  invertedX?: boolean;
+  xInverted?: boolean;
   /** Whether the Y axis is visually inverted. */
-  invertedY?: boolean;
+  yInverted?: boolean;
   /** The color space mode. */
   colorSpace?: SpaceId;
   /** Which channel maps to the X axis. */
@@ -49,8 +49,8 @@ export const ColorAreaRoot = forwardRef<HTMLDivElement, ColorAreaRootProps>(
       defaultValue: defaultValueProp = "hsl(0, 100%, 50%)",
       disabled = false,
       dir = "ltr",
-      invertedX = false,
-      invertedY = false,
+      xInverted = false,
+      yInverted = false,
       colorSpace = "hsl",
       channelX: channelXProp,
       channelY: channelYProp,
@@ -121,8 +121,8 @@ export const ColorAreaRoot = forwardRef<HTMLDivElement, ColorAreaRootProps>(
       }
     }
 
-    const isSlidingFromLeft = (dir !== "rtl" && !invertedX) || (dir !== "ltr" && invertedX);
-    const isSlidingFromTop = !invertedY;
+    const isSlidingFromLeft = (dir !== "rtl" && !xInverted) || (dir !== "ltr" && xInverted);
+    const isSlidingFromTop = !yInverted;
 
     function displayValuesToColor(vals: number[][]): Color | undefined {
       if (!vals[0] || !colorRef || !xConfig || !yConfig) return undefined;

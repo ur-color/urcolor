@@ -136,8 +136,8 @@ const { color } = useColor("hsl(210, 80%, 50%)");
       color-space="hsv"
       x-channel="s"
       y-channel="v"
-      :inverted-y="true"
-      class="absolute inset-[20.3%] relative size-full cursor-crosshair touch-none overflow-clip rounded-sm"
+      :y-inverted="true"
+      class="absolute inset-[20.3%] cursor-crosshair touch-none overflow-clip rounded-sm"
     >
       <ColorAreaArea as="div" class="absolute inset-0">
         <ColorAreaGradient as="div" class="absolute inset-0" />
@@ -156,7 +156,7 @@ const { color } = useColor("hsl(210, 80%, 50%)");
 </template>
 ```
 
-The key is `inset-[20.3%]` — this inscribes the square perfectly inside the ring's inner circle (`50% × (1 − 0.84/√2) ≈ 20.3%`). The `:inverted-y="true"` prop flips the Y axis so value increases upward. Both components share the same `v-model="color"`, so dragging the hue ring updates the area's gradient, and dragging the area updates the color while keeping the hue ring in sync.
+The key is `inset-[20.3%]` — this inscribes the square perfectly inside the ring's inner circle (`50% × (1 − 0.84/√2) ≈ 20.3%`). The `:y-inverted="true"` prop flips the Y axis so value increases upward. Both components share the same `v-model="color"`, so dragging the hue ring updates the area's gradient, and dragging the area updates the color while keeping the hue ring in sync.
 
 ::: tip
 All components are completely unstyled — the classes above are just an example using Tailwind CSS. To compute the inset for any `inner-radius`, use `50% × (1 − innerRadius / √2)`.

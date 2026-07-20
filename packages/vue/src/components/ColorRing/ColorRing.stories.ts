@@ -1,10 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/vue3";
 import { defineComponent, h, shallowRef } from "vue";
-import { ColorRingRoot, ColorRingTrack, ColorRingGradient, ColorRingCheckerboard, ColorRingThumb } from "./index";
+import { ColorRingRoot, ColorRingTrack, ColorRingGradient, ColorRingThumb } from "./index";
 
 type Story = StoryObj<typeof ColorRingRoot>;
 
-function singleRing(props: Record<string, unknown> = {}, { alpha = false } = {}) {
+function singleRing(props: Record<string, unknown> = {}) {
   return h(
     ColorRingRoot,
     { class: "block relative size-64", style: "container-type: inline-size", innerRadius: 0.85, ...props },
@@ -13,7 +13,6 @@ function singleRing(props: Record<string, unknown> = {}, { alpha = false } = {})
         ColorRingTrack,
         { class: "block relative size-full" },
         () => [
-          ...(alpha ? [h(ColorRingCheckerboard)] : []),
           h(ColorRingGradient, { class: "block absolute inset-0" }),
           h(ColorRingThumb, {
             class: "size-4 rounded-full border-2 border-white shadow",
@@ -23,7 +22,7 @@ function singleRing(props: Record<string, unknown> = {}, { alpha = false } = {})
   );
 }
 
-function renderRing(props: Record<string, unknown> = {}, opts: { alpha?: boolean } = {}) {
+function renderRing(props: Record<string, unknown> = {}) {
   return () => h(defineComponent({
     setup() {
       const color = shallowRef<unknown>(null);
@@ -33,7 +32,7 @@ function renderRing(props: Record<string, unknown> = {}, opts: { alpha?: boolean
       });
       return () =>
         h("div", { class: "flex gap-4" }, [
-          h("div", [h("div", { class: "text-xs text-gray-500 mb-1" }, "Default"), singleRing(bind(), opts)]),
+          h("div", [h("div", { class: "text-xs text-gray-500 mb-1" }, "Default"), singleRing(bind())]),
         ]);
     },
   }));

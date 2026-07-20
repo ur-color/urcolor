@@ -27,9 +27,9 @@ export interface ColorAreaRootProps extends /* @vue-ignore */ PrimitiveProps {
   /** The reading direction. If omitted, inherits globally from `ConfigProvider` or assumes LTR. */
   dir?: Direction;
   /** Whether the X axis is visually inverted. */
-  invertedX?: boolean;
+  xInverted?: boolean;
   /** Whether the Y axis is visually inverted. */
-  invertedY?: boolean;
+  yInverted?: boolean;
   /** The color space mode to work in (e.g. 'hsl', 'oklch'). */
   colorSpace?: SpaceId;
   /** Which channel maps to the X axis (e.g. 's' for HSL saturation, or 'alpha' for opacity). */
@@ -104,8 +104,8 @@ defineOptions({
 const props = withDefaults(defineProps<ColorAreaRootProps>(), {
   disabled: false,
   defaultValue: "hsl(0, 100%, 50%)",
-  invertedX: false,
-  invertedY: false,
+  xInverted: false,
+  yInverted: false,
   colorSpace: "hsl",
   minXStepsBetweenThumbs: 0,
   minYStepsBetweenThumbs: 0,
@@ -163,9 +163,9 @@ const offsetPosition = ref<{ x: number; y: number }>();
 
 // Determine axis directions
 const isSlidingFromLeft = computed(() => {
-  return (dir.value !== "rtl" && !props.invertedX) || (dir.value !== "ltr" && props.invertedX);
+  return (dir.value !== "rtl" && !props.xInverted) || (dir.value !== "ltr" && props.xInverted);
 });
-const isSlidingFromTop = computed(() => !props.invertedY);
+const isSlidingFromTop = computed(() => !props.yInverted);
 
 function getPointFromPointerEvent(event: PointerEvent, slideStart?: boolean): number[] {
   const rect = rectRef.value || (areaElement.value ?? currentElement.value).getBoundingClientRect();

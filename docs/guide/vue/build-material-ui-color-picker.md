@@ -59,7 +59,7 @@ const { color } = useColor("hsl(210, 80%, 50%)");
       color-space="hsv"
       x-channel="s"
       y-channel="v"
-      :inverted-y="true"
+      :y-inverted="true"
       class="relative h-[180px] w-full cursor-crosshair touch-none overflow-clip rounded-lg"
     >
       <ColorAreaArea as="div" class="absolute inset-0">
@@ -107,7 +107,7 @@ const { color } = useColor("hsl(210, 80%, 50%)");
       color-space="hsv"
       x-channel="s"
       y-channel="v"
-      :inverted-y="true"
+      :y-inverted="true"
       class="relative h-[180px] w-full cursor-crosshair touch-none overflow-clip rounded-lg"
     >
       <ColorAreaArea as="div" class="absolute inset-0">
@@ -151,7 +151,7 @@ const { color } = useColor("hsl(210, 80%, 50%)");
 
 ## Step 4: Add the alpha slider
 
-Add another `ColorSlider` for the alpha (opacity) channel, with a checkerboard background.
+Add another `ColorSlider` for the alpha (opacity) channel. `ColorSliderGradient` paints the checkerboard behind the canvas automatically, so transparency shows without a separate element.
 
 ```vue
 <script setup lang="ts">
@@ -165,7 +165,6 @@ import {
   ColorSliderTrack,
   ColorSliderGradient,
   ColorSliderThumb,
-  ColorSliderCheckerboard, // [!code ++]
 } from "@urcolor/vue";
 
 const { color } = useColor("hsl(210, 80%, 50%)");
@@ -175,14 +174,13 @@ const { color } = useColor("hsl(210, 80%, 50%)");
   <div class="flex w-full max-w-xs flex-col gap-3 rounded-xl p-3">
     <!-- ...color area and hue slider... -->
 
-    <!-- [!code ++:17] -->
+    <!-- [!code ++:16] -->
     <ColorSliderRoot
       v-model="color"
       color-space="hsv"
       channel="alpha"
     >
       <ColorSliderTrack class="relative h-4 overflow-hidden rounded-full">
-        <ColorSliderCheckerboard class="absolute inset-0 rounded-full" />
         <ColorSliderGradient class="absolute inset-0 rounded-full" />
         <ColorSliderThumb
           class="
@@ -198,7 +196,7 @@ const { color } = useColor("hsl(210, 80%, 50%)");
 </template>
 ```
 
-The `ColorSliderCheckerboard` renders behind the gradient to indicate transparency.
+`ColorSliderGradient` renders the checkerboard behind the canvas itself, so transparency is visible with no extra element.
 
 ## Step 5: Add color field inputs
 
@@ -219,7 +217,6 @@ import {
   ColorSliderTrack,
   ColorSliderGradient,
   ColorSliderThumb,
-  ColorSliderCheckerboard,
   ColorFieldRoot, // [!code ++]
   ColorFieldInput, // [!code ++]
   ColorFieldIncrement, // [!code ++]

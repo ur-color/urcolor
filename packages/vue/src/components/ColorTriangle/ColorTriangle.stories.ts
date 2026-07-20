@@ -1,15 +1,14 @@
 import type { Meta, StoryObj } from "@storybook/vue3";
 import { defineComponent, h, shallowRef } from "vue";
-import { ColorTriangleRoot, ColorTriangleGradient, ColorTriangleCheckerboard, ColorTriangleThumb } from "./index";
+import { ColorTriangleRoot, ColorTriangleGradient, ColorTriangleThumb } from "./index";
 
 type Story = StoryObj<typeof ColorTriangleRoot>;
 
-function singleTriangle(props: Record<string, unknown> = {}, { alpha = false } = {}) {
+function singleTriangle(props: Record<string, unknown> = {}) {
   return h(
     ColorTriangleRoot,
     { class: "block relative size-64", ...props },
     () => [
-      ...(alpha ? [h(ColorTriangleCheckerboard)] : []),
       h(ColorTriangleGradient, { class: "block absolute inset-0" }),
       h(ColorTriangleThumb, {
         class: "size-4 rounded-full border-2 border-white shadow",
@@ -18,7 +17,7 @@ function singleTriangle(props: Record<string, unknown> = {}, { alpha = false } =
   );
 }
 
-function renderTriangle(props: Record<string, unknown> = {}, opts: { alpha?: boolean } = {}) {
+function renderTriangle(props: Record<string, unknown> = {}) {
   return () => h(defineComponent({
     setup() {
       const color = shallowRef<unknown>(null);
@@ -28,7 +27,7 @@ function renderTriangle(props: Record<string, unknown> = {}, opts: { alpha?: boo
       });
       return () =>
         h("div", { class: "flex gap-4" }, [
-          h("div", [h("div", { class: "text-xs text-gray-500 mb-1" }, "Default"), singleTriangle(bind(), opts)]),
+          h("div", [h("div", { class: "text-xs text-gray-500 mb-1" }, "Default"), singleTriangle(bind())]),
         ]);
     },
   }));

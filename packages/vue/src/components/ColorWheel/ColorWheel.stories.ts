@@ -1,15 +1,14 @@
 import type { Meta, StoryObj } from "@storybook/vue3";
 import { defineComponent, h, shallowRef } from "vue";
-import { ColorWheelRoot, ColorWheelGradient, ColorWheelCheckerboard, ColorWheelThumb } from "./index";
+import { ColorWheelRoot, ColorWheelGradient, ColorWheelThumb } from "./index";
 
 type Story = StoryObj<typeof ColorWheelRoot>;
 
-function singleWheel(props: Record<string, unknown> = {}, { alpha = false } = {}) {
+function singleWheel(props: Record<string, unknown> = {}) {
   return h(
     ColorWheelRoot,
     { class: "block relative size-64 rounded-full overflow-hidden", style: "container-type: inline-size", ...props },
     () => [
-      ...(alpha ? [h(ColorWheelCheckerboard)] : []),
       h(ColorWheelGradient, { class: "block absolute inset-0" }),
       h(ColorWheelThumb, {
         class: "size-4 rounded-full border-2 border-white shadow",
@@ -18,7 +17,7 @@ function singleWheel(props: Record<string, unknown> = {}, { alpha = false } = {}
   );
 }
 
-function renderWheel(props: Record<string, unknown> = {}, opts: { alpha?: boolean } = {}) {
+function renderWheel(props: Record<string, unknown> = {}) {
   return () => h(defineComponent({
     setup() {
       const color = shallowRef<unknown>(null);
@@ -28,7 +27,7 @@ function renderWheel(props: Record<string, unknown> = {}, opts: { alpha?: boolea
       });
       return () =>
         h("div", { class: "flex gap-4" }, [
-          h("div", [h("div", { class: "text-xs text-gray-500 mb-1" }, "Default"), singleWheel(bind(), opts)]),
+          h("div", [h("div", { class: "text-xs text-gray-500 mb-1" }, "Default"), singleWheel(bind())]),
         ]);
     },
   }));

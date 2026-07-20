@@ -24,7 +24,6 @@ import ColorWheelOKLCh from './demo/ColorWheelOKLCh.vue'
 ```vue
 <template>
   <ColorWheelRoot>
-    <ColorWheelCheckerboard />
     <ColorWheelGradient />
     <ColorWheelThumb />
   </ColorWheelRoot>
@@ -110,7 +109,11 @@ Renders a polar gradient canvas for the wheel. Automatically samples the gradien
 | `as` | `string` | `'span'` | The element or component to render as. |
 | `asChild` | `boolean` | `false` | Merge props onto the single child instead of rendering an element. |
 
-### ColorWheelCheckerboard
+### ColorWheelCheckerboard <Badge type="warning" text="deprecated" />
+
+::: warning Deprecated
+`ColorWheelGradient` now paints the checkerboard itself, so this component is no longer needed and is kept only for backwards compatibility. It emits a one-time console warning in development. To render a checkerboard elsewhere, apply a CSS `repeating-conic-gradient` background to your own element.
+:::
 
 Renders a checkerboard pattern behind the gradient to visualize alpha transparency. Place it inside `ColorWheelRoot` before `ColorWheelGradient`.
 

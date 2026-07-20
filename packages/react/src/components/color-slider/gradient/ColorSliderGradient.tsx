@@ -2,6 +2,7 @@ import { forwardRef, useCallback, useEffect, useMemo, useRef, type ComponentProp
 import { Color, type SpaceId } from "@urcolor/core";
 import { drawLinearGradient, interpolateStops, getChannelConfig } from "@urcolor/core";
 import { useColorSliderContext } from "../root/ColorSliderRootContext";
+import { CHECKERBOARD_BACKGROUND } from "../../../utils";
 
 export interface ColorSliderGradientProps extends ComponentPropsWithoutRef<"span"> {
   /** Array of color stops. When omitted, auto-computes from the slider's channel and current color. */
@@ -141,7 +142,7 @@ export const ColorSliderGradient = forwardRef<HTMLSpanElement, ColorSliderGradie
     }, []);
 
     return (
-      <span ref={ref} style={style} {...props}>
+      <span ref={ref} style={{ background: CHECKERBOARD_BACKGROUND, ...style }} {...props}>
         <canvas
           ref={canvasRef}
           style={{

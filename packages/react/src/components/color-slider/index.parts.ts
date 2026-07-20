@@ -4,4 +4,5 @@ export { ColorSliderTrack as Track, type ColorSliderTrackProps as TrackProps } f
 export { ColorSliderRange as Range, type ColorSliderRangeProps as RangeProps } from "./range/ColorSliderRange";
 export { ColorSliderThumb as Thumb, type ColorSliderThumbProps as ThumbProps } from "./thumb/ColorSliderThumb";
 export { ColorSliderGradient as Gradient, type ColorSliderGradientProps as GradientProps } from "./gradient/ColorSliderGradient";
+/** @deprecated The Gradient component now paints the checkerboard itself; remove this component. */
 export { ColorSliderCheckerboard as Checkerboard, type ColorSliderCheckerboardProps as CheckerboardProps } from "./checkerboard/ColorSliderCheckerboard";

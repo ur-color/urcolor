@@ -1,16 +1,15 @@
 import type { Meta, StoryObj } from "@storybook/vue3";
 import { defineComponent, h, shallowRef } from "vue";
-import { ColorAreaRoot, ColorAreaArea, ColorAreaGradient, ColorAreaCheckerboard, ColorAreaThumb } from "./index";
+import { ColorAreaRoot, ColorAreaArea, ColorAreaGradient, ColorAreaThumb } from "./index";
 
 type Story = StoryObj<typeof ColorAreaRoot>;
 
-function singleArea(props: Record<string, unknown> = {}, { alpha = false } = {}) {
+function singleArea(props: Record<string, unknown> = {}) {
   return h(
     ColorAreaRoot,
     { class: "block relative size-64 rounded overflow-hidden", ...props },
     () => [
       h(ColorAreaArea, { class: "block absolute inset-0" }, () => [
-        ...(alpha ? [h(ColorAreaCheckerboard, { class: "block absolute inset-0" })] : []),
         h(ColorAreaGradient, { class: "block absolute inset-0" }),
         h(ColorAreaThumb, {
           class: "absolute size-4 rounded-full border-2 border-white shadow",
@@ -20,7 +19,7 @@ function singleArea(props: Record<string, unknown> = {}, { alpha = false } = {})
   );
 }
 
-function renderArea(props: Record<string, unknown> = {}, opts: { alpha?: boolean } = {}) {
+function renderArea(props: Record<string, unknown> = {}) {
   return () => h(defineComponent({
     setup() {
       const color = shallowRef<unknown>(null);
@@ -30,10 +29,10 @@ function renderArea(props: Record<string, unknown> = {}, opts: { alpha?: boolean
       });
       return () =>
         h("div", { class: "grid grid-cols-2 gap-4" }, [
-          h("div", [h("div", { class: "text-xs text-gray-500 mb-1" }, "Default"), singleArea(bind(), opts)]),
-          h("div", [h("div", { class: "text-xs text-gray-500 mb-1" }, "Inverted X"), singleArea(bind({ invertedX: true }), opts)]),
-          h("div", [h("div", { class: "text-xs text-gray-500 mb-1" }, "Inverted Y"), singleArea(bind({ invertedY: true }), opts)]),
-          h("div", [h("div", { class: "text-xs text-gray-500 mb-1" }, "Inverted X & Y"), singleArea(bind({ invertedX: true, invertedY: true }), opts)]),
+          h("div", [h("div", { class: "text-xs text-gray-500 mb-1" }, "Default"), singleArea(bind())]),
+          h("div", [h("div", { class: "text-xs text-gray-500 mb-1" }, "Inverted X"), singleArea(bind({ xInverted: true }))]),
+          h("div", [h("div", { class: "text-xs text-gray-500 mb-1" }, "Inverted Y"), singleArea(bind({ yInverted: true }))]),
+          h("div", [h("div", { class: "text-xs text-gray-500 mb-1" }, "Inverted X & Y"), singleArea(bind({ xInverted: true, yInverted: true }))]),
         ]);
     },
   }));
@@ -106,18 +105,18 @@ export const Rec2020_Red_Blue: Story = { name: "Rec. 2020 / Red × Blue", render
 export const Rec2020_Green_Blue: Story = { name: "Rec. 2020 / Green × Blue", render: renderArea({ colorSpace: "rec2020", xChannel: "g", yChannel: "b" }) };
 
 // Alpha combinations
-export const HSL_Hue_Alpha: Story = { name: "HSL / Hue × Alpha", render: renderArea({ colorSpace: "hsl", xChannel: "h", yChannel: "alpha" }, { alpha: true }) };
-export const HSL_Saturation_Alpha: Story = { name: "HSL / Saturation × Alpha", render: renderArea({ colorSpace: "hsl", xChannel: "s", yChannel: "alpha" }, { alpha: true }) };
-export const HSL_Lightness_Alpha: Story = { name: "HSL / Lightness × Alpha", render: renderArea({ colorSpace: "hsl", xChannel: "l", yChannel: "alpha" }, { alpha: true }) };
-export const HSV_Hue_Alpha: Story = { name: "HSV / Hue × Alpha", render: renderArea({ colorSpace: "hsv", xChannel: "h", yChannel: "alpha" }, { alpha: true }) };
-export const HSV_Saturation_Alpha: Story = { name: "HSV / Saturation × Alpha", render: renderArea({ colorSpace: "hsv", xChannel: "s", yChannel: "alpha" }, { alpha: true }) };
-export const HSV_Value_Alpha: Story = { name: "HSV / Value × Alpha", render: renderArea({ colorSpace: "hsv", xChannel: "v", yChannel: "alpha" }, { alpha: true }) };
-export const RGB_Red_Alpha: Story = { name: "RGB / Red × Alpha", render: renderArea({ colorSpace: "srgb", xChannel: "r", yChannel: "alpha" }, { alpha: true }) };
-export const RGB_Green_Alpha: Story = { name: "RGB / Green × Alpha", render: renderArea({ colorSpace: "srgb", xChannel: "g", yChannel: "alpha" }, { alpha: true }) };
-export const RGB_Blue_Alpha: Story = { name: "RGB / Blue × Alpha", render: renderArea({ colorSpace: "srgb", xChannel: "b", yChannel: "alpha" }, { alpha: true }) };
-export const OKLCh_Lightness_Alpha: Story = { name: "OKLCh / Lightness × Alpha", render: renderArea({ colorSpace: "oklch", xChannel: "l", yChannel: "alpha" }, { alpha: true }) };
-export const OKLCh_Chroma_Alpha: Story = { name: "OKLCh / Chroma × Alpha", render: renderArea({ colorSpace: "oklch", xChannel: "c", yChannel: "alpha" }, { alpha: true }) };
-export const OKLCh_Hue_Alpha: Story = { name: "OKLCh / Hue × Alpha", render: renderArea({ colorSpace: "oklch", xChannel: "h", yChannel: "alpha" }, { alpha: true }) };
+export const HSL_Hue_Alpha: Story = { name: "HSL / Hue × Alpha", render: renderArea({ colorSpace: "hsl", xChannel: "h", yChannel: "alpha" }) };
+export const HSL_Saturation_Alpha: Story = { name: "HSL / Saturation × Alpha", render: renderArea({ colorSpace: "hsl", xChannel: "s", yChannel: "alpha" }) };
+export const HSL_Lightness_Alpha: Story = { name: "HSL / Lightness × Alpha", render: renderArea({ colorSpace: "hsl", xChannel: "l", yChannel: "alpha" }) };
+export const HSV_Hue_Alpha: Story = { name: "HSV / Hue × Alpha", render: renderArea({ colorSpace: "hsv", xChannel: "h", yChannel: "alpha" }) };
+export const HSV_Saturation_Alpha: Story = { name: "HSV / Saturation × Alpha", render: renderArea({ colorSpace: "hsv", xChannel: "s", yChannel: "alpha" }) };
+export const HSV_Value_Alpha: Story = { name: "HSV / Value × Alpha", render: renderArea({ colorSpace: "hsv", xChannel: "v", yChannel: "alpha" }) };
+export const RGB_Red_Alpha: Story = { name: "RGB / Red × Alpha", render: renderArea({ colorSpace: "srgb", xChannel: "r", yChannel: "alpha" }) };
+export const RGB_Green_Alpha: Story = { name: "RGB / Green × Alpha", render: renderArea({ colorSpace: "srgb", xChannel: "g", yChannel: "alpha" }) };
+export const RGB_Blue_Alpha: Story = { name: "RGB / Blue × Alpha", render: renderArea({ colorSpace: "srgb", xChannel: "b", yChannel: "alpha" }) };
+export const OKLCh_Lightness_Alpha: Story = { name: "OKLCh / Lightness × Alpha", render: renderArea({ colorSpace: "oklch", xChannel: "l", yChannel: "alpha" }) };
+export const OKLCh_Chroma_Alpha: Story = { name: "OKLCh / Chroma × Alpha", render: renderArea({ colorSpace: "oklch", xChannel: "c", yChannel: "alpha" }) };
+export const OKLCh_Hue_Alpha: Story = { name: "OKLCh / Hue × Alpha", render: renderArea({ colorSpace: "oklch", xChannel: "h", yChannel: "alpha" }) };
 
 // Prop variations
 export const Disabled: Story = { name: "Disabled", render: renderArea({ disabled: true }) };

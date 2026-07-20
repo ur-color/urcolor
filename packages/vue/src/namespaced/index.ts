@@ -54,6 +54,7 @@ export const ColorArea = {
   // input at all.
   Area: ColorAreaArea,
   Gradient: ColorAreaGradient,
+  /** @deprecated The Gradient component now paints the checkerboard itself; remove this component. */
   Checkerboard: ColorAreaCheckerboard,
   Thumb: ColorAreaThumb,
 };
@@ -64,6 +65,7 @@ export const ColorSlider = {
   Range: ColorSliderRange,
   Thumb: ColorSliderThumb,
   Gradient: ColorSliderGradient,
+  /** @deprecated The Gradient component now paints the checkerboard itself; remove this component. */
   Checkerboard: ColorSliderCheckerboard,
 };
 
@@ -90,6 +92,7 @@ export const ColorRing = {
   Root: ColorRingRoot,
   Track: ColorRingTrack,
   Gradient: ColorRingGradient,
+  /** @deprecated The Gradient component now paints the checkerboard itself; remove this component. */
   Checkerboard: ColorRingCheckerboard,
   Thumb: ColorRingThumb,
 };
@@ -97,6 +100,7 @@ export const ColorRing = {
 export const ColorWheel = {
   Root: ColorWheelRoot,
   Gradient: ColorWheelGradient,
+  /** @deprecated The Gradient component now paints the checkerboard itself; remove this component. */
   Checkerboard: ColorWheelCheckerboard,
   Thumb: ColorWheelThumb,
 };
@@ -104,6 +108,7 @@ export const ColorWheel = {
 export const ColorTriangle = {
   Root: ColorTriangleRoot,
   Gradient: ColorTriangleGradient,
+  /** @deprecated The Gradient component now paints the checkerboard itself; remove this component. */
   Checkerboard: ColorTriangleCheckerboard,
   Thumb: ColorTriangleThumb,
 };

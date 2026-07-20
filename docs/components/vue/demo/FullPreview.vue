@@ -27,12 +27,10 @@ import {
   ColorAreaRoot,
   ColorAreaArea,
   ColorAreaGradient,
-  ColorAreaCheckerboard,
   ColorAreaThumb,
   ColorSliderRoot,
   ColorSliderTrack,
   ColorSliderGradient,
-  ColorSliderCheckerboard,
   ColorSliderThumb,
   ColorFieldRoot,
   ColorFieldInput,
@@ -43,8 +41,8 @@ import {
 } from "@urcolor/vue";
 
 const colorSpace = ref<SpaceId>("hsv");
-const invertedX = ref(false);
-const invertedY = ref(false);
+const xInverted = ref(false);
+const yInverted = ref(false);
 
 const { color } = useColor("hsl(0, 100%, 50%)");
 
@@ -200,8 +198,8 @@ const spaceKeys = Object.keys(colorSpaces) as SpaceId[];
           <TooltipRoot>
             <TooltipTrigger as-child>
               <Toggle
-                v-model="invertedX"
-                :data-active="invertedX ? '' : undefined"
+                v-model="xInverted"
+                :data-active="xInverted ? '' : undefined"
                 aria-label="Invert X axis"
                 class="
                   size-8 cursor-pointer rounded-md border!
@@ -323,8 +321,8 @@ const spaceKeys = Object.keys(colorSpaces) as SpaceId[];
         <TooltipRoot>
           <TooltipTrigger as-child>
             <Toggle
-              v-model="invertedY"
-              :data-active="invertedY ? '' : undefined"
+              v-model="yInverted"
+              :data-active="yInverted ? '' : undefined"
               aria-label="Invert Y axis"
               class="
                 size-8 cursor-pointer rounded-md border!
@@ -353,8 +351,8 @@ const spaceKeys = Object.keys(colorSpaces) as SpaceId[];
       :color-space="colorSpace"
       :x-channel="xChannel"
       :y-channel="yChannel"
-      :inverted-x="invertedX"
-      :inverted-y="invertedY"
+      :x-inverted="xInverted"
+      :y-inverted="yInverted"
       as="div"
       class="
         relative block h-[200px] w-full cursor-crosshair touch-none
@@ -363,7 +361,6 @@ const spaceKeys = Object.keys(colorSpaces) as SpaceId[];
       :aria-label="`Color picker, selected: ${colorHex}`"
     >
       <ColorAreaArea as="div" class="absolute inset-0">
-        <ColorAreaCheckerboard />
         <ColorAreaGradient
           as="div"
           class="absolute inset-0"
@@ -401,7 +398,6 @@ const spaceKeys = Object.keys(colorSpaces) as SpaceId[];
           as="div"
           class="relative h-5 overflow-hidden rounded-xl"
         >
-          <ColorSliderCheckerboard />
           <ColorSliderGradient
             as="div"
             class="absolute inset-0 rounded-xl"
@@ -437,7 +433,6 @@ const spaceKeys = Object.keys(colorSpaces) as SpaceId[];
         as="div"
         class="relative h-5 overflow-hidden rounded-xl"
       >
-        <ColorSliderCheckerboard />
         <ColorSliderGradient
           as="div"
           class="absolute inset-0 rounded-xl"

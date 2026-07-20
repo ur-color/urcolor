@@ -12,6 +12,7 @@ export {
   default as ColorRingGradient,
   type ColorRingGradientProps,
 } from "./ColorRingGradient.vue";
+/** @deprecated The Gradient component now paints the checkerboard itself; remove this component. */
 export {
   default as ColorRingCheckerboard,
   type ColorRingCheckerboardProps,

@@ -24,7 +24,6 @@ import ColorTriangleRGB from './demo/ColorTriangleRGB.tsx'
 
 ```tsx
 <ColorTriangle.Root>
-  <ColorTriangle.Checkerboard />
   <ColorTriangle.Gradient />
   <ColorTriangle.Thumb />
 </ColorTriangle.Root>
@@ -100,7 +99,11 @@ Renders a triangular gradient canvas.
 |------|------|---------|-------------|
 | `channelOverrides` | `Record<string, number> \| false` | `{ alpha: 1 }` | Lock specific channels to fixed values in the gradient. |
 
-### ColorTriangle.Checkerboard
+### ColorTriangle.Checkerboard <Badge type="warning" text="deprecated" />
+
+::: warning Deprecated
+`ColorTriangle.Gradient` now paints the checkerboard itself, so this component is no longer needed and is kept only for backwards compatibility. It emits a one-time console warning in development. To render a checkerboard elsewhere, apply a CSS `repeating-conic-gradient` background to your own element.
+:::
 
 Renders a checkerboard pattern behind the gradient to visualize alpha transparency.
 

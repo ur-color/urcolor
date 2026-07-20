@@ -13,8 +13,8 @@ import { handleSubmit } from "./utils";
 const ColorArea = defineComponent({
   props: {
     disabled: { type: Boolean, default: false },
-    invertedX: { type: Boolean, default: false },
-    invertedY: { type: Boolean, default: false },
+    xInverted: { type: Boolean, default: false },
+    yInverted: { type: Boolean, default: false },
     yChannel: { type: String, default: "s" },
   },
   emits: ["update:modelValue", "update:color", "change", "changeEnd"],
@@ -26,8 +26,8 @@ const ColorArea = defineComponent({
         "xChannel": "h",
         "yChannel": props.yChannel,
         "disabled": props.disabled,
-        "invertedX": props.invertedX,
-        "invertedY": props.invertedY,
+        "xInverted": props.xInverted,
+        "yInverted": props.yInverted,
         "name": "slider-area",
         "onUpdate:modelValue": (v: Color | undefined) => emit("update:modelValue", v),
         "onUpdate:color": (v: Color) => emit("update:color", v),

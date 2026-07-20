@@ -23,7 +23,6 @@ import ColorAreaOKLCh from './demo/ColorAreaOKLCh.tsx'
 
 ```tsx
 <ColorArea.Root>
-  <ColorArea.Checkerboard />
   <ColorArea.Gradient />
   <ColorArea.Thumb />
 </ColorArea.Root>
@@ -72,8 +71,8 @@ The root container that manages slider state.
 | `channelY` | `string` | Auto | Channel for the Y axis. Auto-derived from color space. |
 | `disabled` | `boolean` | `false` | Disables interaction. |
 | `dir` | `'ltr' \| 'rtl'` | — | Reading direction. |
-| `invertedX` | `boolean` | `false` | Invert X axis. |
-| `invertedY` | `boolean` | `false` | Invert Y axis. |
+| `xInverted` | `boolean` | `false` | Invert X axis. |
+| `yInverted` | `boolean` | `false` | Invert Y axis. |
 | `thumbAlignment` | `'contain' \| 'overflow'` | `'overflow'` | How thumb is positioned relative to track bounds. |
 | `onValueChange` | `(color: Color) => void` | — | Called when color changes. |
 | `onValueCommit` | `(color: Color) => void` | — | Called when interaction ends. |
@@ -91,7 +90,11 @@ Renders a 2D gradient canvas for the color area.
 | `interpolationSpace` | `string` | — | Color space for perceptual interpolation. |
 | `channelOverrides` | `Record<string, number> \| false` | `{ alpha: 1 }` | Lock specific channels to fixed values in the gradient. |
 
-### ColorArea.Checkerboard
+### ColorArea.Checkerboard <Badge type="warning" text="deprecated" />
+
+::: warning Deprecated
+`ColorArea.Gradient` now paints the checkerboard itself, so this component is no longer needed and is kept only for backwards compatibility. It emits a one-time console warning in development. To render a checkerboard elsewhere, apply a CSS `repeating-conic-gradient` background to your own element.
+:::
 
 Renders a checkerboard pattern behind the gradient to visualize alpha transparency.
 

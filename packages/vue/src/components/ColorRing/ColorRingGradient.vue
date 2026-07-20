@@ -11,10 +11,11 @@ export interface ColorRingGradientProps extends /* @vue-ignore */ PrimitiveProps
 </script>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import { useForwardExpose, Primitive } from "reka-ui";
 import { sampleConicRing, getChannelConfig } from "@urcolor/core";
 import { applyChannelOverrides, renderToCanvas, useGradientCanvas } from "../../shared/useGradientCanvas";
+import { CHECKERBOARD_BACKGROUND } from "../../shared/checkerboard";
 import { injectColorRingRootContext } from "./ColorRingRoot.vue";
 
 const props = withDefaults(defineProps<ColorRingGradientProps>(), {
@@ -26,6 +27,14 @@ const rootContext = injectColorRingRootContext();
 useForwardExpose();
 
 const canvasRef = ref<HTMLCanvasElement | null>(null);
+
+// Mask the checkerboard into the ring's annulus: transparent inside the inner
+// radius (the hole), opaque across the band, transparent outside the outer
+// circle (the corners). Matches the canvas clip in `clipToRing`.
+const checkerboardMask = computed(() => {
+  const p = (props.innerRadius ?? rootContext.innerRadius.value) * 100;
+  return `radial-gradient(circle closest-side at center, transparent ${p}%, #000 ${p}%, #000 100%, transparent 100%)`;
+});
 
 /** Clip to the ring shape using a two-arc path with even-odd winding. */
 function clipToRing(ctx: CanvasRenderingContext2D, w: number, h: number) {
@@ -77,7 +86,12 @@ useGradientCanvas({
 </script>
 
 <template>
-  <Primitive :as-child="asChild" :as="as" :data-disabled="rootContext.disabled.value ? '' : undefined">
+  <Primitive
+    :as-child="asChild"
+    :as="as"
+    :style="{ background: CHECKERBOARD_BACKGROUND, maskImage: checkerboardMask, WebkitMaskImage: checkerboardMask }"
+    :data-disabled="rootContext.disabled.value ? '' : undefined"
+  >
     <canvas
       ref="canvasRef"
       :style="{ position: 'absolute', inset: '0', width: '100%', height: '100%', pointerEvents: 'none' }"

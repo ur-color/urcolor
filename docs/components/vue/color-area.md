@@ -24,7 +24,6 @@ import ColorAreaOKLCh from './demo/ColorAreaOKLCh.vue'
 <template>
   <ColorAreaRoot>
     <ColorAreaArea>
-      <ColorAreaCheckerboard />
       <ColorAreaGradient />
       <ColorAreaThumb />
     </ColorAreaArea>
@@ -36,7 +35,7 @@ import ColorAreaOKLCh from './demo/ColorAreaOKLCh.vue'
 `ColorAreaArea` is required. `ColorAreaRoot` owns the state but attaches no pointer
 or keyboard handlers of its own — they all live on `ColorAreaArea`, which also
 measures the box that pointer coordinates are resolved against. A tree that puts
-the gradient, checkerboard and thumb directly under the root renders correctly but
+the gradient and thumb directly under the root renders correctly but
 does not respond to input.
 :::
 
@@ -70,7 +69,7 @@ OKLCh color area with Chroma on X and Lightness on Y.
 
 ### With Alpha
 
-Pass `:channel-overrides="false"` on `ColorAreaGradient` to reflect the color's alpha channel as opacity on the gradient. Add `ColorAreaCheckerboard` behind the gradient to visualize transparency.
+Pass `:channel-overrides="false"` on `ColorAreaGradient` to reflect the color's alpha channel as opacity on the gradient. `ColorAreaGradient` paints a checkerboard behind the canvas automatically, so transparency is visible with no extra element.
 
 ```vue
 <template>
@@ -81,7 +80,6 @@ Pass `:channel-overrides="false"` on `ColorAreaGradient` to reflect the color's 
     y-channel="l"
   >
     <ColorAreaArea>
-      <ColorAreaCheckerboard />
       <ColorAreaGradient :channel-overrides="false" />
       <ColorAreaThumb />
     </ColorAreaArea>
@@ -137,8 +135,8 @@ The root container that owns the color state, the channel maths and the keyboard
 | `yName` | `string` | — | Name of a hidden input carrying the raw Y channel value for form submission. |
 | `disabled` | `boolean` | `false` | Disables interaction. |
 | `dir` | `'ltr' \| 'rtl'` | — | Reading direction. Inherits from `ConfigProvider` when omitted. |
-| `invertedX` | `boolean` | `false` | Invert X axis. |
-| `invertedY` | `boolean` | `false` | Invert Y axis. |
+| `xInverted` | `boolean` | `false` | Invert X axis. |
+| `yInverted` | `boolean` | `false` | Invert Y axis. |
 | `minXStepsBetweenThumbs` | `number` | `0` | Minimum permitted steps between thumbs on the X axis. |
 | `minYStepsBetweenThumbs` | `number` | `0` | Minimum permitted steps between thumbs on the Y axis. |
 | `thumbAlignment` | `'contain' \| 'overflow'` | `'overflow'` | Whether thumbs are kept inside the track bounds. |
@@ -159,7 +157,7 @@ ColorArea currently renders a single thumb, so `minXStepsBetweenThumbs` and
 
 ### ColorAreaArea
 
-The interaction surface. Renders `role="application"` with `aria-roledescription="Color picker"` and `touch-action: none`, registers itself as the element pointer coordinates are measured against, and carries the pointer and keyboard listeners. It must wrap `ColorAreaCheckerboard`, `ColorAreaGradient` and `ColorAreaThumb`.
+The interaction surface. Renders `role="application"` with `aria-roledescription="Color picker"` and `touch-action: none`, registers itself as the element pointer coordinates are measured against, and carries the pointer and keyboard listeners. It must wrap `ColorAreaGradient` and `ColorAreaThumb`.
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
@@ -177,7 +175,7 @@ it) if the two boxes differ.
 
 ### ColorAreaGradient
 
-Renders a 2D gradient canvas for the color area. Automatically samples the gradient from the root's color space and channel configuration.
+Renders a 2D gradient canvas for the color area. Automatically samples the gradient from the root's color space and channel configuration, and paints a checkerboard behind the canvas so alpha transparency is visible without a separate element.
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
@@ -190,7 +188,11 @@ Renders a 2D gradient canvas for the color area. Automatically samples the gradi
 | `as` | `string` | `'span'` | The element or component to render as. |
 | `asChild` | `boolean` | `false` | Merge props onto the single child instead of rendering an element. |
 
-### ColorAreaCheckerboard
+### ColorAreaCheckerboard <Badge type="warning" text="deprecated" />
+
+::: warning Deprecated
+`ColorAreaGradient` now paints the checkerboard itself, so this component is no longer needed and is kept only for backwards compatibility. It emits a one-time console warning in development. To render a checkerboard elsewhere, apply a CSS `repeating-conic-gradient` background to your own element.
+:::
 
 Renders a checkerboard pattern behind the gradient to visualize alpha transparency. Place it inside `ColorAreaArea` before `ColorAreaGradient`.
 
@@ -234,5 +236,5 @@ ColorArea exposes a single focusable thumb inside an application-role surface, w
 | Home / End | Jump to X-axis min / max |
 | Page Up / Page Down | Jump to Y-axis min / max |
 
-Arrow keys follow the visual axes: with `inverted-x` or `inverted-y` set, or in RTL,
+Arrow keys follow the visual axes: with `x-inverted` or `y-inverted` set, or in RTL,
 the direction of travel flips so the thumb still moves the way the key points.

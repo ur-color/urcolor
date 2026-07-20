@@ -47,9 +47,9 @@ const color = ref('hsl(200, 100%, 50%)')
 
 `ColorAreaArea` is required — it carries every pointer and keyboard handler and is the box pointer coordinates are measured against. Mounting the gradient and thumb directly under the root renders, but does not respond to input.
 
-**Props:** `modelValue`, `defaultValue`, `colorSpace`, `xChannel`, `yChannel`, `xName`, `yName`, `disabled`, `invertedX`, `invertedY`, `minXStepsBetweenThumbs`, `minYStepsBetweenThumbs`, `thumbAlignment` ("contain" | "overflow"), `name`, `required`, `dir`
+**Props:** `modelValue`, `defaultValue`, `colorSpace`, `xChannel`, `yChannel`, `xName`, `yName`, `disabled`, `xInverted`, `yInverted`, `minXStepsBetweenThumbs`, `minYStepsBetweenThumbs`, `thumbAlignment` ("contain" | "overflow"), `name`, `required`, `dir`
 
-**Sub-components:** `ColorAreaRoot`, `ColorAreaArea`, `ColorAreaGradient`, `ColorAreaThumb`, `ColorAreaCheckerboard`
+**Sub-components:** `ColorAreaRoot`, `ColorAreaArea`, `ColorAreaGradient`, `ColorAreaThumb`, `ColorAreaCheckerboard` _(deprecated — `ColorAreaGradient` now paints the checkerboard itself)_
 
 ### ColorSlider
 
@@ -79,7 +79,7 @@ const color = ref('hsl(200, 100%, 50%)')
 
 **Props:** `modelValue`, `defaultValue`, `colorSpace`, `channel`, `step`, `disabled`, `orientation` ("horizontal" | "vertical"), `inverted`, `name`, `required`, `dir`
 
-**Sub-components:** `ColorSliderRoot`, `ColorSliderTrack`, `ColorSliderRange`, `ColorSliderThumb`, `ColorSliderGradient`, `ColorSliderCheckerboard`
+**Sub-components:** `ColorSliderRoot`, `ColorSliderTrack`, `ColorSliderRange`, `ColorSliderThumb`, `ColorSliderGradient`, `ColorSliderCheckerboard` _(deprecated — the Gradient now paints the checkerboard itself)_
 
 ### ColorField
 
@@ -163,7 +163,7 @@ Single-channel selection along a circular arc.
 
 **Props:** `modelValue`, `defaultValue`, `colorSpace`, `channel`, `startAngle`, `innerRadius`, `disabled`, `name`, `required`, `dir`
 
-**Sub-components:** `ColorRingRoot`, `ColorRingTrack`, `ColorRingGradient`, `ColorRingThumb`, `ColorRingCheckerboard`
+**Sub-components:** `ColorRingRoot`, `ColorRingTrack`, `ColorRingGradient`, `ColorRingThumb`, `ColorRingCheckerboard` _(deprecated — the Gradient now paints the checkerboard itself)_
 
 ### ColorWheel
 
@@ -171,7 +171,7 @@ Two-channel selection mapped to angle and radius.
 
 **Props:** `modelValue`, `defaultValue`, `colorSpace`, `angleChannel`, `radiusChannel`, `startAngle`, `disabled`, `name`, `required`, `dir`
 
-**Sub-components:** `ColorWheelRoot`, `ColorWheelGradient`, `ColorWheelThumb`, `ColorWheelCheckerboard`
+**Sub-components:** `ColorWheelRoot`, `ColorWheelGradient`, `ColorWheelThumb`, `ColorWheelCheckerboard` _(deprecated — the Gradient now paints the checkerboard itself)_
 
 ### ColorTriangle
 
@@ -180,7 +180,7 @@ three-channel (Maxwell triangle) mode.
 
 **Props:** `modelValue`, `defaultValue`, `colorSpace`, `xChannel`, `yChannel`, `zChannel`, `rotation`, `orientation`, `inverted`, `thumbAlignment`, `disabled`, `name`, `required`, `dir`
 
-**Sub-components:** `ColorTriangleRoot`, `ColorTriangleGradient`, `ColorTriangleThumb`, `ColorTriangleCheckerboard`
+**Sub-components:** `ColorTriangleRoot`, `ColorTriangleGradient`, `ColorTriangleThumb`, `ColorTriangleCheckerboard` _(deprecated — the Gradient now paints the checkerboard itself)_
 
 ## Events
 

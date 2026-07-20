@@ -26,7 +26,6 @@ import ColorSliderVertical from './demo/ColorSliderVertical.vue'
 <template>
   <ColorSliderRoot>
     <ColorSliderTrack>
-      <ColorSliderCheckerboard />
       <ColorSliderGradient />
       <ColorSliderThumb />
     </ColorSliderTrack>
@@ -82,7 +81,7 @@ import ColorSliderVertical from './demo/ColorSliderVertical.vue'
 
 ### With Alpha
 
-Pass `:channel-overrides="false"` on `ColorSliderGradient` to reflect the color's alpha as opacity on the gradient. Add `ColorSliderCheckerboard` to show a checkerboard behind transparent areas.
+Pass `:channel-overrides="false"` on `ColorSliderGradient` to reflect the color's alpha as opacity on the gradient. `ColorSliderGradient` paints the checkerboard behind the canvas automatically, so transparency is visible with no extra element.
 
 ```vue
 <template>
@@ -93,7 +92,6 @@ Pass `:channel-overrides="false"` on `ColorSliderGradient` to reflect the color'
     @update:model-value="onColorUpdate"
   >
     <ColorSliderTrack>
-      <ColorSliderCheckerboard />
       <ColorSliderGradient
         :colors="['red', 'yellow', 'lime', 'cyan', 'blue', 'magenta', 'red']"
         :channel-overrides="false"
@@ -117,7 +115,6 @@ Set `channel="alpha"` to create an opacity slider. The gradient automatically re
     @update:model-value="onColorUpdate"
   >
     <ColorSliderTrack>
-      <ColorSliderCheckerboard />
       <ColorSliderGradient :colors="['hsla(210, 80%, 50%, 0)', 'hsl(210, 80%, 50%)']" />
       <ColorSliderThumb />
     </ColorSliderTrack>
@@ -171,7 +168,11 @@ Renders a gradient canvas background for the slider track.
 | `as` | `string` | `'span'` | The element or component to render as. |
 | `asChild` | `boolean` | `false` | Merge props onto the single child instead of rendering an element. |
 
-### ColorSliderCheckerboard
+### ColorSliderCheckerboard <Badge type="warning" text="deprecated" />
+
+::: warning Deprecated
+`ColorSliderGradient` now paints the checkerboard itself, so this component is no longer needed and is kept only for backwards compatibility. It emits a one-time console warning in development. To render a checkerboard elsewhere, apply a CSS `repeating-conic-gradient` background to your own element.
+:::
 
 Renders a checkerboard pattern behind the gradient to visualize alpha transparency. Place it inside `ColorSliderTrack` before `ColorSliderGradient`.
 

@@ -50,9 +50,9 @@ const { color } = useColor("hsl(210, 80%, 50%)");
       color-space="hsv"
       x-channel="s"
       y-channel="v"
-      :inverted-y="true"
+      :y-inverted="true"
       as="div"
-      class="absolute inset-[20.3%] relative size-full cursor-crosshair touch-none overflow-clip rounded-sm"
+      class="absolute inset-[20.3%] cursor-crosshair touch-none overflow-clip rounded-sm"
     >
       <ColorAreaArea as="div" class="absolute inset-0">
         <ColorAreaGradient

@@ -2,6 +2,7 @@ import { forwardRef, useCallback, useEffect, useRef, type ComponentPropsWithoutR
 import { Color } from "@urcolor/core";
 import { samplePolarGrid, getChannelConfig } from "@urcolor/core";
 import { useColorWheelContext } from "../root/ColorWheelRootContext";
+import { CHECKERBOARD_BACKGROUND } from "../../../utils";
 
 export interface ColorWheelGradientProps extends ComponentPropsWithoutRef<"span"> {
   channelOverrides?: Record<string, number> | false;
@@ -87,7 +88,7 @@ export const ColorWheelGradient = forwardRef<HTMLSpanElement, ColorWheelGradient
     }, []);
 
     return (
-      <span ref={ref} data-disabled={ctx.disabled ? "" : undefined} style={style} {...props}>
+      <span ref={ref} data-disabled={ctx.disabled ? "" : undefined} style={{ background: CHECKERBOARD_BACKGROUND, borderRadius: "50%", ...style }} {...props}>
         <canvas ref={canvasRef} style={{ position: "absolute", inset: "0", width: "100%", height: "100%", pointerEvents: "none" }} />
         {children}
       </span>

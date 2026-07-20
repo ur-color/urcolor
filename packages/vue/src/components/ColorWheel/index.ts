@@ -8,6 +8,7 @@ export {
   default as ColorWheelGradient,
   type ColorWheelGradientProps,
 } from "./ColorWheelGradient.vue";
+/** @deprecated The Gradient component now paints the checkerboard itself; remove this component. */
 export {
   default as ColorWheelCheckerboard,
   type ColorWheelCheckerboardProps,

@@ -16,6 +16,7 @@ export {
   default as ColorAreaGradient,
   type ColorAreaGradientProps,
 } from "./ColorAreaGradient.vue";
+/** @deprecated The Gradient component now paints the checkerboard itself; remove this component. */
 export {
   default as ColorAreaCheckerboard,
   type ColorAreaCheckerboardProps,

@@ -1,6 +1,10 @@
 <script lang="ts">
 import type { CheckerboardProps } from "../../shared/Checkerboard.vue";
 
+/**
+ * @deprecated Deprecated. The Gradient component now paints the checkerboard itself, so
+ * this component is no longer needed.
+ */
 export interface ColorSliderCheckerboardProps extends Omit<CheckerboardProps, "shape"> {}
 </script>
 

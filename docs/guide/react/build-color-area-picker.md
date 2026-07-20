@@ -154,7 +154,7 @@ const { color, setColor } = useColor("oklch(0.6, 0.15, 210)");
 
 ## Inverting axis direction
 
-Use `invertedX` or `invertedY` to reverse axis directions:
+Use `xInverted` or `yInverted` to reverse axis directions:
 
 ```tsx{7-8}
 <ColorArea.Root
@@ -163,8 +163,8 @@ Use `invertedX` or `invertedY` to reverse axis directions:
   colorSpace="hsl"
   channelX="h"
   channelY="l"
-  invertedX
-  invertedY
+  xInverted
+  yInverted
 >
   {/* ... */}
 </ColorArea.Root>

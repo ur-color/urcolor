@@ -27,6 +27,7 @@ import { useForwardExpose, Primitive } from "reka-ui";
 import { Color } from "@urcolor/core";
 import { drawLinearGradient, interpolateStops, getChannelConfig } from "@urcolor/core";
 import { applyChannelOverrides, useGradientCanvas } from "../../shared/useGradientCanvas";
+import { CHECKERBOARD_BACKGROUND } from "../../shared/checkerboard";
 import { injectColorSliderRootContext } from "./ColorSliderRoot.vue";
 
 const props = withDefaults(defineProps<ColorSliderGradientProps>(), {
@@ -154,6 +155,7 @@ useGradientCanvas({
   <Primitive
     :as-child="asChild"
     :as="as"
+    :style="{ background: CHECKERBOARD_BACKGROUND }"
   >
     <canvas
       ref="canvasRef"

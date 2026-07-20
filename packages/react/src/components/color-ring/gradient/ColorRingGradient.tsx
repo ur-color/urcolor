@@ -2,6 +2,7 @@ import { forwardRef, useCallback, useEffect, useRef, useMemo, type ComponentProp
 import { Color, type SpaceId } from "@urcolor/core";
 import { sampleConicRing, getChannelConfig } from "@urcolor/core";
 import { useColorRingContext } from "../root/ColorRingRootContext";
+import { CHECKERBOARD_BACKGROUND } from "../../../utils";
 
 export interface ColorRingGradientProps extends ComponentPropsWithoutRef<"span"> {
   channelOverrides?: Record<string, number> | false;
@@ -40,6 +41,12 @@ export const ColorRingGradient = forwardRef<HTMLSpanElement, ColorRingGradientPr
   function ColorRingGradient({ channelOverrides = { alpha: 1 }, style, children, ...props }, ref) {
     const rootCtx = useColorRingContext();
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
+
+    // Mask the checkerboard into the ring's annulus: transparent inside the
+    // inner radius (the hole), opaque across the band, transparent outside the
+    // outer circle (the corners). Matches the canvas clip in renderToCanvas.
+    const maskP = rootCtx.innerRadius * 100;
+    const checkerboardMask = `radial-gradient(circle closest-side at center, transparent ${maskP}%, #000 ${maskP}%, #000 100%, transparent 100%)`;
 
     function applyOverrides(baseColor: Color, cs: SpaceId): Color {
       if (!channelOverrides) return baseColor;
@@ -92,7 +99,7 @@ export const ColorRingGradient = forwardRef<HTMLSpanElement, ColorRingGradientPr
     }, []);
 
     return (
-      <span ref={ref} data-disabled={rootCtx.disabled ? "" : undefined} style={style} {...props}>
+      <span ref={ref} data-disabled={rootCtx.disabled ? "" : undefined} style={{ background: CHECKERBOARD_BACKGROUND, maskImage: checkerboardMask, WebkitMaskImage: checkerboardMask, ...style }} {...props}>
         <canvas
           ref={canvasRef}
           style={{ position: "absolute", inset: "0", width: "100%", height: "100%", pointerEvents: "none" }}

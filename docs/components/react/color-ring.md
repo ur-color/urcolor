@@ -24,7 +24,6 @@ import ColorRingSaturation from './demo/ColorRingSaturation.tsx'
 ```tsx
 <ColorRing.Root>
   <ColorRing.Track>
-    <ColorRing.Checkerboard />
     <ColorRing.Gradient />
     <ColorRing.Thumb />
   </ColorRing.Track>
@@ -89,7 +88,11 @@ Renders a ring gradient canvas for the track.
 |------|------|---------|-------------|
 | `channelOverrides` | `Record<string, number> \| false` | `{ alpha: 1 }` | Lock specific channels to fixed values in the gradient. |
 
-### ColorRing.Checkerboard
+### ColorRing.Checkerboard <Badge type="warning" text="deprecated" />
+
+::: warning Deprecated
+`ColorRing.Gradient` now paints the checkerboard itself, so this component is no longer needed and is kept only for backwards compatibility. It emits a one-time console warning in development. To render a checkerboard elsewhere, apply a CSS `repeating-conic-gradient` background to your own element.
+:::
 
 Renders a checkerboard pattern behind the gradient to visualize alpha transparency.
 

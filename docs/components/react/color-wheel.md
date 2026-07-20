@@ -24,7 +24,6 @@ import ColorWheelOKLCh from './demo/ColorWheelOKLCh.tsx'
 
 ```tsx
 <ColorWheel.Root>
-  <ColorWheel.Checkerboard />
   <ColorWheel.Gradient />
   <ColorWheel.Thumb />
 </ColorWheel.Root>
@@ -97,7 +96,11 @@ Renders a polar gradient canvas for the wheel.
 |------|------|---------|-------------|
 | `channelOverrides` | `Record<string, number> \| false` | `{ alpha: 1 }` | Lock specific channels to fixed values in the gradient. |
 
-### ColorWheel.Checkerboard
+### ColorWheel.Checkerboard <Badge type="warning" text="deprecated" />
+
+::: warning Deprecated
+`ColorWheel.Gradient` now paints the checkerboard itself, so this component is no longer needed and is kept only for backwards compatibility. It emits a one-time console warning in development. To render a checkerboard elsewhere, apply a CSS `repeating-conic-gradient` background to your own element.
+:::
 
 Renders a checkerboard pattern behind the gradient to visualize alpha transparency.
 

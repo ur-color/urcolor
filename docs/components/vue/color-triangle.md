@@ -24,7 +24,6 @@ import ColorTriangleRGB from './demo/ColorTriangleRGB.vue'
 ```vue
 <template>
   <ColorTriangleRoot>
-    <ColorTriangleCheckerboard />
     <ColorTriangleGradient />
     <ColorTriangleThumb />
   </ColorTriangleRoot>
@@ -151,7 +150,11 @@ Renders a triangular gradient canvas. Automatically samples the gradient from th
 | `as` | `string` | `'span'` | The element or component to render as. |
 | `asChild` | `boolean` | `false` | Merge props onto the single child instead of rendering an element. |
 
-### ColorTriangleCheckerboard
+### ColorTriangleCheckerboard <Badge type="warning" text="deprecated" />
+
+::: warning Deprecated
+`ColorTriangleGradient` now paints the checkerboard itself, so this component is no longer needed and is kept only for backwards compatibility. It emits a one-time console warning in development. To render a checkerboard elsewhere, apply a CSS `repeating-conic-gradient` background to your own element.
+:::
 
 Renders a checkerboard pattern behind the gradient to visualize alpha transparency. Place it inside `ColorTriangleRoot` before `ColorTriangleGradient`.
 

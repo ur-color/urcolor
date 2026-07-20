@@ -12,7 +12,6 @@ import {
   ColorSliderTrack,
   ColorSliderGradient,
   ColorSliderThumb,
-  ColorSliderCheckerboard,
   ColorFieldRoot,
   ColorFieldInput,
   ColorFieldIncrement,
@@ -30,7 +29,7 @@ const channels = computed(() => colorSpaces["hsl"]?.channels ?? []);
       color-space="hsv"
       x-channel="s"
       y-channel="v"
-      :inverted-y="true"
+      :y-inverted="true"
       as="div"
       class="relative block h-[180px] w-full cursor-crosshair touch-none overflow-clip rounded-lg"
     >
@@ -89,10 +88,6 @@ const channels = computed(() => colorSpaces["hsl"]?.channels ?? []);
         as="div"
         class="relative h-4 overflow-hidden rounded-full"
       >
-        <ColorSliderCheckerboard
-          as="div"
-          class="absolute inset-0 rounded-full"
-        />
         <ColorSliderGradient
           as="div"
           class="absolute inset-0 rounded-full"

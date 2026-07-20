@@ -65,3 +65,22 @@ export function hasMinStepsBetweenValues(values: number[], minStepsBetweenValues
 
 export const PAGE_KEYS = ["PageUp", "PageDown"];
 export const ARROW_KEYS = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"];
+
+/** CSS `background` value that paints the transparency checkerboard. */
+export const CHECKERBOARD_BACKGROUND
+  = "repeating-conic-gradient(rgb(230, 230, 230) 0% 25%, white 0% 50%) 0% 50% / 16px 16px";
+
+let checkerboardWarned = false;
+
+/**
+ * Emit a one-time deprecation warning for the standalone Checkerboard
+ * components. Silent in production builds.
+ */
+export function warnCheckerboardDeprecated() {
+  if (checkerboardWarned) return;
+  if (typeof process !== "undefined" && process.env && process.env.NODE_ENV === "production") return;
+  checkerboardWarned = true;
+  console.warn(
+    "[urcolor] The Checkerboard components are deprecated. The Gradient components now paint the checkerboard themselves; remove the standalone Checkerboard from your markup.",
+  );
+}

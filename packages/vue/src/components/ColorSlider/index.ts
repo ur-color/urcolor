@@ -20,6 +20,7 @@ export {
   default as ColorSliderGradient,
   type ColorSliderGradientProps,
 } from "./ColorSliderGradient.vue";
+/** @deprecated The Gradient component now paints the checkerboard itself; remove this component. */
 export {
   default as ColorSliderCheckerboard,
   type ColorSliderCheckerboardProps,

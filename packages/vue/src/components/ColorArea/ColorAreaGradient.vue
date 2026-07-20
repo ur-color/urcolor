@@ -31,6 +31,7 @@ import { useForwardExpose, Primitive } from "reka-ui";
 import { Color } from "@urcolor/core";
 import { drawGradient, sampleBilinearGrid, sampleChannelGrid, getChannelConfig } from "@urcolor/core";
 import { applyChannelOverrides, renderToCanvas, useGradientCanvas } from "../../shared/useGradientCanvas";
+import { CHECKERBOARD_BACKGROUND } from "../../shared/checkerboard";
 import { injectColorAreaRootContext } from "./ColorAreaRoot.vue";
 
 const props = withDefaults(defineProps<ColorAreaGradientProps>(), {
@@ -207,6 +208,7 @@ useGradientCanvas({
   <Primitive
     :as-child="asChild"
     :as="as"
+    :style="{ background: CHECKERBOARD_BACKGROUND }"
     :data-disabled="rootContext.disabled.value ? '' : undefined"
   >
     <canvas

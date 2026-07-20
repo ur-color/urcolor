@@ -24,4 +24,4 @@ A numeric input for editing individual color channels, with optional increment/d
 
 A color preview element that displays a color with an optional checkerboard background for visualizing alpha transparency.
 
-All components support alpha channel — use `channel="alpha"` on sliders and fields, or the `alpha` prop on ColorArea, ColorSlider, and ColorSwatch to reflect opacity. Pair with `Checkerboard` sub-components to visualize transparency.
+All components support alpha channel — use `channel="alpha"` on sliders and fields, or the `alpha` prop on ColorArea, ColorSlider, and ColorSwatch to reflect opacity. The `Gradient` sub-components paint a checkerboard behind the canvas automatically, so transparency is visible without extra elements.

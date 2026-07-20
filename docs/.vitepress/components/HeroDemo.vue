@@ -69,7 +69,7 @@ if (inBrowser) {
           y-channel="v"
           as="div"
           class="hero-area-track block"
-          inverted-y
+          y-inverted
           aria-label="Color picker"
           @update:model-value="onColorUpdate"
         >

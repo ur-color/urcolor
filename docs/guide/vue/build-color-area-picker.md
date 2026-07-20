@@ -236,7 +236,7 @@ Or map different HSL channels to create a saturation × lightness picker:
 
 ## Inverting axis direction
 
-You can reverse the direction of the horizontal or vertical axes using the `inverted-x` or `inverted-y` props. This is useful when you want the color area to map from right-to-left (for x) or bottom-to-top (for y) instead of the default direction.
+You can reverse the direction of the horizontal or vertical axes using the `x-inverted` or `y-inverted` props. This is useful when you want the color area to map from right-to-left (for x) or bottom-to-top (for y) instead of the default direction.
 
 ```vue{7-8}
 <template>
@@ -245,8 +245,8 @@ You can reverse the direction of the horizontal or vertical axes using the `inve
     color-space="hsl"
     x-channel="h"
     y-channel="l"
-    :inverted-x="true"
-    :inverted-y="true"
+    :x-inverted="true"
+    :y-inverted="true"
   >
     <!-- ... -->
   </ColorAreaRoot>

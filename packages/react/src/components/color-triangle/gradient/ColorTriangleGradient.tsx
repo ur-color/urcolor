@@ -2,6 +2,7 @@ import { forwardRef, useEffect, useRef, type ComponentPropsWithoutRef } from "re
 import { Color, type SpaceId } from "@urcolor/core";
 import { sampleTriangleGrid, getChannelConfig } from "@urcolor/core";
 import { useColorTriangleContext } from "../root/ColorTriangleRootContext";
+import { CHECKERBOARD_BACKGROUND } from "../../../utils";
 
 export interface ColorTriangleGradientProps extends ComponentPropsWithoutRef<"span"> {
   channelOverrides?: Record<string, number> | false;
@@ -115,7 +116,7 @@ export const ColorTriangleGradient = forwardRef<HTMLSpanElement, ColorTriangleGr
     }, []);
 
     return (
-      <span ref={ref} data-disabled={ctx.disabled ? "" : undefined} {...props}>
+      <span ref={ref} data-disabled={ctx.disabled ? "" : undefined} style={{ background: CHECKERBOARD_BACKGROUND, clipPath, ...style }} {...props}>
         <canvas
           ref={canvasRef}
           style={{

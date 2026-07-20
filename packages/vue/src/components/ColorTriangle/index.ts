@@ -8,6 +8,7 @@ export {
   default as ColorTriangleGradient,
   type ColorTriangleGradientProps,
 } from "./ColorTriangleGradient.vue";
+/** @deprecated The Gradient component now paints the checkerboard itself; remove this component. */
 export {
   default as ColorTriangleCheckerboard,
   type ColorTriangleCheckerboardProps,

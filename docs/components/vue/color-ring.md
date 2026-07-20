@@ -24,7 +24,6 @@ import ColorRingSaturation from './demo/ColorRingSaturation.vue'
 <template>
   <ColorRingRoot>
     <ColorRingTrack>
-      <ColorRingCheckerboard />
       <ColorRingGradient />
       <ColorRingThumb />
     </ColorRingTrack>
@@ -62,7 +61,7 @@ Saturation ring slider for adjusting color intensity.
 
 ### With Alpha
 
-Pass `:channel-overrides="false"` on `ColorRingGradient` to reflect the color's alpha channel as opacity on the gradient. Add `ColorRingCheckerboard` behind the gradient to visualize transparency.
+Pass `:channel-overrides="false"` on `ColorRingGradient` to reflect the color's alpha channel as opacity on the gradient. `ColorRingGradient` paints the checkerboard behind the canvas automatically, so transparency is visible with no extra element.
 
 ```vue
 <template>
@@ -73,7 +72,6 @@ Pass `:channel-overrides="false"` on `ColorRingGradient` to reflect the color's 
     @update:model-value="onColorUpdate"
   >
     <ColorRingTrack>
-      <ColorRingCheckerboard />
       <ColorRingGradient :channel-overrides="false" />
       <ColorRingThumb />
     </ColorRingTrack>
@@ -124,7 +122,11 @@ Renders a ring gradient canvas for the track. Automatically samples the gradient
 | `as` | `string` | `'span'` | The element or component to render as. |
 | `asChild` | `boolean` | `false` | Merge props onto the single child instead of rendering an element. |
 
-### ColorRingCheckerboard
+### ColorRingCheckerboard <Badge type="warning" text="deprecated" />
+
+::: warning Deprecated
+`ColorRingGradient` now paints the checkerboard itself, so this component is no longer needed and is kept only for backwards compatibility. It emits a one-time console warning in development. To render a checkerboard elsewhere, apply a CSS `repeating-conic-gradient` background to your own element.
+:::
 
 Renders a checkerboard pattern behind the gradient to visualize alpha transparency. Place it inside `ColorRingTrack` before `ColorRingGradient`.
 

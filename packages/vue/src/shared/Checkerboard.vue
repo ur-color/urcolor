@@ -1,6 +1,11 @@
 <script lang="ts">
 import type { PrimitiveProps } from "reka-ui";
 
+/**
+ * @deprecated The standalone Checkerboard components are deprecated. The Gradient
+ * components now paint the checkerboard themselves, so these components are no
+ * longer needed.
+ */
 export interface CheckerboardProps extends /* @vue-ignore */ PrimitiveProps {
   as?: string;
   asChild?: boolean;
@@ -12,11 +17,14 @@ export interface CheckerboardProps extends /* @vue-ignore */ PrimitiveProps {
 <script setup lang="ts">
 import { computed } from "vue";
 import { Primitive, useForwardExpose } from "reka-ui";
+import { CHECKERBOARD_BACKGROUND, warnCheckerboardDeprecated } from "./checkerboard";
 
 const props = withDefaults(defineProps<CheckerboardProps>(), {
   as: "div",
   shape: "rect",
 });
+
+warnCheckerboardDeprecated();
 
 useForwardExpose();
 
@@ -24,7 +32,7 @@ const style = computed(() => ({
   position: "absolute" as const,
   inset: "0",
   pointerEvents: "none" as const,
-  background: "repeating-conic-gradient(rgb(230, 230, 230) 0% 25%, white 0% 50%) 0% 50% / 16px 16px",
+  background: CHECKERBOARD_BACKGROUND,
   ...(props.shape === "circle" ? { borderRadius: "50%" } : {}),
 }));
 </script>
