@@ -74,6 +74,7 @@ export default defineConfig({
             { text: "Introduction", link: "/guide/" },
             { text: "Features", link: "/guide/features" },
             { text: "Installation", link: "/guide/installation" },
+            { text: "The Color Class", link: "/guide/color-class" },
             { text: "Relative Colors", link: "/guide/relative-colors" },
             { text: "Color Naming", link: "/guide/color-naming" },
           ],
