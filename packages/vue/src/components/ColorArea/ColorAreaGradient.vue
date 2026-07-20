@@ -26,11 +26,11 @@ export interface ColorAreaGradientProps extends /* @vue-ignore */ PrimitiveProps
 </script>
 
 <script setup lang="ts">
-import { ref, watch, computed, onBeforeUnmount } from "vue";
-import { useResizeObserver } from "@vueuse/core";
+import { ref, computed } from "vue";
 import { useForwardExpose, Primitive } from "reka-ui";
 import { Color } from "@urcolor/core";
 import { drawGradient, sampleBilinearGrid, sampleChannelGrid, getChannelConfig } from "@urcolor/core";
+import { applyChannelOverrides, renderToCanvas, useGradientCanvas } from "../../shared/useGradientCanvas";
 import { injectColorAreaRootContext } from "./ColorAreaRoot.vue";
 
 const props = withDefaults(defineProps<ColorAreaGradientProps>(), {
@@ -63,55 +63,7 @@ const canvasOpacity = computed(() => {
   return 1;
 });
 
-function renderToCanvas(canvas: HTMLCanvasElement, pixels: Uint8ClampedArray, sampleW: number, sampleH: number) {
-  const ctx = canvas.getContext("2d");
-  if (!ctx) return;
-
-  const dpr = typeof devicePixelRatio !== "undefined" ? devicePixelRatio : 1;
-  const w = Math.round(canvas.clientWidth * dpr);
-  const h = Math.round(canvas.clientHeight * dpr);
-  if (canvas.width !== w || canvas.height !== h) {
-    canvas.width = w;
-    canvas.height = h;
-  }
-
-  const pixelData = new Uint8ClampedArray(pixels.buffer) as unknown as Uint8ClampedArray<ArrayBuffer>;
-  const imageData = new ImageData(pixelData, sampleW, sampleH);
-
-  const offscreen = new OffscreenCanvas(sampleW, sampleH);
-  const offCtx = offscreen.getContext("2d");
-  if (!offCtx) return;
-  offCtx.putImageData(imageData, 0, 0);
-
-  ctx.clearRect(0, 0, w, h);
-  ctx.imageSmoothingEnabled = true;
-  ctx.imageSmoothingQuality = "high";
-  ctx.drawImage(offscreen, 0, 0, w, h);
-}
-
-function applyOverrides(baseColor: Color, colorSpace: SpaceId): Color {
-  const overrides: Record<string, number> | false = props.channelOverrides as any;
-  if (!overrides) return baseColor;
-
-  const channelUpdates: Record<string, number> = {};
-  let result = baseColor;
-  for (const [k, v] of Object.entries(overrides)) {
-    if (k === "alpha") {
-      result = result.withAlpha(v);
-    } else if (getChannelConfig(colorSpace, k)) {
-      channelUpdates[k] = v;
-    }
-  }
-  if (Object.keys(channelUpdates).length > 0) {
-    result = result.with({ space: colorSpace, ...channelUpdates });
-  }
-  return result;
-}
-
-function render() {
-  const canvas = canvasRef.value;
-  if (!canvas) return;
-
+function paint(canvas: HTMLCanvasElement) {
   const slidingFromLeft = rootContext.isSlidingFromLeft.value;
   const slidingFromTop = rootContext.isSlidingFromTop.value;
 
@@ -152,7 +104,7 @@ function render() {
   // Channel-based rendering from root context
   if (baseColorObj && colorSpace) {
     // Apply channel overrides to the base color before sampling
-    const overriddenBase = applyOverrides(baseColorObj, colorSpace);
+    const overriddenBase = applyChannelOverrides(baseColorObj, colorSpace, props.channelOverrides);
 
     // Resolve the actual channel keys for sampling (skip alpha axes)
     const effectiveXChannel = xIsAlpha.value ? null : xChannel;
@@ -235,34 +187,19 @@ function render() {
   }
 }
 
-useResizeObserver(canvasRef, () => {
-  render();
-});
-
-watch(
-  () => [
+useGradientCanvas({
+  canvas: canvasRef,
+  sources: () => [
     props.topLeft, props.topRight, props.bottomLeft, props.bottomRight,
     props.interpolationSpace, props.channelOverrides,
     rootContext.colorSpace.value, rootContext.xChannelKey.value, rootContext.yChannelKey.value,
     rootContext.colorRef.value,
     rootContext.isSlidingFromLeft.value, rootContext.isSlidingFromTop.value,
   ],
-  () => { if (!rootContext.isDragging.value) render(); },
-  { flush: "post", immediate: true },
-);
-
-watch(() => rootContext.isDragging.value, (dragging, wasDragging) => {
-  if (wasDragging && !dragging) render();
-});
-
-onBeforeUnmount(() => {
-  const canvas = canvasRef.value;
-  if (canvas) {
-    const gl = canvas.getContext("webgl");
-    if (gl) {
-      gl.getExtension("WEBGL_lose_context")?.loseContext();
-    }
-  }
+  paint,
+  isDragging: rootContext.isDragging,
+  // The corner-colour path without an `interpolationSpace` paints via WebGL.
+  usesWebGL: true,
 });
 </script>
 

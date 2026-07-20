@@ -9,11 +9,10 @@ export interface ColorTriangleGradientProps extends /* @vue-ignore */ PrimitiveP
 </script>
 
 <script setup lang="ts">
-import { ref, watch, computed, onBeforeUnmount } from "vue";
-import { useResizeObserver } from "@vueuse/core";
+import { ref, computed } from "vue";
 import { useForwardExpose, Primitive } from "reka-ui";
-import { Color, type SpaceId } from "@urcolor/core";
 import { sampleTriangleGrid, getChannelConfig } from "@urcolor/core";
+import { applyChannelOverrides, renderToCanvas, useGradientCanvas } from "../../shared/useGradientCanvas";
 import { injectColorTriangleRootContext } from "./ColorTriangleRoot.vue";
 
 const props = withDefaults(defineProps<ColorTriangleGradientProps>(), {
@@ -31,64 +30,20 @@ const clipPath = computed(() => {
   return `polygon(${v0.x * 100}% ${v0.y * 100}%, ${v1.x * 100}% ${v1.y * 100}%, ${v2.x * 100}% ${v2.y * 100}%)`;
 });
 
-function applyOverrides(baseColor: Color, colorSpace: SpaceId): Color {
-  const overrides = props.channelOverrides;
-  if (!overrides) return baseColor;
-  let result = baseColor;
-  const channelUpdates: Record<string, number> = {};
-  for (const [k, v] of Object.entries(overrides)) {
-    if (k === "alpha") result = result.withAlpha(v);
-    else if (getChannelConfig(colorSpace, k)) channelUpdates[k] = v;
-  }
-  if (Object.keys(channelUpdates).length > 0) {
-    result = result.with({ space: colorSpace, ...channelUpdates });
-  }
-  return result;
-}
-
-function renderToCanvas(canvas: HTMLCanvasElement, pixels: Uint8ClampedArray, sampleW: number, sampleH: number) {
-  const ctx = canvas.getContext("2d");
-  if (!ctx) return;
-  const dpr = typeof devicePixelRatio !== "undefined" ? devicePixelRatio : 1;
-  const w = Math.round(canvas.clientWidth * dpr);
-  const h = Math.round(canvas.clientHeight * dpr);
-  if (canvas.width !== w || canvas.height !== h) {
-    canvas.width = w;
-    canvas.height = h;
-  }
-  const pixelData = new Uint8ClampedArray(pixels.buffer) as unknown as Uint8ClampedArray<ArrayBuffer>;
-  const imageData = new ImageData(pixelData, sampleW, sampleH);
-  const offscreen = new OffscreenCanvas(sampleW, sampleH);
-  const offCtx = offscreen.getContext("2d");
-  if (!offCtx) return;
-  offCtx.putImageData(imageData, 0, 0);
-  ctx.clearRect(0, 0, w, h);
-  ctx.imageSmoothingEnabled = true;
-  ctx.imageSmoothingQuality = "high";
-  ctx.drawImage(offscreen, 0, 0, w, h);
-}
-
-function render() {
-  const canvas = canvasRef.value;
-  if (!canvas) return;
-
-  const ctx = canvas.getContext("2d");
-  if (!ctx) return;
-
+function paint(canvas: HTMLCanvasElement) {
+  // Sampling a triangle is the most expensive of the five grids; skip it
+  // entirely for a canvas that has no layout box yet (a hidden or not-yet-laid
+  // out picker), which the immediate first paint can otherwise catch.
   const dpr = typeof devicePixelRatio !== "undefined" ? devicePixelRatio : 1;
   const w = Math.round(canvas.clientWidth * dpr);
   const h = Math.round(canvas.clientHeight * dpr);
   if (w === 0 || h === 0) return;
-  if (canvas.width !== w || canvas.height !== h) {
-    canvas.width = w;
-    canvas.height = h;
-  }
 
   const colorSpace = rootContext.colorSpace.value;
   const baseColor = rootContext.colorRef.value;
   if (!baseColor) return;
 
-  const overriddenBase = applyOverrides(baseColor, colorSpace);
+  const overriddenBase = applyChannelOverrides(baseColor, colorSpace, props.channelOverrides);
   const xCfg = getChannelConfig(colorSpace, rootContext.xChannelKey.value);
   const yCfg = getChannelConfig(colorSpace, rootContext.yChannelKey.value);
   if (!xCfg || !yCfg) return;
@@ -126,30 +81,15 @@ function render() {
   renderToCanvas(canvas, pixels, sampleSize, sampleSize);
 }
 
-useResizeObserver(canvasRef, () => {
-  render();
-});
-
-watch(
-  () => [
+useGradientCanvas({
+  canvas: canvasRef,
+  sources: () => [
     props.channelOverrides,
     rootContext.colorSpace.value, rootContext.xChannelKey.value, rootContext.yChannelKey.value, rootContext.zChannelKey.value,
     rootContext.colorRef.value, rootContext.rotation.value,
   ],
-  () => { if (!rootContext.isDragging.value) render(); },
-  { flush: "post" },
-);
-
-watch(() => rootContext.isDragging.value, (dragging, wasDragging) => {
-  if (wasDragging && !dragging) render();
-});
-
-onBeforeUnmount(() => {
-  const canvas = canvasRef.value;
-  if (canvas) {
-    const gl = canvas.getContext("webgl");
-    if (gl) gl.getExtension("WEBGL_lose_context")?.loseContext();
-  }
+  paint,
+  isDragging: rootContext.isDragging,
 });
 </script>
 

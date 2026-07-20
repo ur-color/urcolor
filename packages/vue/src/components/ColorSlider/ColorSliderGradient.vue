@@ -22,11 +22,11 @@ export interface ColorSliderGradientProps extends /* @vue-ignore */ PrimitivePro
 </script>
 
 <script setup lang="ts">
-import { ref, computed, watch, onBeforeUnmount } from "vue";
-import { useResizeObserver } from "@vueuse/core";
+import { ref, computed } from "vue";
 import { useForwardExpose, Primitive } from "reka-ui";
 import { Color } from "@urcolor/core";
 import { drawLinearGradient, interpolateStops, getChannelConfig } from "@urcolor/core";
+import { applyChannelOverrides, useGradientCanvas } from "../../shared/useGradientCanvas";
 import { injectColorSliderRootContext } from "./ColorSliderRoot.vue";
 
 const props = withDefaults(defineProps<ColorSliderGradientProps>(), {
@@ -72,17 +72,10 @@ const autoColors = computed<Color[] | null>(() => {
   const overrides = props.channelOverrides;
 
   if (isAlphaChannel.value) {
-    // Alpha slider: gradient from transparent to opaque
-    let baseColor = color;
-    if (overrides && typeof overrides === "object") {
-      const nonAlphaOverrides: Record<string, number> = {};
-      for (const [k, v] of Object.entries(overrides)) {
-        if (k !== "alpha" && getChannelConfig(colorSpace, k)) nonAlphaOverrides[k] = v;
-      }
-      if (Object.keys(nonAlphaOverrides).length > 0) {
-        baseColor = color.with({ space: colorSpace, ...nonAlphaOverrides });
-      }
-    }
+    // Alpha slider: gradient from transparent to opaque. Any `alpha` override
+    // in the map is irrelevant here — alpha is the axis, so both endpoints
+    // overwrite it.
+    const baseColor = applyChannelOverrides(color, colorSpace, overrides);
     const transparent = baseColor.withAlpha(0);
     const opaque = baseColor.withAlpha(1);
     return [transparent, opaque];
@@ -97,19 +90,7 @@ const autoColors = computed<Color[] | null>(() => {
   const cMax = cfg.nativeMax ?? cfg.max;
 
   // Apply overrides to the base color
-  let baseColor = color;
-  if (overrides && typeof overrides === "object") {
-    const channelOverridesForSet: Record<string, number> = {};
-    for (const [k, v] of Object.entries(overrides)) {
-      if (k !== "alpha" && getChannelConfig(colorSpace, k)) channelOverridesForSet[k] = v;
-    }
-    if (Object.keys(channelOverridesForSet).length > 0) {
-      baseColor = color.with({ space: colorSpace, ...channelOverridesForSet });
-    }
-    if (overrides.alpha !== undefined) {
-      baseColor = baseColor.withAlpha(overrides.alpha);
-    }
-  }
+  const baseColor = applyChannelOverrides(color, colorSpace, overrides);
 
   for (let i = 0; i < steps; i++) {
     const t = i / (steps - 1);
@@ -122,10 +103,7 @@ const autoColors = computed<Color[] | null>(() => {
 
 const canvasRef = ref<HTMLCanvasElement | null>(null);
 
-function render() {
-  const canvas = canvasRef.value;
-  if (!canvas) return;
-
+function paint(canvas: HTMLCanvasElement) {
   let colors: Color[];
 
   if (props.colors) {
@@ -154,32 +132,16 @@ function render() {
   }
 }
 
-useResizeObserver(canvasRef, () => {
-  render();
-});
-
-watch(
-  () => [props.colors, effectiveAngle.value, effectiveMirrorX.value, effectiveMirrorY.value, props.interpolationSpace, props.channelOverrides, autoColors.value],
-  () => {
-    if (!rootContext.isDragging.value)
-      render();
-  },
-  { flush: "post", deep: true, immediate: true },
-);
-
-watch(() => rootContext.isDragging.value, (dragging, wasDragging) => {
-  if (wasDragging && !dragging)
-    render();
-});
-
-onBeforeUnmount(() => {
-  const canvas = canvasRef.value;
-  if (canvas) {
-    const gl = canvas.getContext("webgl");
-    if (gl) {
-      gl.getExtension("WEBGL_lose_context")?.loseContext();
-    }
-  }
+useGradientCanvas({
+  canvas: canvasRef,
+  sources: () => [props.colors, effectiveAngle.value, effectiveMirrorX.value, effectiveMirrorY.value, props.interpolationSpace, props.channelOverrides, autoColors.value],
+  paint,
+  isDragging: rootContext.isDragging,
+  // `autoColors` and `props.colors` are arrays rebuilt on every read; a shallow
+  // watch would compare fresh references and fire on unrelated changes.
+  deep: true,
+  // drawLinearGradient paints through WebGL.
+  usesWebGL: true,
 });
 </script>
 

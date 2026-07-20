@@ -1,0 +1,160 @@
+import type { Color, SpaceId } from "@urcolor/core";
+import type { Ref } from "vue";
+import { getChannelConfig } from "@urcolor/core";
+import { useResizeObserver } from "@vueuse/core";
+import { getCurrentInstance, onBeforeUnmount, watch } from "vue";
+
+/**
+ * Apply a `channelOverrides` map to a base color, resolved against
+ * `colorSpace`.
+ *
+ * `alpha` is handled separately from the coordinate channels because it is not
+ * one — every space has it. Coordinate keys that the space does not define are
+ * dropped rather than forwarded: `Color#with()` throws a `RangeError` for an
+ * unknown channel, and the documented override example (`{ s: 1, v: 1 }`, which
+ * is HSV-only) is routinely paired with a non-HSV `colorSpace`.
+ *
+ * Passing `false` — the documented "no overrides" value — returns the base
+ * color untouched.
+ */
+export function applyChannelOverrides(
+  color: Color,
+  colorSpace: SpaceId,
+  overrides: Record<string, number> | false,
+): Color {
+  if (!overrides) return color;
+
+  let result = color;
+  const channelUpdates: Record<string, number> = {};
+  for (const [k, v] of Object.entries(overrides)) {
+    if (k === "alpha") result = result.withAlpha(v);
+    else if (getChannelConfig(colorSpace, k)) channelUpdates[k] = v;
+  }
+  // One `with()` for all coordinate channels: each call converts into
+  // `colorSpace`, so doing it per channel would round-trip needlessly.
+  if (Object.keys(channelUpdates).length > 0) {
+    result = result.with({ space: colorSpace, ...channelUpdates });
+  }
+  return result;
+}
+
+/**
+ * Blit a sampled RGBA grid onto a canvas, scaled to the canvas' device-pixel
+ * backing store.
+ *
+ * The gradients sample a small grid (64×64 or 128×128) and let the canvas
+ * upscale it with smoothing, rather than sampling at full resolution — colour
+ * conversion per pixel is far more expensive than the interpolation.
+ *
+ * `clip` runs between the clear and the draw, inside a `save()`/`restore()`
+ * pair, for the ring's annulus.
+ */
+export function renderToCanvas(
+  canvas: HTMLCanvasElement,
+  pixels: Uint8ClampedArray,
+  sampleW: number,
+  sampleH: number,
+  clip?: (ctx: CanvasRenderingContext2D, width: number, height: number) => void,
+) {
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return;
+
+  const dpr = typeof devicePixelRatio !== "undefined" ? devicePixelRatio : 1;
+  const w = Math.round(canvas.clientWidth * dpr);
+  const h = Math.round(canvas.clientHeight * dpr);
+  if (canvas.width !== w || canvas.height !== h) {
+    canvas.width = w;
+    canvas.height = h;
+  }
+
+  const pixelData = new Uint8ClampedArray(pixels.buffer) as unknown as Uint8ClampedArray<ArrayBuffer>;
+  const imageData = new ImageData(pixelData, sampleW, sampleH);
+
+  const offscreen = new OffscreenCanvas(sampleW, sampleH);
+  const offCtx = offscreen.getContext("2d");
+  if (!offCtx) return;
+  offCtx.putImageData(imageData, 0, 0);
+
+  ctx.clearRect(0, 0, w, h);
+
+  if (clip) {
+    ctx.save();
+    clip(ctx, w, h);
+  }
+
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = "high";
+  ctx.drawImage(offscreen, 0, 0, w, h);
+
+  if (clip) ctx.restore();
+}
+
+export interface UseGradientCanvasOptions {
+  canvas: Ref<HTMLCanvasElement | null | undefined>;
+  /** Reactive sources that should trigger a repaint. */
+  sources: () => unknown;
+  /**
+   * Paints one frame.
+   *
+   * Receives the canvas rather than a 2D context: `ColorAreaGradient` and
+   * `ColorSliderGradient` paint through WebGL, and acquiring a 2D context here
+   * would permanently deny them one. 2D painters call `renderToCanvas`, which
+   * owns the device-pixel sizing.
+   */
+  paint: (canvas: HTMLCanvasElement) => void;
+  /** Repaints are suppressed while this is true, then run once on the falling edge. */
+  isDragging?: Ref<boolean>;
+  /** Watch `sources` deeply. Needed where a source is an array rebuilt per read. */
+  deep?: boolean;
+  /** Set when `paint` acquires a WebGL context, so teardown only runs where it applies. */
+  usesWebGL?: boolean;
+}
+
+/**
+ * The canvas lifecycle shared by every gradient: paint on mount, on resize and
+ * whenever the tracked sources change, but never mid-drag — a drag moves the
+ * thumb, not the gradient, and repainting per pointer move is the single most
+ * expensive thing these components can do. The falling-edge watch commits the
+ * one repaint the drag deferred.
+ */
+export function useGradientCanvas(options: UseGradientCanvasOptions): { render: () => void } {
+  function render() {
+    const canvas = options.canvas.value;
+    if (!canvas) return;
+    options.paint(canvas);
+  }
+
+  // A real ResizeObserver fires once as soon as `observe()` is called, so this
+  // is also a first paint — but not a reliable one (a zero-sized or
+  // display:none canvas never gets an entry), hence `immediate` below too.
+  useResizeObserver(options.canvas, () => render());
+
+  watch(
+    options.sources,
+    () => { if (!options.isDragging?.value) render(); },
+    { flush: "post", immediate: true, deep: options.deep },
+  );
+
+  watch(
+    () => options.isDragging?.value,
+    (dragging, wasDragging) => {
+      if (wasDragging && !dragging) render();
+    },
+  );
+
+  // Browsers cap the number of live WebGL contexts (~16) and drop the oldest
+  // when the cap is hit, so a page that mounts and unmounts gradients would
+  // silently kill contexts still in use. Only the WebGL painters need this:
+  // calling `getContext("webgl")` on a 2D canvas allocates a context purely to
+  // destroy it.
+  if (options.usesWebGL && getCurrentInstance()) {
+    onBeforeUnmount(() => {
+      const canvas = options.canvas.value;
+      if (!canvas) return;
+      const gl = canvas.getContext("webgl");
+      if (gl) gl.getExtension("WEBGL_lose_context")?.loseContext();
+    });
+  }
+
+  return { render };
+}
