@@ -1,5 +1,6 @@
 import {
   ColorAreaRoot,
+  ColorAreaArea,
   ColorAreaGradient,
   ColorAreaCheckerboard,
   ColorAreaThumb,
@@ -48,6 +49,10 @@ import {
 
 export const ColorArea = {
   Root: ColorAreaRoot,
+  // `Area` is not optional: the root carries no pointer or keyboard handlers,
+  // so a picker assembled without it renders correctly and does not respond to
+  // input at all.
+  Area: ColorAreaArea,
   Gradient: ColorAreaGradient,
   Checkerboard: ColorAreaCheckerboard,
   Thumb: ColorAreaThumb,
