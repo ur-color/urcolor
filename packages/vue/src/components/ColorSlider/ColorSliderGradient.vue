@@ -137,8 +137,13 @@ useGradientCanvas({
   sources: () => [props.colors, effectiveAngle.value, effectiveMirrorX.value, effectiveMirrorY.value, props.interpolationSpace, props.channelOverrides, autoColors.value],
   paint,
   isDragging: rootContext.isDragging,
-  // `autoColors` and `props.colors` are arrays rebuilt on every read; a shallow
-  // watch would compare fresh references and fire on unrelated changes.
+  // Carried over from the pre-refactor watch for fidelity, not because a
+  // shallow watch was shown to misbehave: `sources` is a getter, so it already
+  // re-runs and returns a fresh array on every trigger regardless of `deep` —
+  // `deep` only adds traversal-based tracking of the array's *elements*
+  // (`Color` instances, which are not reactive), so it has no reactive
+  // dependency left to add. See `useGradientCanvas.test.ts`, "reaches the
+  // `deep` option through to the watch" for what is actually pinned here.
   deep: true,
   // drawLinearGradient paints through WebGL.
   usesWebGL: true,

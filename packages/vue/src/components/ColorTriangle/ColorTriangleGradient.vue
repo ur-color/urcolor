@@ -33,7 +33,10 @@ const clipPath = computed(() => {
 function paint(canvas: HTMLCanvasElement) {
   // Sampling a triangle is the most expensive of the five grids; skip it
   // entirely for a canvas that has no layout box yet (a hidden or not-yet-laid
-  // out picker), which the immediate first paint can otherwise catch.
+  // out picker). There is no other guard against this: the resize observer
+  // that delivers the first paint never fires for a zero-sized canvas in the
+  // first place, so this bail only matters for a later repaint after the
+  // canvas shrinks to nothing.
   const dpr = typeof devicePixelRatio !== "undefined" ? devicePixelRatio : 1;
   const w = Math.round(canvas.clientWidth * dpr);
   const h = Math.round(canvas.clientHeight * dpr);

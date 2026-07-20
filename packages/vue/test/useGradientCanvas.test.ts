@@ -1,6 +1,6 @@
 import { mount } from "@vue/test-utils";
 import { afterEach, beforeEach, describe, expect, it, mock } from "bun:test";
-import { defineComponent, h, nextTick, ref } from "vue";
+import { defineComponent, h, nextTick, reactive, ref } from "vue";
 import { Color } from "@urcolor/core";
 import { ColorTriangleGradient, ColorTriangleRoot } from "../src/components/ColorTriangle";
 import { applyChannelOverrides, useGradientCanvas } from "../src/shared/useGradientCanvas";
@@ -45,6 +45,7 @@ function mountHarness(options: {
   paint: (canvas: HTMLCanvasElement) => void;
   isDragging?: ReturnType<typeof ref<boolean>>;
   usesWebGL?: boolean;
+  deep?: boolean;
 }) {
   return mount(defineComponent({
     setup() {
@@ -55,6 +56,7 @@ function mountHarness(options: {
         paint: options.paint,
         isDragging: options.isDragging as never,
         usesWebGL: options.usesWebGL,
+        deep: options.deep,
       });
       return () => h("canvas", { ref: canvasRef });
     },
@@ -67,11 +69,13 @@ describe("useGradientCanvas", () => {
     inertResizeObserver();
   });
 
-  // The source watch is `immediate`, but an immediate callback runs
-  // synchronously during setup — before the template ref is assigned — so it
-  // cannot be the first paint. The resize observer is, and a real one always
-  // fires on `observe()`. This is what the five gradients have always done;
-  // it is pinned here so a future change to either trigger has to face it.
+  // The source watch is not `immediate` (it used to be, on this composable
+  // and on the two pre-refactor components that carried it): an immediate
+  // callback runs synchronously during setup, before the template ref is
+  // assigned, so `render()` would always bail and it could never be the
+  // first paint regardless. The resize observer is the only first-paint
+  // mechanism, and a real one always fires on `observe()`. This is pinned
+  // here so a future change to either trigger has to face it.
   it("delivers the first paint from the resize observer, not the immediate watch", async () => {
     const withoutObserver = mock(() => {});
     mountHarness({ sources: () => [1], paint: withoutObserver });
@@ -133,6 +137,31 @@ describe("useGradientCanvas", () => {
     const afterMount = paint.mock.calls.length;
 
     source.value = 2;
+    await nextTick();
+    await nextTick();
+
+    expect(paint.mock.calls.length).toBe(afterMount + 1);
+  });
+
+  // `Color` instances (the real payload every gradient's `sources` carries)
+  // are not reactive, so `deep` cannot be pinned through a real gradient's
+  // repaint count — a plain reactive object stands in here as a source that
+  // *can* expose the difference `deep` makes. `sources` returns the same
+  // array reference on every read (`state.items`, not a rebuilt literal), so
+  // only a traversal-based dependency — the thing `deep: true` adds — sees
+  // the nested mutation. `ColorSliderGradient` passes `deep: true` for
+  // fidelity to its pre-refactor watch, not because this scenario occurs
+  // there; see the comment beside its `deep: true` for why it is likely inert
+  // in practice.
+  it("reaches the `deep` option through to the watch: a nested mutation without a reference change still triggers a repaint", async () => {
+    const state = reactive({ items: [{ v: 1 }] });
+    const paint = mock(() => {});
+    mountHarness({ sources: () => [state.items], paint, deep: true });
+    await nextTick();
+    await nextTick();
+    const afterMount = paint.mock.calls.length;
+
+    state.items[0]!.v = 2; // same array reference — only a deep watch sees this
     await nextTick();
     await nextTick();
 

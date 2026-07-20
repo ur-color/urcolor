@@ -104,7 +104,13 @@ export interface UseGradientCanvasOptions {
   paint: (canvas: HTMLCanvasElement) => void;
   /** Repaints are suppressed while this is true, then run once on the falling edge. */
   isDragging?: Ref<boolean>;
-  /** Watch `sources` deeply. Needed where a source is an array rebuilt per read. */
+  /**
+   * Watch `sources` deeply. A pass-through to `watch`'s own `deep` option,
+   * kept only because `ColorSliderGradient`'s pre-refactor watch carried it —
+   * see the comment beside its `deep: true` for why it likely adds no
+   * dependency in practice (its `sources` payload is `Color` instances,
+   * which are not reactive).
+   */
   deep?: boolean;
   /** Set when `paint` acquires a WebGL context, so teardown only runs where it applies. */
   usesWebGL?: boolean;
@@ -124,15 +130,26 @@ export function useGradientCanvas(options: UseGradientCanvasOptions): { render: 
     options.paint(canvas);
   }
 
-  // A real ResizeObserver fires once as soon as `observe()` is called, so this
-  // is also a first paint — but not a reliable one (a zero-sized or
-  // display:none canvas never gets an entry), hence `immediate` below too.
+  // A real ResizeObserver fires once as soon as `observe()` is called — that
+  // first callback is the actual first paint for all five gradients. The
+  // source watch below cannot deliver it: an `immediate` callback runs
+  // synchronously during `setup()`, before the template ref is assigned, so
+  // `render()` would bail on `if (!canvas)` every time. (`immediate` was
+  // carried by the pre-refactor `ColorAreaGradient`/`ColorSliderGradient` and
+  // proven inert for exactly this reason; it has been dropped here rather
+  // than kept as dead weight — see `useGradientCanvas.test.ts`, "delivers the
+  // first paint from the resize observer, not the immediate watch".)
+  //
+  // Known gap, not fixed by anything below: a canvas that is zero-sized or
+  // `display: none` at mount never gets a ResizeObserver entry, so it never
+  // gets a first paint at all. It will only paint once it is laid out and
+  // either resizes or a tracked source changes.
   useResizeObserver(options.canvas, () => render());
 
   watch(
     options.sources,
     () => { if (!options.isDragging?.value) render(); },
-    { flush: "post", immediate: true, deep: options.deep },
+    { flush: "post", deep: options.deep },
   );
 
   watch(
