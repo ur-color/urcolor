@@ -31,9 +31,11 @@ onUnmounted(() => {
 
 // The root owns this gesture's rect and value maths (it measures the area
 // element itself, with thumb-size offsets), so only the lifecycle lives here.
+// No `target` is passed: this composable instance never reads `drag.rect`
+// (the root's own rectRef is what the maths uses), so there's nothing to
+// measure a rect against here.
 const drag = usePointerDrag({
   disabled: rootContext.disabled,
-  target: areaElement,
   onMove(event, phase) {
     if (phase === "move") {
       rootContext.handleSlideMove(event);

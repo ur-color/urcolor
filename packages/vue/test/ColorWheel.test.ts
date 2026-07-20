@@ -251,4 +251,39 @@ describe("given default ColorWheel", () => {
       expect(wrapper.emitted("changeEnd")).toHaveLength(1);
     });
   });
+
+  describe("the outside-circle hit test", () => {
+    it("should reject a pointerdown outside the circle: no drag, no emit", async () => {
+      stubRootRect(wrapper);
+      const root = new DOMWrapper(wrapper.element as HTMLElement);
+
+      // Centre (100, 100), radius 100. clientX=250 is 150px right of centre -
+      // outside the circle (distance 150 > radius 100) - so the shared
+      // composable's canStart (isInsideCircle) must reject the pointerdown
+      // before any capture, rect cache, or value update happens. clientY=100
+      // keeps this off the degenerate dx=dy=0 case ColorRing's annulus test
+      // warns about, and angle-for-this-point (90, same as the default's
+      // reachable hue via the accept case below) would visibly change the
+      // value if the rejection were missing.
+      await root.trigger("pointerdown", { pointerId: 1, clientX: 250, clientY: 100 });
+      await root.trigger("pointerup", { pointerId: 1, clientX: 250, clientY: 100 });
+
+      expect(wrapper.emitted("update:modelValue")).toBeUndefined();
+      expect(wrapper.emitted("change")).toBeUndefined();
+      expect(wrapper.emitted("changeEnd")).toBeUndefined();
+    });
+
+    it("should accept a pointerdown inside the circle", async () => {
+      stubRootRect(wrapper);
+      const root = new DOMWrapper(wrapper.element as HTMLElement);
+
+      // 50px right of centre: well inside the radius-100 circle - accepted,
+      // starts a drag, and moves the value from angle 180 to angle 90.
+      await root.trigger("pointerdown", { pointerId: 1, clientX: 150, clientY: 100 });
+      await root.trigger("pointerup", { pointerId: 1, clientX: 150, clientY: 100 });
+
+      expect(wrapper.emitted("update:modelValue")).toHaveLength(1);
+      expect(getEmittedDisplayValues(wrapper)?.[0]).toBe(90);
+    });
+  });
 });

@@ -226,6 +226,36 @@ describe("given a two-channel ColorTriangle", () => {
     });
   });
 
+  describe("the outside-triangle hit test", () => {
+    // Vertices for this default (rotation 0, not inverted) equilateral
+    // triangle inscribed in the 100x100 stubbed box: apex (50, 0), base
+    // corners at roughly (93.3, 75) and (6.7, 75) - the base sits at y=75, so
+    // any point below that (e.g. y=95) is outside no matter the x.
+    it("should reject a pointerdown outside the triangle: no drag, no emit", async () => {
+      const root = wrapper.find<HTMLElement>("[data-color-triangle-root]");
+      stubRootRect(root);
+
+      await root.trigger("pointerdown", { pointerId: 1, clientX: 95, clientY: 95 });
+      await root.trigger("pointerup", { pointerId: 1, clientX: 95, clientY: 95 });
+
+      expect(wrapper.emitted("update:modelValue")).toBeUndefined();
+      expect(wrapper.emitted("change")).toBeUndefined();
+      expect(wrapper.emitted("changeEnd")).toBeUndefined();
+    });
+
+    it("should accept a pointerdown inside the triangle", async () => {
+      const root = wrapper.find<HTMLElement>("[data-color-triangle-root]");
+      stubRootRect(root);
+
+      // (50, 40) is inside the triangle (see the drag tests above), so this
+      // must start a drag and move the value.
+      await root.trigger("pointerdown", { pointerId: 1, clientX: 50, clientY: 40 });
+      await root.trigger("pointerup", { pointerId: 1, clientX: 50, clientY: 40 });
+
+      expect(wrapper.emitted("update:modelValue")).toHaveLength(1);
+    });
+  });
+
   describe("when disabled", () => {
     beforeEach(() => {
       document.body.innerHTML = "";

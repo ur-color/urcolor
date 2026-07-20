@@ -1,10 +1,15 @@
 import type { Ref } from "vue";
-import { ref } from "vue";
+import { getCurrentScope, onScopeDispose, ref } from "vue";
 
 export interface UsePointerDragOptions {
   disabled: Ref<boolean>;
-  /** Element the pointer coordinates are measured against. */
-  target: Ref<HTMLElement | undefined>;
+  /**
+   * Element the pointer coordinates are measured against. Optional: a caller
+   * whose own root already caches a rect (e.g. ColorArea, which measures the
+   * area element from its root) can omit this so the composable doesn't do a
+   * `getBoundingClientRect()` whose result is never read.
+   */
+  target?: Ref<HTMLElement | undefined>;
   /** Called on pointerdown and on every throttled move, with client coordinates. */
   onMove: (event: PointerEvent, phase: "start" | "move") => void;
   /** Called once on release. */
@@ -40,6 +45,20 @@ export function usePointerDrag(options: UsePointerDragOptions): UsePointerDragRe
   /** The move the pending frame will deliver. */
   let pendingMove: PointerEvent | undefined;
 
+  // A component that unmounts mid-drag would otherwise leave a scheduled
+  // frame to fire against a torn-down component. Only register the cleanup
+  // when there is an active effect scope to own it - the composable's own
+  // tests call it bare, and a scope-less `onScopeDispose` would emit a Vue
+  // warning.
+  if (getCurrentScope()) {
+    onScopeDispose(() => {
+      if (frame === undefined) return;
+      cancelAnimationFrame(frame);
+      frame = undefined;
+      pendingMove = undefined;
+    });
+  }
+
   /**
    * Run a move the throttle has not delivered yet, then drop the frame.
    *
@@ -66,7 +85,7 @@ export function usePointerDrag(options: UsePointerDragOptions): UsePointerDragRe
     target.setPointerCapture(event.pointerId);
     event.preventDefault();
 
-    rect.value = options.target.value?.getBoundingClientRect();
+    rect.value = options.target?.value?.getBoundingClientRect();
     isDragging.value = true;
     options.onMove(event, "start");
   }
@@ -75,11 +94,18 @@ export function usePointerDrag(options: UsePointerDragOptions): UsePointerDragRe
     if (!isDragging.value) return;
     const target = event.target as HTMLElement;
     if (!target.hasPointerCapture(event.pointerId)) return;
-    // Coalesce every move within a frame into one call.
-    if (frame !== undefined) return;
 
+    // Snapshot before the coalescing guard below so every move updates the
+    // pending position - last-wins, not first-wins. Several moves can land
+    // within one frame (pointermove fires faster than 60 Hz in a real
+    // browser), and the freshest position is the one that should be
+    // delivered when the frame fires or is flushed on release.
     const { clientX, clientY, pointerId } = event;
     pendingMove = { clientX, clientY, pointerId } as PointerEvent;
+    // Coalesce every move within a frame into one call: only the first move
+    // in a frame schedules it.
+    if (frame !== undefined) return;
+
     frame = requestAnimationFrame(() => {
       frame = undefined;
       const move = pendingMove;
