@@ -27,24 +27,29 @@ Two-dimensional color selection for any pair of channels.
 <script setup>
 import {
   ColorAreaRoot,
-  ColorAreaThumb,
+  ColorAreaArea,
   ColorAreaGradient,
+  ColorAreaThumb,
 } from '@urcolor/vue'
 
 const color = ref('hsl(200, 100%, 50%)')
 </script>
 
 <template>
-  <ColorAreaRoot v-model="color" color-space="hsl" channel-x="saturation" channel-y="lightness">
-    <ColorAreaGradient />
-    <ColorAreaThumb />
+  <ColorAreaRoot v-model="color" color-space="hsl" x-channel="s" y-channel="l">
+    <ColorAreaArea>
+      <ColorAreaGradient />
+      <ColorAreaThumb />
+    </ColorAreaArea>
   </ColorAreaRoot>
 </template>
 ```
 
-**Props:** `modelValue`, `colorSpace`, `channelX`, `channelY`, `disabled`, `invertedX`, `invertedY`, `thumbAlignment` ("contain" | "overflow"), `name`, `dir`
+`ColorAreaArea` is required — it carries every pointer and keyboard handler and is the box pointer coordinates are measured against. Mounting the gradient and thumb directly under the root renders, but does not respond to input.
 
-**Sub-components:** `ColorAreaRoot`, `ColorAreaThumb`, `ColorAreaGradient`, `ColorAreaCheckerboard`
+**Props:** `modelValue`, `defaultValue`, `colorSpace`, `xChannel`, `yChannel`, `xName`, `yName`, `disabled`, `invertedX`, `invertedY`, `minXStepsBetweenThumbs`, `minYStepsBetweenThumbs`, `thumbAlignment` ("contain" | "overflow"), `name`, `required`, `dir`
+
+**Sub-components:** `ColorAreaRoot`, `ColorAreaArea`, `ColorAreaGradient`, `ColorAreaThumb`, `ColorAreaCheckerboard`
 
 ### ColorSlider
 
@@ -63,7 +68,7 @@ const color = ref('hsl(200, 100%, 50%)')
 </script>
 
 <template>
-  <ColorSliderRoot v-model="color" color-space="hsl" channel="hue">
+  <ColorSliderRoot v-model="color" color-space="hsl" channel="h">
     <ColorSliderTrack>
       <ColorSliderGradient />
       <ColorSliderThumb />
@@ -72,7 +77,7 @@ const color = ref('hsl(200, 100%, 50%)')
 </template>
 ```
 
-**Props:** `modelValue`, `colorSpace`, `channel`, `disabled`, `orientation` ("horizontal" | "vertical"), `inverted`, `dir`
+**Props:** `modelValue`, `defaultValue`, `colorSpace`, `channel`, `step`, `disabled`, `orientation` ("horizontal" | "vertical"), `inverted`, `name`, `required`, `dir`
 
 **Sub-components:** `ColorSliderRoot`, `ColorSliderTrack`, `ColorSliderRange`, `ColorSliderThumb`, `ColorSliderGradient`, `ColorSliderCheckerboard`
 
@@ -93,7 +98,7 @@ const color = ref('hsl(200, 100%, 50%)')
 </script>
 
 <template>
-  <ColorFieldRoot v-model="color" color-space="hsl" channel="hue">
+  <ColorFieldRoot v-model="color" color-space="hsl" channel="h">
     <ColorFieldDecrement>−</ColorFieldDecrement>
     <ColorFieldInput />
     <ColorFieldIncrement>+</ColorFieldIncrement>
@@ -101,7 +106,7 @@ const color = ref('hsl(200, 100%, 50%)')
 </template>
 ```
 
-**Props:** `modelValue`, `colorSpace`, `channel`, `format` ("number" | "degree" | "percentage" | "hex"), `min`, `max`, `step`, `disabled`, `name`
+**Props:** `modelValue`, `defaultValue`, `colorSpace`, `channel`, `format` ("number" | "degree" | "percentage" | "hex"), `min`, `max`, `step`, `disabled`, `readonly`, `placeholder`, `disableWheelChange`, `locale`, `name`, `required`
 
 **Keyboard:** Arrow Up/Down to increment, Page Up/Down for 10x steps, Home/End for min/max.
 
@@ -117,31 +122,78 @@ Display a color with optional transparency checkerboard.
 </template>
 ```
 
-**Props:** `modelValue`, `checkerSize`, `alpha`
+**Props:** `modelValue`, `checkerSize`, `alpha`, `label`
 
-### ColorSwatchGroup
+### ColorSwatchPicker
 
-Select one or multiple colors from a palette.
+Select one or multiple colors from a palette. Built on Reka UI's Listbox — the root
+renders `role="listbox"` and each item `role="option"`.
 
 ```vue
 <script setup>
-import { ColorSwatchGroupRoot, ColorSwatchGroupItem } from '@urcolor/vue'
+import {
+  ColorSwatchPickerRoot,
+  ColorSwatchPickerItem,
+  ColorSwatchPickerItemSwatch,
+  ColorSwatchPickerItemIndicator,
+} from '@urcolor/vue'
 
 const selected = ref(['red'])
 </script>
 
 <template>
-  <ColorSwatchGroupRoot v-model="selected" type="multiple">
-    <ColorSwatchGroupItem value="red" />
-    <ColorSwatchGroupItem value="green" />
-    <ColorSwatchGroupItem value="blue" />
-  </ColorSwatchGroupRoot>
+  <ColorSwatchPickerRoot v-model="selected" multiple>
+    <ColorSwatchPickerItem v-for="c in ['red', 'green', 'blue']" :key="c" :value="c">
+      <ColorSwatchPickerItemSwatch />
+      <ColorSwatchPickerItemIndicator>✓</ColorSwatchPickerItemIndicator>
+    </ColorSwatchPickerItem>
+  </ColorSwatchPickerRoot>
 </template>
 ```
 
-**Props:** `modelValue`, `type` ("single" | "multiple"), `disabled`, `orientation`, `loop`, `rovingFocus`, `dir`
+**Props:** `modelValue`, `defaultValue`, `multiple`, `disabled`, `orientation` ("horizontal" | "vertical"), `selectionBehavior` ("toggle" | "replace"), `highlightOnHover`, `name`, `required`, `dir`
 
-**Sub-components:** `ColorSwatchGroupRoot`, `ColorSwatchGroupItem`
+**Sub-components:** `ColorSwatchPickerRoot`, `ColorSwatchPickerItem`, `ColorSwatchPickerItemSwatch`, `ColorSwatchPickerItemIndicator`
+
+Note: typeahead is not supported — swatches carry no text for the listbox to search against.
+
+### ColorRing
+
+Single-channel selection along a circular arc.
+
+**Props:** `modelValue`, `defaultValue`, `colorSpace`, `channel`, `startAngle`, `innerRadius`, `disabled`, `name`, `required`, `dir`
+
+**Sub-components:** `ColorRingRoot`, `ColorRingTrack`, `ColorRingGradient`, `ColorRingThumb`, `ColorRingCheckerboard`
+
+### ColorWheel
+
+Two-channel selection mapped to angle and radius.
+
+**Props:** `modelValue`, `defaultValue`, `colorSpace`, `angleChannel`, `radiusChannel`, `startAngle`, `disabled`, `name`, `required`, `dir`
+
+**Sub-components:** `ColorWheelRoot`, `ColorWheelGradient`, `ColorWheelThumb`, `ColorWheelCheckerboard`
+
+### ColorTriangle
+
+Two- or three-channel selection in barycentric coordinates. Set `zChannel` for the
+three-channel (Maxwell triangle) mode.
+
+**Props:** `modelValue`, `defaultValue`, `colorSpace`, `xChannel`, `yChannel`, `zChannel`, `rotation`, `orientation`, `inverted`, `thumbAlignment`, `disabled`, `name`, `required`, `dir`
+
+**Sub-components:** `ColorTriangleRoot`, `ColorTriangleGradient`, `ColorTriangleThumb`, `ColorTriangleCheckerboard`
+
+## Events
+
+Every color root emits the same four events:
+
+| Event | Payload | When |
+|-------|---------|------|
+| `update:modelValue` | `Color \| undefined` | Whenever the color changes (this is what `v-model` binds to). |
+| `update:color` | `Color` | Mirrors `update:modelValue`; present for API parity. |
+| `change` | `Color` | On every value change, including mid-drag and mid-typing. |
+| `changeEnd` | `Color` | When a change-producing interaction ends. |
+
+`ColorSwatchPicker` is the exception: it emits the Listbox event set — `update:modelValue`, `highlight`, `entryFocus` and `leave`.
 
 ## Supported Color Spaces
 

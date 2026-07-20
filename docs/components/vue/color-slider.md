@@ -134,16 +134,25 @@ The root container that manages slider state and color channel binding.
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
 | `modelValue` | `Color \| string \| null` | — | Controlled color value (v-model). |
+| `defaultValue` | `Color \| string` | `'hsl(0, 100%, 50%)'` | Initial color when uncontrolled. |
 | `colorSpace` | `SpaceId` | `'hsl'` | Color space (e.g. `'hsl'`, `'oklch'`). |
-| `channel` | `string` | `'h'` | Channel to control (e.g. `'h'`, `'s'`, `'l'`). |
+| `channel` | `string` | `'h'` | Channel to control (e.g. `'h'`, `'s'`, `'l'`, `'alpha'`). |
+| `step` | `number` | Auto | Stepping interval. Derived from the channel config when omitted. |
 | `disabled` | `boolean` | `false` | Disables interaction. |
 | `dir` | `'ltr' \| 'rtl'` | — | Reading direction. |
 | `inverted` | `boolean` | `false` | Visually invert the slider. |
 | `orientation` | `'horizontal' \| 'vertical'` | `'horizontal'` | Slider orientation. |
+| `name` | `string` | — | Hidden input name for form submission. |
+| `required` | `boolean` | `false` | Marks as required for form submission. |
+| `as` | `string` | `'span'` | The element or component to render as. |
+| `asChild` | `boolean` | `false` | Merge props onto the single child instead of rendering an element. |
+
 | Event | Payload | Description |
 |-------|---------|-------------|
-| `update:modelValue` | `Color \| undefined` | Emitted when color changes. |
-| `valueCommit` | `Color` | Emitted when interaction ends. |
+| `update:modelValue` | `Color \| undefined` | Emitted whenever the color changes. |
+| `update:color` | `Color` | Mirrors `update:modelValue`; present for API parity. |
+| `change` | `Color` | Emitted on every value change, including mid-drag. |
+| `changeEnd` | `Color` | Emitted when a change-producing interaction ends. |
 
 ### ColorSliderTrack
 
@@ -155,10 +164,12 @@ Renders a gradient canvas background for the slider track.
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
-| `colors` | `string[]` | — | Array of color stops (minimum 2). |
-| `vertical` | `boolean` | `false` | Render gradient top-to-bottom instead of left-to-right. |
-| `interpolationSpace` | `string` | — | Color space for perceptual interpolation (e.g. `'oklch'`). |
+| `colors` | `string[]` | Auto | Array of color stops. Computed from the slider's channel and current color when omitted. |
+| `angle` | `number` | Auto | Gradient rotation in degrees (`0` = left-to-right, `90` = top-to-bottom). Normalized to 0–360; defaults to `90` when the slider is vertical. |
+| `interpolationSpace` | `SpaceId` | — | Color space for perceptual interpolation (e.g. `'oklch'`). |
 | `channelOverrides` | `Record<string, number> \| false` | `{ alpha: 1 }` | Lock specific channels to fixed values in the gradient. Set to `false` to reflect all channels from current color including alpha. E.g. `{ s: 1, v: 1, alpha: 1 }` for an immutable hue gradient in HSV. |
+| `as` | `string` | `'span'` | The element or component to render as. |
+| `asChild` | `boolean` | `false` | Merge props onto the single child instead of rendering an element. |
 
 ### ColorSliderCheckerboard
 

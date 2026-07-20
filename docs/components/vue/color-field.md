@@ -100,12 +100,15 @@ The root container that manages field state and color channel binding.
 | `locale` | `string` | — | Locale used for parsing/formatting. Reserved for future use. |
 | `name` | `string` | — | Hidden input name for form submission. |
 | `required` | `boolean` | `false` | Marks as required for form submission. |
+| `as` | `string` | `'div'` | The element or component to render as. |
+| `asChild` | `boolean` | `false` | Merge props onto the single child instead of rendering an element. |
 
 | Event | Payload | Description |
 |-------|---------|-------------|
-| `update:modelValue` | `Color \| undefined` | Emitted when color changes. |
-| `update:color` | `Color` | Emitted when color changes. Mirrors `update:modelValue`; present for API parity. |
-| `valueCommit` | `Color` | Emitted when interaction ends (blur or Enter). |
+| `update:modelValue` | `Color \| undefined` | Emitted whenever the color changes. |
+| `update:color` | `Color` | Mirrors `update:modelValue`; present for API parity. |
+| `change` | `Color` | Emitted on every value change, including mid-typing. |
+| `changeEnd` | `Color` | Emitted when the value settles: blur, Enter, arrow keys, wheel, or the increment/decrement buttons. |
 
 ### ColorFieldInput
 
@@ -136,6 +139,7 @@ Displays a color preview swatch. Wraps `ColorSwatchRoot` with automatic checkerb
 | `modelValue` | `Color \| string \| null` | — | The color value to display. |
 | `alpha` | `boolean` | `false` | When true, reflects the color's alpha channel. |
 | `checkerSize` | `number` | `16` | The checkerboard tile size in pixels. |
+| `label` | `string` | Auto | Accessible name. Falls back to the resolved color string, then `"transparent"`. |
 
 ## Accessibility
 
@@ -161,3 +165,5 @@ ColorField provides a spinbutton interface for precise numeric color channel edi
 | Home | Jump to minimum |
 | End | Jump to maximum |
 | Enter | Commit current value |
+
+The mouse wheel also steps the value while the input is focused. Set `disable-wheel-change` on `ColorFieldRoot` to turn that off.

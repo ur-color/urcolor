@@ -59,8 +59,8 @@ const { color } = useColor("hsl(210, 80%, 50%)");
 </template>
 ```
 
-- `color-space` — the color space to work in (`hsl`, `oklch`, `hsb`, etc.)
-- `channel` — the channel this slider controls (`h`, `s`, `l`, `hue`, `chroma`, etc.)
+- `color-space` — the color space to work in (`hsl`, `oklch`, `hsv`, etc.)
+- `channel` — the channel this slider controls (`h`, `s`, `l`, `c`, `alpha`, etc.)
 
 ## Step 3: Add the track and gradient
 
@@ -210,7 +210,7 @@ Switch the `channel` prop to control different color properties. For example, a 
 
 ## Listening to changes
 
-Use `@update:model-value` for real-time updates (while dragging) and `@value-commit` for the final value (on release):
+Use `@update:model-value` for real-time updates (while dragging) and `@change-end` for the final value (on release):
 
 ```vue{3-8,15-16}
 <script setup lang="ts">
@@ -218,7 +218,7 @@ Use `@update:model-value` for real-time updates (while dragging) and `@value-com
 const onColorChange = (color: Color) => {
   console.log("dragging", color.toString());
 };
-const onColorCommit = (color: Color) => {
+const onColorChangeEnd = (color: Color) => {
   console.log("committed", color.toString());
 };
 </script>
@@ -228,7 +228,7 @@ const onColorCommit = (color: Color) => {
     v-model="color"
     color-space="hsl"
     @update:model-value="onColorChange"
-    @value-commit="onColorCommit"
+    @change-end="onColorChangeEnd"
     channel="h"
   >
     <!-- ... -->

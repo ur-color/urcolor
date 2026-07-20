@@ -52,8 +52,8 @@ const { color } = useColor("hsl(210, 80%, 50%)");
   <ColorWheelRoot
     v-model="color"
     color-space="hsl"
-    channel-angle="h"
-    channel-radius="s"
+    angle-channel="h"
+    radius-channel="s"
   >
     <!-- children go here -->
   </ColorWheelRoot>
@@ -61,8 +61,8 @@ const { color } = useColor("hsl(210, 80%, 50%)");
 ```
 
 - `color-space` — the color space to work in (`hsl`, `oklch`, etc.)
-- `channel-angle` — the channel mapped to the angular axis (rotation)
-- `channel-radius` — the channel mapped to the radial axis (distance from center)
+- `angle-channel` — the channel mapped to the angular axis (rotation)
+- `radius-channel` — the channel mapped to the radial axis (distance from center)
 
 ## Step 3: Add the gradient
 
@@ -83,8 +83,8 @@ const { color } = useColor("hsl(210, 80%, 50%)");
   <ColorWheelRoot
     v-model="color"
     color-space="hsl"
-    channel-angle="h"
-    channel-radius="s"
+    angle-channel="h"
+    radius-channel="s"
     class="relative block size-64 overflow-hidden rounded-full"
     style="container-type: inline-size"
   >
@@ -115,8 +115,8 @@ const { color } = useColor("hsl(210, 80%, 50%)");
   <ColorWheelRoot
     v-model="color"
     color-space="hsl"
-    channel-angle="h"
-    channel-radius="s"
+    angle-channel="h"
+    radius-channel="s"
     class="relative block size-64 overflow-hidden rounded-full"
     style="container-type: inline-size"
   >
@@ -148,8 +148,8 @@ Use `start-angle` to rotate where the wheel gradient begins (in degrees):
     v-model="color"
     color-space="hsl"
     :start-angle="90"
-    channel-angle="h"
-    channel-radius="s"
+    angle-channel="h"
+    radius-channel="s"
   >
     <!-- ... -->
   </ColorWheelRoot>
@@ -164,15 +164,15 @@ Switch the color space and channel mapping for different wheel behaviors. For ex
 <script setup lang="ts">
 import { useColor } from "@urcolor/vue";
 
-const { color } = useColor("oklch(0.6, 0.15, 210)");
+const { color } = useColor("oklch(0.6 0.15 210)");
 </script>
 
 <template>
   <ColorWheelRoot
     v-model="color"
     color-space="oklch"
-    channel-angle="hue"
-    channel-radius="chroma"
+    angle-channel="h"
+    radius-channel="c"
   >
     <!-- ... -->
   </ColorWheelRoot>
@@ -181,7 +181,7 @@ const { color } = useColor("oklch(0.6, 0.15, 210)");
 
 ## Listening to changes
 
-Use `@update:model-value` for real-time updates (while dragging) and `@value-commit` for the final value (on release):
+Use `@update:model-value` for real-time updates (while dragging) and `@change-end` for the final value (on release):
 
 ```vue{3-8,15-16}
 <script setup lang="ts">
@@ -189,7 +189,7 @@ Use `@update:model-value` for real-time updates (while dragging) and `@value-com
 const onColorChange = (color: Color) => {
   console.log("dragging", color.toString());
 };
-const onColorCommit = (color: Color) => {
+const onColorChangeEnd = (color: Color) => {
   console.log("committed", color.toString());
 };
 </script>
@@ -199,9 +199,9 @@ const onColorCommit = (color: Color) => {
     v-model="color"
     color-space="hsl"
     @update:model-value="onColorChange"
-    @value-commit="onColorCommit"
-    channel-angle="h"
-    channel-radius="s"
+    @change-end="onColorChangeEnd"
+    angle-channel="h"
+    radius-channel="s"
   >
     <!-- ... -->
   </ColorWheelRoot>

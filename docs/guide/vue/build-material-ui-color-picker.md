@@ -43,6 +43,7 @@ The `ColorArea` provides a 2D gradient for picking saturation and value in HSV s
 import { // [!code ++]
   useColor, // [!code ++]
   ColorAreaRoot, // [!code ++]
+  ColorAreaArea, // [!code ++]
   ColorAreaGradient, // [!code ++]
   ColorAreaThumb, // [!code ++]
 } from "@urcolor/vue"; // [!code ++]
@@ -51,25 +52,28 @@ const { color } = useColor("hsl(210, 80%, 50%)");
 </script>
 
 <template>
-  <!-- [!code ++:17] -->
+  <!-- [!code ++:23] -->
   <div class="flex w-full max-w-xs flex-col gap-3 rounded-xl p-3">
     <ColorAreaRoot
       v-model="color"
       color-space="hsv"
-      channel-x="s"
-      channel-y="v"
+      x-channel="s"
+      y-channel="v"
       :inverted-y="true"
       class="relative h-[180px] w-full cursor-crosshair touch-none overflow-clip rounded-lg"
     >
-      <ColorAreaGradient class="absolute inset-0" />
-      <ColorAreaThumb
-        class="
-          absolute size-5 transform-(--reka-slider-area-thumb-transform)
-          rounded-full border-2 border-white
-          shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_2px_4px_rgba(0,0,0,0.3)]
-          focus-visible:shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_0_0_3px_rgba(66,153,225,0.6)]
-        "
-      />
+      <ColorAreaArea as="div" class="absolute inset-0">
+        <ColorAreaGradient as="div" class="absolute inset-0" />
+        <ColorAreaThumb
+          as="div"
+          class="
+            absolute size-5 transform-(--reka-slider-area-thumb-transform)
+            rounded-full border-2 border-white
+            shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_2px_4px_rgba(0,0,0,0.3)]
+            focus-visible:shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_0_0_3px_rgba(66,153,225,0.6)]
+          "
+        />
+      </ColorAreaArea>
     </ColorAreaRoot>
   </div>
 </template>
@@ -84,6 +88,7 @@ Add a `ColorSlider` below the area to control the hue channel.
 import {
   useColor,
   ColorAreaRoot,
+  ColorAreaArea,
   ColorAreaGradient,
   ColorAreaThumb,
   ColorSliderRoot, // [!code ++]
@@ -100,20 +105,23 @@ const { color } = useColor("hsl(210, 80%, 50%)");
     <ColorAreaRoot
       v-model="color"
       color-space="hsv"
-      channel-x="s"
-      channel-y="v"
+      x-channel="s"
+      y-channel="v"
       :inverted-y="true"
       class="relative h-[180px] w-full cursor-crosshair touch-none overflow-clip rounded-lg"
     >
-      <ColorAreaGradient class="absolute inset-0" />
-      <ColorAreaThumb
-        class="
-          absolute size-5 transform-(--reka-slider-area-thumb-transform)
-          rounded-full border-2 border-white
-          shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_2px_4px_rgba(0,0,0,0.3)]
-          focus-visible:shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_0_0_3px_rgba(66,153,225,0.6)]
-        "
-      />
+      <ColorAreaArea as="div" class="absolute inset-0">
+        <ColorAreaGradient as="div" class="absolute inset-0" />
+        <ColorAreaThumb
+          as="div"
+          class="
+            absolute size-5 transform-(--reka-slider-area-thumb-transform)
+            rounded-full border-2 border-white
+            shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_2px_4px_rgba(0,0,0,0.3)]
+            focus-visible:shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_0_0_3px_rgba(66,153,225,0.6)]
+          "
+        />
+      </ColorAreaArea>
     </ColorAreaRoot>
 
     <!-- [!code ++:16] -->
@@ -150,6 +158,7 @@ Add another `ColorSlider` for the alpha (opacity) channel, with a checkerboard b
 import {
   useColor,
   ColorAreaRoot,
+  ColorAreaArea,
   ColorAreaGradient,
   ColorAreaThumb,
   ColorSliderRoot,
@@ -203,6 +212,7 @@ import { Label } from "reka-ui"; // [!code ++]
 import {
   useColor,
   ColorAreaRoot,
+  ColorAreaArea,
   ColorAreaGradient,
   ColorAreaThumb,
   ColorSliderRoot,

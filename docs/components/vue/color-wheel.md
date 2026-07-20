@@ -26,10 +26,7 @@ import ColorWheelOKLCh from './demo/ColorWheelOKLCh.vue'
   <ColorWheelRoot>
     <ColorWheelCheckerboard />
     <ColorWheelGradient />
-    <ColorWheelThumb>
-      <ColorWheelThumbX />
-      <ColorWheelThumbY />
-    </ColorWheelThumb>
+    <ColorWheelThumb />
   </ColorWheelRoot>
 </template>
 ```
@@ -86,18 +83,22 @@ The root container that manages wheel state and color channel binding.
 | `modelValue` | `Color \| string \| null` | — | Controlled color value (v-model). |
 | `defaultValue` | `Color \| string` | `'hsl(0, 100%, 50%)'` | Initial color when uncontrolled. |
 | `colorSpace` | `SpaceId` | `'hsl'` | Color space (e.g. `'hsl'`, `'oklch'`). |
-| `channelAngle` | `string` | Auto | Channel mapped to the angle axis (e.g. `'h'`). Auto-derived from color space. |
-| `channelRadius` | `string` | Auto | Channel mapped to the radius axis (e.g. `'s'`). Auto-derived from color space. |
+| `angleChannel` | `string` | Auto | Channel mapped to the angle axis (e.g. `'h'`). Defaults to the color space's first channel. |
+| `radiusChannel` | `string` | Auto | Channel mapped to the radius axis (e.g. `'s'`). Defaults to the color space's second channel. |
 | `startAngle` | `number` | `0` | Starting angle offset in degrees. |
 | `disabled` | `boolean` | `false` | Disables interaction. |
 | `dir` | `'ltr' \| 'rtl'` | — | Reading direction. |
 | `name` | `string` | — | Hidden input name for form submission. |
 | `required` | `boolean` | `false` | Marks as required for form submission. |
+| `as` | `string` | `'span'` | The element or component to render as. |
+| `asChild` | `boolean` | `false` | Merge props onto the single child instead of rendering an element. |
 
 | Event | Payload | Description |
 |-------|---------|-------------|
-| `update:modelValue` | `Color \| undefined` | Emitted when color changes. |
-| `valueCommit` | `Color` | Emitted when interaction ends. |
+| `update:modelValue` | `Color \| undefined` | Emitted whenever the color changes. |
+| `update:color` | `Color` | Mirrors `update:modelValue`; present for API parity. |
+| `change` | `Color` | Emitted on every value change, including mid-drag. |
+| `changeEnd` | `Color` | Emitted when a change-producing interaction ends. |
 
 ### ColorWheelGradient
 
@@ -106,6 +107,8 @@ Renders a polar gradient canvas for the wheel. Automatically samples the gradien
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
 | `channelOverrides` | `Record<string, number> \| false` | `{ alpha: 1 }` | Lock specific channels to fixed values in the gradient. Set to `false` to reflect all channels from current color including alpha. |
+| `as` | `string` | `'span'` | The element or component to render as. |
+| `asChild` | `boolean` | `false` | Merge props onto the single child instead of rendering an element. |
 
 ### ColorWheelCheckerboard
 
@@ -113,24 +116,26 @@ Renders a checkerboard pattern behind the gradient to visualize alpha transparen
 
 ### ColorWheelThumb
 
-Wrapper for the thumb indicator. Position is set automatically via CSS custom properties using polar coordinates.
+The thumb indicator, and the wheel's only focusable element. It renders `role="slider"` and is positioned from the angle and radius channel values in polar coordinates.
 
-### ColorWheelThumbX / ColorWheelThumbY
-
-Individual axis thumb elements for angle and radius. Both are required inside `ColorWheelThumb` for keyboard navigation to work on both axes.
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `as` | `string` | `'span'` | The element or component to render as. |
+| `asChild` | `boolean` | `false` | Merge props onto the single child instead of rendering an element. |
 
 ## Accessibility
 
-ColorWheel provides a circular 2D interface with two independently focusable thumb elements for keyboard access to the angle and radius axes.
+ColorWheel exposes a single focusable thumb that drives both the angle and the radius channel.
 
 ### ARIA Labels
 
 | Attribute | Description |
 |-----------|-------------|
-| `aria-label` | Labels the root element with the color wheel's purpose. |
-| `role="slider"` | Applied to each thumb element (ThumbX, ThumbY) for screen reader recognition. |
-| `aria-valuemin` / `aria-valuemax` | Defines the range for the angle and radius channels. |
-| `aria-valuenow` | Current value of the focused channel. |
+| `role="slider"` | Applied to `ColorWheelThumb`, with `aria-roledescription="Color thumb"`. |
+| `aria-label` | Defaults to the angle and radius channel labels, e.g. `"Hue, Saturation"`. Pass your own `aria-label` on the thumb to override. |
+| `aria-valuemin` / `aria-valuemax` | The angle channel's range. |
+| `aria-valuenow` | The current angle channel value. |
+| `aria-valuetext` | Both channels formatted, e.g. `"Hue 210°, Saturation 80%"`. |
 
 ### Keyboard Navigation
 
@@ -141,6 +146,8 @@ ColorWheel provides a circular 2D interface with two independently focusable thu
 | Arrow Up | Increase radius by one step |
 | Arrow Down | Decrease radius by one step |
 | Shift + Arrow | Move by 10 steps |
-| Page Up / Page Down | Increase/decrease radius by 10 steps |
-| Home | Move to minimum |
-| End | Move to maximum |
+| Page Up / Page Down | Increase / decrease radius by 10 steps (unaffected by Shift) |
+| Home | Move both angle and radius to their minimum |
+| End | Move both angle and radius to their maximum |
+
+When the angle channel is cyclic (a `degree`-formatted channel such as hue), stepping past the end wraps around instead of clamping.

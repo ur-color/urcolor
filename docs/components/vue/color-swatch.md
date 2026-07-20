@@ -51,6 +51,15 @@ Renders a color preview with an automatic checkerboard background.
 | `modelValue` | `Color \| string \| null` | — | The color value to display. |
 | `alpha` | `boolean` | `false` | When true, reflects the color's alpha channel. When false, displays the color as fully opaque. |
 | `checkerSize` | `number` | `16` | The checkerboard tile size in pixels. |
+| `label` | `string` | Auto | Accessible name for the swatch. Falls back to the resolved color string, then `"transparent"`. |
+| `as` | `string` | `'div'` | The element or component to render as. |
+| `asChild` | `boolean` | `false` | Merge props onto the single child instead of rendering an element. |
+
+### Data Attributes
+
+| Attribute | Description |
+|-----------|-------------|
+| `data-no-color` | Present when there is no color, or the color is fully transparent. |
 
 ### CSS Variables
 

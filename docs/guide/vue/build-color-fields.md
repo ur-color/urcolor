@@ -57,7 +57,7 @@ const { color } = useColor("hsl(210, 80%, 50%)");
 </template>
 ```
 
-- `color-space` — the color space to work in (`hsl`, `oklch`, `hsb`, etc.)
+- `color-space` — the color space to work in (`hsl`, `oklch`, `hsv`, etc.)
 - `channel` — the channel this field controls (`h`, `s`, `l`, etc.)
 
 ## Step 3: Add the input
@@ -202,7 +202,7 @@ Set `channel` to `"hex"` and `format` to `"hex"` for a hex color input:
 
 ## Listening to changes
 
-Use `@update:model-value` for real-time updates and `@value-commit` for the final value (on blur or Enter):
+Use `@change` for real-time updates (it fires on every keystroke that parses) and `@change-end` for the settled value — blur, Enter, arrow keys, the wheel, or the increment/decrement buttons:
 
 ```vue{3-8,15-16}
 <script setup lang="ts">
@@ -210,7 +210,7 @@ Use `@update:model-value` for real-time updates and `@value-commit` for the fina
 const onColorChange = (color: Color) => {
   console.log("changing", color.toString());
 };
-const onColorCommit = (color: Color) => {
+const onColorChangeEnd = (color: Color) => {
   console.log("committed", color.toString());
 };
 </script>
@@ -221,7 +221,7 @@ const onColorCommit = (color: Color) => {
     color-space="hsl"
     channel="h"
     @update:model-value="onColorChange"
-    @value-commit="onColorCommit"
+    @change-end="onColorChangeEnd"
   >
     <!-- ... -->
   </ColorFieldRoot>

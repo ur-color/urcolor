@@ -99,11 +99,15 @@ The root container that manages ring state and color channel binding.
 | `dir` | `'ltr' \| 'rtl'` | — | Reading direction. |
 | `name` | `string` | — | Hidden input name for form submission. |
 | `required` | `boolean` | `false` | Marks as required for form submission. |
+| `as` | `string` | `'span'` | The element or component to render as. |
+| `asChild` | `boolean` | `false` | Merge props onto the single child instead of rendering an element. |
 
 | Event | Payload | Description |
 |-------|---------|-------------|
-| `update:modelValue` | `Color \| undefined` | Emitted when color changes. |
-| `valueCommit` | `Color` | Emitted when interaction ends. |
+| `update:modelValue` | `Color \| undefined` | Emitted whenever the color changes. |
+| `update:color` | `Color` | Mirrors `update:modelValue`; present for API parity. |
+| `change` | `Color` | Emitted on every value change, including mid-drag. |
+| `changeEnd` | `Color` | Emitted when a change-producing interaction ends. |
 
 ### ColorRingTrack
 
@@ -116,6 +120,8 @@ Renders a ring gradient canvas for the track. Automatically samples the gradient
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
 | `channelOverrides` | `Record<string, number> \| false` | `{ alpha: 1 }` | Lock specific channels to fixed values in the gradient. Set to `false` to reflect all channels from current color including alpha. |
+| `as` | `string` | `'span'` | The element or component to render as. |
+| `asChild` | `boolean` | `false` | Merge props onto the single child instead of rendering an element. |
 
 ### ColorRingCheckerboard
 
@@ -145,7 +151,11 @@ ColorRing provides a circular slider interface for adjusting a single color chan
 | Arrow Right / Arrow Up | Increase by one step |
 | Arrow Left / Arrow Down | Decrease by one step |
 | Shift + Arrow | Move by 10 steps |
-| Page Up | Increase by 10 steps |
-| Page Down | Decrease by 10 steps |
+| Page Up | Increase by 10 steps (unaffected by Shift) |
+| Page Down | Decrease by 10 steps (unaffected by Shift) |
 | Home | Move to minimum |
 | End | Move to maximum |
+
+When the controlled channel is cyclic (a `degree`-formatted channel such as hue), stepping past the end wraps around instead of clamping.
+
+Pointer input is only accepted inside the ring's annulus — a press in the hole at the centre, or outside the outer edge, is ignored. The hole's size follows the `inner-radius` prop.

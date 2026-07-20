@@ -48,23 +48,68 @@ const { color } = useColor("hsl(210, 80%, 50%)");
 </script>
 
 <template>
-  <!-- [!code ++:8] -->
+  <!-- [!code ++:9] -->
   <ColorAreaRoot
     v-model="color"
     color-space="hsl"
-    channel-x="h"
-    channel-y="s"
+    x-channel="h"
+    y-channel="s"
+    as="div"
   >
     <!-- children go here -->
   </ColorAreaRoot>
 </template>
 ```
 
-- `color-space` — the color space to work in (`hsl`, `oklch`, `hsb`, etc.)
-- `channel-x` — the channel mapped to the horizontal axis
-- `channel-y` — the channel mapped to the vertical axis
+- `color-space` — the color space to work in (`hsl`, `oklch`, `hsv`, etc.)
+- `x-channel` — the channel mapped to the horizontal axis
+- `y-channel` — the channel mapped to the vertical axis
 
-## Step 3: Add the gradient
+## Step 3: Add the area
+
+`ColorAreaArea` is the interaction surface. The root owns the state and the value
+maths, but every pointer and keyboard listener lives here — and this is the element
+the pointer coordinates are measured against. Everything else goes inside it.
+
+```vue
+<script setup lang="ts">
+import {
+  useColor,
+  ColorAreaRoot,
+  ColorAreaArea, // [!code ++]
+} from "@urcolor/vue";
+
+const { color } = useColor("hsl(210, 80%, 50%)");
+</script>
+
+<template>
+  <ColorAreaRoot
+    v-model="color"
+    color-space="hsl"
+    x-channel="h"
+    y-channel="s"
+    as="div"
+    class="
+      relative block h-[200px] w-full cursor-crosshair
+      touch-none overflow-clip rounded-lg
+    "
+  >
+    <!-- [!code ++:3] -->
+    <ColorAreaArea as="div" class="absolute inset-0">
+      <!-- gradient and thumb go here -->
+    </ColorAreaArea>
+  </ColorAreaRoot>
+</template>
+```
+
+The root needs a fixed height and `position: relative` so the thumb can be positioned inside it. `touch-none` prevents scroll interference on mobile.
+
+::: warning
+Without `ColorAreaArea` the picker still renders, but it will not respond to
+clicks, drags or arrow keys — the root attaches no handlers of its own.
+:::
+
+## Step 4: Add the gradient
 
 `ColorAreaGradient` renders the 2D gradient on a canvas.
 
@@ -73,6 +118,7 @@ const { color } = useColor("hsl(210, 80%, 50%)");
 import {
   useColor,
   ColorAreaRoot,
+  ColorAreaArea,
   ColorAreaGradient, // [!code ++]
 } from "@urcolor/vue";
 
@@ -83,29 +129,32 @@ const { color } = useColor("hsl(210, 80%, 50%)");
   <ColorAreaRoot
     v-model="color"
     color-space="hsl"
-    channel-x="h"
-    channel-y="s"
+    x-channel="h"
+    y-channel="s"
+    as="div"
     class="
-      relative h-[200px] w-full cursor-crosshair
+      relative block h-[200px] w-full cursor-crosshair
       touch-none overflow-clip rounded-lg
     "
   >
-    <ColorAreaGradient class="absolute inset-0" /> <!-- [!code ++] -->
+    <ColorAreaArea as="div" class="absolute inset-0">
+      <ColorAreaGradient as="div" class="absolute inset-0" /> <!-- [!code ++] -->
+    </ColorAreaArea>
   </ColorAreaRoot>
 </template>
 ```
 
-The root needs a fixed height and `position: relative` so the thumb can be positioned inside it. `touch-none` prevents scroll interference on mobile.
+## Step 5: Add the thumb
 
-## Step 4: Add the thumb
-
-`ColorAreaThumb` is the visible, styled handle. It handles both axes internally, including accessible `role="slider"` elements for screen readers.
+`ColorAreaThumb` is the visible, styled handle. It is the picker's single focusable
+element and carries `role="slider"` for screen readers.
 
 ```vue
 <script setup lang="ts">
 import {
   useColor,
   ColorAreaRoot,
+  ColorAreaArea,
   ColorAreaGradient,
   ColorAreaThumb, // [!code ++]
 } from "@urcolor/vue";
@@ -117,22 +166,26 @@ const { color } = useColor("hsl(210, 80%, 50%)");
   <ColorAreaRoot
     v-model="color"
     color-space="hsl"
-    channel-x="h"
-    channel-y="s"
+    x-channel="h"
+    y-channel="s"
+    as="div"
     class="
-      relative h-[200px] w-full cursor-crosshair
+      relative block h-[200px] w-full cursor-crosshair
       touch-none overflow-clip rounded-lg
     "
   >
-    <ColorAreaGradient class="absolute inset-0" />
-    <!-- [!code ++:7] -->
-    <ColorAreaThumb
-      class="
-        absolute size-5 transform-(--reka-slider-area-thumb-transform)
-        rounded-full border-2 border-white
-        shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_2px_4px_rgba(0,0,0,0.3)]
-      "
-    />
+    <ColorAreaArea as="div" class="absolute inset-0">
+      <ColorAreaGradient as="div" class="absolute inset-0" />
+      <!-- [!code ++:8] -->
+      <ColorAreaThumb
+        as="div"
+        class="
+          absolute size-5 transform-(--reka-slider-area-thumb-transform)
+          rounded-full border-2 border-white
+          shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_2px_4px_rgba(0,0,0,0.3)]
+        "
+      />
+    </ColorAreaArea>
   </ColorAreaRoot>
 </template>
 ```
@@ -151,15 +204,15 @@ You can change the color space and channel mapping to get completely different p
 <script setup lang="ts">
 import { useColor } from "@urcolor/vue";
 
-const { color } = useColor("oklch(0.6, 0.15, 210)");
+const { color } = useColor("oklch(0.6 0.15 210)");
 </script>
 
 <template>
   <ColorAreaRoot
     v-model="color"
     color-space="oklch"
-    channel-x="hue"
-    channel-y="chroma"
+    x-channel="c"
+    y-channel="l"
   >
     <!-- ... -->
   </ColorAreaRoot>
@@ -173,8 +226,8 @@ Or map different HSL channels to create a saturation × lightness picker:
   <ColorAreaRoot
     v-model="color"
     color-space="hsl"
-    channel-x="s"
-    channel-y="l"
+    x-channel="s"
+    y-channel="l"
   >
     <!-- ... -->
   </ColorAreaRoot>
@@ -190,8 +243,8 @@ You can reverse the direction of the horizontal or vertical axes using the `inve
   <ColorAreaRoot
     v-model="color"
     color-space="hsl"
-    channel-x="h"
-    channel-y="l"
+    x-channel="h"
+    y-channel="l"
     :inverted-x="true"
     :inverted-y="true"
   >
@@ -202,7 +255,7 @@ You can reverse the direction of the horizontal or vertical axes using the `inve
 
 ## Listening to changes
 
-Use `@update:model-value` for real-time updates (while dragging) and `@value-commit` for the final value (on release):
+Use `@change` for real-time updates (it fires on every change, including mid-drag) and `@change-end` for the final value (on release):
 
 ```vue{3-8,17-18}
 <script setup lang="ts">
@@ -210,7 +263,7 @@ Use `@update:model-value` for real-time updates (while dragging) and `@value-com
 const onColorChange = (color: Color) => {
   console.log("dragging", color.toString());
 };
-const onColorCommit = (color: Color) => {
+const onColorChangeEnd = (color: Color) => {
   console.log("committed", color.toString());
 };
 </script>
@@ -219,12 +272,15 @@ const onColorCommit = (color: Color) => {
   <ColorAreaRoot
     v-model="color"
     color-space="hsl"
-    channel-x="h"
-    channel-y="s"
-    @update:model-value="onColorChange"
-    @value-commit="onColorCommit"
+    x-channel="h"
+    y-channel="s"
+    @change="onColorChange"
+    @change-end="onColorChangeEnd"
   >
     <!-- ... -->
   </ColorAreaRoot>
 </template>
 ```
+
+`@update:model-value` and `@update:color` fire alongside `@change`; use whichever
+suits your binding style.

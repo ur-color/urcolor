@@ -26,10 +26,7 @@ import ColorTriangleRGB from './demo/ColorTriangleRGB.vue'
   <ColorTriangleRoot>
     <ColorTriangleCheckerboard />
     <ColorTriangleGradient />
-    <ColorTriangleThumb>
-      <ColorTriangleThumbX />
-      <ColorTriangleThumbY />
-    </ColorTriangleThumb>
+    <ColorTriangleThumb />
   </ColorTriangleRoot>
 </template>
 ```
@@ -77,7 +74,7 @@ Three-channel RGB triangle using barycentric coordinates.
 
 ### Three-Channel Mode
 
-Pass `channelZ` to enable three-channel barycentric mode. Include `ColorTriangleThumbZ` inside the thumb.
+Pass `z-channel` to enable three-channel barycentric mode. The single `ColorTriangleThumb` drives all three channels.
 
 ```vue
 <script setup>
@@ -85,30 +82,31 @@ import {
   ColorTriangleRoot,
   ColorTriangleGradient,
   ColorTriangleThumb,
-  ColorTriangleThumbX,
-  ColorTriangleThumbY,
-  ColorTriangleThumbZ,
 } from "@urcolor/vue";
 </script>
 
 <template>
   <ColorTriangleRoot
-    :model-value="color"
+    v-model="color"
     color-space="srgb"
-    channel-x="red"
-    channel-y="green"
-    channel-z="blue"
-    @update:model-value="onColorUpdate"
+    x-channel="r"
+    y-channel="g"
+    z-channel="b"
   >
     <ColorTriangleGradient />
-    <ColorTriangleThumb>
-      <ColorTriangleThumbX />
-      <ColorTriangleThumbY />
-      <ColorTriangleThumbZ />
-    </ColorTriangleThumb>
+    <ColorTriangleThumb />
   </ColorTriangleRoot>
 </template>
 ```
+
+::: info The first keypress "jumps"
+In three-channel mode the three values are barycentric coordinates: only the ratio
+between them is meaningful, so the component renormalizes them onto the simplex
+(`u + v + w === 1`) on every write. A color sitting at, say, `50 / 50 / 180` is
+therefore rewritten to `33 / 33 / 120` the first time you step it. This is inherent
+to the geometry, not a bug — after the first write the values stay on the simplex
+and step smoothly.
+:::
 
 ## API Reference
 
@@ -121,20 +119,26 @@ The root container that manages triangle state and color channel binding.
 | `modelValue` | `Color \| string \| null` | — | Controlled color value (v-model). |
 | `defaultValue` | `Color \| string` | `'hsl(0, 100%, 50%)'` | Initial color when uncontrolled. |
 | `colorSpace` | `SpaceId` | `'hsv'` | Color space (e.g. `'hsv'`, `'hsl'`, `'srgb'`). |
-| `channelX` | `string` | Auto | Channel for the X axis. Auto-derived from color space. |
-| `channelY` | `string` | Auto | Channel for the Y axis. Auto-derived from color space. |
-| `channelZ` | `string` | — | Optional third channel for barycentric three-channel mode. |
+| `xChannel` | `string` | Auto | Channel for the X axis. Defaults to the color space's second channel. |
+| `yChannel` | `string` | Auto | Channel for the Y axis. Defaults to the color space's third channel. |
+| `zChannel` | `string` | — | Optional third channel. Setting it switches the triangle into barycentric three-channel mode. |
 | `rotation` | `number` | `0` | Triangle rotation in degrees. |
 | `orientation` | `'vertical' \| 'horizontal'` | `'vertical'` | Layout orientation. |
+| `inverted` | `boolean` | `false` | Swap the second and third vertices, mirroring the triangle. |
+| `thumbAlignment` | `'contain' \| 'overflow'` | `'overflow'` | Whether the thumb is kept inside the triangle's edges. |
 | `disabled` | `boolean` | `false` | Disables interaction. |
 | `dir` | `'ltr' \| 'rtl'` | — | Reading direction. |
 | `name` | `string` | — | Hidden input name for form submission. |
 | `required` | `boolean` | `false` | Marks as required for form submission. |
+| `as` | `string` | `'span'` | The element or component to render as. |
+| `asChild` | `boolean` | `false` | Merge props onto the single child instead of rendering an element. |
 
 | Event | Payload | Description |
 |-------|---------|-------------|
-| `update:modelValue` | `Color \| undefined` | Emitted when color changes. |
-| `valueCommit` | `Color` | Emitted when interaction ends. |
+| `update:modelValue` | `Color \| undefined` | Emitted whenever the color changes. |
+| `update:color` | `Color` | Mirrors `update:modelValue`; present for API parity. |
+| `change` | `Color` | Emitted on every value change, including mid-drag. |
+| `changeEnd` | `Color` | Emitted when a change-producing interaction ends. |
 
 ### ColorTriangleGradient
 
@@ -143,6 +147,8 @@ Renders a triangular gradient canvas. Automatically samples the gradient from th
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
 | `channelOverrides` | `Record<string, number> \| false` | `{ alpha: 1 }` | Lock specific channels to fixed values in the gradient. Set to `false` to reflect all channels from current color including alpha. |
+| `as` | `string` | `'span'` | The element or component to render as. |
+| `asChild` | `boolean` | `false` | Merge props onto the single child instead of rendering an element. |
 
 ### ColorTriangleCheckerboard
 
@@ -150,51 +156,41 @@ Renders a checkerboard pattern behind the gradient to visualize alpha transparen
 
 ### ColorTriangleThumb
 
-Wrapper for the thumb indicator. Position is set automatically via CSS custom properties.
+The thumb indicator, and the triangle's only focusable element. It renders `role="slider"` and is positioned from the barycentric coordinates of the current channel values.
 
-### ColorTriangleThumbX / ColorTriangleThumbY
-
-Individual axis thumb elements. Both are required inside `ColorTriangleThumb` for keyboard navigation.
-
-### ColorTriangleThumbZ
-
-Optional third axis thumb for three-channel barycentric mode. Only include when `channelZ` is set on the root.
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `as` | `string` | `'span'` | The element or component to render as. |
+| `asChild` | `boolean` | `false` | Merge props onto the single child instead of rendering an element. |
 
 ## Accessibility
 
-ColorTriangle provides a triangular 2D interface with independently focusable thumb elements for keyboard access. In three-channel mode, each channel has its own focusable thumb.
+ColorTriangle exposes a single focusable thumb that drives two channels — or three, in barycentric mode.
 
 ### ARIA Labels
 
 | Attribute | Description |
 |-----------|-------------|
-| `aria-label` | Labels the root element with the color triangle's purpose. |
-| `role="slider"` | Applied to each thumb element for screen reader recognition. |
-| `aria-valuemin` / `aria-valuemax` | Defines the range for each channel. |
-| `aria-valuenow` | Current value of the focused channel. |
+| `role="slider"` | Applied to `ColorTriangleThumb`, with `aria-roledescription="Color thumb"`. |
+| `aria-label` | Defaults to the channel labels in order, e.g. `"Saturation, Brightness"`. Pass your own `aria-label` on the thumb to override. |
+| `aria-valuemin` / `aria-valuemax` | The X channel's range. |
+| `aria-valuenow` | The current X channel value. |
+| `aria-valuetext` | Every channel formatted, e.g. `"Saturation 80%, Brightness 50%"`. |
 
 ### Keyboard Navigation
 
-#### Two-Channel Mode
+Arrow keys map to the X and Y axes, matching `ColorArea`.
 
 | Key | Action |
 |-----|--------|
-| Arrow Right | Increase Y channel |
-| Arrow Left | Decrease Y channel |
-| Arrow Up | Increase X channel |
-| Arrow Down | Decrease X channel |
-| Shift + Arrow | Move by 10 steps |
-| Home / Page Up | Jump to max |
-| End / Page Down | Jump to min |
+| Arrow Left / Arrow Right | Decrease / increase the X channel by one step |
+| Arrow Down / Arrow Up | Decrease / increase the Y channel by one step |
+| Page Down / Page Up | Decrease / increase the Z channel by one step — three-channel mode only |
+| Shift + Arrow, Shift + Page | Move by 10 steps |
+| Home | Jump to the X channel's minimum |
+| End | Jump to the X channel's maximum |
 
-#### Three-Channel Mode
-
-| Key | Action |
-|-----|--------|
-| Arrow Up / Arrow Right | Increase focused channel by 5% |
-| Arrow Down / Arrow Left | Decrease focused channel by 5% |
-| Shift + Arrow | Move by 20% |
-| Page Up | Increase by 20% |
-| Page Down | Decrease by 20% |
-| Home | Jump to focused channel vertex |
-| End | Jump to center (equal distribution) |
+In two-channel mode the reachable region is the half-simplex, so a step that would
+push the point past the hypotenuse gives way on the axis you did not drive. In
+three-channel mode every write is renormalized onto the simplex — see
+[Three-Channel Mode](#three-channel-mode) for what that means for the first keypress.

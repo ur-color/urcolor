@@ -52,8 +52,8 @@ const { color } = useColor("hsl(210, 80%, 50%)");
   <ColorTriangleRoot
     v-model="color"
     color-space="hsv"
-    channel-x="s"
-    channel-y="v"
+    x-channel="s"
+    y-channel="v"
   >
     <!-- children go here -->
   </ColorTriangleRoot>
@@ -61,8 +61,8 @@ const { color } = useColor("hsl(210, 80%, 50%)");
 ```
 
 - `color-space` — the color space to work in (`hsv`, `hsl`, `rgb`, etc.)
-- `channel-x` — the channel mapped to the horizontal axis
-- `channel-y` — the channel mapped to the vertical axis
+- `x-channel` — the channel mapped to the horizontal axis
+- `y-channel` — the channel mapped to the vertical axis
 
 ## Step 3: Add the gradient
 
@@ -83,8 +83,8 @@ const { color } = useColor("hsl(210, 80%, 50%)");
   <ColorTriangleRoot
     v-model="color"
     color-space="hsv"
-    channel-x="s"
-    channel-y="v"
+    x-channel="s"
+    y-channel="v"
     class="relative block size-64"
   >
     <ColorTriangleGradient class="absolute inset-0 block" /> <!-- [!code ++] -->
@@ -112,8 +112,8 @@ const { color } = useColor("hsl(210, 80%, 50%)");
   <ColorTriangleRoot
     v-model="color"
     color-space="hsv"
-    channel-x="s"
-    channel-y="v"
+    x-channel="s"
+    y-channel="v"
     class="relative block size-64"
   >
     <ColorTriangleGradient class="absolute inset-0 block" />
@@ -144,8 +144,8 @@ Use the `rotation` prop to rotate the triangle (in degrees):
     v-model="color"
     color-space="hsv"
     :rotation="180"
-    channel-x="s"
-    channel-y="v"
+    x-channel="s"
+    y-channel="v"
   >
     <!-- ... -->
   </ColorTriangleRoot>
@@ -154,25 +154,37 @@ Use the `rotation` prop to rotate the triangle (in degrees):
 
 ## Three-channel mode
 
-Add `channel-z` to enable barycentric three-channel mode. This maps all three channels to the triangle's vertices — useful for RGB color mixing:
+Add `z-channel` to enable barycentric three-channel mode. This maps all three channels to the triangle's vertices — useful for RGB color mixing:
 
 ```vue{4-6}
 <template>
   <ColorTriangleRoot
     v-model="color"
     color-space="srgb"
-    channel-x="r"
-    channel-y="g"
-    channel-z="b"
+    x-channel="r"
+    y-channel="g"
+    z-channel="b"
   >
     <!-- ... -->
   </ColorTriangleRoot>
 </template>
 ```
 
+::: info The first keypress "jumps"
+In three-channel mode the values are barycentric coordinates — only the ratio
+between them is meaningful — so every write is renormalized back onto the simplex.
+A color at `50 / 50 / 180` therefore becomes `33 / 33 / 120` the first time you
+step it. That is inherent to the geometry, not a bug; from then on the values move
+smoothly.
+:::
+
+Keyboard control follows the same axes as `ColorArea`: Arrow Left/Right step X,
+Arrow Up/Down step Y, and — in three-channel mode only — Page Up/Page Down step Z.
+Hold Shift for ten steps at a time.
+
 ## Listening to changes
 
-Use `@update:model-value` for real-time updates (while dragging) and `@value-commit` for the final value (on release):
+Use `@update:model-value` for real-time updates (while dragging) and `@change-end` for the final value (on release):
 
 ```vue{3-8,15-16}
 <script setup lang="ts">
@@ -180,7 +192,7 @@ Use `@update:model-value` for real-time updates (while dragging) and `@value-com
 const onColorChange = (color: Color) => {
   console.log("dragging", color.toString());
 };
-const onColorCommit = (color: Color) => {
+const onColorChangeEnd = (color: Color) => {
   console.log("committed", color.toString());
 };
 </script>
@@ -190,9 +202,9 @@ const onColorCommit = (color: Color) => {
     v-model="color"
     color-space="hsv"
     @update:model-value="onColorChange"
-    @value-commit="onColorCommit"
-    channel-x="s"
-    channel-y="v"
+    @change-end="onColorChangeEnd"
+    x-channel="s"
+    y-channel="v"
   >
     <!-- ... -->
   </ColorTriangleRoot>
