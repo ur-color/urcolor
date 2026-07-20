@@ -73,6 +73,7 @@ export const [injectColorTriangleRootContext, provideColorTriangleRootContext]
 import { Primitive } from "reka-ui";
 import { snapToStep, useFormControl } from "../../shared/utils";
 import { useColorChannelModel } from "../../shared/useColorChannelModel";
+import { usePointerDrag } from "../../shared/usePointerDrag";
 
 defineOptions({ inheritAttrs: false });
 
@@ -158,14 +159,10 @@ const currentXValue = computed(() => displayValues.value[0] ?? xMin.value);
 const currentYValue = computed(() => displayValues.value[1] ?? yMin.value);
 const currentZValue = computed(() => displayValues.value[2] ?? zMin.value);
 
-const isDragging = ref(false);
-
 const valueBeforeSlide = ref({ x: currentXValue.value, y: currentYValue.value, z: currentZValue.value });
-const rectRef = ref<DOMRect>();
 
 function getValuesFromPointer(event: PointerEvent): { x: number; y: number; z?: number } {
-  const rect = rectRef.value || currentElement.value.getBoundingClientRect();
-  rectRef.value = rect;
+  const rect = drag.rect.value ?? currentElement.value.getBoundingClientRect();
 
   const nx = (event.clientX - rect.left) / rect.width;
   const ny = (event.clientY - rect.top) / rect.height;
@@ -259,59 +256,36 @@ function setChannelValues(partial: { x?: number; y?: number; z?: number }, optio
   updateValues(newX, newY, options.commit);
 }
 
-function handlePointerDown(event: PointerEvent) {
-  if (props.disabled) return;
-  const target = event.target as HTMLElement;
-
-  // Ignore clicks outside the triangle
+/** Reject a pointerdown that lands outside the triangle. */
+function isInsideTriangle(event: PointerEvent): boolean {
   const rect = currentElement.value.getBoundingClientRect();
   const nx = (event.clientX - rect.left) / rect.width;
   const ny = (event.clientY - rect.top) / rect.height;
   const [hv0, hv1, hv2] = vertices.value;
-  if (!pointInTriangle(nx, ny, hv0, hv1, hv2)) return;
-
-  target.setPointerCapture(event.pointerId);
-  event.preventDefault();
-
-  thumbElement.value?.focus();
-
-  isDragging.value = true;
-  valueBeforeSlide.value = { x: currentXValue.value, y: currentYValue.value, z: currentZValue.value };
-  const vals = getValuesFromPointer(event);
-  updateValues(vals.x, vals.y, false, vals.z);
+  return pointInTriangle(nx, ny, hv0, hv1, hv2);
 }
 
-const lastPointerPosition = ref<{ x: number; y: number }>();
-let rafPending = false;
-
-function handlePointerMove(event: PointerEvent) {
-  const target = event.target as HTMLElement;
-  if (!target.hasPointerCapture(event.pointerId)) return;
-  if (rafPending) return;
-  rafPending = true;
-  const clientX = event.clientX;
-  const clientY = event.clientY;
-  const pointerId = event.pointerId;
-  requestAnimationFrame(() => {
-    rafPending = false;
-    lastPointerPosition.value = { x: clientX, y: clientY };
-    const vals = getValuesFromPointer({ clientX, clientY, pointerId } as PointerEvent);
+const drag = usePointerDrag({
+  disabled,
+  target: currentElement,
+  canStart: isInsideTriangle,
+  onMove(event, phase) {
+    if (phase === "start") {
+      thumbElement.value?.focus();
+      valueBeforeSlide.value = { x: currentXValue.value, y: currentYValue.value, z: currentZValue.value };
+    }
+    const vals = getValuesFromPointer(event);
     updateValues(vals.x, vals.y, false, vals.z);
-  });
-}
+  },
+  onEnd() {
+    const prev = valueBeforeSlide.value;
+    if (prev.x !== currentXValue.value || prev.y !== currentYValue.value || prev.z !== currentZValue.value) {
+      if (colorRef.value) emits("changeEnd", colorRef.value);
+    }
+  },
+});
 
-function handlePointerUp(event: PointerEvent) {
-  const target = event.target as HTMLElement;
-  if (!target.hasPointerCapture(event.pointerId)) return;
-  target.releasePointerCapture(event.pointerId);
-  isDragging.value = false;
-  rectRef.value = undefined;
-  lastPointerPosition.value = undefined;
-  const prev = valueBeforeSlide.value;
-  if (prev.x !== currentXValue.value || prev.y !== currentYValue.value || prev.z !== currentZValue.value) {
-    if (colorRef.value) emits("changeEnd", colorRef.value);
-  }
-}
+const isDragging = drag.isDragging;
 
 function baryToChannels(u: number, v: number, w: number): { x: number; y: number; z?: number } {
   if (isThreeChannel.value) {
@@ -408,9 +382,9 @@ provideColorTriangleRootContext({
     :style="clipPathStyle"
     :data-disabled="disabled ? '' : undefined"
     data-color-triangle-root
-    @pointerdown="handlePointerDown"
-    @pointermove="handlePointerMove"
-    @pointerup="handlePointerUp"
+    @pointerdown="drag.onPointerDown"
+    @pointermove="drag.onPointerMove"
+    @pointerup="drag.onPointerUp"
     @keydown="handleKeyDown"
   >
     <slot :model-value="colorRef" />

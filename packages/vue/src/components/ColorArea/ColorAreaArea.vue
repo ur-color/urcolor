@@ -11,6 +11,7 @@ export interface ColorAreaAreaProps extends /* @vue-ignore */ PrimitiveProps {
 import { onMounted, onUnmounted } from "vue";
 import { Primitive, useForwardExpose } from "reka-ui";
 import { injectColorAreaRootContext } from "./ColorAreaRoot.vue";
+import { usePointerDrag } from "../../shared/usePointerDrag";
 
 withDefaults(defineProps<ColorAreaAreaProps>(), {
   as: "div",
@@ -28,38 +29,30 @@ onUnmounted(() => {
     rootContext.areaElement.value = undefined;
 });
 
-function onPointerDown(event: PointerEvent) {
-  if (rootContext.disabled.value)
-    return;
-  const target = event.target as HTMLElement;
-  target.setPointerCapture(event.pointerId);
-  event.preventDefault();
-  const thumb = rootContext.thumbRef.value;
-  if (thumb && thumb.contains(target)) {
-    thumb.focus();
-  } else {
+// The root owns this gesture's rect and value maths (it measures the area
+// element itself, with thumb-size offsets), so only the lifecycle lives here.
+const drag = usePointerDrag({
+  disabled: rootContext.disabled,
+  target: areaElement,
+  onMove(event, phase) {
+    if (phase === "move") {
+      rootContext.handleSlideMove(event);
+      return;
+    }
+    // A press that lands on the thumb focuses it and grabs the pointer, but
+    // must not restart the slide from under the cursor.
+    const thumb = rootContext.thumbRef.value;
+    if (thumb && thumb.contains(event.target as HTMLElement)) {
+      thumb.focus();
+      return;
+    }
     rootContext.snapshotValues();
     rootContext.handleSlideStart(event);
-  }
-}
-
-function onPointerMove(event: PointerEvent) {
-  if (rootContext.disabled.value)
-    return;
-  const target = event.target as HTMLElement;
-  if (target.hasPointerCapture(event.pointerId))
-    rootContext.handleSlideMove(event);
-}
-
-function onPointerUp(event: PointerEvent) {
-  if (rootContext.disabled.value)
-    return;
-  const target = event.target as HTMLElement;
-  if (target.hasPointerCapture(event.pointerId)) {
-    target.releasePointerCapture(event.pointerId);
+  },
+  onEnd() {
     rootContext.handleSlideEnd();
-  }
-}
+  },
+});
 </script>
 
 <template>
@@ -73,9 +66,9 @@ function onPointerUp(event: PointerEvent) {
     :data-disabled="rootContext.disabled.value ? '' : undefined"
     :style="{ touchAction: 'none' }"
     @keydown="rootContext.handleKeyDown"
-    @pointerdown="onPointerDown"
-    @pointermove="onPointerMove"
-    @pointerup="onPointerUp"
+    @pointerdown="drag.onPointerDown"
+    @pointermove="drag.onPointerMove"
+    @pointerup="drag.onPointerUp"
   >
     <slot />
   </Primitive>

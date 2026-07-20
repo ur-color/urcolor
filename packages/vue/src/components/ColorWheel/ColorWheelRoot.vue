@@ -8,6 +8,7 @@ import { colorSpaces } from "@urcolor/core";
 import { cartesianToPolar, normalizeAngle, clampToCircle } from "@urcolor/core";
 import { cyclicWrap, snapToStep, useFormControl } from "../../shared/utils";
 import { useColorChannelModel } from "../../shared/useColorChannelModel";
+import { usePointerDrag } from "../../shared/usePointerDrag";
 
 type Direction = "ltr" | "rtl";
 
@@ -105,14 +106,11 @@ const currentAngleValue = computed(() => displayValues.value[0] ?? angleMin.valu
 const currentRadiusValue = computed(() => displayValues.value[1] ?? radiusMin.value);
 
 const thumbElement = ref<HTMLElement>();
-const isDragging = ref(false);
 
 const valueBeforeSlide = ref({ angle: currentAngleValue.value, radius: currentRadiusValue.value });
-const rectRef = ref<DOMRect>();
 
 function getValuesFromPointer(event: PointerEvent): { angle: number; radius: number } {
-  const rect = rectRef.value || currentElement.value.getBoundingClientRect();
-  rectRef.value = rect;
+  const rect = drag.rect.value ?? currentElement.value.getBoundingClientRect();
   const cx = rect.left + rect.width / 2;
   const cy = rect.top + rect.height / 2;
   const maxR = Math.min(rect.width, rect.height) / 2;
@@ -147,63 +145,41 @@ function updateValues(angle: number, radius: number, commit = false) {
   setDisplayValues([snappedAngle, snappedRadius], { commit });
 }
 
-function handlePointerDown(event: PointerEvent) {
-  if (props.disabled) return;
-  const target = event.target as HTMLElement;
-
-  // Ignore clicks outside the circle
+/** Reject a pointerdown that lands outside the wheel's circle. */
+function isInsideCircle(event: PointerEvent): boolean {
   const rect = currentElement.value.getBoundingClientRect();
   const cx = rect.left + rect.width / 2;
   const cy = rect.top + rect.height / 2;
   const maxR = Math.min(rect.width, rect.height) / 2;
   const dx = event.clientX - cx;
   const dy = event.clientY - cy;
-  if (dx * dx + dy * dy > maxR * maxR) return;
-
-  target.setPointerCapture(event.pointerId);
-  event.preventDefault();
-
-  // Focus the thumb if the pointer is on or inside it
-  if (thumbElement.value && (target === thumbElement.value || thumbElement.value.contains(target)))
-    thumbElement.value.focus();
-
-  isDragging.value = true;
-  valueBeforeSlide.value = { angle: currentAngleValue.value, radius: currentRadiusValue.value };
-  const vals = getValuesFromPointer(event);
-  updateValues(vals.angle, vals.radius);
+  return dx * dx + dy * dy <= maxR * maxR;
 }
 
-const lastPointerPosition = ref<{ x: number; y: number }>();
-let rafPending = false;
-
-function handlePointerMove(event: PointerEvent) {
-  const target = event.target as HTMLElement;
-  if (!target.hasPointerCapture(event.pointerId)) return;
-  if (rafPending) return;
-  rafPending = true;
-  const clientX = event.clientX;
-  const clientY = event.clientY;
-  const pointerId = event.pointerId;
-  requestAnimationFrame(() => {
-    rafPending = false;
-    lastPointerPosition.value = { x: clientX, y: clientY };
-    const vals = getValuesFromPointer({ clientX, clientY, pointerId } as PointerEvent);
+const drag = usePointerDrag({
+  disabled,
+  target: currentElement,
+  canStart: isInsideCircle,
+  onMove(event, phase) {
+    if (phase === "start") {
+      // Focus the thumb if the pointer is on or inside it
+      const target = event.target as HTMLElement;
+      if (thumbElement.value && (target === thumbElement.value || thumbElement.value.contains(target)))
+        thumbElement.value.focus();
+      valueBeforeSlide.value = { angle: currentAngleValue.value, radius: currentRadiusValue.value };
+    }
+    const vals = getValuesFromPointer(event);
     updateValues(vals.angle, vals.radius);
-  });
-}
+  },
+  onEnd() {
+    const prev = valueBeforeSlide.value;
+    if (prev.angle !== currentAngleValue.value || prev.radius !== currentRadiusValue.value) {
+      if (colorRef.value) emits("changeEnd", colorRef.value);
+    }
+  },
+});
 
-function handlePointerUp(event: PointerEvent) {
-  const target = event.target as HTMLElement;
-  if (!target.hasPointerCapture(event.pointerId)) return;
-  target.releasePointerCapture(event.pointerId);
-  isDragging.value = false;
-  rectRef.value = undefined;
-  lastPointerPosition.value = undefined;
-  const prev = valueBeforeSlide.value;
-  if (prev.angle !== currentAngleValue.value || prev.radius !== currentRadiusValue.value) {
-    if (colorRef.value) emits("changeEnd", colorRef.value);
-  }
-}
+const isDragging = drag.isDragging;
 
 function handleKeyDown(event: KeyboardEvent) {
   if (props.disabled) return;
@@ -273,9 +249,9 @@ provideColorWheelRootContext({
     :dir="direction"
     :aria-disabled="disabled || undefined"
     :data-disabled="disabled ? '' : undefined"
-    @pointerdown="handlePointerDown"
-    @pointermove="handlePointerMove"
-    @pointerup="handlePointerUp"
+    @pointerdown="drag.onPointerDown"
+    @pointermove="drag.onPointerMove"
+    @pointerup="drag.onPointerUp"
     @keydown="handleKeyDown"
   >
     <slot :model-value="colorRef" />
