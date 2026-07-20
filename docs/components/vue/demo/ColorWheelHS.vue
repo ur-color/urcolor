@@ -14,8 +14,8 @@ const { color, hex } = useColor("hsl(210, 80%, 50%)");
   <ColorWheelRoot
     v-model="color"
     color-space="hsl"
-    channel-angle="h"
-    channel-radius="s"
+    angle-channel="h"
+    radius-channel="s"
     class="relative block size-64 overflow-hidden rounded-full"
     style="container-type: inline-size"
   >

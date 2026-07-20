@@ -27,7 +27,6 @@ const { color } = useColor("hsl(210, 80%, 50%)");
         as="div"
         class="absolute inset-0 rounded-xl"
         :colors="['red', 'yellow', 'lime', 'cyan', 'blue', 'magenta', 'red']"
-        :vertical="true"
       />
       <ColorSliderThumb
         class="

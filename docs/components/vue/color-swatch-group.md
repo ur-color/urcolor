@@ -5,16 +5,16 @@ A group of color swatches with toggle-group selection behavior. Supports single 
 ## Preview
 
 <script setup>
-import ColorSwatchGroupBasic from './demo/ColorSwatchGroupBasic.vue'
-import ColorSwatchGroupMultiple from './demo/ColorSwatchGroupMultiple.vue'
+import ColorSwatchPickerBasic from './demo/ColorSwatchPickerBasic.vue'
+import ColorSwatchPickerMultiple from './demo/ColorSwatchPickerMultiple.vue'
 </script>
 
-<ColorSwatchGroupBasic />
+<ColorSwatchPickerBasic />
 
 <details>
 <summary>Source code</summary>
 
-<<< @/components/vue/demo/ColorSwatchGroupBasic.vue
+<<< @/components/vue/demo/ColorSwatchPickerBasic.vue
 
 </details>
 
@@ -36,12 +36,12 @@ import ColorSwatchGroupMultiple from './demo/ColorSwatchGroupMultiple.vue'
 
 Click a swatch to select it. Clicking the selected swatch deselects it.
 
-<ColorSwatchGroupBasic />
+<ColorSwatchPickerBasic />
 
 <details>
 <summary>Source code</summary>
 
-<<< @/components/vue/demo/ColorSwatchGroupBasic.vue
+<<< @/components/vue/demo/ColorSwatchPickerBasic.vue
 
 </details>
 
@@ -49,12 +49,12 @@ Click a swatch to select it. Clicking the selected swatch deselects it.
 
 Toggle any number of swatches independently.
 
-<ColorSwatchGroupMultiple />
+<ColorSwatchPickerMultiple />
 
 <details>
 <summary>Source code</summary>
 
-<<< @/components/vue/demo/ColorSwatchGroupMultiple.vue
+<<< @/components/vue/demo/ColorSwatchPickerMultiple.vue
 
 </details>
 

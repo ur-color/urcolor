@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import {
   ColorAreaRoot,
+  ColorAreaArea,
   ColorAreaGradient,
   ColorAreaThumb,
   useColor,
@@ -13,8 +14,8 @@ const { color } = useColor("hsl(210, 80%, 50%)");
   <ColorAreaRoot
     v-model="color"
     color-space="hsl"
-    channel-x="h"
-    channel-y="s"
+    x-channel="h"
+    y-channel="s"
     as="div"
     class="
       relative block h-[200px] w-full cursor-crosshair touch-none overflow-clip
@@ -22,17 +23,19 @@ const { color } = useColor("hsl(210, 80%, 50%)");
     "
     aria-label="HSL color area"
   >
-    <ColorAreaGradient
-      as="div"
-      class="absolute inset-0"
-    />
-    <ColorAreaThumb
-      as="div"
-      class="
-        absolute size-5 transform-(--reka-slider-area-thumb-transform)
-        rounded-full border-2 border-white
-        shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_2px_4px_rgba(0,0,0,0.3)]
-      "
-    />
+    <ColorAreaArea as="div" class="absolute inset-0">
+      <ColorAreaGradient
+        as="div"
+        class="absolute inset-0"
+      />
+      <ColorAreaThumb
+        as="div"
+        class="
+          absolute size-5 transform-(--reka-slider-area-thumb-transform)
+          rounded-full border-2 border-white
+          shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_2px_4px_rgba(0,0,0,0.3)]
+        "
+      />
+    </ColorAreaArea>
   </ColorAreaRoot>
 </template>

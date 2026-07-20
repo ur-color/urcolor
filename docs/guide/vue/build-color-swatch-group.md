@@ -3,12 +3,12 @@
 Let's build a keyboard-navigable color swatch group for selecting colors from a palette.
 
 <script setup>
-import ColorSwatchGroupGuide from './demo/ColorSwatchGroupGuide.vue'
+import ColorSwatchPickerGuide from './demo/ColorSwatchPickerGuide.vue'
 </script>
 
 Here's what we'll end up with:
 
-<ColorSwatchGroupGuide />
+<ColorSwatchPickerGuide />
 
 
 <details>
@@ -16,7 +16,7 @@ Here's what we'll end up with:
 
 ::: code-group
 
-<<< @/guide/vue/demo/ColorSwatchGroupGuide.vue
+<<< @/guide/vue/demo/ColorSwatchPickerGuide.vue
 
 :::
 

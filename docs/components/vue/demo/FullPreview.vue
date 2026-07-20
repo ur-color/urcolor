@@ -25,6 +25,7 @@ import { Icon } from "@iconify/vue";
 import FullPreviewOverrides from "./FullPreviewOverrides.vue";
 import {
   ColorAreaRoot,
+  ColorAreaArea,
   ColorAreaGradient,
   ColorAreaCheckerboard,
   ColorAreaThumb,
@@ -350,33 +351,34 @@ const spaceKeys = Object.keys(colorSpaces) as SpaceId[];
     <ColorAreaRoot
       v-model="color"
       :color-space="colorSpace"
-      :channel-x="xChannel"
-      :channel-y="yChannel"
+      :x-channel="xChannel"
+      :y-channel="yChannel"
       :inverted-x="invertedX"
       :inverted-y="invertedY"
       as="div"
-      alpha
       class="
         relative block h-[200px] w-full cursor-crosshair touch-none
         overflow-clip rounded-xl self-start
       "
       :aria-label="`Color picker, selected: ${colorHex}`"
     >
-      <ColorAreaCheckerboard />
-      <ColorAreaGradient
-        as="div"
-        class="absolute inset-0"
-        :channel-overrides="areaOverrides"
-      />
-      <ColorAreaThumb
-        as="div"
-        class="
-          absolute size-6 transform-(--reka-slider-area-thumb-transform)
-          rounded-full border-2 border-white
-          shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_2px_4px_rgba(0,0,0,0.3)]
-        "
-        :aria-label="`Color: ${colorHex}`"
-      />
+      <ColorAreaArea as="div" class="absolute inset-0">
+        <ColorAreaCheckerboard />
+        <ColorAreaGradient
+          as="div"
+          class="absolute inset-0"
+          :channel-overrides="areaOverrides"
+        />
+        <ColorAreaThumb
+          as="div"
+          class="
+            absolute size-6 transform-(--reka-slider-area-thumb-transform)
+            rounded-full border-2 border-white
+            shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_2px_4px_rgba(0,0,0,0.3)]
+          "
+          :aria-label="`Color: ${colorHex}`"
+        />
+      </ColorAreaArea>
     </ColorAreaRoot>
 
     <!-- N-channel slider rows: [label] [slider] -->

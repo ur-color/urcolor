@@ -14,8 +14,8 @@ const { color, hex } = useColor("oklch(0.6 0.15 210)");
   <ColorWheelRoot
     v-model="color"
     color-space="oklch"
-    channel-angle="h"
-    channel-radius="c"
+    angle-channel="h"
+    radius-channel="c"
     class="relative block size-64 overflow-hidden rounded-full"
     style="container-type: inline-size"
   >
