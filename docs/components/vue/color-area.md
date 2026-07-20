@@ -147,6 +147,9 @@ The root container that owns the color state, the channel maths and the keyboard
 | `as` | `string` | `'span'` | The element or component to render as. |
 | `asChild` | `boolean` | `false` | Merge props onto the single child instead of rendering an element. |
 
+ColorArea currently renders a single thumb, so `minXStepsBetweenThumbs` and
+`minYStepsBetweenThumbs` have no observable effect.
+
 | Event | Payload | Description |
 |-------|---------|-------------|
 | `update:modelValue` | `Color \| undefined` | Emitted whenever the color changes. |

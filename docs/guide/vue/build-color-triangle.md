@@ -173,9 +173,10 @@ Add `z-channel` to enable barycentric three-channel mode. This maps all three ch
 ::: info The first keypress "jumps"
 In three-channel mode the values are barycentric coordinates — only the ratio
 between them is meaningful — so every write is renormalized back onto the simplex.
-A color at `50 / 50 / 180` therefore becomes `33 / 33 / 120` the first time you
-step it. That is inherent to the geometry, not a bug; from then on the values move
-smoothly.
+An `srgb` color at `r/g/b 50 / 50 / 180` becomes `46 / 45 / 163` the first time you
+press Arrow Right (which steps red by one and, as a side effect of the
+renormalization, redistributes all three channels onto the simplex). That is
+inherent to the geometry, not a bug; from then on the values move smoothly.
 :::
 
 Keyboard control follows the same axes as `ColorArea`: Arrow Left/Right step X,

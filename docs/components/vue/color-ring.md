@@ -120,6 +120,7 @@ Renders a ring gradient canvas for the track. Automatically samples the gradient
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
 | `channelOverrides` | `Record<string, number> \| false` | `{ alpha: 1 }` | Lock specific channels to fixed values in the gradient. Set to `false` to reflect all channels from current color including alpha. |
+| `innerRadius` | `number` | Auto | **Deprecated.** Use `innerRadius` on `ColorRingRoot` instead. Overrides the ring's inner radius ratio for this gradient only, when set. |
 | `as` | `string` | `'span'` | The element or component to render as. |
 | `asChild` | `boolean` | `false` | Merge props onto the single child instead of rendering an element. |
 

@@ -102,10 +102,11 @@ import {
 ::: info The first keypress "jumps"
 In three-channel mode the three values are barycentric coordinates: only the ratio
 between them is meaningful, so the component renormalizes them onto the simplex
-(`u + v + w === 1`) on every write. A color sitting at, say, `50 / 50 / 180` is
-therefore rewritten to `33 / 33 / 120` the first time you step it. This is inherent
-to the geometry, not a bug — after the first write the values stay on the simplex
-and step smoothly.
+(`u + v + w === 1`) on every write. An `srgb` color sitting at `r/g/b 50 / 50 / 180`
+is rewritten to `46 / 45 / 163` the first time you press Arrow Right (which steps
+red by one and, as a side effect of the renormalization, pulls all three channels
+onto the simplex). This is inherent to the geometry, not a bug — after the first
+write the values stay on the simplex and step smoothly.
 :::
 
 ## API Reference

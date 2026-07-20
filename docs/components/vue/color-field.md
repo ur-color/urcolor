@@ -97,7 +97,7 @@ The root container that manages field state and color channel binding.
 | `readonly` | `boolean` | `false` | Makes the field read-only. |
 | `placeholder` | `string` | — | Placeholder text shown when the input has no value. |
 | `disableWheelChange` | `boolean` | `false` | Disables stepping the value with the mouse wheel. |
-| `locale` | `string` | — | Locale used for parsing/formatting. Reserved for future use. |
+| `locale` | `string` | — | Currently ignored — accepted but not read anywhere in the parse/format path. |
 | `name` | `string` | — | Hidden input name for form submission. |
 | `required` | `boolean` | `false` | Marks as required for form submission. |
 | `as` | `string` | `'div'` | The element or component to render as. |
