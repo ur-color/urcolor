@@ -60,7 +60,7 @@ Channel labels — the words behind abbreviations like `H`, `S`, `L`, `V`, `R`, 
 import { ChannelNames } from "@urcolor/i18n";
 
 const channels = new ChannelNames("ko");
-channels.of("hue"); // "색상"
+channels.of("hue"); // "색조"
 channels.resolvedOptions(); // { locale: "ko" }
 ```
 

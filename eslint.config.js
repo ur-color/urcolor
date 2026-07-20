@@ -121,6 +121,6 @@ export default [
     },
   },
   {
-    ignores: ["node_modules/", "**/dist/", ".nuxt/", ".output/", "bun.lock", "docs/.vitepress/dist/", "docs/.vitepress/cache/", "**/storybook-static/", "**/*.md", "**/*.d.ts", "**/.storybook/"],
+    ignores: ["node_modules/", "**/dist/", ".nuxt/", ".output/", "bun.lock", "docs/.vitepress/dist/", "docs/.vitepress/cache/", "**/storybook-static/", "**/*.md", "**/*.d.ts", "**/.storybook/", "packages/i18n/src/data/**", "packages/i18n/src/sources/uwdata/chunks.ts"],
   },
 ];

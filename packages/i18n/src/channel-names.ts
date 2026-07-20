@@ -25,7 +25,7 @@ const AVAILABLE = Object.keys(translations);
  * Channel-label translations, shaped after `Intl.DisplayNames`.
  *
  * ```ts
- * new ChannelNames("ko").of("hue"); // "색상"
+ * new ChannelNames("ko").of("hue"); // "색조"
  * ```
  */
 export class ChannelNames {
