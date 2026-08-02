@@ -27,6 +27,12 @@ export const ColorTriangleGradient = forwardRef<HTMLSpanElement, ColorTriangleGr
     const ctx = useColorTriangleContext();
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
+    // Cut once, on the wrapper — it clips the canvas with it. Clipping the
+    // canvas to the same polygon as well left a seam along the three edges:
+    // each clip antialiases independently and the two partial coverages
+    // multiply. `sampleTriangleGrid` clamps its barycentric coordinates, so the
+    // canvas is coloured out to its corners and nothing translucent shows
+    // through.
     const clipPath = (() => {
       const [v0, v1, v2] = ctx.vertices;
       return `polygon(${v0.x * 100}% ${v0.y * 100}%, ${v1.x * 100}% ${v1.y * 100}%, ${v2.x * 100}% ${v2.y * 100}%)`;
@@ -125,7 +131,6 @@ export const ColorTriangleGradient = forwardRef<HTMLSpanElement, ColorTriangleGr
             width: "100%",
             height: "100%",
             pointerEvents: "none",
-            clipPath,
           }}
         />
         {children}

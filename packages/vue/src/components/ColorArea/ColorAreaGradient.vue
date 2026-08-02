@@ -94,7 +94,7 @@ function paint(canvas: HTMLCanvasElement) {
       const sampleW = 64;
       const sampleH = 64;
       const pixels = sampleBilinearGrid(ctl, ctr, cbl, cbr, sampleW, sampleH, props.interpolationSpace, hasAlphaAxis.value);
-      renderToCanvas(canvas, pixels, sampleW, sampleH);
+      renderToCanvas({ canvas, pixels, sampleWidth: sampleW, sampleHeight: sampleH });
     } else {
       // WebGL path: use mirror uniforms
       drawGradient(canvas, tl, tr, bl, br, hasAlphaAxis.value, mirrorX.value, mirrorY.value);
@@ -135,7 +135,7 @@ function paint(canvas: HTMLCanvasElement) {
         slidingFromTop ? yMinVal : yMaxVal, slidingFromTop ? yMaxVal : yMinVal,
         sampleW, sampleH, hasAlphaAxis.value,
       );
-      renderToCanvas(canvas, pixels, sampleW, sampleH);
+      renderToCanvas({ canvas, pixels, sampleWidth: sampleW, sampleHeight: sampleH });
     } else {
       // One axis is alpha — render a 2D grid: real channel on one axis, alpha on the other
       const channelKey = effectiveXChannel ?? effectiveYChannel!;
@@ -183,7 +183,7 @@ function paint(canvas: HTMLCanvasElement) {
           data[idx + 3] = Math.round(Math.max(0, Math.min(1, alphaVal)) * 255);
         }
       }
-      renderToCanvas(canvas, data, sampleW, sampleH);
+      renderToCanvas({ canvas, pixels: data, sampleWidth: sampleW, sampleHeight: sampleH });
     }
   }
 }

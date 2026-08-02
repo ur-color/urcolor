@@ -46,48 +46,17 @@ export function applyChannelOverrides(
  * upscale it with smoothing, rather than sampling at full resolution — colour
  * conversion per pixel is far more expensive than the interpolation.
  *
- * `clip` runs between the clear and the draw, inside a `save()`/`restore()`
- * pair, for the ring's annulus.
+ * Every gradient fills its whole canvas; the non-rectangular ones (ring,
+ * wheel, triangle) are cut to shape by a mask or `clip-path` on their wrapper
+ * element. Cutting the canvas here as well is what used to leave a seam along
+ * the boundary — two independently antialiased edges whose partial coverage
+ * multiplies.
+ *
+ * The implementation lives in `@urcolor/primitives`, shared with the other
+ * framework packages; it is re-exported here because every gradient in this
+ * package already imports it from this module.
  */
-export function renderToCanvas(
-  canvas: HTMLCanvasElement,
-  pixels: Uint8ClampedArray,
-  sampleW: number,
-  sampleH: number,
-  clip?: (ctx: CanvasRenderingContext2D, width: number, height: number) => void,
-) {
-  const ctx = canvas.getContext("2d");
-  if (!ctx) return;
-
-  const dpr = typeof devicePixelRatio !== "undefined" ? devicePixelRatio : 1;
-  const w = Math.round(canvas.clientWidth * dpr);
-  const h = Math.round(canvas.clientHeight * dpr);
-  if (canvas.width !== w || canvas.height !== h) {
-    canvas.width = w;
-    canvas.height = h;
-  }
-
-  const pixelData = new Uint8ClampedArray(pixels.buffer) as unknown as Uint8ClampedArray<ArrayBuffer>;
-  const imageData = new ImageData(pixelData, sampleW, sampleH);
-
-  const offscreen = new OffscreenCanvas(sampleW, sampleH);
-  const offCtx = offscreen.getContext("2d");
-  if (!offCtx) return;
-  offCtx.putImageData(imageData, 0, 0);
-
-  ctx.clearRect(0, 0, w, h);
-
-  if (clip) {
-    ctx.save();
-    clip(ctx, w, h);
-  }
-
-  ctx.imageSmoothingEnabled = true;
-  ctx.imageSmoothingQuality = "high";
-  ctx.drawImage(offscreen, 0, 0, w, h);
-
-  if (clip) ctx.restore();
-}
+export { renderToCanvas } from "@urcolor/primitives";
 
 export interface UseGradientCanvasOptions {
   canvas: Ref<HTMLCanvasElement | null | undefined>;

@@ -1,6 +1,7 @@
 import { forwardRef, useCallback, useEffect, useMemo, useRef, type ComponentPropsWithoutRef } from "react";
 import { Color, type SpaceId } from "@urcolor/core";
 import { drawGradient, sampleBilinearGrid, sampleChannelGrid, getChannelConfig } from "@urcolor/core";
+import { renderToCanvas } from "@urcolor/primitives";
 import { useColorAreaContext } from "../root/ColorAreaRootContext";
 import { CHECKERBOARD_BACKGROUND } from "../../../utils";
 
@@ -11,25 +12,6 @@ export interface ColorAreaGradientProps extends ComponentPropsWithoutRef<"span">
   bottomRight?: string;
   interpolationSpace?: SpaceId;
   channelOverrides?: Record<string, number> | false;
-}
-
-function renderToCanvas(canvas: HTMLCanvasElement, pixels: Uint8ClampedArray, sampleW: number, sampleH: number) {
-  const ctx = canvas.getContext("2d");
-  if (!ctx) return;
-  const dpr = typeof devicePixelRatio !== "undefined" ? devicePixelRatio : 1;
-  const w = Math.round(canvas.clientWidth * dpr);
-  const h = Math.round(canvas.clientHeight * dpr);
-  if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; }
-  const pixelData = new Uint8ClampedArray(pixels.buffer) as unknown as Uint8ClampedArray<ArrayBuffer>;
-  const imageData = new ImageData(pixelData, sampleW, sampleH);
-  const offscreen = new OffscreenCanvas(sampleW, sampleH);
-  const offCtx = offscreen.getContext("2d");
-  if (!offCtx) return;
-  offCtx.putImageData(imageData, 0, 0);
-  ctx.clearRect(0, 0, w, h);
-  ctx.imageSmoothingEnabled = true;
-  ctx.imageSmoothingQuality = "high";
-  ctx.drawImage(offscreen, 0, 0, w, h);
 }
 
 export const ColorAreaGradient = forwardRef<HTMLSpanElement, ColorAreaGradientProps>(
@@ -86,7 +68,7 @@ export const ColorAreaGradient = forwardRef<HTMLSpanElement, ColorAreaGradientPr
           if (!slidingFromLeft) [a, b, c, d] = [b, a, d, c];
           if (!slidingFromTop) [a, b, c, d] = [c, d, a, b];
           const pixels = sampleBilinearGrid(a, b, c, d, 64, 64, interpolationSpace, hasAlphaAxis);
-          renderToCanvas(canvas, pixels, 64, 64);
+          renderToCanvas({ canvas, pixels, sampleWidth: 64, sampleHeight: 64 });
         } else {
           drawGradient(canvas, tl, tr, bl, br, hasAlphaAxis, mirrorX, mirrorY);
         }
@@ -115,7 +97,7 @@ export const ColorAreaGradient = forwardRef<HTMLSpanElement, ColorAreaGradientPr
             slidingFromTop ? yMin : yMax, slidingFromTop ? yMax : yMin,
             64, 64, hasAlphaAxis,
           );
-          renderToCanvas(canvas, pixels, 64, 64);
+          renderToCanvas({ canvas, pixels, sampleWidth: 64, sampleHeight: 64 });
         } else {
           const channelKey = effectiveXChannel ?? effectiveYChannel!;
           const cfg = getChannelConfig(cs, channelKey);
@@ -145,7 +127,7 @@ export const ColorAreaGradient = forwardRef<HTMLSpanElement, ColorAreaGradientPr
               data[idx + 3] = Math.round(Math.max(0, Math.min(1, alphaVal)) * 255);
             }
           }
-          renderToCanvas(canvas, data, 64, 64);
+          renderToCanvas({ canvas, pixels: data, sampleWidth: 64, sampleHeight: 64 });
         }
       }
     }, [rootCtx.isSlidingFromLeft, rootCtx.isSlidingFromTop, rootCtx.colorSpace, rootCtx.xChannelKey, rootCtx.yChannelKey, rootCtx.colorRef, rootCtx.isDragging, topLeft, topRight, bottomLeft, bottomRight, interpolationSpace, channelOverrides, mirrorX, mirrorY, hasAlphaAxis, xIsAlpha, yIsAlpha]);

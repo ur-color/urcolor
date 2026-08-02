@@ -1,6 +1,7 @@
 import { forwardRef, useCallback, useEffect, useRef, useMemo, type ComponentPropsWithoutRef } from "react";
 import { Color, type SpaceId } from "@urcolor/core";
 import { sampleConicRing, getChannelConfig } from "@urcolor/core";
+import { renderToCanvas } from "@urcolor/primitives";
 import { useColorRingContext } from "../root/ColorRingRootContext";
 import { CHECKERBOARD_BACKGROUND } from "../../../utils";
 
@@ -8,45 +9,22 @@ export interface ColorRingGradientProps extends ComponentPropsWithoutRef<"span">
   channelOverrides?: Record<string, number> | false;
 }
 
-function renderToCanvas(canvas: HTMLCanvasElement, pixels: Uint8ClampedArray, sampleW: number, sampleH: number, innerR: number) {
-  const ctx = canvas.getContext("2d");
-  if (!ctx) return;
-  const dpr = typeof devicePixelRatio !== "undefined" ? devicePixelRatio : 1;
-  const w = Math.round(canvas.clientWidth * dpr);
-  const h = Math.round(canvas.clientHeight * dpr);
-  if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; }
-  const pixelData = new Uint8ClampedArray(pixels.buffer) as unknown as Uint8ClampedArray<ArrayBuffer>;
-  const imageData = new ImageData(pixelData, sampleW, sampleH);
-  const offscreen = new OffscreenCanvas(sampleW, sampleH);
-  const offCtx = offscreen.getContext("2d");
-  if (!offCtx) return;
-  offCtx.putImageData(imageData, 0, 0);
-  ctx.clearRect(0, 0, w, h);
-  const cx = w / 2;
-  const cy = h / 2;
-  const outerR = Math.min(cx, cy);
-  const innerRPx = outerR * innerR;
-  ctx.save();
-  ctx.beginPath();
-  ctx.arc(cx, cy, outerR, 0, Math.PI * 2);
-  ctx.arc(cx, cy, innerRPx, 0, Math.PI * 2, true);
-  ctx.clip("evenodd");
-  ctx.imageSmoothingEnabled = true;
-  ctx.imageSmoothingQuality = "high";
-  ctx.drawImage(offscreen, 0, 0, w, h);
-  ctx.restore();
-}
-
 export const ColorRingGradient = forwardRef<HTMLSpanElement, ColorRingGradientProps>(
   function ColorRingGradient({ channelOverrides = { alpha: 1 }, style, children, ...props }, ref) {
     const rootCtx = useColorRingContext();
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
-    // Mask the checkerboard into the ring's annulus: transparent inside the
-    // inner radius (the hole), opaque across the band, transparent outside the
-    // outer circle (the corners). Matches the canvas clip in renderToCanvas.
+    // The annulus is cut here and nowhere else: the canvas paints the full
+    // square and this mask — which applies to the element and every descendant,
+    // canvas included — hides the hole and the corners. Clipping the canvas as
+    // well used to leave a seam, because the two edges are rasterised
+    // independently and their partial coverage multiplies along the boundary.
+    //
+    // The ±0.5px on the stops is what antialiases the edges: a gradient hard
+    // stop (two stops at one position) rasterises without any, so both circles
+    // came out visibly stepped.
     const maskP = rootCtx.innerRadius * 100;
-    const checkerboardMask = `radial-gradient(circle closest-side at center, transparent ${maskP}%, #000 ${maskP}%, #000 100%, transparent 100%)`;
+    const checkerboardMask = `radial-gradient(circle closest-side at center, transparent calc(${maskP}% - 0.5px), #000 calc(${maskP}% + 0.5px), #000 calc(100% - 0.5px), transparent 100%)`;
 
     function applyOverrides(baseColor: Color, cs: SpaceId): Color {
       if (!channelOverrides) return baseColor;
@@ -72,8 +50,10 @@ export const ColorRingGradient = forwardRef<HTMLSpanElement, ColorRingGradientPr
       const cMax = cfg.nativeMax ?? cfg.max;
       const sampleSize = 128;
       const pixels = sampleConicRing(overriddenBase, rootCtx.colorSpace, rootCtx.channelKey, cMin, cMax, sampleSize, sampleSize, rootCtx.startAngle);
-      renderToCanvas(canvas, pixels, sampleSize, sampleSize, rootCtx.innerRadius);
-    }, [rootCtx.colorRef, rootCtx.colorSpace, rootCtx.channelKey, rootCtx.startAngle, rootCtx.innerRadius, rootCtx.isDragging, channelOverrides]);
+      renderToCanvas({ canvas, pixels, sampleWidth: sampleSize, sampleHeight: sampleSize });
+      // `innerRadius` is not a dependency: it only moves the mask, and the
+      // pixels the canvas paints are the same at every radius.
+    }, [rootCtx.colorRef, rootCtx.colorSpace, rootCtx.channelKey, rootCtx.startAngle, rootCtx.isDragging, channelOverrides]);
 
     useEffect(() => {
       const canvas = canvasRef.current;

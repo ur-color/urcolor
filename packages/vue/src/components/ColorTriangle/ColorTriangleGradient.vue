@@ -26,6 +26,11 @@ useForwardExpose();
 
 const canvasRef = ref<HTMLCanvasElement | null>(null);
 
+// Cut once, on the wrapper — it clips the canvas with it. Clipping the canvas
+// to the same polygon as well left a seam along the three edges: each clip
+// antialiases independently and the two partial coverages multiply.
+// `sampleTriangleGrid` clamps its barycentric coordinates, so the canvas is
+// coloured out to its corners and nothing translucent can show through.
 const clipPath = computed(() => {
   const [v0, v1, v2] = rootContext.vertices.value;
   return `polygon(${v0.x * 100}% ${v0.y * 100}%, ${v1.x * 100}% ${v1.y * 100}%, ${v2.x * 100}% ${v2.y * 100}%)`;
@@ -82,7 +87,7 @@ function paint(canvas: HTMLCanvasElement) {
     false,
     zChannel, zMinVal, zMaxVal,
   );
-  renderToCanvas(canvas, pixels, sampleSize, sampleSize);
+  renderToCanvas({ canvas, pixels, sampleWidth: sampleSize, sampleHeight: sampleSize });
 }
 
 useGradientCanvas({
@@ -112,7 +117,6 @@ useGradientCanvas({
         width: '100%',
         height: '100%',
         pointerEvents: 'none',
-        clipPath,
       }"
     />
     <slot />

@@ -49,7 +49,7 @@ function paint(canvas: HTMLCanvasElement) {
     sampleSize, sampleSize,
     rootContext.startAngle.value,
   );
-  renderToCanvas(canvas, pixels, sampleSize, sampleSize);
+  renderToCanvas({ canvas, pixels, sampleWidth: sampleSize, sampleHeight: sampleSize });
 }
 
 useGradientCanvas({

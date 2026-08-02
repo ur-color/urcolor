@@ -1,37 +1,12 @@
 import { forwardRef, useCallback, useEffect, useRef, type ComponentPropsWithoutRef } from "react";
 import { Color } from "@urcolor/core";
 import { samplePolarGrid, getChannelConfig } from "@urcolor/core";
+import { renderToCanvas } from "@urcolor/primitives";
 import { useColorWheelContext } from "../root/ColorWheelRootContext";
 import { CHECKERBOARD_BACKGROUND } from "../../../utils";
 
 export interface ColorWheelGradientProps extends ComponentPropsWithoutRef<"span"> {
   channelOverrides?: Record<string, number> | false;
-}
-
-function renderToCanvas(canvas: HTMLCanvasElement, pixels: Uint8ClampedArray, size: number) {
-  const ctx = canvas.getContext("2d");
-  if (!ctx) return;
-  const dpr = typeof devicePixelRatio !== "undefined" ? devicePixelRatio : 1;
-  const w = Math.round(canvas.clientWidth * dpr);
-  const h = Math.round(canvas.clientHeight * dpr);
-  if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; }
-  const pixelData = new Uint8ClampedArray(pixels.buffer) as unknown as Uint8ClampedArray<ArrayBuffer>;
-  const imageData = new ImageData(pixelData, size, size);
-  const offscreen = new OffscreenCanvas(size, size);
-  const offCtx = offscreen.getContext("2d");
-  if (!offCtx) return;
-  offCtx.putImageData(imageData, 0, 0);
-  ctx.clearRect(0, 0, w, h);
-  const cx = w / 2, cy = h / 2;
-  const r = Math.min(cx, cy);
-  ctx.save();
-  ctx.beginPath();
-  ctx.arc(cx, cy, r, 0, Math.PI * 2);
-  ctx.clip();
-  ctx.imageSmoothingEnabled = true;
-  ctx.imageSmoothingQuality = "high";
-  ctx.drawImage(offscreen, 0, 0, w, h);
-  ctx.restore();
 }
 
 export const ColorWheelGradient = forwardRef<HTMLSpanElement, ColorWheelGradientProps>(
@@ -68,7 +43,7 @@ export const ColorWheelGradient = forwardRef<HTMLSpanElement, ColorWheelGradient
         aMin, aMax, rMin, rMax,
         size, size, ctx.startAngle,
       );
-      renderToCanvas(canvas, pixels, size);
+      renderToCanvas({ canvas, pixels, sampleWidth: size, sampleHeight: size });
     }, [ctx.colorRef, ctx.colorSpace, ctx.angleChannelKey, ctx.radiusChannelKey, ctx.startAngle, ctx.isDragging, channelOverrides]);
 
     useEffect(() => {
@@ -89,7 +64,11 @@ export const ColorWheelGradient = forwardRef<HTMLSpanElement, ColorWheelGradient
 
     return (
       <span ref={ref} data-disabled={ctx.disabled ? "" : undefined} style={{ background: CHECKERBOARD_BACKGROUND, borderRadius: "50%", ...style }} {...props}>
-        <canvas ref={canvasRef} style={{ position: "absolute", inset: "0", width: "100%", height: "100%", pointerEvents: "none" }} />
+        {/* The disc shape is cut here rather than inside `renderToCanvas`: the
+            sampled grid fills its whole square, and clipping in-canvas as well
+            as on the element leaves a seam along the boundary. Matches the Vue
+            implementation. */}
+        <canvas ref={canvasRef} style={{ position: "absolute", inset: "0", width: "100%", height: "100%", pointerEvents: "none", clipPath: "circle(50%)" }} />
         {children}
       </span>
     );

@@ -28,28 +28,19 @@ useForwardExpose();
 
 const canvasRef = ref<HTMLCanvasElement | null>(null);
 
-// Mask the checkerboard into the ring's annulus: transparent inside the inner
-// radius (the hole), opaque across the band, transparent outside the outer
-// circle (the corners). Matches the canvas clip in `clipToRing`.
+// The annulus is cut here and nowhere else: the canvas paints the full square
+// and this mask — which applies to the element and every descendant, canvas
+// included — hides the hole and the corners. Clipping the canvas as well used
+// to leave a seam, because the two edges are rasterised independently and their
+// partial coverage multiplies along the boundary.
+//
+// The ±0.5px on the stops is what antialiases the edges: a gradient hard stop
+// (two stops at one position) rasterises without any, so both circles came out
+// visibly stepped.
 const checkerboardMask = computed(() => {
   const p = (props.innerRadius ?? rootContext.innerRadius.value) * 100;
-  return `radial-gradient(circle closest-side at center, transparent ${p}%, #000 ${p}%, #000 100%, transparent 100%)`;
+  return `radial-gradient(circle closest-side at center, transparent calc(${p}% - 0.5px), #000 calc(${p}% + 0.5px), #000 calc(100% - 0.5px), transparent 100%)`;
 });
-
-/** Clip to the ring shape using a two-arc path with even-odd winding. */
-function clipToRing(ctx: CanvasRenderingContext2D, w: number, h: number) {
-  const cx = w / 2;
-  const cy = h / 2;
-  const outerR = Math.min(cx, cy);
-  const innerR = outerR * (props.innerRadius ?? rootContext.innerRadius.value);
-
-  ctx.beginPath();
-  // Outer circle clockwise
-  ctx.arc(cx, cy, outerR, 0, Math.PI * 2);
-  // Inner circle counter-clockwise (creates the hole)
-  ctx.arc(cx, cy, innerR, 0, Math.PI * 2, true);
-  ctx.clip("evenodd");
-}
 
 function paint(canvas: HTMLCanvasElement) {
   const colorSpace = rootContext.colorSpace.value;
@@ -70,13 +61,15 @@ function paint(canvas: HTMLCanvasElement) {
     sampleSize, sampleSize,
     rootContext.startAngle.value,
   );
-  renderToCanvas(canvas, pixels, sampleSize, sampleSize, clipToRing);
+  renderToCanvas({ canvas, pixels, sampleWidth: sampleSize, sampleHeight: sampleSize });
 }
 
 useGradientCanvas({
   canvas: canvasRef,
+  // `innerRadius` is not a source: it only moves the mask, and the pixels the
+  // canvas paints are the same at every radius.
   sources: () => [
-    props.channelOverrides, (props.innerRadius ?? rootContext.innerRadius.value),
+    props.channelOverrides,
     rootContext.colorSpace.value, rootContext.channelKey.value,
     rootContext.colorRef.value, rootContext.startAngle.value,
   ],
