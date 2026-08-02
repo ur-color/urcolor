@@ -55,8 +55,10 @@ Plain functions and small state objects. No signals, no runes, no reactivity pri
 
 Svelte 5 runes. Directory layout mirrors React's kebab-case tree so the two remain diffable.
 
+Source lives under `src/lib/`, which is `svelte-package`'s expected input root.
+
 ```
-packages/svelte/src/
+packages/svelte/src/lib/
   components/color-slider/
     root/ColorSliderRoot.svelte
     root/context.svelte.ts          # setContext/getContext, $state-backed
@@ -96,13 +98,34 @@ The `asChild` equivalent:
 </ColorSlider.Thumb>
 ```
 
+### Behavior travels as an attachment, not as event props
+
+The `props` object handed to `child` carries its DOM behavior as an **attachment** under a `Symbol` key (`createAttachmentKey`), not as a bag of `onpointerdown` / `onkeydown` / `bind:this` props.
+
+Attachments landed in Svelte 5.29 as the runes-era replacement for actions. They matter here for three reasons: they are reactive (they re-run when the state they read changes, which actions never did), they survive `{...props}` spreading across component boundaries, and they work when the consumer spreads onto *another component* rather than an element — actions could only target elements.
+
+Concretely, the pointer capture, keyboard handling, and element measurement that `ColorSliderRoot` needs all live in one attachment built over `primitives/drag.ts` and `primitives/slider.ts`. A consumer writing `<button {...props}>` gets all of it, and so does a consumer writing `<MyButton {...props}>`.
+
+Actions are not used. `fromAction` exists for consumers wrapping third-party action-only libraries; this package needs none.
+
 ### Hooks
 
 `.svelte.ts` rune modules returning objects with getters and setters over `$state`.
 
 ### Build
 
-`@sveltejs/package`. Ships `.svelte` source plus generated `.d.ts` under the `svelte` export condition, so the consumer's own Svelte compiler handles compilation. Peer dependency: `svelte: ^5`.
+`@sveltejs/package`. Ships preprocessed `.svelte` files plus generated `.d.ts` under the `svelte` export condition, so the consumer's own compiler does the final compile:
+
+```json
+"exports": { ".": { "types": "./dist/index.d.ts", "svelte": "./dist/index.js" } }
+```
+
+Two constraints this imposes on the source, both easy to get wrong:
+
+- Relative imports must be fully specified per Node ESM — `./root/ColorSliderRoot.svelte`, and `.ts` files imported with a `.js` extension
+- Consumers need `moduleResolution: "bundler"` or `"node16"` for non-root export types to resolve; only a root export is shipped, which sidesteps this
+
+Peer dependency: `svelte: ^5.29` — the floor where attachments exist.
 
 ## `@urcolor/angular`
 
@@ -134,9 +157,27 @@ The Angular API does **not** mirror React prop-for-prop. It uses Angular and DOM
 | `dir` | ambient `Directionality`, not a prop |
 | `orientation` | `input()`, host-bound `aria-orientation` |
 | `className` / `style` | consumer's own element — nothing to pass |
-| — | `ControlValueAccessor` on Root and Field, so `formControlName` and `ngModel` work |
+| — | `FormValueControl<Color>` on Root and Field (see below) |
 
 The `*DataAttributes.ts` enums become `host: { '[attr.data-disabled]': ... }` bindings, with names sourced from `@urcolor/primitives/data-attributes`.
+
+### Forms integration: `FormValueControl`, not `ControlValueAccessor`
+
+`ControlValueAccessor` is the legacy path. Angular 21 introduced Signal Forms (`@angular/forms/signals`); they are stable in v22.
+
+`FormValueControl<TValue>` requires exactly one member: a `value` property that is a `ModelSignal<TValue>` created via `model()`. **The Root directives already have that** — `model<Color>()` is the same signal backing `[(value)]`. So forms support is a declaration, not an implementation:
+
+```ts
+@Directive({ selector: '[urcColorSliderRoot]' })
+export class ColorSliderRoot implements FormValueControl<Color> {
+  readonly value = model.required<Color>();
+  // …
+}
+```
+
+Consumers then write `<div urcColorSliderRoot [formField]="form.brandColor">`. Angular syncs value, disabled, required, and touched. Legacy reactive-forms consumers are covered by Angular's own CVA interop directive — nothing for this package to implement.
+
+This is the strongest argument for the native-props decision: mirroring React's `value`/`defaultValue`/`onValueChange` triple would have made forms integration a separate adapter. `model()` gets both for free.
 
 ### `@angular/aria`
 
@@ -144,8 +185,19 @@ The `*DataAttributes.ts` enums become `host: { '[attr.data-disabled]': ... }` bi
 
 Used only where a pattern exists:
 
-- `ColorSwatchGroup` → `Listbox` (roving focus, typeahead, multi-select)
+- `ColorSwatchGroup.Root` composes `ngListbox` — `[(value)]`, `orientation`, `[multi]`, roving focus, typeahead
+- `ColorSwatch`, when inside a group, composes `ngOption`. Standalone it falls back to `primitives/toggle.ts`
 - Everything else → `@urcolor/primitives`
+
+`ngListbox`/`ngOption` are applied through `hostDirectives`, so consumers never write both selectors:
+
+```html
+<ul urcColorSwatchGroupRoot [(value)]="selected" [multi]="false">
+  @for (c of palette(); track c) {
+    <li urcColorSwatch [value]="c"></li>
+  }
+</ul>
+```
 
 ### Usage
 
@@ -160,7 +212,11 @@ Used only where a pattern exists:
 
 ### Build
 
-`ng-packagr`, producing Angular Package Format. This is the one place the monorepo gains a non-Bun/Vite toolchain — decorators require `ngtsc`. Peer dependencies: `@angular/core`, `@angular/common`, `@angular/forms`, `@angular/aria`, all `^21 || ^22`.
+`ng-packagr`, producing Angular Package Format. This is the one place the monorepo gains a non-Bun/Vite toolchain — decorators require `ngtsc`.
+
+Peer dependencies: `@angular/core`, `@angular/common`, `@angular/forms`, `@angular/aria` — all **`^22`**, not `^21 || ^22`. Signal Forms are experimental in v21 and stable in v22, and `@angular/aria` is documented against v22. A brand-new package has no legacy consumers to support, so supporting v21 would mean carrying a conditional forms path for no one. Revisit if a consumer asks.
+
+File and class naming follow the current Angular style guide: hyphenated filenames with no `.directive.ts` suffix (`color-slider-root.ts` → `class ColorSliderRoot`), camelCase attribute selectors with a library prefix (`[urcColorSliderRoot]`).
 
 ## Parity matrix
 
@@ -240,8 +296,10 @@ The existing vue and react suites (`bun test`) pass unchanged. No new tests are 
 
 1. **`primitives/slider.ts` is genuinely new code.** base-ui's Slider handles RTL, inverted, orientation, page-step, and commit semantics. Reimplementing it is the single largest source of behavior bugs in this work, and Angular/Svelte have no test suite (out of scope) to catch them.
 2. **`ng-packagr` in a Bun monorepo.** First non-Bun toolchain in this repo. Whether `bun install` and `workspace:*` links resolve cleanly for it is unknown until attempted.
-3. **`@angular/aria` is new**, marked "New" in the v22 docs. The Listbox API may shift.
-4. **`renderToCanvas` uses `OffscreenCanvas`** with no SSR guard today. Angular and SvelteKit both SSR by default, so the new packages need `typeof window` guards that React and Vue never needed.
+3. **`@angular/aria` is new**, marked "New" in the v22 docs; the Listbox API may still shift. Specific unknown for this design: `ngOption` takes a `[value]`, and ours are `Color` instances rather than primitives. Whether Listbox selection compares by reference or offers a compare function needs checking before `ColorSwatchGroup` is built — reference equality against an immutable `Color` would silently break selection.
+4. **`renderToCanvas` uses `OffscreenCanvas`** with no SSR guard today. Angular and SvelteKit both SSR by default. The two frameworks land differently here:
+   - **Svelte is safe by construction** — attachments only run when an element enters the DOM, so canvas code never executes during SSR.
+   - **Angular is not.** Directive constructors and `effect()` do run on the server. Gradient directives must defer canvas work to `afterNextRender()`, which is the native Angular answer and is cleaner than a `typeof window` guard.
 5. **The Thumb merge moves keyboard handling into the root** for React's wheel and triangle, replacing `activeDirection`. Vue already has the working shape to copy: `ArrowLeft`/`ArrowRight` → x (angle), `ArrowUp`/`ArrowDown` → y (radius), `shiftKey` → 10× step. The triangle needs no third-axis key even in three-channel mode — `z` falls out of barycentric normalization from x and y. Low risk, but it is React behavior being replaced rather than added.
 
 ## Out of scope
@@ -253,3 +311,4 @@ The existing vue and react suites (`bun test`) pass unchanged. No new tests are 
 - `@angular-eslint`
 - Porting the deprecated `Checkerboard` parts
 - Renaming Vue's `ColorSwatchPicker` to `ColorSwatchGroup`, or any other Vue/React API convergence beyond the Thumb merge
+- **Dropping `forwardRef` from `@urcolor/react`.** React 19 accepts `ref` as a plain prop and `forwardRef` is deprecated with an official codemod (`react-codemod react-19/remove-forward-ref`). The package's `^18 || ^19` peer range means it stays for now. Noted so it is a decision rather than an oversight.
