@@ -1,0 +1,1502 @@
+{
+  "source": "wikidata",
+  "retrievedAt": "2026-08-02T09:37:45.528Z",
+  "itemCount": 964,
+  "languages": {
+    "ga": {
+      "model": "palette",
+      "terms": 37,
+      "coverage": 0.038381742738589214
+    },
+    "gl": {
+      "model": "palette",
+      "terms": 54,
+      "coverage": 0.056016597510373446
+    },
+    "gn": {
+      "model": "palette",
+      "terms": 12,
+      "coverage": 0.012448132780082987
+    },
+    "got": {
+      "model": "palette",
+      "terms": 3,
+      "coverage": 0.0031120331950207467
+    },
+    "guc": {
+      "model": "palette",
+      "terms": 8,
+      "coverage": 0.008298755186721992
+    },
+    "gv": {
+      "model": "palette",
+      "terms": 23,
+      "coverage": 0.023858921161825725
+    },
+    "hak": {
+      "model": "palette",
+      "terms": 12,
+      "coverage": 0.012448132780082987
+    },
+    "haw": {
+      "model": "palette",
+      "terms": 6,
+      "coverage": 0.006224066390041493
+    },
+    "hi": {
+      "model": "palette",
+      "terms": 44,
+      "coverage": 0.04564315352697095
+    },
+    "hr": {
+      "model": "palette",
+      "terms": 24,
+      "coverage": 0.024896265560165973
+    },
+    "hsb": {
+      "model": "palette",
+      "terms": 7,
+      "coverage": 0.007261410788381743
+    },
+    "ht": {
+      "model": "palette",
+      "terms": 14,
+      "coverage": 0.014522821576763486
+    },
+    "hu": {
+      "model": "palette",
+      "terms": 79,
+      "coverage": 0.08195020746887967
+    },
+    "hy": {
+      "model": "palette",
+      "terms": 36,
+      "coverage": 0.03734439834024896
+    },
+    "hyw": {
+      "model": "palette",
+      "terms": 13,
+      "coverage": 0.013485477178423237
+    },
+    "ia": {
+      "model": "palette",
+      "terms": 3,
+      "coverage": 0.0031120331950207467
+    },
+    "iba": {
+      "model": "palette",
+      "terms": 4,
+      "coverage": 0.004149377593360996
+    },
+    "ik": {
+      "model": "palette",
+      "terms": 5,
+      "coverage": 0.005186721991701245
+    },
+    "ilo": {
+      "model": "palette",
+      "terms": 2,
+      "coverage": 0.002074688796680498
+    },
+    "io": {
+      "model": "palette",
+      "terms": 38,
+      "coverage": 0.03941908713692946
+    },
+    "is": {
+      "model": "palette",
+      "terms": 29,
+      "coverage": 0.03008298755186722
+    },
+    "jbo": {
+      "model": "palette",
+      "terms": 5,
+      "coverage": 0.005186721991701245
+    },
+    "jv": {
+      "model": "palette",
+      "terms": 19,
+      "coverage": 0.01970954356846473
+    },
+    "kab": {
+      "model": "palette",
+      "terms": 3,
+      "coverage": 0.0031120331950207467
+    },
+    "kbp": {
+      "model": "palette",
+      "terms": 9,
+      "coverage": 0.00933609958506224
+    },
+    "kea": {
+      "model": "palette",
+      "terms": 7,
+      "coverage": 0.007261410788381743
+    },
+    "kge": {
+      "model": "palette",
+      "terms": 16,
+      "coverage": 0.016597510373443983
+    },
+    "kk": {
+      "model": "palette",
+      "terms": 11,
+      "coverage": 0.011410788381742738
+    },
+    "km": {
+      "model": "palette",
+      "terms": 9,
+      "coverage": 0.00933609958506224
+    },
+    "kn": {
+      "model": "palette",
+      "terms": 11,
+      "coverage": 0.011410788381742738
+    },
+    "ks": {
+      "model": "palette",
+      "terms": 19,
+      "coverage": 0.01970954356846473
+    },
+    "ku": {
+      "model": "palette",
+      "terms": 12,
+      "coverage": 0.012448132780082987
+    },
+    "lad": {
+      "model": "palette",
+      "terms": 9,
+      "coverage": 0.00933609958506224
+    },
+    "lb": {
+      "model": "palette",
+      "terms": 38,
+      "coverage": 0.03941908713692946
+    },
+    "lbe": {
+      "model": "palette",
+      "terms": 11,
+      "coverage": 0.011410788381742738
+    },
+    "lfn": {
+      "model": "palette",
+      "terms": 15,
+      "coverage": 0.015560165975103735
+    },
+    "ln": {
+      "model": "palette",
+      "terms": 13,
+      "coverage": 0.013485477178423237
+    },
+    "lo": {
+      "model": "palette",
+      "terms": 3,
+      "coverage": 0.0031120331950207467
+    },
+    "lt": {
+      "model": "palette",
+      "terms": 37,
+      "coverage": 0.038381742738589214
+    },
+    "lv": {
+      "model": "palette",
+      "terms": 19,
+      "coverage": 0.01970954356846473
+    },
+    "lzh": {
+      "model": "palette",
+      "terms": 16,
+      "coverage": 0.016597510373443983
+    },
+    "mag": {
+      "model": "palette",
+      "terms": 5,
+      "coverage": 0.005186721991701245
+    },
+    "mdf": {
+      "model": "palette",
+      "terms": 11,
+      "coverage": 0.011410788381742738
+    },
+    "mk": {
+      "model": "palette",
+      "terms": 70,
+      "coverage": 0.07261410788381743
+    },
+    "mni": {
+      "model": "palette",
+      "terms": 5,
+      "coverage": 0.005186721991701245
+    },
+    "mr": {
+      "model": "palette",
+      "terms": 12,
+      "coverage": 0.012448132780082987
+    },
+    "mt": {
+      "model": "palette",
+      "terms": 9,
+      "coverage": 0.00933609958506224
+    },
+    "my": {
+      "model": "palette",
+      "terms": 20,
+      "coverage": 0.02074688796680498
+    },
+    "myv": {
+      "model": "palette",
+      "terms": 8,
+      "coverage": 0.008298755186721992
+    },
+    "mzn": {
+      "model": "palette",
+      "terms": 21,
+      "coverage": 0.021784232365145227
+    },
+    "nah": {
+      "model": "palette",
+      "terms": 23,
+      "coverage": 0.023858921161825725
+    },
+    "nan": {
+      "model": "palette",
+      "terms": 18,
+      "coverage": 0.01867219917012448
+    },
+    "nap": {
+      "model": "palette",
+      "terms": 3,
+      "coverage": 0.0031120331950207467
+    },
+    "nds": {
+      "model": "palette",
+      "terms": 11,
+      "coverage": 0.011410788381742738
+    },
+    "ne": {
+      "model": "palette",
+      "terms": 17,
+      "coverage": 0.017634854771784232
+    },
+    "new": {
+      "model": "palette",
+      "terms": 8,
+      "coverage": 0.008298755186721992
+    },
+    "nod": {
+      "model": "palette",
+      "terms": 13,
+      "coverage": 0.013485477178423237
+    },
+    "nqo": {
+      "model": "palette",
+      "terms": 12,
+      "coverage": 0.012448132780082987
+    },
+    "nrm": {
+      "model": "palette",
+      "terms": 8,
+      "coverage": 0.008298755186721992
+    },
+    "nso": {
+      "model": "palette",
+      "terms": 37,
+      "coverage": 0.038381742738589214
+    },
+    "oc": {
+      "model": "palette",
+      "terms": 27,
+      "coverage": 0.028008298755186723
+    },
+    "os": {
+      "model": "palette",
+      "terms": 19,
+      "coverage": 0.01970954356846473
+    },
+    "pag": {
+      "model": "palette",
+      "terms": 4,
+      "coverage": 0.004149377593360996
+    },
+    "pam": {
+      "model": "palette",
+      "terms": 9,
+      "coverage": 0.00933609958506224
+    },
+    "pap": {
+      "model": "palette",
+      "terms": 14,
+      "coverage": 0.014522821576763486
+    },
+    "pcd": {
+      "model": "palette",
+      "terms": 6,
+      "coverage": 0.006224066390041493
+    },
+    "pnb": {
+      "model": "palette",
+      "terms": 29,
+      "coverage": 0.03008298755186722
+    },
+    "pt": {
+      "model": "palette",
+      "terms": 112,
+      "coverage": 0.11618257261410789
+    },
+    "pwn": {
+      "model": "palette",
+      "terms": 4,
+      "coverage": 0.004149377593360996
+    },
+    "qu": {
+      "model": "palette",
+      "terms": 15,
+      "coverage": 0.015560165975103735
+    },
+    "ro": {
+      "model": "palette",
+      "terms": 65,
+      "coverage": 0.06742738589211618
+    },
+    "rup": {
+      "model": "palette",
+      "terms": 7,
+      "coverage": 0.007261410788381743
+    },
+    "sa": {
+      "model": "palette",
+      "terms": 11,
+      "coverage": 0.011410788381742738
+    },
+    "sah": {
+      "model": "palette",
+      "terms": 9,
+      "coverage": 0.00933609958506224
+    },
+    "sat": {
+      "model": "palette",
+      "terms": 7,
+      "coverage": 0.007261410788381743
+    },
+    "scn": {
+      "model": "palette",
+      "terms": 63,
+      "coverage": 0.06535269709543569
+    },
+    "sd": {
+      "model": "palette",
+      "terms": 9,
+      "coverage": 0.00933609958506224
+    },
+    "se": {
+      "model": "palette",
+      "terms": 10,
+      "coverage": 0.01037344398340249
+    },
+    "sgs": {
+      "model": "palette",
+      "terms": 12,
+      "coverage": 0.012448132780082987
+    },
+    "sh": {
+      "model": "palette",
+      "terms": 24,
+      "coverage": 0.024896265560165973
+    },
+    "sma": {
+      "model": "palette",
+      "terms": 10,
+      "coverage": 0.01037344398340249
+    },
+    "smj": {
+      "model": "palette",
+      "terms": 10,
+      "coverage": 0.01037344398340249
+    },
+    "sn": {
+      "model": "palette",
+      "terms": 21,
+      "coverage": 0.021784232365145227
+    },
+    "so": {
+      "model": "palette",
+      "terms": 13,
+      "coverage": 0.013485477178423237
+    },
+    "sq": {
+      "model": "palette",
+      "terms": 11,
+      "coverage": 0.011410788381742738
+    },
+    "sr": {
+      "model": "palette",
+      "terms": 52,
+      "coverage": 0.05394190871369295
+    },
+    "sr-Cyrl": {
+      "model": "palette",
+      "terms": 19,
+      "coverage": 0.01970954356846473
+    },
+    "sr-Latn": {
+      "model": "palette",
+      "terms": 19,
+      "coverage": 0.01970954356846473
+    },
+    "su": {
+      "model": "palette",
+      "terms": 10,
+      "coverage": 0.01037344398340249
+    },
+    "sw": {
+      "model": "palette",
+      "terms": 14,
+      "coverage": 0.014522821576763486
+    },
+    "syl": {
+      "model": "palette",
+      "terms": 2,
+      "coverage": 0.002074688796680498
+    },
+    "szl": {
+      "model": "palette",
+      "terms": 5,
+      "coverage": 0.005186721991701245
+    },
+    "szy": {
+      "model": "palette",
+      "terms": 8,
+      "coverage": 0.008298755186721992
+    },
+    "ta": {
+      "model": "palette",
+      "terms": 15,
+      "coverage": 0.015560165975103735
+    },
+    "te": {
+      "model": "palette",
+      "terms": 11,
+      "coverage": 0.011410788381742738
+    },
+    "th": {
+      "model": "palette",
+      "terms": 40,
+      "coverage": 0.04149377593360996
+    },
+    "tl": {
+      "model": "palette",
+      "terms": 22,
+      "coverage": 0.022821576763485476
+    },
+    "tr": {
+      "model": "palette",
+      "terms": 93,
+      "coverage": 0.09647302904564316
+    },
+    "ts": {
+      "model": "palette",
+      "terms": 11,
+      "coverage": 0.011410788381742738
+    },
+    "tt": {
+      "model": "palette",
+      "terms": 48,
+      "coverage": 0.04979253112033195
+    },
+    "en": {
+      "model": "palette",
+      "terms": 897,
+      "coverage": 0.9304979253112033
+    },
+    "nn": {
+      "model": "palette",
+      "terms": 62,
+      "coverage": 0.06431535269709543
+    },
+    "pa": {
+      "model": "palette",
+      "terms": 16,
+      "coverage": 0.016597510373443983
+    },
+    "fa": {
+      "model": "palette",
+      "terms": 159,
+      "coverage": 0.16493775933609958
+    },
+    "grc": {
+      "model": "palette",
+      "terms": 9,
+      "coverage": 0.00933609958506224
+    },
+    "ur": {
+      "model": "palette",
+      "terms": 45,
+      "coverage": 0.046680497925311204
+    },
+    "it": {
+      "model": "palette",
+      "terms": 468,
+      "coverage": 0.4854771784232365
+    },
+    "mwl": {
+      "model": "palette",
+      "terms": 4,
+      "coverage": 0.004149377593360996
+    },
+    "da": {
+      "model": "palette",
+      "terms": 103,
+      "coverage": 0.10684647302904564
+    },
+    "ja": {
+      "model": "palette",
+      "terms": 273,
+      "coverage": 0.28319502074688796
+    },
+    "bn": {
+      "model": "palette",
+      "terms": 82,
+      "coverage": 0.08506224066390042
+    },
+    "az": {
+      "model": "palette",
+      "terms": 41,
+      "coverage": 0.04253112033195021
+    },
+    "azb": {
+      "model": "palette",
+      "terms": 22,
+      "coverage": 0.022821576763485476
+    },
+    "br": {
+      "model": "palette",
+      "terms": 23,
+      "coverage": 0.023858921161825725
+    },
+    "cho": {
+      "model": "palette",
+      "terms": 7,
+      "coverage": 0.007261410788381743
+    },
+    "cy": {
+      "model": "palette",
+      "terms": 43,
+      "coverage": 0.044605809128630707
+    },
+    "kw": {
+      "model": "palette",
+      "terms": 20,
+      "coverage": 0.02074688796680498
+    },
+    "zh-Hant": {
+      "model": "palette",
+      "terms": 111,
+      "coverage": 0.11514522821576763
+    },
+    "lmo": {
+      "model": "palette",
+      "terms": 19,
+      "coverage": 0.01970954356846473
+    },
+    "ru": {
+      "model": "palette",
+      "terms": 200,
+      "coverage": 0.2074688796680498
+    },
+    "jam": {
+      "model": "palette",
+      "terms": 3,
+      "coverage": 0.0031120331950207467
+    },
+    "nl": {
+      "model": "palette",
+      "terms": 370,
+      "coverage": 0.38381742738589214
+    },
+    "pl": {
+      "model": "palette",
+      "terms": 114,
+      "coverage": 0.11825726141078838
+    },
+    "he": {
+      "model": "palette",
+      "terms": 93,
+      "coverage": 0.09647302904564316
+    },
+    "tok": {
+      "model": "palette",
+      "terms": 17,
+      "coverage": 0.017634854771784232
+    },
+    "eu": {
+      "model": "palette",
+      "terms": 59,
+      "coverage": 0.061203319502074686
+    },
+    "sk": {
+      "model": "palette",
+      "terms": 28,
+      "coverage": 0.029045643153526972
+    },
+    "cs": {
+      "model": "palette",
+      "terms": 113,
+      "coverage": 0.11721991701244813
+    },
+    "la": {
+      "model": "palette",
+      "terms": 44,
+      "coverage": 0.04564315352697095
+    },
+    "de": {
+      "model": "palette",
+      "terms": 480,
+      "coverage": 0.4979253112033195
+    },
+    "nb": {
+      "model": "palette",
+      "terms": 97,
+      "coverage": 0.10062240663900415
+    },
+    "es": {
+      "model": "palette",
+      "terms": 452,
+      "coverage": 0.46887966804979253
+    },
+    "et": {
+      "model": "palette",
+      "terms": 164,
+      "coverage": 0.17012448132780084
+    },
+    "ml": {
+      "model": "palette",
+      "terms": 26,
+      "coverage": 0.026970954356846474
+    },
+    "sv": {
+      "model": "palette",
+      "terms": 170,
+      "coverage": 0.17634854771784234
+    },
+    "id": {
+      "model": "palette",
+      "terms": 253,
+      "coverage": 0.262448132780083
+    },
+    "fi": {
+      "model": "palette",
+      "terms": 65,
+      "coverage": 0.06742738589211618
+    },
+    "ka": {
+      "model": "palette",
+      "terms": 14,
+      "coverage": 0.014522821576763486
+    },
+    "ms": {
+      "model": "palette",
+      "terms": 60,
+      "coverage": 0.06224066390041494
+    },
+    "ms-Arab": {
+      "model": "palette",
+      "terms": 12,
+      "coverage": 0.012448132780082987
+    },
+    "ig": {
+      "model": "palette",
+      "terms": 7,
+      "coverage": 0.007261410788381743
+    },
+    "or": {
+      "model": "palette",
+      "terms": 6,
+      "coverage": 0.006224066390041493
+    },
+    "an": {
+      "model": "palette",
+      "terms": 15,
+      "coverage": 0.015560165975103735
+    },
+    "mnc": {
+      "model": "palette",
+      "terms": 10,
+      "coverage": 0.01037344398340249
+    },
+    "tg": {
+      "model": "palette",
+      "terms": 13,
+      "coverage": 0.013485477178423237
+    },
+    "zh": {
+      "model": "palette",
+      "terms": 221,
+      "coverage": 0.229253112033195
+    },
+    "fr": {
+      "model": "palette",
+      "terms": 438,
+      "coverage": 0.45435684647302904
+    },
+    "el": {
+      "model": "palette",
+      "terms": 51,
+      "coverage": 0.052904564315352696
+    },
+    "ca": {
+      "model": "palette",
+      "terms": 168,
+      "coverage": 0.17427385892116182
+    },
+    "ko": {
+      "model": "palette",
+      "terms": 107,
+      "coverage": 0.11099585062240663
+    },
+    "sl": {
+      "model": "palette",
+      "terms": 182,
+      "coverage": 0.1887966804979253
+    },
+    "gan": {
+      "model": "palette",
+      "terms": 5,
+      "coverage": 0.005186721991701245
+    },
+    "yue": {
+      "model": "palette",
+      "terms": 63,
+      "coverage": 0.06535269709543569
+    },
+    "pdc": {
+      "model": "palette",
+      "terms": 13,
+      "coverage": 0.013485477178423237
+    },
+    "ar": {
+      "model": "palette",
+      "terms": 199,
+      "coverage": 0.20643153526970953
+    },
+    "arz": {
+      "model": "palette",
+      "terms": 27,
+      "coverage": 0.028008298755186723
+    },
+    "ha": {
+      "model": "palette",
+      "terms": 6,
+      "coverage": 0.006224066390041493
+    },
+    "aeb-Arab": {
+      "model": "palette",
+      "terms": 13,
+      "coverage": 0.013485477178423237
+    },
+    "af": {
+      "model": "palette",
+      "terms": 167,
+      "coverage": 0.17323651452282157
+    },
+    "ak": {
+      "model": "palette",
+      "terms": 2,
+      "coverage": 0.002074688796680498
+    },
+    "am": {
+      "model": "palette",
+      "terms": 12,
+      "coverage": 0.012448132780082987
+    },
+    "ang": {
+      "model": "palette",
+      "terms": 13,
+      "coverage": 0.013485477178423237
+    },
+    "anp": {
+      "model": "palette",
+      "terms": 7,
+      "coverage": 0.007261410788381743
+    },
+    "apc": {
+      "model": "palette",
+      "terms": 5,
+      "coverage": 0.005186721991701245
+    },
+    "arc": {
+      "model": "palette",
+      "terms": 10,
+      "coverage": 0.01037344398340249
+    },
+    "arq": {
+      "model": "palette",
+      "terms": 6,
+      "coverage": 0.006224066390041493
+    },
+    "ast": {
+      "model": "palette",
+      "terms": 48,
+      "coverage": 0.04979253112033195
+    },
+    "atj": {
+      "model": "palette",
+      "terms": 4,
+      "coverage": 0.004149377593360996
+    },
+    "awa": {
+      "model": "palette",
+      "terms": 9,
+      "coverage": 0.00933609958506224
+    },
+    "ay": {
+      "model": "palette",
+      "terms": 15,
+      "coverage": 0.015560165975103735
+    },
+    "ba": {
+      "model": "palette",
+      "terms": 15,
+      "coverage": 0.015560165975103735
+    },
+    "ban": {
+      "model": "palette",
+      "terms": 15,
+      "coverage": 0.015560165975103735
+    },
+    "bcl": {
+      "model": "palette",
+      "terms": 11,
+      "coverage": 0.011410788381742738
+    },
+    "be": {
+      "model": "palette",
+      "terms": 47,
+      "coverage": 0.0487551867219917
+    },
+    "be-tarask": {
+      "model": "palette",
+      "terms": 63,
+      "coverage": 0.06535269709543569
+    },
+    "bg": {
+      "model": "palette",
+      "terms": 30,
+      "coverage": 0.03112033195020747
+    },
+    "bjn": {
+      "model": "palette",
+      "terms": 6,
+      "coverage": 0.006224066390041493
+    },
+    "bo": {
+      "model": "palette",
+      "terms": 17,
+      "coverage": 0.017634854771784232
+    },
+    "bs": {
+      "model": "palette",
+      "terms": 19,
+      "coverage": 0.01970954356846473
+    },
+    "cdo": {
+      "model": "palette",
+      "terms": 11,
+      "coverage": 0.011410788381742738
+    },
+    "ce": {
+      "model": "palette",
+      "terms": 13,
+      "coverage": 0.013485477178423237
+    },
+    "ceb": {
+      "model": "palette",
+      "terms": 4,
+      "coverage": 0.004149377593360996
+    },
+    "ch": {
+      "model": "palette",
+      "terms": 8,
+      "coverage": 0.008298755186721992
+    },
+    "ckb": {
+      "model": "palette",
+      "terms": 19,
+      "coverage": 0.01970954356846473
+    },
+    "csb": {
+      "model": "palette",
+      "terms": 5,
+      "coverage": 0.005186721991701245
+    },
+    "cu": {
+      "model": "palette",
+      "terms": 4,
+      "coverage": 0.004149377593360996
+    },
+    "cv": {
+      "model": "palette",
+      "terms": 15,
+      "coverage": 0.015560165975103735
+    },
+    "diq": {
+      "model": "palette",
+      "terms": 6,
+      "coverage": 0.006224066390041493
+    },
+    "dsb": {
+      "model": "palette",
+      "terms": 10,
+      "coverage": 0.01037344398340249
+    },
+    "dty": {
+      "model": "palette",
+      "terms": 6,
+      "coverage": 0.006224066390041493
+    },
+    "eo": {
+      "model": "palette",
+      "terms": 148,
+      "coverage": 0.15352697095435686
+    },
+    "ext": {
+      "model": "palette",
+      "terms": 16,
+      "coverage": 0.016597510373443983
+    },
+    "fj": {
+      "model": "palette",
+      "terms": 13,
+      "coverage": 0.013485477178423237
+    },
+    "fo": {
+      "model": "palette",
+      "terms": 28,
+      "coverage": 0.029045643153526972
+    },
+    "fur": {
+      "model": "palette",
+      "terms": 5,
+      "coverage": 0.005186721991701245
+    },
+    "fy": {
+      "model": "palette",
+      "terms": 85,
+      "coverage": 0.08817427385892117
+    },
+    "uk": {
+      "model": "palette",
+      "terms": 120,
+      "coverage": 0.12448132780082988
+    },
+    "frr": {
+      "model": "palette",
+      "terms": 13,
+      "coverage": 0.013485477178423237
+    },
+    "mn": {
+      "model": "palette",
+      "terms": 3,
+      "coverage": 0.0031120331950207467
+    },
+    "vec": {
+      "model": "palette",
+      "terms": 134,
+      "coverage": 0.13900414937759337
+    },
+    "vi": {
+      "model": "palette",
+      "terms": 82,
+      "coverage": 0.08506224066390042
+    },
+    "vo": {
+      "model": "palette",
+      "terms": 8,
+      "coverage": 0.008298755186721992
+    },
+    "tt-Cyrl": {
+      "model": "palette",
+      "terms": 21,
+      "coverage": 0.021784232365145227
+    },
+    "ty": {
+      "model": "palette",
+      "terms": 11,
+      "coverage": 0.011410788381742738
+    },
+    "udm": {
+      "model": "palette",
+      "terms": 12,
+      "coverage": 0.012448132780082987
+    },
+    "uz": {
+      "model": "palette",
+      "terms": 10,
+      "coverage": 0.01037344398340249
+    },
+    "vep": {
+      "model": "palette",
+      "terms": 8,
+      "coverage": 0.008298755186721992
+    },
+    "vro": {
+      "model": "palette",
+      "terms": 11,
+      "coverage": 0.011410788381742738
+    },
+    "war": {
+      "model": "palette",
+      "terms": 13,
+      "coverage": 0.013485477178423237
+    },
+    "wuu": {
+      "model": "palette",
+      "terms": 16,
+      "coverage": 0.016597510373443983
+    },
+    "xmf": {
+      "model": "palette",
+      "terms": 7,
+      "coverage": 0.007261410788381743
+    },
+    "yi": {
+      "model": "palette",
+      "terms": 20,
+      "coverage": 0.02074688796680498
+    },
+    "yo": {
+      "model": "palette",
+      "terms": 6,
+      "coverage": 0.006224066390041493
+    },
+    "za": {
+      "model": "palette",
+      "terms": 14,
+      "coverage": 0.014522821576763486
+    },
+    "zu": {
+      "model": "palette",
+      "terms": 12,
+      "coverage": 0.012448132780082987
+    },
+    "tly": {
+      "model": "palette",
+      "terms": 8,
+      "coverage": 0.008298755186721992
+    },
+    "ary": {
+      "model": "palette",
+      "terms": 8,
+      "coverage": 0.008298755186721992
+    },
+    "ky": {
+      "model": "palette",
+      "terms": 4,
+      "coverage": 0.004149377593360996
+    },
+    "kaa": {
+      "model": "palette",
+      "terms": 1,
+      "coverage": 0.001037344398340249
+    },
+    "shn": {
+      "model": "palette",
+      "terms": 10,
+      "coverage": 0.01037344398340249
+    },
+    "kaj": {
+      "model": "palette",
+      "terms": 2,
+      "coverage": 0.002074688796680498
+    },
+    "lld": {
+      "model": "palette",
+      "terms": 9,
+      "coverage": 0.00933609958506224
+    },
+    "sjd": {
+      "model": "palette",
+      "terms": 9,
+      "coverage": 0.00933609958506224
+    },
+    "isv-Cyrl": {
+      "model": "palette",
+      "terms": 2,
+      "coverage": 0.002074688796680498
+    },
+    "isv-Latn": {
+      "model": "palette",
+      "terms": 2,
+      "coverage": 0.002074688796680498
+    },
+    "vls": {
+      "model": "palette",
+      "terms": 4,
+      "coverage": 0.004149377593360996
+    },
+    "aeb-Latn": {
+      "model": "palette",
+      "terms": 1,
+      "coverage": 0.001037344398340249
+    },
+    "bho": {
+      "model": "palette",
+      "terms": 4,
+      "coverage": 0.004149377593360996
+    },
+    "olo": {
+      "model": "palette",
+      "terms": 5,
+      "coverage": 0.005186721991701245
+    },
+    "sco": {
+      "model": "palette",
+      "terms": 18,
+      "coverage": 0.01867219917012448
+    },
+    "ug": {
+      "model": "palette",
+      "terms": 8,
+      "coverage": 0.008298755186721992
+    },
+    "kl": {
+      "model": "palette",
+      "terms": 14,
+      "coverage": 0.014522821576763486
+    },
+    "map-bms": {
+      "model": "palette",
+      "terms": 8,
+      "coverage": 0.008298755186721992
+    },
+    "mi": {
+      "model": "palette",
+      "terms": 3,
+      "coverage": 0.0031120331950207467
+    },
+    "nv": {
+      "model": "palette",
+      "terms": 5,
+      "coverage": 0.005186721991701245
+    },
+    "om": {
+      "model": "palette",
+      "terms": 1,
+      "coverage": 0.001037344398340249
+    },
+    "din": {
+      "model": "palette",
+      "terms": 1,
+      "coverage": 0.001037344398340249
+    },
+    "crh": {
+      "model": "palette",
+      "terms": 3,
+      "coverage": 0.0031120331950207467
+    },
+    "ps": {
+      "model": "palette",
+      "terms": 11,
+      "coverage": 0.011410788381742738
+    },
+    "mad": {
+      "model": "palette",
+      "terms": 7,
+      "coverage": 0.007261410788381743
+    },
+    "gd": {
+      "model": "palette",
+      "terms": 3,
+      "coverage": 0.0031120331950207467
+    },
+    "iu": {
+      "model": "palette",
+      "terms": 3,
+      "coverage": 0.0031120331950207467
+    },
+    "as": {
+      "model": "palette",
+      "terms": 2,
+      "coverage": 0.002074688796680498
+    },
+    "bar": {
+      "model": "palette",
+      "terms": 5,
+      "coverage": 0.005186721991701245
+    },
+    "si": {
+      "model": "palette",
+      "terms": 5,
+      "coverage": 0.005186721991701245
+    },
+    "ie": {
+      "model": "palette",
+      "terms": 1,
+      "coverage": 0.001037344398340249
+    },
+    "ksh": {
+      "model": "palette",
+      "terms": 2,
+      "coverage": 0.002074688796680498
+    },
+    "ku-Latn": {
+      "model": "palette",
+      "terms": 2,
+      "coverage": 0.002074688796680498
+    },
+    "na": {
+      "model": "palette",
+      "terms": 1,
+      "coverage": 0.001037344398340249
+    },
+    "rue": {
+      "model": "palette",
+      "terms": 2,
+      "coverage": 0.002074688796680498
+    },
+    "shi": {
+      "model": "palette",
+      "terms": 1,
+      "coverage": 0.001037344398340249
+    },
+    "wa": {
+      "model": "palette",
+      "terms": 4,
+      "coverage": 0.004149377593360996
+    },
+    "xal": {
+      "model": "palette",
+      "terms": 1,
+      "coverage": 0.001037344398340249
+    },
+    "btm": {
+      "model": "palette",
+      "terms": 2,
+      "coverage": 0.002074688796680498
+    },
+    "gur": {
+      "model": "palette",
+      "terms": 4,
+      "coverage": 0.004149377593360996
+    },
+    "li": {
+      "model": "palette",
+      "terms": 1,
+      "coverage": 0.001037344398340249
+    },
+    "lij": {
+      "model": "palette",
+      "terms": 1,
+      "coverage": 0.001037344398340249
+    },
+    "tpi": {
+      "model": "palette",
+      "terms": 4,
+      "coverage": 0.004149377593360996
+    },
+    "chr": {
+      "model": "palette",
+      "terms": 4,
+      "coverage": 0.004149377593360996
+    },
+    "mhr": {
+      "model": "palette",
+      "terms": 2,
+      "coverage": 0.002074688796680498
+    },
+    "wo": {
+      "model": "palette",
+      "terms": 6,
+      "coverage": 0.006224066390041493
+    },
+    "sje": {
+      "model": "palette",
+      "terms": 4,
+      "coverage": 0.004149377593360996
+    },
+    "sms": {
+      "model": "palette",
+      "terms": 4,
+      "coverage": 0.004149377593360996
+    },
+    "sju": {
+      "model": "palette",
+      "terms": 4,
+      "coverage": 0.004149377593360996
+    },
+    "smn": {
+      "model": "palette",
+      "terms": 4,
+      "coverage": 0.004149377593360996
+    },
+    "cr": {
+      "model": "palette",
+      "terms": 2,
+      "coverage": 0.002074688796680498
+    },
+    "dtp": {
+      "model": "palette",
+      "terms": 2,
+      "coverage": 0.002074688796680498
+    },
+    "pih": {
+      "model": "palette",
+      "terms": 1,
+      "coverage": 0.001037344398340249
+    },
+    "stq": {
+      "model": "palette",
+      "terms": 3,
+      "coverage": 0.0031120331950207467
+    },
+    "kcg": {
+      "model": "palette",
+      "terms": 6,
+      "coverage": 0.006224066390041493
+    },
+    "ryu": {
+      "model": "palette",
+      "terms": 2,
+      "coverage": 0.002074688796680498
+    },
+    "dag": {
+      "model": "palette",
+      "terms": 1,
+      "coverage": 0.001037344398340249
+    },
+    "tw": {
+      "model": "palette",
+      "terms": 1,
+      "coverage": 0.001037344398340249
+    },
+    "dua": {
+      "model": "palette",
+      "terms": 1,
+      "coverage": 0.001037344398340249
+    },
+    "tcy": {
+      "model": "palette",
+      "terms": 3,
+      "coverage": 0.0031120331950207467
+    },
+    "gpe": {
+      "model": "palette",
+      "terms": 1,
+      "coverage": 0.001037344398340249
+    },
+    "bug": {
+      "model": "palette",
+      "terms": 3,
+      "coverage": 0.0031120331950207467
+    },
+    "kg": {
+      "model": "palette",
+      "terms": 1,
+      "coverage": 0.001037344398340249
+    },
+    "simple": {
+      "model": "palette",
+      "terms": 1,
+      "coverage": 0.001037344398340249
+    },
+    "shy-Latn": {
+      "model": "palette",
+      "terms": 1,
+      "coverage": 0.001037344398340249
+    },
+    "xh": {
+      "model": "palette",
+      "terms": 1,
+      "coverage": 0.001037344398340249
+    },
+    "ti": {
+      "model": "palette",
+      "terms": 1,
+      "coverage": 0.001037344398340249
+    },
+    "eml": {
+      "model": "palette",
+      "terms": 1,
+      "coverage": 0.001037344398340249
+    },
+    "gu": {
+      "model": "palette",
+      "terms": 3,
+      "coverage": 0.0031120331950207467
+    },
+    "pnt": {
+      "model": "palette",
+      "terms": 2,
+      "coverage": 0.002074688796680498
+    },
+    "tig": {
+      "model": "palette",
+      "terms": 1,
+      "coverage": 0.001037344398340249
+    },
+    "tt-Latn": {
+      "model": "palette",
+      "terms": 1,
+      "coverage": 0.001037344398340249
+    },
+    "tn": {
+      "model": "palette",
+      "terms": 1,
+      "coverage": 0.001037344398340249
+    },
+    "av": {
+      "model": "palette",
+      "terms": 1,
+      "coverage": 0.001037344398340249
+    },
+    "chy": {
+      "model": "palette",
+      "terms": 1,
+      "coverage": 0.001037344398340249
+    },
+    "dga": {
+      "model": "palette",
+      "terms": 2,
+      "coverage": 0.002074688796680498
+    },
+    "mai": {
+      "model": "palette",
+      "terms": 1,
+      "coverage": 0.001037344398340249
+    },
+    "bdr": {
+      "model": "palette",
+      "terms": 1,
+      "coverage": 0.001037344398340249
+    },
+    "lg": {
+      "model": "palette",
+      "terms": 1,
+      "coverage": 0.001037344398340249
+    },
+    "ady": {
+      "model": "palette",
+      "terms": 1,
+      "coverage": 0.001037344398340249
+    },
+    "sc": {
+      "model": "palette",
+      "terms": 2,
+      "coverage": 0.002074688796680498
+    },
+    "hif": {
+      "model": "palette",
+      "terms": 1,
+      "coverage": 0.001037344398340249
+    },
+    "inh": {
+      "model": "palette",
+      "terms": 1,
+      "coverage": 0.001037344398340249
+    },
+    "ltg": {
+      "model": "palette",
+      "terms": 1,
+      "coverage": 0.001037344398340249
+    }
+  }
+}

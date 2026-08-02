@@ -8,8 +8,11 @@ export { translations, type ChannelTranslations } from "./channels";
 import { registerSource } from "./engine/registry";
 import { uwdataSource } from "./sources/uwdata/source";
 import { uwdataChunks } from "./sources/uwdata/chunks";
+import { wikidataSource } from "./sources/wikidata/source";
+import { wikidataChunks } from "./sources/wikidata/chunks";
 
 registerSource(uwdataSource, uwdataChunks);
+registerSource(wikidataSource, wikidataChunks);
 
 export { listSources, getSource } from "./engine/registry";
 export type { LanguageCoverage, NameSource } from "./engine/types";

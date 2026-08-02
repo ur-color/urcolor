@@ -20,7 +20,11 @@ The API follows the ECMAScript `Intl` classes: `of()`, `resolvedOptions()`, and
 
 ## Coverage
 
-Colour-name data comes from the `uwdata` source and covers **20 languages**.
+Colour-name data comes from two independent sources: `uwdata` and `wikidata`.
+
+### uwdata
+
+The `uwdata` source covers **20 languages**.
 Fourteen have a full-colour-space model (`de en es fa fi fr ko nl pl pt ro ru
 sv zh`); six more have a hue-circle model that only describes saturated
 colours (`ar da el hu it tr`). Upstream's raw files list dozens of additional
@@ -56,6 +60,27 @@ coverage at all — there's no neighbouring-bin fallback for `fallback: "none"`
 to have an opinion about, so it's a no-op there. `resolve()` on a hue-model
 locale also returns `hueProjectionDistance`, the Oklab distance from the
 query to the fully saturated colour at the same hue.
+
+### wikidata
+
+The `wikidata` source covers **299 languages** with a discrete-palette model:
+964 catalogued colours, each with one exact sRGB value, named in whatever
+languages Wikidata editors have supplied. This is where the long tail lives —
+Georgian, Cherokee, Aymara, Amharic, and Aramaic have colour names here and
+none in `uwdata`.
+
+It answers a different question from `uwdata`. Where `uwdata` models how
+speakers *spontaneously name* a region of colour space, `wikidata` records the
+*established name of a catalogued colour*. There is no sampled distribution, so
+`resolve()` reports `probability` as a **proximity confidence, not a naming
+frequency** — read `binDistance` for the underlying Oklab distance.
+
+Coverage is `terms / 964`: `en` 93%, `de` 50%, `ja` 28%, `ka` 0.3%. Thin
+languages are shipped rather than pruned — a three-term Georgian chunk cannot
+name an arbitrary colour, but it resolves `colorOf("ყვითელი")` correctly.
+
+Wikidata is **CC0-1.0**, so the licensing caveat above does not apply to this
+source.
 
 ## Data source and attribution
 

@@ -1,7 +1,10 @@
 import { describe, expect, it } from "bun:test";
+import { Color } from "@urcolor/core";
 import meta from "../src/data/uwdata/meta.json";
 import { uwdataChunks } from "../src/sources/uwdata/chunks";
 import type { FullChunk, HueChunk } from "../src/engine/types";
+import { ColorNames } from "../src/color-names";
+import { getSource, listSources, loadChunk } from "../src/engine/registry";
 
 const FULL_LANGS = ["de", "en", "es", "fa", "fi", "fr", "ko", "nl", "pl", "pt", "ro", "ru", "sv", "zh"];
 
@@ -77,5 +80,61 @@ describe("generated uwdata data", () => {
       }
     }
     expect(offenders).toEqual([]);
+  });
+});
+
+describe("wikidata data integrity", () => {
+  it("registers the source with CC0 licensing", () => {
+    const source = getSource("wikidata");
+    expect(source.license).toBe("CC0-1.0");
+    expect(source.retrievedAt).toBeTruthy();
+  });
+
+  it("ships a chunk for every language in the descriptor", async () => {
+    const source = getSource("wikidata");
+    for (const locale of Object.keys(source.languages)) {
+      const chunk = await loadChunk("wikidata", locale);
+      expect(chunk.model).toBe("palette");
+      expect(chunk.lang).toBe(locale);
+    }
+  });
+
+  it("keeps terms, provenance, and centroids consistent", async () => {
+    const chunk = await loadChunk("wikidata", "en");
+    if (chunk.model !== "palette") throw new Error("expected a palette chunk");
+
+    expect(chunk.terms.length).toBe(chunk.provenance.length);
+    for (const [index, entry] of chunk.terms.entries()) {
+      const [term, name, centroid, pCT] = entry;
+      expect(term).toBe(term.normalize("NFC"));
+      expect(name).toBe(name.normalize("NFC"));
+      expect(pCT).toBeNull();
+      expect(centroid).not.toBeNull();
+      expect(centroid!.every(Number.isFinite)).toBe(true);
+      expect(chunk.provenance[index]![0]).toMatch(/^Q[1-9][0-9]*$/);
+      expect(chunk.provenance[index]![1]).toMatch(/^[0-9a-fA-F]{6}$/);
+    }
+  });
+
+  it("points every alias at a real term index", async () => {
+    const chunk = await loadChunk("wikidata", "en");
+    if (chunk.model !== "palette") throw new Error("expected a palette chunk");
+    for (const [alias, index] of Object.entries(chunk.aliases)) {
+      expect(alias).toBe(alias.normalize("NFC").toLowerCase());
+      expect(chunk.terms[index]).toBeDefined();
+    }
+  });
+
+  it("names yellow in languages uwdata has no data for", async () => {
+    const georgian = await ColorNames.load("ka", { source: "wikidata" });
+    expect(georgian.colorOf("ყვითელი")).toBeDefined();
+
+    const english = await ColorNames.load("en", { source: "wikidata" });
+    expect(english.of(Color.parse("#FFFF00")!)).toBe("yellow");
+  });
+
+  it("keeps the two sources independent", () => {
+    const ids = listSources().map(source => source.id).sort();
+    expect(ids).toEqual(["uwdata", "wikidata"]);
   });
 });
