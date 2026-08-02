@@ -1,5 +1,6 @@
 import { forwardRef, useMemo, useEffect, type ComponentPropsWithoutRef } from "react";
 import { barycentricToCartesian } from "@urcolor/core";
+import { channelLabel, formatChannelValue } from "@urcolor/primitives";
 import { useColorTriangleContext } from "../root/ColorTriangleRootContext";
 
 export interface ColorTriangleThumbProps extends ComponentPropsWithoutRef<"span"> {}
@@ -48,6 +49,32 @@ export const ColorTriangleThumb = forwardRef<HTMLSpanElement, ColorTriangleThumb
       };
     }, [ctx.currentXValue, ctx.currentYValue, ctx.currentZValue, ctx.xMin, ctx.xMax, ctx.yMin, ctx.yMax, ctx.zMin, ctx.zMax, ctx.isThreeChannel, ctx.vertices]);
 
+    const labels = useMemo(() => (
+      ctx.isThreeChannel
+        ? [
+            channelLabel(ctx.colorSpace, ctx.xChannelKey),
+            channelLabel(ctx.colorSpace, ctx.yChannelKey),
+            channelLabel(ctx.colorSpace, ctx.zChannelKey ?? ""),
+          ]
+        : [
+            channelLabel(ctx.colorSpace, ctx.xChannelKey),
+            channelLabel(ctx.colorSpace, ctx.yChannelKey),
+          ]
+    ), [ctx.isThreeChannel, ctx.colorSpace, ctx.xChannelKey, ctx.yChannelKey, ctx.zChannelKey]);
+
+    const ariaLabel = labels.join(", ");
+
+    const ariaValueText = useMemo(() => {
+      const valueParts = [
+        `${labels[0]} ${formatChannelValue(ctx.colorSpace, ctx.xChannelKey, ctx.currentXValue)}`,
+        `${labels[1]} ${formatChannelValue(ctx.colorSpace, ctx.yChannelKey, ctx.currentYValue)}`,
+      ];
+      if (ctx.isThreeChannel) {
+        valueParts.push(`${labels[2]} ${formatChannelValue(ctx.colorSpace, ctx.zChannelKey ?? "", ctx.currentZValue)}`);
+      }
+      return valueParts.join(", ");
+    }, [labels, ctx.colorSpace, ctx.xChannelKey, ctx.yChannelKey, ctx.zChannelKey, ctx.currentXValue, ctx.currentYValue, ctx.currentZValue, ctx.isThreeChannel]);
+
     return (
       <span
         ref={(el) => {
@@ -55,8 +82,15 @@ export const ColorTriangleThumb = forwardRef<HTMLSpanElement, ColorTriangleThumb
           if (typeof ref === "function") ref(el);
           else if (ref) ref.current = el;
         }}
-        aria-roledescription="2D slider"
-        aria-disabled={ctx.disabled}
+        role="slider"
+        tabIndex={ctx.disabled ? undefined : 0}
+        aria-label={ariaLabel}
+        aria-valuenow={ctx.currentXValue}
+        aria-valuemin={ctx.xMin}
+        aria-valuemax={ctx.xMax}
+        aria-valuetext={ariaValueText}
+        aria-roledescription="Color thumb"
+        aria-disabled={ctx.disabled || undefined}
         data-disabled={ctx.disabled ? "" : undefined}
         style={{
           position: "absolute",

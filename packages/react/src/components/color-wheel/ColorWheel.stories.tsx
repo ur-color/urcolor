@@ -16,10 +16,7 @@ function WheelDemo(props: Record<string, unknown>) {
       {...props}
     >
       <ColorWheel.Gradient className="block" />
-      <ColorWheel.Thumb className="size-5 rounded-full border-2 border-white shadow bg-current">
-        <ColorWheel.ThumbX />
-        <ColorWheel.ThumbY />
-      </ColorWheel.Thumb>
+      <ColorWheel.Thumb className="size-5 rounded-full border-2 border-white shadow bg-current" />
     </ColorWheel.Root>
   );
 }

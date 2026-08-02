@@ -2,8 +2,6 @@ import { createContext, useContext } from "react";
 import type { Color, SpaceId } from "@urcolor/core";
 import type { Point } from "@urcolor/core";
 
-export type ActiveDirection = "x" | "y" | "z";
-
 export interface ColorTriangleContextValue {
   disabled: boolean;
   colorSpace: SpaceId;
@@ -23,11 +21,6 @@ export interface ColorTriangleContextValue {
   isThreeChannel: boolean;
   rotation: number;
   vertices: [Point, Point, Point];
-  activeDirection: ActiveDirection;
-  setActiveDirection: (dir: ActiveDirection) => void;
-  thumbXElement: React.MutableRefObject<HTMLElement | undefined>;
-  thumbYElement: React.MutableRefObject<HTMLElement | undefined>;
-  thumbZElement: React.MutableRefObject<HTMLElement | undefined>;
   isDragging: boolean;
   thumbAlignment: "contain" | "overflow";
   thumbElement: React.MutableRefObject<HTMLElement | undefined>;

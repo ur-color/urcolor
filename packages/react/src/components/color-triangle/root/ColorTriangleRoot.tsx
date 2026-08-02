@@ -1,7 +1,7 @@
 import { forwardRef, useCallback, useMemo, useRef, useState } from "react";
 import { Color, type SpaceId } from "@urcolor/core";
 import { colorSpaces, getChannelConfig, displayToNative, nativeToDisplay, type ChannelConfig, triangleVertices, clampToTriangle, barycentricCoords, pointInTriangle, type Point } from "@urcolor/core";
-import { ColorTriangleContext, type ColorTriangleContextValue, type ActiveDirection } from "./ColorTriangleRootContext";
+import { ColorTriangleContext, type ColorTriangleContextValue } from "./ColorTriangleRootContext";
 
 export interface ColorTriangleRootProps {
   value?: Color | string | null;
@@ -112,7 +112,6 @@ export const ColorTriangleRoot = forwardRef<HTMLDivElement, ColorTriangleRootPro
     const [currentYValue, setCurrentYValue] = useState(initValues.y);
     const [currentZValue, setCurrentZValue] = useState(initValues.z);
     const [isDragging, setIsDragging] = useState(false);
-    const [activeDirection, setActiveDirection] = useState<ActiveDirection>("x");
 
     const prevColorRef = useRef(colorRef);
     if (colorRef !== prevColorRef.current) {
@@ -123,9 +122,6 @@ export const ColorTriangleRoot = forwardRef<HTMLDivElement, ColorTriangleRootPro
       if (Math.abs(currentZValue - newVals.z) > 0.001) setCurrentZValue(newVals.z);
     }
 
-    const thumbXElement = useRef<HTMLElement | undefined>(undefined);
-    const thumbYElement = useRef<HTMLElement | undefined>(undefined);
-    const thumbZElement = useRef<HTMLElement | undefined>(undefined);
     const thumbElement = useRef<HTMLElement | undefined>(undefined);
     const elementRef = useRef<HTMLDivElement>(null);
     const rectRef = useRef<DOMRect | undefined>(undefined);
@@ -237,6 +233,8 @@ export const ColorTriangleRoot = forwardRef<HTMLDivElement, ColorTriangleRootPro
     }
 
     function handleKeyDown3Channel(event: React.KeyboardEvent) {
+      // The merged thumb is a single focus target, so keyboard nudges always drive
+      // the x channel and redistribute the remainder across y and z.
       const step = 0.05;
       const multiplier = event.shiftKey ? 4 : 1;
       let channelDelta = 0;
@@ -247,10 +245,7 @@ export const ColorTriangleRoot = forwardRef<HTMLDivElement, ColorTriangleRootPro
         case "PageUp": channelDelta = step * 4; break;
         case "PageDown": channelDelta = -step * 4; break;
         case "Home": {
-          const u = activeDirection === "x" ? 1 : 0;
-          const v = activeDirection === "y" ? 1 : 0;
-          const w = activeDirection === "z" ? 1 : 0;
-          const vals = baryToChannels(u, v, w);
+          const vals = baryToChannels(1, 0, 0);
           updateValues(vals.x, vals.y, true, vals.z);
           event.preventDefault();
           return;
@@ -267,15 +262,12 @@ export const ColorTriangleRoot = forwardRef<HTMLDivElement, ColorTriangleRootPro
       event.preventDefault();
       const bary = channelsToBary();
       let newU = bary.u, newV = bary.v, newW = bary.w;
-      const ad = activeDirection;
-      const focused = ad === "x" ? newU : ad === "y" ? newV : newW;
+      const focused = newU;
       const newFocused = Math.max(0, Math.min(1, focused + channelDelta));
       const actualDelta = newFocused - focused;
-      const origU = newU, origV = newV, origW = newW;
+      const origV = newV, origW = newW;
 
-      if (ad === "x") newU = newFocused;
-      else if (ad === "y") newV = newFocused;
-      else newW = newFocused;
+      newU = newFocused;
 
       function redistribute(a: number, b: number, delta: number): [number, number] {
         const sum = a + b;
@@ -283,9 +275,7 @@ export const ColorTriangleRoot = forwardRef<HTMLDivElement, ColorTriangleRootPro
         return [-delta / 2, -delta / 2];
       }
 
-      if (ad === "x") [newV, newW] = redistribute(origV, origW, actualDelta);
-      else if (ad === "y") [newU, newW] = redistribute(origU, origW, actualDelta);
-      else [newU, newV] = redistribute(origU, origV, actualDelta);
+      [newV, newW] = redistribute(origV, origW, actualDelta);
 
       newU = Math.max(0, newU);
       newV = Math.max(0, newV);
@@ -343,19 +333,7 @@ export const ColorTriangleRoot = forwardRef<HTMLDivElement, ColorTriangleRootPro
       target.setPointerCapture(event.pointerId);
       event.preventDefault();
 
-      if (thumbXElement.current && (target === thumbXElement.current || thumbXElement.current.contains(target))) {
-        setActiveDirection("x");
-        thumbXElement.current.focus();
-      } else if (thumbYElement.current && (target === thumbYElement.current || thumbYElement.current.contains(target))) {
-        setActiveDirection("y");
-        thumbYElement.current.focus();
-      } else if (thumbZElement.current && (target === thumbZElement.current || thumbZElement.current.contains(target))) {
-        setActiveDirection("z");
-        thumbZElement.current.focus();
-      } else {
-        setActiveDirection("x");
-        thumbXElement.current?.focus();
-      }
+      thumbElement.current?.focus();
 
       setIsDragging(true);
       valueBeforeSlide.current = { x: currentXValue, y: currentYValue, z: currentZValue };
@@ -394,17 +372,15 @@ export const ColorTriangleRoot = forwardRef<HTMLDivElement, ColorTriangleRootPro
       if (disabled) return;
       if (isThreeChannel) handleKeyDown3Channel(event);
       else handleKeyDown2Channel(event);
-    }, [disabled, isThreeChannel, activeDirection, currentXValue, currentYValue, currentZValue, xMin, xMax, yMin, yMax, zMin, zMax, xStep, yStep, zStep, colorRef, xConfig, yConfig, zConfig, isControlled, onValueChange, onValueCommit]);
+    }, [disabled, isThreeChannel, currentXValue, currentYValue, currentZValue, xMin, xMax, yMin, yMax, zMin, zMax, xStep, yStep, zStep, colorRef, xConfig, yConfig, zConfig, isControlled, onValueChange, onValueCommit]);
 
     const ctxValue = useMemo<ColorTriangleContextValue>(() => ({
       disabled, colorSpace, xChannelKey, yChannelKey, zChannelKey,
       colorRef, currentXValue, currentYValue, currentZValue,
       xMin, xMax, yMin, yMax, zMin, zMax,
       isThreeChannel, rotation, vertices,
-      activeDirection, setActiveDirection,
-      thumbXElement, thumbYElement, thumbZElement,
       isDragging, thumbAlignment, thumbElement,
-    }), [disabled, colorSpace, xChannelKey, yChannelKey, zChannelKey, colorRef, currentXValue, currentYValue, currentZValue, xMin, xMax, yMin, yMax, zMin, zMax, isThreeChannel, rotation, vertices, activeDirection, isDragging, thumbAlignment]);
+    }), [disabled, colorSpace, xChannelKey, yChannelKey, zChannelKey, colorRef, currentXValue, currentYValue, currentZValue, xMin, xMax, yMin, yMax, zMin, zMax, isThreeChannel, rotation, vertices, isDragging, thumbAlignment]);
 
     return (
       <ColorTriangleContext.Provider value={ctxValue}>

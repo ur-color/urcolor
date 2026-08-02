@@ -7,7 +7,6 @@ type Story = StoryObj<typeof ColorTriangle.Root>;
 
 function TriangleDemo(props: Record<string, unknown>) {
   const [color, setColor] = useState<Color | undefined>();
-  const isThreeChannel = "channelZ" in props;
   return (
     <ColorTriangle.Root
       value={color}
@@ -16,11 +15,7 @@ function TriangleDemo(props: Record<string, unknown>) {
       {...props}
     >
       <ColorTriangle.Gradient className="block absolute inset-0" />
-      <ColorTriangle.Thumb className="size-4 rounded-full border-2 border-white shadow bg-current">
-        <ColorTriangle.ThumbX />
-        <ColorTriangle.ThumbY />
-        {isThreeChannel && <ColorTriangle.ThumbZ />}
-      </ColorTriangle.Thumb>
+      <ColorTriangle.Thumb className="size-4 rounded-full border-2 border-white shadow bg-current" />
     </ColorTriangle.Root>
   );
 }

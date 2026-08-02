@@ -1,8 +1,6 @@
 import { createContext, useContext } from "react";
 import type { Color, SpaceId } from "@urcolor/core";
 
-export type ActiveDirection = "x" | "y";
-
 export interface ColorWheelContextValue {
   disabled: boolean;
   colorSpace: SpaceId;
@@ -16,10 +14,7 @@ export interface ColorWheelContextValue {
   radiusMin: number;
   radiusMax: number;
   startAngle: number;
-  activeDirection: ActiveDirection;
-  setActiveDirection: (dir: ActiveDirection) => void;
-  thumbXElement: React.MutableRefObject<HTMLElement | undefined>;
-  thumbYElement: React.MutableRefObject<HTMLElement | undefined>;
+  thumbElement: React.MutableRefObject<HTMLElement | undefined>;
   isDragging: boolean;
 }
 

@@ -2,7 +2,7 @@ import { forwardRef, useCallback, useMemo, useRef, useState } from "react";
 import { Color, type SpaceId } from "@urcolor/core";
 import { colorSpaces, getChannelConfig, displayToNative, nativeToDisplay, type ChannelConfig } from "@urcolor/core";
 import { cartesianToPolar, normalizeAngle, clampToCircle } from "@urcolor/core";
-import { ColorWheelContext, type ActiveDirection, type ColorWheelContextValue } from "./ColorWheelRootContext";
+import { ColorWheelContext, type ColorWheelContextValue } from "./ColorWheelRootContext";
 
 export interface ColorWheelRootProps {
   value?: Color | string | null;
@@ -65,11 +65,9 @@ export const ColorWheelRoot = forwardRef<HTMLDivElement, ColorWheelRootProps>(
     const init = colorToDisplayValues(colorRef);
     const [currentAngleValue, setCurrentAngleValue] = useState(init.angle);
     const [currentRadiusValue, setCurrentRadiusValue] = useState(init.radius);
-    const [activeDirection, setActiveDirection] = useState<ActiveDirection>("x");
     const [isDragging, setIsDragging] = useState(false);
 
-    const thumbXElement = useRef<HTMLElement | undefined>(undefined);
-    const thumbYElement = useRef<HTMLElement | undefined>(undefined);
+    const thumbElement = useRef<HTMLElement | undefined>(undefined);
     const elementRef = useRef<HTMLDivElement>(null);
     const rectRef = useRef<DOMRect | undefined>(undefined);
     const valueBeforeSlide = useRef({ angle: currentAngleValue, radius: currentRadiusValue });
@@ -193,8 +191,6 @@ export const ColorWheelRoot = forwardRef<HTMLDivElement, ColorWheelRootProps>(
       else if (event.key === "End") { updateValues(angleMax, radiusMax, true); event.preventDefault(); return; }
       else return;
       event.preventDefault();
-      if (angleOffset !== 0) setActiveDirection("x");
-      if (radiusOffset !== 0) setActiveDirection("y");
       let newAngle = currentAngleValue + angleOffset;
       const isCyclic = angleConfig?.format === "degree";
       if (isCyclic) { const r = angleMax - angleMin; newAngle = ((newAngle - angleMin) % r + r) % r + angleMin; }
@@ -206,8 +202,8 @@ export const ColorWheelRoot = forwardRef<HTMLDivElement, ColorWheelRootProps>(
     const ctxValue = useMemo<ColorWheelContextValue>(() => ({
       disabled, colorSpace, angleChannelKey, radiusChannelKey, colorRef,
       currentAngleValue, currentRadiusValue, angleMin, angleMax, radiusMin, radiusMax,
-      startAngle, activeDirection, setActiveDirection, thumbXElement, thumbYElement, isDragging,
-    }), [disabled, colorSpace, angleChannelKey, radiusChannelKey, colorRef, currentAngleValue, currentRadiusValue, angleMin, angleMax, radiusMin, radiusMax, startAngle, activeDirection, isDragging]);
+      startAngle, thumbElement, isDragging,
+    }), [disabled, colorSpace, angleChannelKey, radiusChannelKey, colorRef, currentAngleValue, currentRadiusValue, angleMin, angleMax, radiusMin, radiusMax, startAngle, isDragging]);
 
     return (
       <ColorWheelContext.Provider value={ctxValue}>
