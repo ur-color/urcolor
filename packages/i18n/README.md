@@ -75,12 +75,14 @@ speakers *spontaneously name* a region of colour space, `wikidata` records the
 `resolve()` reports `probability` as a **proximity confidence, not a naming
 frequency** — read `binDistance` for the underlying Oklab distance.
 
-Coverage is `terms / 964`: `en` 93%, `de` 50%, `ja` 28%, `ka` 0.3%. Thin
-languages are shipped rather than pruned — a three-term Georgian chunk cannot
-name an arbitrary colour, but it resolves `colorOf("ყვითელი")` correctly.
+Coverage is `terms / 964`: `en` 93%, `de` 50%, `ja` 28%, `ka` 1.5%. Thin
+languages are shipped rather than pruned — Georgian's 14-term chunk (33 other
+locales carry just a single term) can't name an arbitrary colour, but it
+resolves `colorOf("ყვითელი")` correctly.
 
-Wikidata is **CC0-1.0**, so the licensing caveat above does not apply to this
-source.
+Wikidata is **CC0-1.0**. The "no license declared upstream, make your own
+assessment" caveat in [Licensing](#licensing) below is about `uwdata`
+specifically — it does not apply here.
 
 ## Data source and attribution
 
