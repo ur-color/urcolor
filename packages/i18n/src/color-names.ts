@@ -3,6 +3,7 @@ import { filterSupportedLocales, negotiateLocale } from "./engine/locale";
 import { getLoadedChunk, getSource, loadChunk } from "./engine/registry";
 import { lookupFull, type BinMatch, type Candidate } from "./engine/lookup-full";
 import { lookupHue, type HueMatch } from "./engine/lookup-hue";
+import { lookupPalette } from "./engine/lookup-palette";
 import type { Chunk } from "./engine/types";
 
 export interface ColorNamesOptions {
@@ -29,7 +30,7 @@ export interface ColorNameResolution {
   term: string | undefined;
   probability: number;
   candidates: Candidate[];
-  model: "full" | "hue";
+  model: "full" | "hue" | "palette";
   source: string;
   coverage: "exact" | "nearest" | "none";
   binDistance: number;
@@ -44,7 +45,7 @@ export interface ColorNameResolution {
 export interface ResolvedColorNamesOptions {
   locale: string;
   source: string;
-  model: "full" | "hue";
+  model: "full" | "hue" | "palette";
   style: "long" | "short";
   fallback: "nearest" | "none";
   binSize: number | undefined;
@@ -53,6 +54,13 @@ export interface ResolvedColorNamesOptions {
 
 const DEFAULT_MAX_DISTANCE = 0.075;
 const DEFAULT_TOP_N = 5;
+
+/**
+ * The palette model's default search radius is wider than the binned models'.
+ * 964 catalogued colours spread across Oklab leave real gaps — a radius tuned
+ * for a dense 0.05 bin grid would report "none" for ordinary colours.
+ */
+const DEFAULT_PALETTE_MAX_DISTANCE = 0.15;
 
 /**
  * The hue model only describes the saturated hue ring; beyond this Oklab
@@ -119,7 +127,8 @@ export class ColorNames {
       source: options.source,
       style: options.style ?? "long",
       fallback: options.fallback ?? "nearest",
-      maxDistance: options.maxDistance ?? DEFAULT_MAX_DISTANCE,
+      maxDistance: options.maxDistance
+        ?? (chunk.model === "palette" ? DEFAULT_PALETTE_MAX_DISTANCE : DEFAULT_MAX_DISTANCE),
       topN: options.topN ?? DEFAULT_TOP_N,
     };
   }
@@ -178,9 +187,18 @@ export class ColorNames {
   resolve(color: Color): ColorNameResolution {
     const { source, topN, maxDistance } = this.#options;
 
-    const match = this.#chunk.model === "full"
-      ? lookupFull(this.#chunk, oklabOf(color), { topN, maxDistance })
-      : lookupHue(this.#chunk, color, { topN, maxHueDistance: MAX_HUE_DISTANCE });
+    let match: BinMatch | HueMatch;
+    switch (this.#chunk.model) {
+      case "full":
+        match = lookupFull(this.#chunk, oklabOf(color), { topN, maxDistance });
+        break;
+      case "hue":
+        match = lookupHue(this.#chunk, color, { topN, maxHueDistance: MAX_HUE_DISTANCE });
+        break;
+      case "palette":
+        match = lookupPalette(this.#chunk, oklabOf(color), { topN, maxDistance });
+        break;
+    }
 
     const best = match.candidates[0];
     return {
@@ -210,7 +228,16 @@ export class ColorNames {
     // input, not the comparison strategy: this keeps the match exact rather
     // than fuzzy, while making it robust to the caller's normalisation form.
     const normalizedTerm = term.normalize("NFC");
-    const entry = this.#chunk.terms.find(([key, name]) => key === normalizedTerm || name === normalizedTerm);
+    let entry = this.#chunk.terms.find(([key, name]) => key === normalizedTerm || name === normalizedTerm);
+
+    // Palette chunks carry the source's alternative names separately. Only
+    // consult them after a direct term/name miss, so a real term never loses
+    // to another entry's alias.
+    if (entry === undefined && this.#chunk.model === "palette") {
+      const index = this.#chunk.aliases[normalizedTerm.toLowerCase()];
+      if (index !== undefined) entry = this.#chunk.terms[index];
+    }
+
     if (entry === undefined) return undefined;
 
     const [key, name, centroid, pCT] = entry;

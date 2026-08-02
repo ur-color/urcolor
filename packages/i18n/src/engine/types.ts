@@ -1,6 +1,10 @@
 /** Which naming model backs a language, and how much of the space it covers. */
 export interface LanguageCoverage {
-  /** `"full"` = Oklab-cube model; `"hue"` = saturated-hue-circle model only. */
+  /**
+   * `"full"` = Oklab-cube model; `"hue"` = saturated-hue-circle model only;
+   * `"palette"` = a discrete catalogue of named colours with exact values,
+   * not a model of a colour space at all.
+   */
   model: "full" | "hue" | "palette";
   /** Number of distinct colour terms modelled for this language. */
   terms: number;
@@ -92,7 +96,7 @@ export interface PaletteChunk {
   aliases: Record<string, number>;
 }
 
-export type Chunk = FullChunk | HueChunk;
+export type Chunk = FullChunk | HueChunk | PaletteChunk;
 
 /** Locale -> lazy loader for that locale's chunk. */
 export type ChunkLoaders = Record<string, () => Promise<{ default: Chunk }>>;
