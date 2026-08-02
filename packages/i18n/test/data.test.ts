@@ -1,4 +1,4 @@
-import { beforeAll, describe, expect, it } from "bun:test";
+import { describe, expect, it } from "bun:test";
 import { Color } from "@urcolor/core";
 // Side-effect import: this file asserts against the real registered sources
 // and the shipped default chain, so it must register them itself rather
@@ -10,7 +10,7 @@ import wikidataMeta from "../src/data/wikidata/meta.json";
 import { uwdataChunks } from "../src/sources/uwdata/chunks";
 import type { FullChunk, HueChunk } from "../src/engine/types";
 import { ColorNames } from "../src/color-names";
-import { getSource, listSources, loadChunk, setDefaultSources } from "../src/engine/registry";
+import { getDefaultSources, getSource, listSources, loadChunk } from "../src/engine/registry";
 
 const FULL_LANGS = ["de", "en", "es", "fa", "fi", "fr", "ko", "nl", "pl", "pt", "ro", "ru", "sv", "zh"];
 
@@ -178,14 +178,16 @@ describe("wikidata data integrity", () => {
 });
 
 describe("default source chain against shipped data", () => {
-  // Other suites (engine/registry.test.ts, engine/source-chain.test.ts,
-  // color-names.test.ts) call setDefaultSources() with fake ids to test the
-  // chain mechanism in isolation. That call mutates shared module state, so
-  // whichever chain was installed last leaks into whatever runs next in the
-  // same process. Restore the real shipped chain here so these assertions
-  // hold regardless of test-file execution order.
-  beforeAll(() => {
-    setDefaultSources(["uwdata", "wikidata"]);
+  // Regression guard for src/index.ts's setDefaultSources(["uwdata",
+  // "wikidata"]) call: this asserts the entry point itself installed the
+  // real chain, as an unmediated consequence of importing it, rather than
+  // this file installing it. (Other suites — engine/registry.test.ts,
+  // engine/source-chain.test.ts, color-names.test.ts — install fake chains
+  // via the same shared module state, but they now save and restore it
+  // around their own tests, so the real chain set by "../src/index" above
+  // survives intact by the time this runs.)
+  it("registers the shipped default chain on import", () => {
+    expect(getDefaultSources()).toEqual(["uwdata", "wikidata"]);
   });
 
   it("defaults to uwdata for a locale both sources cover", async () => {

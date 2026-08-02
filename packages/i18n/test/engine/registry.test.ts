@@ -1,4 +1,4 @@
-import { describe, expect, it } from "bun:test";
+import { afterAll, beforeAll, describe, expect, it } from "bun:test";
 import "../../src/index";
 import { getSource, listSources, setDefaultSources, getDefaultSources } from "../../src/engine/registry";
 
@@ -47,6 +47,18 @@ describe("source registry", () => {
 });
 
 describe("default sources", () => {
+  // The default chain is shared module state, not scoped to this describe
+  // block. Save and restore it around these tests so installing "alpha"/
+  // "beta" here doesn't leak into whatever suite runs next in the same
+  // process and corrupt an assertion against the real shipped chain.
+  let realDefaults: readonly string[];
+  beforeAll(() => {
+    realDefaults = getDefaultSources();
+  });
+  afterAll(() => {
+    setDefaultSources(realDefaults);
+  });
+
   it("round-trips what was set", () => {
     setDefaultSources(["alpha", "beta"]);
     expect(getDefaultSources()).toEqual(["alpha", "beta"]);

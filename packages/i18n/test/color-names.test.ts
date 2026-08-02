@@ -1,7 +1,7 @@
-import { beforeAll, describe, expect, it } from "bun:test";
+import { afterAll, beforeAll, describe, expect, it } from "bun:test";
 import { Color } from "@urcolor/core";
 import { ColorNames } from "../src/index";
-import { registerSource, setDefaultSources } from "../src/engine/registry";
+import { getDefaultSources, registerSource, setDefaultSources } from "../src/engine/registry";
 import type { PaletteChunk } from "../src/engine/types";
 
 const BLUE = Color.parse("#3b82f6")!;
@@ -326,7 +326,14 @@ describe("source chains", () => {
     aliases: {},
   });
 
+  // The default chain is shared module state. Save it before this describe
+  // block installs its fake "chain-narrow"/"chain-broad" chain below, and
+  // restore it in afterAll, so this suite doesn't leak a fake chain into
+  // whatever runs next and corrupt an assertion against the real one.
+  let realDefaults: readonly string[];
+
   beforeAll(() => {
+    realDefaults = getDefaultSources();
     registerSource(
       {
         id: "chain-narrow",
@@ -376,6 +383,10 @@ describe("source chains", () => {
       { ka: () => Promise.resolve({ default: chunkFor("ka") }) },
     );
     setDefaultSources(["chain-narrow", "chain-broad"]);
+  });
+
+  afterAll(() => {
+    setDefaultSources(realDefaults);
   });
 
   it("uses the default chain when source is omitted entirely", async () => {

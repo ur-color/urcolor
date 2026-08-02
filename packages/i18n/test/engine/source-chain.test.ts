@@ -1,5 +1,5 @@
-import { beforeAll, describe, expect, it } from "bun:test";
-import { registerSource, setDefaultSources } from "../../src/engine/registry";
+import { afterAll, beforeAll, describe, expect, it } from "bun:test";
+import { getDefaultSources, registerSource, setDefaultSources } from "../../src/engine/registry";
 import {
   chainLocales,
   normalizeChain,
@@ -21,6 +21,8 @@ function fakeSource(id: string, locales: string[]): NameSource {
   };
 }
 
+let realDefaults: readonly string[];
+
 beforeAll(() => {
   // Mirrors the real shape: "narrow" is a strict subset of "broad", except
   // that "broad" also carries the script variant "zh-Hant" that "narrow"
@@ -28,7 +30,16 @@ beforeAll(() => {
   // Loaders are never invoked here — this module only reads `languages`.
   registerSource(fakeSource("narrow", ["en", "zh", "pt"]), {});
   registerSource(fakeSource("broad", ["en", "zh", "zh-Hant", "pt", "ka"]), {});
+  // The default chain is shared module state. Save it before installing
+  // this file's fake chain, and restore it in afterAll below, so this
+  // suite doesn't leak "narrow"/"broad" into whatever runs next and
+  // corrupt an assertion against the real shipped chain.
+  realDefaults = getDefaultSources();
   setDefaultSources(["narrow", "broad"]);
+});
+
+afterAll(() => {
+  setDefaultSources(realDefaults);
 });
 
 describe("normalizeChain", () => {
