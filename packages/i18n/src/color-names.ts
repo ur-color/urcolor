@@ -176,16 +176,23 @@ export class ColorNames {
   /**
    * Resolve the source and locale, load the chunk, and construct an instance.
    *
-   * The original `locales` and `options` are handed to the constructor rather
-   * than the resolved pair, so `resolvedOptions().sources` still reports the
-   * whole chain that was considered rather than collapsing to the winner.
-   * Resolution is deterministic, so the constructor reaches the same match.
+   * `options` is snapshotted before the `await loadChunk(...)` below, and the
+   * constructor is handed the already-resolved `sources` chain rather than
+   * re-reading `options.source` itself. Without this, a caller that mutates
+   * their `options` object during the await window (or reuses/shares it)
+   * could make the constructor re-resolve against a different chain than the
+   * one `load` actually loaded a chunk for — silently answering from a
+   * dataset this call never loaded, or throwing the generic "not loaded"
+   * error. Passing the full `sources` array (not just the winning
+   * `match.source`) is deliberate: it's what keeps `resolvedOptions().sources`
+   * reporting the whole chain that was considered, not just the winner.
    */
   static async load(
     locales: string | readonly string[],
     options: ColorNamesOptions = {},
   ): Promise<ColorNames> {
-    const sources = normalizeChain(options.source);
+    const snapshot = { ...options };
+    const sources = normalizeChain(snapshot.source);
     const match = resolveSourceChain(locales, sources);
     if (match === undefined) {
       throw new RangeError(
@@ -193,7 +200,7 @@ export class ColorNames {
       );
     }
     await loadChunk(match.source, match.locale);
-    return new ColorNames(locales, options);
+    return new ColorNames(locales, { ...snapshot, source: sources });
   }
 
   static supportedLocalesOf(

@@ -359,6 +359,22 @@ describe("source chains", () => {
         "ka": () => Promise.resolve({ default: chunkFor("ka") }),
       },
     );
+    // A third, otherwise-unrelated source that also answers "ka". Used only
+    // by the options-mutation-during-await test below: its chunk is loaded
+    // ahead of time so it is already cached, which is what makes the buggy
+    // re-resolution silently succeed (from the wrong dataset) instead of
+    // throwing — the worse of the two bad outcomes the fix guards against.
+    registerSource(
+      {
+        id: "chain-third",
+        title: "Third",
+        url: "https://example.invalid/",
+        license: "CC0-1.0",
+        citation: "Third",
+        languages: { ka: { model: "palette", terms: 1, coverage: 1 } },
+      },
+      { ka: () => Promise.resolve({ default: chunkFor("ka") }) },
+    );
     setDefaultSources(["chain-narrow", "chain-broad"]);
   });
 
@@ -439,5 +455,22 @@ describe("source chains", () => {
     const names = await ColorNames.load("ka");
     expect(names.of(Color.parse("#FFFF00")!)).toBe("yellow");
     expect(names.resolve(Color.parse("#FFFF00")!).source).toBe("chain-broad");
+  });
+
+  it("is immune to the caller mutating options.source during the await window", async () => {
+    // Pre-load a third source's "ka" chunk so it is already cached. This is
+    // what would let a re-resolution against the mutated options silently
+    // succeed from the wrong dataset, rather than throwing — the worse of
+    // the two bad outcomes a live re-read of `options` would allow.
+    await ColorNames.load("ka", { source: "chain-third" });
+
+    const opts: { source: string | readonly string[] } = { source: ["chain-narrow", "chain-broad"] };
+    const pending = ColorNames.load("ka", opts);
+    opts.source = "chain-third";
+    const names = await pending;
+
+    expect(names.resolvedOptions().source).toBe("chain-broad");
+    expect(names.resolvedOptions().sources).toEqual(["chain-narrow", "chain-broad"]);
+    expect(names.resolvedOptions().locale).toBe("ka");
   });
 });
