@@ -6,6 +6,17 @@ const QUANTIZE_MODE: "round" | "floor" = "round";
 export interface Candidate {
   name: string;
   term: string;
+  /**
+   * Meaning depends on the model that produced this candidate. For `full`
+   * and `hue` chunks this is a sampled naming frequency: the fraction of
+   * upstream study participants who used this term for a colour in the
+   * matched bin. For `palette` chunks (see `lookupPalette`) there is no
+   * sampled distribution to draw from — this is instead a proximity
+   * confidence derived from Oklab distance to the candidate's catalogued
+   * colour, and it is NOT a naming frequency. Either way, the underlying
+   * raw distance is always available on `BinMatch.binDistance` /
+   * `ColorNameResolution.binDistance`.
+   */
   probability: number;
 }
 

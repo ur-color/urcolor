@@ -127,7 +127,23 @@ describe("groupLabels", () => {
 
   it("lets the base tag win over a variant for the same item", async () => {
     const { labels } = await load();
-    // Q943 has both en "yellow" and en-us "yellow (US)".
+    // Q943 has both en "yellow" and en-us "yellow (US)". The fixture happens
+    // to list the "en" row before "en-us", which alone wouldn't distinguish
+    // base-tag-wins from plain first-wins-by-arrival — so this assertion is
+    // backed up by the inline, order-reversed case below.
+    expect(labels.get("en")?.get("Q943")).toBe("yellow");
+  });
+
+  it("lets the base tag win even when the variant row arrives first", () => {
+    // Same shape as the fixture case above, but built inline with the
+    // variant row ("en-us") listed before the base row ("en") — the order
+    // the fixture doesn't exercise. If the base-tag-wins guard were deleted
+    // and this fell back to first-wins-by-arrival, this would return
+    // "yellow (US)" instead.
+    const labels = groupLabels([
+      { qid: "Q943", lang: "en-us", value: "yellow (US)" },
+      { qid: "Q943", lang: "en", value: "yellow" },
+    ]);
     expect(labels.get("en")?.get("Q943")).toBe("yellow");
   });
 

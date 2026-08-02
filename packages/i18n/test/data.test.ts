@@ -1,6 +1,7 @@
 import { describe, expect, it } from "bun:test";
 import { Color } from "@urcolor/core";
 import meta from "../src/data/uwdata/meta.json";
+import wikidataMeta from "../src/data/wikidata/meta.json";
 import { uwdataChunks } from "../src/sources/uwdata/chunks";
 import type { FullChunk, HueChunk } from "../src/engine/types";
 import { ColorNames } from "../src/color-names";
@@ -136,5 +137,37 @@ describe("wikidata data integrity", () => {
   it("keeps the two sources independent", () => {
     const ids = listSources().map(source => source.id).sort();
     expect(ids).toEqual(["uwdata", "wikidata"]);
+  });
+
+  // Unlike uwdata, wikidata has no pinned upstream revision — it queries a
+  // live SPARQL endpoint by design (see scripts/sync-wikidata/fetch.ts), so
+  // there is no commitSha to assert. Without a floor, a catastrophic upstream
+  // change would sail through undetected: e.g. a Wikidata ontology edit that
+  // breaks a P279 link partway down the wd:Q1075 subclass chain would make
+  // ITEMS_QUERY return a fraction of the real item count. Every structural
+  // integrity test above would still pass — the rows that do come back are
+  // perfectly well-formed — while the sync quietly deleted most chunks,
+  // wrote a handful of thin ones, and coverage recomputed against the new,
+  // shrunken denominator without complaint. These floors are the only guard
+  // against that class of silent regression for this source.
+  it("keeps at least 900 catalogued items", () => {
+    expect(wikidataMeta.itemCount).toBeGreaterThanOrEqual(900);
+  });
+
+  it("keeps at least 280 shipped locales", () => {
+    const source = getSource("wikidata");
+    expect(Object.keys(source.languages).length).toBeGreaterThanOrEqual(280);
+  });
+
+  // en is by far the largest chunk (~119 KB, ~897 terms). Ceiling set at the
+  // real value plus ~15% headroom, mirroring the uwdata chunk-size guard
+  // above — this catches a future sync silently inflating the bundle further
+  // without needing an exact byte count.
+  it("keeps every wikidata chunk under 140 KB", async () => {
+    const source = getSource("wikidata");
+    for (const locale of Object.keys(source.languages)) {
+      const bytes = Bun.file(`${import.meta.dir}/../src/data/wikidata/${locale}.js`).size;
+      expect(bytes).toBeLessThan(140 * 1024);
+    }
   });
 });

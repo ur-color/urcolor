@@ -1,9 +1,6 @@
 import type { NameSource } from "../../engine/types";
 import meta from "../../data/wikidata/meta.json";
 
-/** Catalogue size the shipped coverage figures were computed against. */
-export const WIKIDATA_ITEM_COUNT = meta.itemCount;
-
 export const wikidataSource: NameSource = {
   id: "wikidata",
   title: "Wikidata",
