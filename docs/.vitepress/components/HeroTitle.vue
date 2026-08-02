@@ -141,7 +141,7 @@ onUnmounted(() => {
 
 <style scoped>
 .hero-title {
-  font-size: clamp(2rem, 8vw, 5.5rem);
+  font-size: clamp(2rem, 6vw, 3.5rem);
   font-weight: 800;
   line-height: 1.2;
   letter-spacing: -0.02em;

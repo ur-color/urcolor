@@ -1,96 +1,98 @@
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
-import HeroDemo from "./HeroDemo.vue";
-import HeroBgCanvas from "./HeroBgCanvas.vue";
+import { provideHeroColor } from "../composables/useHeroColor";
 import FeaturesGrid from "./FeaturesGrid.vue";
+import HeroBgCanvas from "./HeroBgCanvas.vue";
+import HeroOrbit from "./HeroOrbit.vue";
 import HeroTitle from "./HeroTitle.vue";
 
-const perspectiveEl = ref<HTMLElement>();
-
-onMounted(async () => {
-  const gsap = (await import("gsap")).default;
-  const { ScrollTrigger } = await import("gsap/ScrollTrigger");
-  gsap.registerPlugin(ScrollTrigger);
-
-  // 3D scroll effect
-  if (perspectiveEl.value) {
-    gsap.set(perspectiveEl.value, { rotateX: -36, transformPerspective: 1000 });
-    gsap.to(perspectiveEl.value, {
-      rotateX: 0,
-      ease: "none",
-      scrollTrigger: {
-        trigger: perspectiveEl.value,
-        start: "top 80%",
-        end: "top 30%",
-        scrub: true,
-      },
-    });
-  }
-});
+provideHeroColor();
 </script>
 
 <template>
   <div class="hero-section">
     <HeroBgCanvas />
-    <div class="hero-content">
-      <HeroTitle />
-      <p class="hero-tagline">
-        Universal color picker component library
-      </p>
-      <div class="hero-actions">
-        <a
-          href="/guide/"
-          class="hero-btn hero-btn-brand"
-        >Get Started</a>
-        <a
-          href="/components/"
-          class="hero-btn hero-btn-alt"
-        >Components</a>
+
+    <div class="hero-stage">
+      <div class="hero-copy">
+        <HeroTitle />
+        <p class="hero-tagline">
+          Universal color picker component library
+        </p>
+        <p class="hero-lede">
+          Headless, accessible primitives for every color space — sRGB, HSL,
+          LCH, OKLCH — in any framework, with no runtime dependencies.
+        </p>
+        <div class="hero-actions">
+          <a
+            href="/guide/"
+            class="hero-btn hero-btn-brand"
+          >Get Started</a>
+          <a
+            href="/components/"
+            class="hero-btn hero-btn-alt"
+          >Components</a>
+        </div>
+      </div>
+
+      <div class="hero-cluster">
+        <HeroOrbit />
       </div>
     </div>
 
-    <div
-      ref="perspectiveEl"
-      class="hero-demo-perspective"
-    >
-      <HeroDemo />
+    <div class="hero-features">
+      <FeaturesGrid />
     </div>
-
-    <FeaturesGrid />
   </div>
 </template>
 
 <style scoped>
 .hero-section {
   position: relative;
-  max-width: 960px;
-  margin: 0 auto;
-  padding: 180px 24px 80px;
-  text-align: center;
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
-.hero-content,
-.hero-demo-perspective {
+.hero-stage {
   position: relative;
   z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+  align-items: center;
+  gap: clamp(24px, 4vw, 64px);
+  max-width: 1400px;
+  margin: 0 auto;
+  min-height: calc(100dvh - var(--vp-nav-height));
+  padding: 24px clamp(24px, 4vw, 56px) 40px;
+  text-align: left;
 }
 
-.hero-content {
-  margin-bottom: 80px;
+.hero-copy {
+  max-width: 560px;
 }
 
 .hero-tagline {
-  font-size: clamp(1rem, 4vw, 1.5rem);
+  font-size: clamp(1.05rem, 2vw, 1.4rem);
+  color: var(--vp-c-text-1);
+  margin-top: 8px;
+}
+
+.hero-lede {
+  font-size: clamp(0.9rem, 1.4vw, 1rem);
+  line-height: 1.6;
   color: var(--vp-c-text-2);
-  margin-bottom: 32px;
+  margin-top: 14px;
+  max-width: 46ch;
+}
+
+.hero-cluster {
+  min-width: 0;
 }
 
 .hero-actions {
   display: flex;
   gap: 12px;
-  justify-content: center;
+  justify-content: flex-start;
   flex-wrap: wrap;
+  margin-top: 28px;
 }
 
 .hero-btn {
@@ -137,104 +139,52 @@ onMounted(async () => {
   color: var(--vp-c-brand-1);
 }
 
-.hero-demo-perspective {
-  margin-bottom: 64px;
-  will-change: transform;
-}
-
-/* Skeleton matching HeroDemo layout */
-.hero-demo-skeleton {
-  width: 100%;
-  max-width: 640px;
+.hero-features {
+  position: relative;
+  z-index: 1;
+  max-width: 960px;
   margin: 0 auto;
+  padding: 0 24px 80px;
 }
 
-.hero-demo-skeleton-grid {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  grid-template-rows: auto auto;
-  gap: 16px;
-  padding: 20px;
-  border-radius: 20px;
-  background: color-mix(in srgb, var(--vp-c-bg) 40%, transparent);
-  backdrop-filter: blur(20px);
-  border: 1px solid color-mix(in srgb, var(--vp-c-text-1) 15%, transparent);
-}
-
-.skeleton-area {
-  grid-column: 1;
-  grid-row: 1;
-  height: 260px;
-  border-radius: 12px;
-  background: var(--vp-c-bg-soft);
-}
-
-.skeleton-swatches {
-  grid-column: 2;
-  grid-row: 1;
-  width: 192px;
-  border-radius: 12px;
-  background: var(--vp-c-bg-soft);
-}
-
-.skeleton-sliders {
-  grid-column: 1;
-  grid-row: 2;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  gap: 10px;
-}
-
-.skeleton-track {
-  height: 1.25rem;
-  border-radius: 0.75rem;
-  background: var(--vp-c-bg-soft);
-}
-
-.skeleton-fields {
-  grid-column: 2;
-  grid-row: 2;
-  width: 192px;
-  background: var(--vp-c-bg-soft);
-  border-radius: 6px;
-}
-
-@media (max-width: 640px) {
-  .hero-demo-skeleton-grid {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto auto auto auto;
+/*
+ * Below this the two columns each get too narrow to be worth the split: the
+ * copy wraps to ragged three-word lines and the cluster loses its orbit. One
+ * centered column instead.
+ */
+@media (max-width: 1080px) {
+  .hero-stage {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+    text-align: center;
+    gap: 32px;
   }
 
-  .skeleton-area {
-    grid-column: 1;
-    grid-row: 1;
-    height: 160px;
+  .hero-copy {
+    max-width: 620px;
   }
 
-  .skeleton-swatches {
-    grid-column: 1;
-    grid-row: 2;
+  .hero-lede {
+    margin-inline: auto;
+  }
+
+  .hero-actions {
+    justify-content: center;
+  }
+
+  .hero-cluster {
     width: 100%;
-    height: 60px;
-  }
-
-  .skeleton-sliders {
-    grid-column: 1;
-    grid-row: 3;
-  }
-
-  .skeleton-fields {
-    grid-column: 1;
-    grid-row: 4;
-    width: 100%;
-    height: 60px;
   }
 }
 
 @media (max-width: 768px) {
-  .hero-section {
-    padding: 72px 16px 48px;
+  .hero-stage {
+    min-height: 0;
+    padding: 48px 16px 32px;
+  }
+
+  .hero-features {
+    padding: 0 16px 48px;
   }
 }
 </style>
