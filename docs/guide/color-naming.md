@@ -5,8 +5,9 @@ language, from either of two independent sources: `uwdata`, crowdsourced
 colour-perception data that models how speakers spontaneously name a region
 of colour space, or `wikidata`, an editorial catalogue of discrete named
 colours contributed by Wikidata editors. They answer different questions —
-see [Sources](#sources) below — and `source` is always required, so you
-always know which one produced an answer.
+see [Sources](#sources) below. By default `uwdata` answers the 20 locales it
+covers and `wikidata` answers the rest; whichever one answered is always
+named by `resolvedOptions().source`.
 
 ## Basic usage
 
@@ -110,7 +111,7 @@ near those extremes.
 
 | Option | Values | Default | Meaning |
 | --- | --- | --- | --- |
-| `source` | source id | *required* | Which dataset answers |
+| `source` | source id, or an array of them | `["uwdata", "wikidata"]` | Which dataset(s) answer, in priority order. A single id pins the instance and throws if that source lacks the locale |
 | `style` | `"long"` \| `"short"` | `"long"` | Display name vs. matching key |
 | `fallback` | `"nearest"` \| `"none"` | `"nearest"` | Whether a `"nearest"` result is withheld by `of()`. Meaningfully filters full-model results; a no-op for hue-model locales (see above); highly consequential for `wikidata`'s palette locales, where almost every query reports `"nearest"` |
 | `maxDistance` | number | `0.075` (full/hue), `0.15` (palette) | Oklab search radius used at lookup time — unconditionally, not only when `fallback` is `"nearest"`. Wider by default for `wikidata` because 964 catalogued colours leave real gaps a bin-tuned radius would miss |
@@ -157,9 +158,20 @@ exactly the capability `uwdata` lacks there.
 
 ## Sources
 
-`source` is required. Datasets are namespaced and never merged, because they use
-different methodologies and blending them would produce answers no source
-actually supports.
+Datasets are namespaced and never merged, because they use different
+methodologies and blending them would produce answers no source actually
+supports. Exactly one source answers an entire `ColorNames` instance, chosen
+at load time and fixed thereafter.
+
+Omitting `source` walks the default chain — `uwdata` first, then `wikidata`.
+Provenance is then implicit in the *request* but still explicit in the
+*result*: `resolve().source` and `resolvedOptions().source` always name the
+dataset that answered, and `resolvedOptions().sources` reports the whole chain
+that was considered.
+
+Requesting a tag one source has exactly beats a tag another only reaches by
+stripping subtags, so `load("zh-Hant")` gets `wikidata`'s Traditional Chinese
+rather than `uwdata`'s Simplified `zh`. `load("zh")` still gets `uwdata`.
 
 ```ts
 import { listSources, getSource } from "@urcolor/i18n";
@@ -171,6 +183,13 @@ getSource("wikidata").disclaimer;
 ```
 
 Please surface the citation and disclaimer in any UI built on this data.
+
+`uwdata` covers 20 locales but several thinly — Romanian has 4 terms, Finnish
+11, Swedish 16, where `wikidata` has 65, 65, and 170. The chain is
+locale-level, so `load("ro")` stays on `uwdata`'s 4 terms. That is deliberate:
+switching sources on a coverage threshold would return perceptual data for one
+language and catalogue data for another with no defensible cutoff. Pass
+`{ source: ["wikidata"] }` when you want breadth over perceptual fidelity.
 
 ## Channel labels
 

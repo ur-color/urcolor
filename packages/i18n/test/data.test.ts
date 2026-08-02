@@ -171,3 +171,46 @@ describe("wikidata data integrity", () => {
     }
   });
 });
+
+describe("default source chain against shipped data", () => {
+  it("defaults to uwdata for a locale both sources cover", async () => {
+    const names = await ColorNames.load("en");
+    expect(names.resolvedOptions().source).toBe("uwdata");
+    expect(names.resolvedOptions().sources).toEqual(["uwdata", "wikidata"]);
+  });
+
+  it("falls through to wikidata for a locale uwdata lacks", async () => {
+    const names = await ColorNames.load("ka");
+    expect(names.resolvedOptions().source).toBe("wikidata");
+    expect(names.colorOf("ყვითელი")).toBeDefined();
+  });
+
+  it("gives zh to uwdata but zh-Hant to wikidata", async () => {
+    // The only tag where an exact rung in the later source outranks a
+    // stripped rung in the earlier one.
+    expect((await ColorNames.load("zh")).resolvedOptions().source).toBe("uwdata");
+
+    const hant = await ColorNames.load("zh-Hant");
+    expect(hant.resolvedOptions().source).toBe("wikidata");
+    expect(hant.resolvedOptions().locale).toBe("zh-Hant");
+  });
+
+  it("resolves a region variant through the base tag", async () => {
+    const names = await ColorNames.load("de-AT");
+    expect(names.resolvedOptions().source).toBe("uwdata");
+    expect(names.resolvedOptions().locale).toBe("de");
+  });
+
+  it("keeps thin uwdata locales on uwdata by design", async () => {
+    // Romanian has 4 uwdata terms vs 65 in wikidata. The rule is
+    // locale-level on purpose; callers wanting breadth pass wikidata.
+    expect((await ColorNames.load("ro")).resolvedOptions().source).toBe("uwdata");
+    expect((await ColorNames.load("ro", { source: ["wikidata"] })).resolvedOptions().source)
+      .toBe("wikidata");
+  });
+
+  it("supports every wikidata locale through the default chain", () => {
+    const supported = ColorNames.supportedLocalesOf(["ka", "chr", "en", "xx"]);
+    expect(supported).toEqual(["ka", "chr", "en"]);
+  });
+});

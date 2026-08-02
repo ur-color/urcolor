@@ -6,8 +6,14 @@ Multilingual colour naming and channel-label translations for urcolor.
 import { ColorNames, ChannelNames } from "@urcolor/i18n";
 import { Color } from "@urcolor/core";
 
+// Default chain: uwdata where it has the locale, wikidata for the rest.
+const ko = await ColorNames.load("ko");
+ko.of(Color.parse("#3b82f6")!);          // "파랑색"  (uwdata)
+const ka = await ColorNames.load("ka");
+ka.resolvedOptions().source;             // "wikidata"
+
+// Pin to one source when provenance must be fixed.
 const names = await ColorNames.load("ko", { source: "uwdata" });
-names.of(Color.parse("#3b82f6")!); // "파랑색"
 names.resolve(Color.parse("#3b82f6")!);
 // { name, term, probability, candidates, model, source, coverage, binDistance,
 //   hueProjectionDistance }  // only set for hue-model locales
@@ -84,12 +90,39 @@ Wikidata is **CC0-1.0**. The "no license declared upstream, make your own
 assessment" caveat in [Licensing](#licensing) below is about `uwdata`
 specifically — it does not apply here.
 
+### Default source chain
+
+Omitting `source` walks the default chain — `uwdata` first, then `wikidata`.
+`uwdata` answers the 20 locales it covers, `wikidata` answers the other 278,
+and `resolvedOptions().source` always names whichever one actually did while
+`resolvedOptions().sources` reports the whole chain that was considered.
+
+A tag one source has exactly outranks a tag another source only reaches by
+stripping subtags: `load("zh-Hant")` resolves to `wikidata`'s Traditional
+Chinese chunk rather than falling back to `uwdata`'s Simplified `zh` chunk.
+`load("zh")` still resolves to `uwdata`.
+
+`uwdata` covers 20 locales but several of them thinly — Romanian has 4 terms,
+Finnish 11, Swedish 16 — where `wikidata` has 65, 65, and 170. Because the
+rule is locale-level, `load("ro")` stays on `uwdata`'s 4 terms. That is
+deliberate: the two sources answer different questions, and switching between
+them on a coverage threshold would return perceptual data for one language and
+catalogue data for another with no defensible cutoff. Pass
+`{ source: ["wikidata"] }` if you want breadth over perceptual fidelity.
+
 ## Data source and attribution
 
-This package can never return an answer without knowing where it came from —
-`source` is a required option, and every result carries it. Attribution below
-is scoped the same way: each source's provenance is stated separately, because
-the two caveats do not transfer between them.
+Sources are never merged. Exactly one source answers an entire `ColorNames`
+instance — chosen at load time and fixed thereafter, so two colours resolved
+from the same instance always come from the same dataset. Omitting `source`
+lets the package pick using the default chain (`uwdata`, then `wikidata`);
+provenance is then implicit in the *request* but still explicit in the
+*result*, since `resolve().source` and `resolvedOptions().source` always name
+the dataset that answered. Passing a single id pins the instance and throws if
+that source lacks the locale.
+
+Attribution below is scoped the same way: each source's provenance is stated
+separately, because the two caveats do not transfer between them.
 
 ### uwdata
 
@@ -138,6 +171,6 @@ source.
 
 Sources are namespaced and never merged. A new dataset means a new directory
 under `src/sources/`, a `NameSource` descriptor, and generated chunks — no
-changes to the lookup engine. Every result carries the `source` that produced it,
-and `source` is a required option, so a caller can never get an answer without
-knowing where it came from.
+changes to the lookup engine. Every result carries the `source` that produced
+it, so a caller can never get an answer without knowing where it came from,
+whether they named that source explicitly or let the default chain pick.
