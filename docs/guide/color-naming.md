@@ -1,7 +1,12 @@
 # Color Naming
 
-`@urcolor/i18n` answers "what do speakers of this language call this colour?"
-using crowdsourced colour-perception data.
+`@urcolor/i18n` answers "what does this colour get called?" in a given
+language, from either of two independent sources: `uwdata`, crowdsourced
+colour-perception data that models how speakers spontaneously name a region
+of colour space, or `wikidata`, an editorial catalogue of discrete named
+colours contributed by Wikidata editors. They answer different questions —
+see [Sources](#sources) below — and `source` is always required, so you
+always know which one produced an answer.
 
 ## Basic usage
 
@@ -34,9 +39,11 @@ new ColorNames("ko", { source: "uwdata" }); // fine — chunk is cached
 new ColorNames("ru", { source: "uwdata" }); // throws — call load() first
 ```
 
-## Probabilities
+## Probabilities and confidence
 
-Colour naming is not deterministic. `resolve()` exposes the distribution:
+For `uwdata`'s full and hue models, colour naming is not deterministic:
+`resolve()` exposes the sampled distribution of what study participants
+actually called a colour.
 
 ```ts
 names.resolve(Color.parse("#3b82f6")!);
@@ -52,13 +59,25 @@ names.resolve(Color.parse("#3b82f6")!);
 // }
 ```
 
-`coverage` is the honest bit. `"exact"` means the colour fell in a bin with real
-data. `"nearest"` means the answer came from a neighbouring bin. `"none"` means
-the dataset has nothing to say — `of()` returns `undefined` rather than guessing.
-`resolve()` always reports the *true* `coverage` and `binDistance`, regardless
-of the `fallback` option — `fallback` only changes what `of()` does with a
-`"nearest"` result, so you can always tell whether a nearby answer exists even
-when `of()` is configured to withhold it.
+`wikidata`'s palette model is different: it has no sampled distribution at
+all, just a catalogue of discrete colours. There, `probability` is a
+**proximity confidence** derived from Oklab distance to the nearest
+catalogued colour — not a naming frequency — and `candidates` ranks the
+nearest few catalogued colours rather than the most commonly used terms.
+`binDistance` is always the underlying Oklab distance, for either model, so
+it's the number to read when you need ground truth rather than a
+model-dependent score.
+
+`coverage` is the honest bit either way. `"exact"` means the colour matched
+real data — a populated bin for `uwdata`, or (within a tiny epsilon) a
+catalogued hex for `wikidata`. `"nearest"` means the answer came from
+nearby — a neighbouring bin, or the closest catalogued colour within
+`maxDistance`. `"none"` means the dataset has nothing to say — `of()` returns
+`undefined` rather than guessing. `resolve()` always reports the *true*
+`coverage` and `binDistance`, regardless of the `fallback` option —
+`fallback` only changes what `of()` does with a `"nearest"` result, so you
+can always tell whether a nearby answer exists even when `of()` is
+configured to withhold it.
 
 For hue-model locales (`ar da el hu it tr`), `resolve()` also returns
 `hueProjectionDistance`: the Oklab distance from the query colour to the fully
@@ -69,11 +88,14 @@ full model, the hue model can't fall back to a neighbouring bin — a lookup
 either lands in a populated bin (`"exact"`) or misses (`"none"`) — so it never
 reports `"nearest"`, and `fallback: "none"` is a no-op for these 6 locales.
 
-::: warning Achromatic extremes are unreliable
+::: warning Achromatic extremes are unreliable (uwdata full model)
 Colours near the edges of the sampled space — very light, very dark,
 near-grey — have little or no direct data, so a `"nearest"` answer there can
 be a real perceptual distance from what a speaker would actually say, while
-still reporting a plausible-looking probability.
+still reporting a plausible-looking probability. This is specific to
+`uwdata`'s full model — `wikidata`'s palette lookup has no bins to run out
+of data near, though a `"nearest"` answer there can still be far from the
+query colour if `maxDistance` is generous; check `binDistance`.
 
 For example, pure white (`#ffffff`) resolves to `연분홍색` ("light pink", 36%
 probability, `binDistance` 0.050) in Korean, and to `浅蓝色` ("light blue",
@@ -90,8 +112,8 @@ near those extremes.
 | --- | --- | --- | --- |
 | `source` | source id | *required* | Which dataset answers |
 | `style` | `"long"` \| `"short"` | `"long"` | Display name vs. matching key |
-| `fallback` | `"nearest"` \| `"none"` | `"nearest"` | Whether neighbouring bins may answer (full-model locales only — see above) |
-| `maxDistance` | number | `0.075` | Oklab search radius for `"nearest"` |
+| `fallback` | `"nearest"` \| `"none"` | `"nearest"` | Whether a `"nearest"` result is withheld by `of()`. Meaningfully filters full-model results; a no-op for hue-model locales (see above); highly consequential for `wikidata`'s palette locales, where almost every query reports `"nearest"` |
+| `maxDistance` | number | `0.075` (full/hue), `0.15` (palette) | Oklab search radius used at lookup time — unconditionally, not only when `fallback` is `"nearest"`. Wider by default for `wikidata` because 964 catalogued colours leave real gaps a bin-tuned radius would miss |
 | `topN` | number | `5` | Candidates returned by `resolve()` |
 
 ## Reverse lookup
@@ -105,18 +127,33 @@ names.resolveColorOf("파랑");
 `pCT` is upstream's "how strongly this term identifies its own colour"
 signal — the maximum across the term's bins, since that's the bin where the
 term is the *most* distinctive label for its colour. It's `null` when the
-source data doesn't carry that signal for this term's model at all.
+source data doesn't carry that signal for this term's model at all — which is
+always the case for `wikidata`: the palette model has no per-term bin data of
+any kind, so every `resolveColorOf()` result from that source has `pCT: null`
+unconditionally, not as a per-term gap.
 
 ## Coverage by language
 
-Colour data comes from the `uwdata` source and spans **20 languages**: 14 with
-a full-colour-space model (`de en es fa fi fr ko nl pl pt ro ru sv zh`) and 6
-with a hue-circle model that only describes saturated colours (`ar da el hu it
-tr`). Sample volume differs by orders of magnitude between languages — English
-alone accounts for hundreds of terms, while languages like Romanian have only
-a handful — so `resolvedOptions().coverage` (the fraction of sRGB-reachable
-Oklab space that has data) ranges from about 96% (en) down to single digits
-(ro).
+Colour-name data comes from two independent sources.
+
+`uwdata` spans **20 languages**: 14 with a full-colour-space model (`de en es
+fa fi fr ko nl pl pt ro ru sv zh`) and 6 with a hue-circle model that only
+describes saturated colours (`ar da el hu it tr`). Sample volume differs by
+orders of magnitude between languages — English alone accounts for hundreds
+of terms, while languages like Romanian have only a handful — so
+`resolvedOptions().coverage` (the fraction of sRGB-reachable Oklab space that
+has data) ranges from about 96% (en) down to single digits (ro).
+
+`wikidata` spans **298 languages** with a discrete-palette model: 964
+catalogued colours, each with one exact sRGB value, named in whatever
+languages Wikidata editors have supplied. This is where the long tail
+lives — languages like Georgian and Cherokee have colour names here and none
+in `uwdata`. `resolvedOptions().coverage` there means `terms / itemCount`
+instead — the fraction of the *catalogue* this language names, not of Oklab
+space — and ranges from 93% (en, 897 terms) down to a single term for the
+thinnest locales; Georgian's 14-term chunk (coverage 1.45%) can't name an
+arbitrary colour, but it resolves `colorOf("ყვითელი")` correctly, which is
+exactly the capability `uwdata` lacks there.
 
 ## Sources
 
@@ -129,6 +166,8 @@ import { listSources, getSource } from "@urcolor/i18n";
 
 getSource("uwdata").citation; // attribution text to display
 getSource("uwdata").disclaimer;
+getSource("wikidata").citation; // same shape, different provenance
+getSource("wikidata").disclaimer;
 ```
 
 Please surface the citation and disclaimer in any UI built on this data.

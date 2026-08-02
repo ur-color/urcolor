@@ -284,7 +284,10 @@ between syncs.
 
 ## Output
 
-**299 chunks, 10,429 entries** after merging and excluding `mul`.
+**298 chunks, 10,428 entries** after merging and excluding `mul`. (`simple`,
+Simple English Wikipedia's MediaWiki code rather than a language, also merges
+into `en` — its sole term duplicated one `en` already had, so the merge cost
+one chunk and one entry, both accounted for above.)
 
 | Locale | Terms | | Locale | Terms |
 | --- | --- | --- | --- | --- |
@@ -299,7 +302,7 @@ between syncs.
 generated `meta.json`. The tail reaches all the way down to single-term chunks
 (`ady`, `av`, `chy`, `dag`, `din`, `dua`, `bdr`, `aeb-Latn`).
 
-**Every language with ≥1 term ships.** A 3-term Georgian chunk cannot name an
+**Every language with ≥1 term ships.** A 14-term Georgian chunk cannot name an
 arbitrary colour, but it answers `colorOf("ყვითელი")` correctly — which is
 exactly the capability `uwdata` lacks and this source exists to add. `coverage`
 tells the caller how thin it is.
@@ -314,7 +317,7 @@ recorded in `meta.json` so a later sync that grows the catalogue recomputes ever
 coverage figure consistently instead of silently drifting against a stale
 constant.
 
-Generated artefacts: `src/data/wikidata/<locale>.js` (299 files, lazily imported)
+Generated artefacts: `src/data/wikidata/<locale>.js` (298 files, lazily imported)
 plus `meta.json`, and the generated manifest `src/sources/wikidata/chunks.ts`.
 
 ## Registration and docs

@@ -63,7 +63,7 @@ query to the fully saturated colour at the same hue.
 
 ### wikidata
 
-The `wikidata` source covers **299 languages** with a discrete-palette model:
+The `wikidata` source covers **298 languages** with a discrete-palette model:
 964 catalogued colours, each with one exact sRGB value, named in whatever
 languages Wikidata editors have supplied. This is where the long tail lives —
 Georgian, Cherokee, Aymara, Amharic, and Aramaic have colour names here and
@@ -76,7 +76,7 @@ speakers *spontaneously name* a region of colour space, `wikidata` records the
 frequency** — read `binDistance` for the underlying Oklab distance.
 
 Coverage is `terms / 964`: `en` 93%, `de` 50%, `ja` 28%, `ka` 1.5%. Thin
-languages are shipped rather than pruned — Georgian's 14-term chunk (33 other
+languages are shipped rather than pruned — Georgian's 14-term chunk (32 other
 locales carry just a single term) can't name an arbitrary colour, but it
 resolves `colorOf("ყვითელი")` correctly.
 
@@ -86,6 +86,13 @@ specifically — it does not apply here.
 
 ## Data source and attribution
 
+This package can never return an answer without knowing where it came from —
+`source` is a required option, and every result carries it. Attribution below
+is scoped the same way: each source's provenance is stated separately, because
+the two caveats do not transfer between them.
+
+### uwdata
+
 Colour-name data is derived from
 [Color Naming in Different Languages](https://github.com/uwdata/color-naming-in-different-languages),
 pinned at commit `f0d3e30db9e4b2c3b703bde0d816043eb48a6cb5`.
@@ -94,19 +101,38 @@ pinned at commit `f0d3e30db9e4b2c3b703bde0d816043eb48a6cb5`.
 > Languages: Salient Colors and Term Translation in Multilingual Color Naming
 > Models. EuroVis.
 
-The dataset authors' own caveat, which applies to every name this package returns:
+The dataset authors' own caveat, which applies to every name `uwdata` returns
+(not to `wikidata`):
 
 > We represent the color labels provided by the participants in our study, which
 > may include misspellings, but also whatever racial biases they have (e.g., the
 > color 'skin'). This is not meant to be a prescriptive definition of what colors
 > fit what labels.
 
+### wikidata
+
+Colour-name data is derived from [Wikidata](https://www.wikidata.org/), items
+whose instance-of/subclass-of chain reaches
+[Q1075 (colour)](https://www.wikidata.org/wiki/Q1075) and which carry a
+[P465](https://www.wikidata.org/wiki/Property:P465) sRGB hex triplet —
+exactly the `citation` and `disclaimer` exposed on `getSource("wikidata")`:
+
+> Wikidata contributors. Wikidata, the free knowledge base.
+> https://www.wikidata.org/ — content available under CC0 1.0.
+
+> Names are editorial labels contributed by Wikidata editors, not measured
+> naming behaviour. Coverage is uneven across languages, and a name's
+> presence does not imply it is the term speakers would actually choose.
+
 ## Licensing
 
-The upstream repository declares no license file. Its README asks only that
-the paper be cited, which this package does — in the source, in this README,
-and in the documentation. Downstream users redistributing the data should
-make their own assessment.
+`uwdata`'s upstream repository declares no license file. Its README asks only
+that the paper be cited, which this package does — in the source, in this
+README, and in the documentation. Downstream users redistributing the data
+should make their own assessment.
+
+`wikidata` content is **CC0-1.0** — no such caveat applies to names from that
+source.
 
 ## Adding a source
 
