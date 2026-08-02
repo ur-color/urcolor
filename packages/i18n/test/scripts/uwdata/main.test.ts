@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, mock } from "bun:test";
-import { parseBasicInfo, parseFullBinned, parseHueBinned, SchemaError } from "../../scripts/sync-uwdata/fetch";
-import { UWDATA_COMMIT } from "../../src/sources/uwdata/source";
+import { parseBasicInfo, parseFullBinned, parseHueBinned, SchemaError } from "../../../scripts/sync-uwdata/fetch";
+import { UWDATA_COMMIT } from "../../../src/sources/uwdata/source";
 import {
   buildOutput,
   isMissingUpstreamFile,
@@ -8,9 +8,9 @@ import {
   renderChunkModule,
   renderManifest,
   resolveRef,
-} from "../../scripts/sync-uwdata/main";
+} from "../../../scripts/sync-uwdata/main";
 
-const fixture = (name: string) => Bun.file(`${import.meta.dir}/../fixtures/uwdata/${name}`).text();
+const fixture = (name: string) => Bun.file(`${import.meta.dir}/../../fixtures/uwdata/${name}`).text();
 
 async function inputs() {
   const ko = parseBasicInfo(await fixture("basic_colors_info_ko.csv"));
