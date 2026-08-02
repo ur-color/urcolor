@@ -1,0 +1,74 @@
+// Zed tasks — plain runners (task: spawn). Use these for day-to-day dev servers;
+// .zed/debug.json is for attaching the JS debugger.
+[
+  {
+    "label": "docs:dev",
+    "command": "bun run --cwd docs dev",
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "use_new_terminal": false,
+    "allow_concurrent_runs": false
+  },
+  {
+    "label": "docs:build",
+    "command": "bun run docs:build",
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "use_new_terminal": false,
+    "allow_concurrent_runs": false
+  },
+  {
+    "label": "docs:preview",
+    "command": "bun run docs:preview",
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "use_new_terminal": false,
+    "allow_concurrent_runs": false
+  },
+  {
+    "label": "storybook:vue",
+    "command": "bun run storybook",
+    "cwd": "$ZED_WORKTREE_ROOT/packages/vue",
+    "use_new_terminal": false,
+    "allow_concurrent_runs": false
+  },
+  {
+    "label": "storybook:react",
+    "command": "bun run storybook",
+    "cwd": "$ZED_WORKTREE_ROOT/packages/react",
+    "use_new_terminal": false,
+    "allow_concurrent_runs": false
+  },
+  {
+    "label": "build (all packages)",
+    "command": "bun run build",
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "use_new_terminal": false,
+    "allow_concurrent_runs": false
+  },
+  {
+    "label": "lint",
+    "command": "bun run lint",
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "use_new_terminal": false,
+    "allow_concurrent_runs": false
+  },
+  {
+    "label": "lint:fix",
+    "command": "bun run lint:fix",
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "use_new_terminal": false,
+    "allow_concurrent_runs": false
+  },
+  {
+    "label": "test (all)",
+    "command": "bun test",
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "use_new_terminal": false,
+    "allow_concurrent_runs": false
+  },
+  {
+    "label": "test (current file)",
+    "command": "bun test $ZED_FILE",
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "use_new_terminal": false,
+    "allow_concurrent_runs": true
+  }
+]

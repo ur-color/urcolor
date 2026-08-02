@@ -41,3 +41,12 @@ docs/.vitepress/cache
 
 # Storybook
 storybook-static
+
+# graphify — graphify-out/ is committed so the team shares one map.
+# These three are local-only: token tally, this machine's interpreter path,
+# and the absolute scan root. (.gitignore has no inline comments.)
+**/graphify-out/cost.json
+**/graphify-out/.graphify_python
+**/graphify-out/.graphify_root
+# Optional: uncomment to keep the repo small at the cost of a full rebuild on checkout.
+# **/graphify-out/cache/
