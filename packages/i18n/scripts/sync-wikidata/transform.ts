@@ -1,0 +1,184 @@
+import { Color } from "@urcolor/core";
+import type { LanguageCoverage, PaletteChunk, TermEntry } from "../../src/engine/types";
+import type { RawAliasRow, RawItemRow, RawLabelRow } from "./fetch";
+
+/**
+ * Wikidata pseudo-languages. `mul` ("multiple languages") is present in the
+ * live data; `zxx` ("no linguistic content") is not, and is excluded
+ * defensively. Neither is a language a locale could negotiate to.
+ */
+export const EXCLUDED_LANGUAGES: ReadonlySet<string> = new Set(["mul", "zxx"]);
+
+/**
+ * Wikidata ships regional and orthographic variants as independent label sets,
+ * usually far thinner than their base tag. Shipping them verbatim is a footgun:
+ * `negotiateLocale` prefers an exact tag match, so a 6-term `en-gb` chunk would
+ * beat the 897-term `en` chunk for a caller asking for "en-GB".
+ *
+ * Region-only variants therefore fold into their base tag, while genuine script
+ * variants stay distinct under well-formed BCP 47 script subtags. Chinese
+ * regional tags are treated as script tags because that is what they encode in
+ * practice; bare `zh` on Wikidata is Simplified, matching the uwdata `zh` chunk.
+ */
+export const LANGUAGE_MERGE: Readonly<Record<string, string>> = {
+  "en-ca": "en", "en-gb": "en", "en-us": "en",
+  "de-at": "de", "de-ch": "de",
+  "pt-br": "pt",
+  "crh-ro": "crh",
+  "pap-aw": "pap",
+  "zh-cn": "zh", "zh-sg": "zh", "zh-my": "zh", "zh-hans": "zh",
+  "zh-tw": "zh-Hant", "zh-hk": "zh-Hant", "zh-mo": "zh-Hant", "zh-hant": "zh-Hant",
+  "sr-ec": "sr-Cyrl", "sr-el": "sr-Latn",
+  "tt-cyrl": "tt-Cyrl", "tt-latn": "tt-Latn",
+  "aeb-arab": "aeb-Arab", "aeb-latn": "aeb-Latn",
+  "isv-cyrl": "isv-Cyrl", "isv-latn": "isv-Latn",
+  "ku-latn": "ku-Latn",
+  "ms-arab": "ms-Arab",
+  "shy-latn": "shy-Latn",
+};
+
+/** The locale a Wikidata tag ships under, or `undefined` if it must be dropped. */
+export function normalizeLanguage(tag: string): string | undefined {
+  const lower = tag.toLowerCase();
+  if (EXCLUDED_LANGUAGES.has(lower)) return undefined;
+  return LANGUAGE_MERGE[lower] ?? lower;
+}
+
+/**
+ * 62 items carry more than one best-rank `P465` — e.g. Q12894641 (lilac) has
+ * both `BF00FF` and `C8A2C8`. Sorting and taking the first makes the choice
+ * depend on the data rather than on SPARQL result ordering, so re-syncing an
+ * unchanged catalogue produces byte-identical output.
+ */
+export function pickHex(hexes: readonly string[]): string {
+  return [...hexes].sort()[0]!;
+}
+
+export interface ColorItem {
+  qid: string;
+  hex: string;
+  sitelinks: number;
+  centroid: [number, number, number];
+}
+
+const qidNumber = (qid: string) => Number(qid.slice(1));
+
+/**
+ * Collapses the raw rows into one entry per item and orders them by salience.
+ *
+ * Ordering is what makes reverse lookup deterministic. 545 (language, label)
+ * pairs are shared by two or more items — English "white" labels both Q23444
+ * (183 sitelinks) and Q62391724 (0) — and `resolveColorOf` takes the first
+ * match. Sitelink count is a reasonable proxy for the central sense of a name;
+ * the QID tiebreak guarantees a total order.
+ */
+export function buildItems(rows: readonly RawItemRow[]): ColorItem[] {
+  const hexes = new Map<string, string[]>();
+  const sitelinks = new Map<string, number>();
+
+  for (const row of rows) {
+    const bucket = hexes.get(row.qid);
+    if (bucket === undefined) hexes.set(row.qid, [row.hex]);
+    else bucket.push(row.hex);
+    sitelinks.set(row.qid, row.sitelinks);
+  }
+
+  const items: ColorItem[] = [];
+  for (const [qid, values] of hexes) {
+    const hex = pickHex(values);
+    const [l, a, b] = Color.parse(`#${hex}`)!.to("oklab").coords;
+    items.push({ qid, hex, sitelinks: sitelinks.get(qid) ?? 0, centroid: [l!, a!, b!] });
+  }
+
+  items.sort((x, y) => y.sitelinks - x.sitelinks || qidNumber(x.qid) - qidNumber(y.qid));
+  return items;
+}
+
+/**
+ * Buckets labels by shipping locale, one label per item.
+ *
+ * The `lang === target` guard implements base-tag-wins without needing two
+ * passes or a stable row order: a base-tag row always overwrites, while a
+ * variant row only fills a gap the base tag left.
+ */
+export function groupLabels(rows: readonly RawLabelRow[]): Map<string, Map<string, string>> {
+  const byLang = new Map<string, Map<string, string>>();
+
+  for (const row of rows) {
+    const target = normalizeLanguage(row.lang);
+    if (target === undefined) continue;
+
+    let bucket = byLang.get(target);
+    if (bucket === undefined) {
+      bucket = new Map<string, string>();
+      byLang.set(target, bucket);
+    }
+    if (!bucket.has(row.qid) || row.lang.toLowerCase() === target.toLowerCase()) {
+      bucket.set(row.qid, row.value);
+    }
+  }
+
+  return byLang;
+}
+
+/** Aliases are many-per-item, so they bucket into a list rather than a map. */
+export function groupAliases(rows: readonly RawAliasRow[]): Map<string, { qid: string; value: string }[]> {
+  const byLang = new Map<string, { qid: string; value: string }[]>();
+
+  for (const row of rows) {
+    const target = normalizeLanguage(row.lang);
+    if (target === undefined) continue;
+    const bucket = byLang.get(target);
+    if (bucket === undefined) byLang.set(target, [{ qid: row.qid, value: row.value }]);
+    else bucket.push({ qid: row.qid, value: row.value });
+  }
+
+  return byLang;
+}
+
+export function buildPaletteChunk(
+  lang: string,
+  items: readonly ColorItem[],
+  labels: ReadonlyMap<string, string>,
+  aliases: readonly { qid: string; value: string }[],
+): PaletteChunk {
+  const terms: TermEntry[] = [];
+  const provenance: [string, string][] = [];
+  const indexByQid = new Map<string, number>();
+
+  // `items` is already in salience order, so the emitted entries inherit it.
+  for (const item of items) {
+    const label = labels.get(item.qid);
+    if (label === undefined) continue;
+
+    const name = label.normalize("NFC");
+    indexByQid.set(item.qid, terms.length);
+    terms.push([name.toLowerCase(), name, item.centroid, null]);
+    provenance.push([item.qid, item.hex]);
+  }
+
+  const aliasIndex: Record<string, number> = {};
+  for (const alias of aliases) {
+    const index = indexByQid.get(alias.qid);
+    if (index === undefined) continue;
+    const key = alias.value.normalize("NFC").toLowerCase();
+    // First wins, and `items` order means "first" is the most-linked item.
+    if (!(key in aliasIndex)) aliasIndex[key] = index;
+  }
+
+  return { lang, model: "palette", terms, provenance, aliases: aliasIndex };
+}
+
+/**
+ * The fraction of the catalogue this language names. `itemCount` is passed in
+ * rather than hardcoded so that a later sync which grows the catalogue
+ * recomputes every figure consistently instead of drifting against a stale
+ * constant.
+ */
+export function paletteCoverage(chunk: PaletteChunk, itemCount: number): LanguageCoverage {
+  return {
+    model: "palette",
+    terms: chunk.terms.length,
+    coverage: itemCount > 0 ? chunk.terms.length / itemCount : 0,
+  };
+}
