@@ -93,9 +93,11 @@ export class ColorSliderRoot implements FormValueControl<Color> {
   private readonly disabledState = signal(
     inject(new HostAttributeToken("disabled"), { optional: true }) !== null,
   );
+
   private readonly dirState = signal<"ltr" | "rtl">(
     inject(new HostAttributeToken("dir"), { optional: true }) === "rtl" ? "rtl" : "ltr",
   );
+
   private readonly draggingState = signal(false);
 
   /**

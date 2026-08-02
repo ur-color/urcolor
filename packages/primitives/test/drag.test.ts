@@ -80,8 +80,10 @@ describe("createDragController", () => {
     const { el } = makeElement({ left: 0, top: 0, width: 10, height: 10 });
     let starts = 0, ends = 0;
     const c = createDragController({
-      getElement: () => el, onMove: () => {},
-      onStart: () => { starts++; }, onEnd: () => { ends++; },
+      getElement: () => el,
+      onMove: () => {},
+      onStart: () => { starts++; },
+      onEnd: () => { ends++; },
     });
     c.pointerDown(makeEvent(5, 5, el));
     c.pointerUp(makeEvent(5, 5, el));
@@ -92,7 +94,11 @@ describe("createDragController", () => {
   it("ignores pointerup without a matching capture", () => {
     const { el } = makeElement({ left: 0, top: 0, width: 10, height: 10 });
     let ends = 0;
-    const c = createDragController({ getElement: () => el, onMove: () => {}, onEnd: () => { ends++; } });
+    const c = createDragController({
+      getElement: () => el,
+      onMove: () => {},
+      onEnd: () => { ends++; },
+    });
     c.pointerUp(makeEvent(5, 5, el));
     expect(ends).toBe(0);
   });

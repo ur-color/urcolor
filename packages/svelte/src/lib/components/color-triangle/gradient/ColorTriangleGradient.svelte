@@ -140,9 +140,9 @@
 
   const elementProps = $derived<ChildProps>({
     ...rest,
-    "class": className,
+    class: className,
     // The caller's declarations come last so they win the cascade.
-    "style": `background:${CHECKERBOARD_BACKGROUND};${clipPath}${style ?? ""}`,
+    style: `background:${CHECKERBOARD_BACKGROUND};${clipPath}${style ?? ""}`,
     [DATA_DISABLED]: context.disabled ? "" : undefined,
   });
 </script>

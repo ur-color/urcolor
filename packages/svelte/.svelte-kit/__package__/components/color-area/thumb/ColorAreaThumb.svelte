@@ -40,7 +40,7 @@
    * positive. The transform comes from the root, which knows the alignment.
    */
   const layout = $derived(
-    `position:absolute;transform:var(--reka-slider-area-thumb-transform);`
+    "position:absolute;transform:var(--reka-slider-area-thumb-transform);"
     + `${context.isSlidingFromLeft ? "left" : "right"}:${percentX}%;`
     + `${context.isSlidingFromTop ? "top" : "bottom"}:${percentY}%;`,
   );

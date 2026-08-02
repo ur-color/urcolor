@@ -60,7 +60,7 @@
         : undefined,
   }));
 
-  const label = $derived([labels.x, labels.y, labels.z].filter((entry) => entry !== undefined).join(", "));
+  const label = $derived([labels.x, labels.y, labels.z].filter(entry => entry !== undefined).join(", "));
 
   const valueText = $derived.by(() => {
     const parts = [

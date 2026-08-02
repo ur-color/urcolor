@@ -106,9 +106,11 @@ export class ColorAreaRoot implements FormValueControl<Color> {
   private readonly disabledState = signal(
     inject(new HostAttributeToken("disabled"), { optional: true }) !== null,
   );
+
   private readonly dirState = signal<"ltr" | "rtl">(
     inject(new HostAttributeToken("dir"), { optional: true }) === "rtl" ? "rtl" : "ltr",
   );
+
   private readonly draggingState = signal(false);
 
   /**
@@ -125,6 +127,7 @@ export class ColorAreaRoot implements FormValueControl<Color> {
   readonly xChannel = computed(
     () => this.channelX() ?? colorSpaces[this.colorSpace()]?.channels[0]?.key ?? "h",
   );
+
   /** The channel mapped to the vertical axis, or `"alpha"`. */
   readonly yChannel = computed(
     () => this.channelY() ?? colorSpaces[this.colorSpace()]?.channels[1]?.key ?? "s",
@@ -133,6 +136,7 @@ export class ColorAreaRoot implements FormValueControl<Color> {
   private readonly xConfig = computed(() =>
     resolveChannelConfig(this.colorSpace(), this.xChannel()),
   );
+
   private readonly yConfig = computed(() =>
     resolveChannelConfig(this.colorSpace(), this.yChannel()),
   );
@@ -149,6 +153,7 @@ export class ColorAreaRoot implements FormValueControl<Color> {
     () =>
       (this.dir() !== "rtl" && !this.xInverted()) || (this.dir() !== "ltr" && this.xInverted()),
   );
+
   /** Reading direction never affects the vertical axis. */
   readonly isSlidingFromTop = computed(() => !this.yInverted());
 
@@ -156,6 +161,7 @@ export class ColorAreaRoot implements FormValueControl<Color> {
   readonly valueX = computed(() =>
     colorToDisplayValue(this.value(), this.colorSpace(), this.xChannel()),
   );
+
   /** The vertical channel in display units. */
   readonly valueY = computed(() =>
     colorToDisplayValue(this.value(), this.colorSpace(), this.yChannel()),

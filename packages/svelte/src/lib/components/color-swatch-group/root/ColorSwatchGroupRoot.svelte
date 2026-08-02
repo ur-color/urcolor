@@ -29,13 +29,13 @@
 <script lang="ts">
   import { untrack } from "svelte";
   import { createAttachmentKey } from "svelte/attachments";
-  import {
-    DATA_DISABLED,
-    DATA_ORIENTATION,
-    rovingIndexFromKey,
-    rovingTabIndex,
-    type ToggleGroupState,
-  } from "@urcolor/primitives";
+    import {
+      DATA_DISABLED,
+      DATA_ORIENTATION,
+      rovingIndexFromKey,
+      rovingTabIndex,
+      type ToggleGroupState,
+    } from "@urcolor/primitives";
   import type { ChildProps } from "../../../shared/child.js";
   import { colorSwatchGroupContext, type ColorSwatchGroupItemHandle } from "./context.svelte.js";
 
@@ -96,7 +96,7 @@
   function toggle(itemValue: string): void {
     if (disabled) return;
     if (isSelected(itemValue)) {
-      commit(type === "single" ? [] : selection.filter((entry) => entry !== itemValue));
+      commit(type === "single" ? [] : selection.filter(entry => entry !== itemValue));
       return;
     }
     commit(type === "single" ? [itemValue] : [...selection, itemValue]);
@@ -179,7 +179,7 @@
     const onFocusIn = (event: FocusEvent): void => {
       const target = event.target;
       if (!(target instanceof Element)) return;
-      const index = itemNodes(node).findIndex((item) => item === target || item.contains(target));
+      const index = itemNodes(node).findIndex(item => item === target || item.contains(target));
       if (index >= 0) activeIndex = index;
     };
 
@@ -194,11 +194,11 @@
 
   const elementProps = $derived<ChildProps>({
     // Ahead of the rest props so an explicit `role` from the caller wins.
-    "role": "group",
+    role: "group",
     ...rest,
-    "class": className,
-    "style": style,
-    "dir": dir,
+    class: className,
+    style: style,
+    dir: dir,
     [DATA_ORIENTATION]: orientation,
     [DATA_DISABLED]: disabled ? "" : undefined,
     [attachmentKey]: interaction,

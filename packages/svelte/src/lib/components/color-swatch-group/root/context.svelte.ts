@@ -62,8 +62,8 @@ export interface ColorSwatchGroupContextValue {
   register(): ColorSwatchGroupItemHandle;
 }
 
-export const colorSwatchGroupContext =
-  createContextPair<ColorSwatchGroupContextValue>("ColorSwatchGroup");
+export const colorSwatchGroupContext
+  = createContextPair<ColorSwatchGroupContextValue>("ColorSwatchGroup");
 
 /**
  * The optional read: a standalone swatch is valid, so absence is not an error.

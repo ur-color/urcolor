@@ -112,6 +112,7 @@ export class ColorSwatchGroupRoot implements FormValueControl<string[]> {
   private readonly disabledState = signal(
     inject(new HostAttributeToken("disabled"), { optional: true }) !== null,
   );
+
   private readonly dirState = signal<"ltr" | "rtl">(
     inject(new HostAttributeToken("dir"), { optional: true }) === "rtl" ? "rtl" : "ltr",
   );
@@ -169,7 +170,7 @@ export class ColorSwatchGroupRoot implements FormValueControl<string[]> {
     const selection = this.value();
     if (selection.includes(itemValue)) {
       this.value.set(
-        this.type() === "single" ? [] : selection.filter((entry) => entry !== itemValue),
+        this.type() === "single" ? [] : selection.filter(entry => entry !== itemValue),
       );
       return;
     }
@@ -196,7 +197,7 @@ export class ColorSwatchGroupRoot implements FormValueControl<string[]> {
    */
   register(): ColorSwatchGroupItemHandle {
     const seat = Symbol("ColorSwatchGroupItem");
-    this.seats.update((seats) => [...seats, seat]);
+    this.seats.update(seats => [...seats, seat]);
 
     // Every member reads through a closure over the directive, so the handle
     // reports live state rather than a snapshot taken at registration.
@@ -205,7 +206,7 @@ export class ColorSwatchGroupRoot implements FormValueControl<string[]> {
     const isActive = (): boolean => indexOf() === this.activeIndex();
     const activate = (): void => this.setActiveIndex(indexOf());
     const dispose = (): void => {
-      this.seats.update((seats) => seats.filter((entry) => entry !== seat));
+      this.seats.update(seats => seats.filter(entry => entry !== seat));
     };
 
     return {
@@ -252,7 +253,7 @@ export class ColorSwatchGroupRoot implements FormValueControl<string[]> {
     const target = event.target;
     if (!(target instanceof Element)) return;
     const index = this.itemNodes().findIndex(
-      (item) => item === target || item.contains(target),
+      item => item === target || item.contains(target),
     );
     if (index >= 0) this.activeIndexState.set(index);
   }

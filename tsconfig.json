@@ -33,5 +33,16 @@
     "*.d.ts",
     "env.d.ts",
     "*.js"
+  ],
+  // Both packages type-check through their own tooling, invoked from the root
+  // `lint` script: svelte-check for @urcolor/svelte, `tsc -p tsconfig.lib.json`
+  // for @urcolor/angular. vue-tsc cannot resolve `.svelte` named type exports
+  // (it falls back to a generic `*.svelte` module shim), and Angular needs
+  // ngtsc rather than plain tsc.
+  "exclude": [
+    "packages/svelte",
+    "packages/angular",
+    "node_modules",
+    "**/dist"
   ]
 }

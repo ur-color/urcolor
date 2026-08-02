@@ -144,8 +144,8 @@ export class ColorSliderGradient {
     let stops: Color[];
 
     if (explicit) {
-      const parsed = explicit.map((entry) => Color.parse(entry));
-      if (parsed.length < 2 || parsed.some((entry) => !entry)) return;
+      const parsed = explicit.map(entry => Color.parse(entry));
+      if (parsed.length < 2 || parsed.some(entry => !entry)) return;
       stops = parsed as Color[];
     } else {
       const auto = this.autoColors();

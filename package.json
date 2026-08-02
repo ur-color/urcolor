@@ -7,11 +7,11 @@
     "docs"
   ],
   "scripts": {
-    "build": "bun run --cwd packages/core build && bun run --cwd packages/relative build && bun run --cwd packages/i18n build && bun run --cwd packages/vue build && bun run --cwd packages/react build",
+    "build": "bun run --cwd packages/core build && bun run --cwd packages/primitives build && bun run --cwd packages/relative build && bun run --cwd packages/i18n build && bun run --cwd packages/vue build && bun run --cwd packages/react build && bun run --cwd packages/svelte build && bun run --cwd packages/angular build",
     "docs:dev": "bun run --cwd docs dev",
     "docs:build": "bun run build && bun run --cwd docs build && bun run --cwd packages/vue build-storybook && mkdir -p docs/.vitepress/dist/storybook/vue && cp -r packages/vue/storybook-static/* docs/.vitepress/dist/storybook/vue/",
     "docs:preview": "bun run --cwd docs preview",
-    "lint": "eslint . && vue-tsc --noEmit",
+    "lint": "eslint . && vue-tsc --noEmit && bun run --cwd packages/svelte check && bun run --cwd packages/angular check",
     "lint:fix": "eslint . --fix && vue-tsc --noEmit"
   },
   "devDependencies": {
@@ -27,12 +27,14 @@
     "eslint-import-resolver-typescript": "^4.4.4",
     "eslint-plugin-better-tailwindcss": "^4.3.0",
     "eslint-plugin-import-x": "^4.16.1",
+    "eslint-plugin-svelte": "^3.22.0",
     "eslint-plugin-unused-imports": "^4.4.1",
     "eslint-plugin-vue": "^10.8.0",
     "happy-dom": "^20.6.1",
     "jsdom": "^28.0.0",
     "reka-ui": "^2.8.0",
     "sharp": "^0.34.5",
+    "svelte-eslint-parser": "^1.8.0",
     "tailwindcss": "^4.1.18",
     "typescript-eslint": "^8.55.0",
     "unplugin-vue": "^7.1.1",

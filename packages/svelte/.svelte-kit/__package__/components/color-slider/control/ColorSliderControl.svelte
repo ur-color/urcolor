@@ -20,8 +20,8 @@
 
   const elementProps = $derived<ChildProps>({
     ...rest,
-    "class": className,
-    "style": style,
+    class: className,
+    style: style,
     [DATA_ORIENTATION]: context.orientation,
     [DATA_DISABLED]: context.disabled ? "" : undefined,
   });

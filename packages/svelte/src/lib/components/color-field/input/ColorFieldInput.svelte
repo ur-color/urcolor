@@ -15,7 +15,10 @@
   import type { ChildProps } from "../../../shared/child.js";
   import { colorFieldContext } from "../root/context.svelte.js";
 
-  let { class: className, style, children, child, ...rest }: ColorFieldInputProps = $props();
+  // `children` is pulled out and discarded on purpose: <input> is a void
+  // element, so letting it fall through to `...rest` would spread a snippet
+  // onto the DOM.
+  let { class: className, style, children: _children, child, ...rest }: ColorFieldInputProps = $props();
 
   const context = colorFieldContext.get();
 

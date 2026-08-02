@@ -37,7 +37,7 @@
 <script lang="ts">
   import { untrack } from "svelte";
   import { createAttachmentKey } from "svelte/attachments";
-  import { Color as ColorClass, colorSpaces } from "@urcolor/core";
+    import { Color as ColorClass, colorSpaces } from "@urcolor/core";
   import {
     applyDisplayValues,
     colorToDisplayValue,
@@ -259,7 +259,7 @@
    * caller asked for `"contain"`, in which case it is pulled fully inside.
    */
   const layout = $derived(
-    `--reka-slider-area-thumb-transform:translate(`
+    "--reka-slider-area-thumb-transform:translate("
     + `${!isSlidingFromLeft && thumbAlignment === "overflow" ? "50%" : "-50%"}, `
     + `${!isSlidingFromTop && thumbAlignment === "overflow" ? "50%" : "-50%"});`,
   );

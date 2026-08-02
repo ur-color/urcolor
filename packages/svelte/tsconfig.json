@@ -3,5 +3,9 @@
   "compilerOptions": {
     "noEmit": true
   },
-  "include": ["src/**/*.ts", "src/**/*.svelte"]
+  "include": ["src/**/*.ts", "src/**/*.svelte"],
+  // The root tsconfig excludes packages/svelte so vue-tsc skips it. That
+  // exclude is inherited through `extends`, so it has to be overridden here or
+  // this project would exclude itself.
+  "exclude": ["node_modules", "dist", ".svelte-kit"]
 }

@@ -37,16 +37,16 @@
 <script lang="ts">
   import { untrack } from "svelte";
   import { createAttachmentKey } from "svelte/attachments";
-  import {
-    barycentricCoords,
-    clampToTriangle,
-    Color as ColorClass,
-    colorSpaces,
-    insetTriangle,
-    pointInTriangle,
-    triangleVertices,
-    type Point,
-  } from "@urcolor/core";
+    import {
+      barycentricCoords,
+      clampToTriangle,
+      Color as ColorClass,
+      colorSpaces,
+      insetTriangle,
+      pointInTriangle,
+      triangleVertices,
+      type Point,
+    } from "@urcolor/core";
   import {
     applyDisplayValues,
     colorToDisplayValue,
@@ -160,7 +160,7 @@
   });
 
   const clipPath = $derived(
-    `clip-path:polygon(${vertices.map((p) => `${(p.x * 100).toFixed(2)}% ${(p.y * 100).toFixed(2)}%`).join(", ")});`,
+    `clip-path:polygon(${vertices.map(p => `${(p.x * 100).toFixed(2)}% ${(p.y * 100).toFixed(2)}%`).join(", ")});`,
   );
 
   /** Writes the two or three display-space channel values back as a single colour. */

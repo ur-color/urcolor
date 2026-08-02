@@ -37,9 +37,9 @@
 
   const elementProps = $derived<ChildProps>({
     ...rest,
-    "class": className,
+    class: className,
     // The caller's declarations come last so they win the cascade.
-    "style": style ? `${layout}${style}` : layout,
+    style: style ? `${layout}${style}` : layout,
     [DATA_ORIENTATION]: state.orientation,
     [DATA_DISABLED]: state.disabled ? "" : undefined,
   });

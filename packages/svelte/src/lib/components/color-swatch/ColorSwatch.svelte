@@ -30,17 +30,17 @@
 <script lang="ts">
   import { untrack } from "svelte";
   import { createAttachmentKey } from "svelte/attachments";
-  import {
-    DATA_DISABLED,
-    DATA_PRESSED,
-    isToggleActivationKey,
-    parseColor,
-    toggleAria,
-  } from "@urcolor/primitives";
+    import {
+      DATA_DISABLED,
+      DATA_PRESSED,
+      isToggleActivationKey,
+      parseColor,
+      toggleAria,
+    } from "@urcolor/primitives";
   import type { ChildProps } from "../../shared/child.js";
 
-  const CHECKER_PATTERN =
-    "repeating-conic-gradient(rgb(230, 230, 230) 0%, rgb(230, 230, 230) 25%, white 0%, white 50%) 0% 50%";
+  const CHECKER_PATTERN
+    = "repeating-conic-gradient(rgb(230, 230, 230) 0%, rgb(230, 230, 230) 25%, white 0%, white 50%) 0% 50%";
 
   let {
     value,
@@ -130,9 +130,9 @@
     ...(interactive
       ? { ...toggleAria(isPressed, disabled), type: "button", disabled: disabled || undefined }
       : { role: "img" }),
-    "class": className,
+    class: className,
     // The caller's declarations come last so they win the cascade.
-    "style": style ? `${swatchStyle}${style}` : swatchStyle,
+    style: style ? `${swatchStyle}${style}` : swatchStyle,
     [DATA_PRESSED]: interactive && isPressed ? "" : undefined,
     [DATA_DISABLED]: disabled ? "" : undefined,
     ...(interactive ? { [attachmentKey]: interaction } : {}),

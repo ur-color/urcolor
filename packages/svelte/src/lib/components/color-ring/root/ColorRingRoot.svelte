@@ -31,7 +31,7 @@
 <script lang="ts">
   import { untrack } from "svelte";
   import { createAttachmentKey } from "svelte/attachments";
-  import { Color as ColorClass, cartesianToPolar, colorSpaces, normalizeAngle } from "@urcolor/core";
+    import { Color as ColorClass, cartesianToPolar, colorSpaces, normalizeAngle } from "@urcolor/core";
   import {
     applyDisplayValue,
     colorToDisplayValue,
@@ -139,7 +139,7 @@
     if (event.key === "End") return max;
 
     let offset: number;
-    if (PAGE_KEYS.some((key) => key === event.key)) {
+    if (PAGE_KEYS.some(key => key === event.key)) {
       offset = step * 10 * (event.key === "PageUp" ? 1 : -1);
     } else {
       const arrow = resolveArrowKey({ key: event.key });
@@ -161,7 +161,7 @@
     onStart: () => {
       dragging = true;
     },
-    onMove: (point) => setDisplayValue(valueFromPoint(point)),
+    onMove: point => setDisplayValue(valueFromPoint(point)),
     onEnd: () => {
       dragging = false;
       commit();

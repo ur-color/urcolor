@@ -33,7 +33,7 @@
 <script lang="ts">
   import { untrack } from "svelte";
   import { createAttachmentKey } from "svelte/attachments";
-  import { Color as ColorClass } from "@urcolor/core";
+    import { Color as ColorClass } from "@urcolor/core";
   import {
     applyDisplayValue,
     colorToDisplayValue,
@@ -189,9 +189,9 @@
 
   const elementProps = $derived<ChildProps>({
     ...rest,
-    "class": className,
-    "style": style,
-    "dir": dir,
+    class: className,
+    style: style,
+    dir: dir,
     [DATA_ORIENTATION]: orientation,
     [DATA_DISABLED]: disabled ? "" : undefined,
     [DATA_DRAGGING]: dragging ? "" : undefined,

@@ -9,6 +9,10 @@
     "verbatimModuleSyntax": false
   },
   "include": ["src/**/*.ts"],
+  // The root tsconfig excludes packages/angular so vue-tsc skips it (Angular
+  // needs ngtsc, not plain tsc). That exclude is inherited through `extends`,
+  // so it has to be overridden here or this project would exclude itself.
+  "exclude": ["node_modules", "dist"],
   "angularCompilerOptions": {
     "strictTemplates": true
   }

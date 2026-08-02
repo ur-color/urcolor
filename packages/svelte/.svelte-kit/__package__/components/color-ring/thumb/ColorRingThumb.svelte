@@ -31,9 +31,9 @@
    */
   const orbit = $derived(((1 + context.innerRadius) / 2) * 50);
   const layout = $derived(
-    `position:absolute;top:50%;left:50%;`
+    "position:absolute;top:50%;left:50%;"
     + `transform:rotate(${angle}deg) translateY(-${orbit}cqmin) translate(-50%, -50%);`
-    + `transform-origin:0 0;`,
+    + "transform-origin:0 0;",
   );
 
   const label = $derived(channelLabel(context.colorSpace, context.channel));

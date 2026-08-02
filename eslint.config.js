@@ -3,6 +3,8 @@ import js from "@eslint/js";
 import stylistic from "@stylistic/eslint-plugin";
 import importX from "eslint-plugin-import-x";
 import vue from "eslint-plugin-vue";
+import svelte from "eslint-plugin-svelte";
+import svelteParser from "svelte-eslint-parser";
 import unusedImports from "eslint-plugin-unused-imports";
 import tailwindcss from "eslint-plugin-better-tailwindcss";
 import tseslint from "typescript-eslint";
@@ -47,6 +49,20 @@ export default [
         projectService: true,
         tsconfigRootDir: import.meta.dirname,
         extraFileExtensions: [".vue"],
+      },
+    },
+  },
+  ...svelte.configs.recommended,
+  {
+    files: ["**/*.svelte", "**/*.svelte.ts", "**/*.svelte.js"],
+    languageOptions: {
+      parser: svelteParser,
+      parserOptions: {
+        parser: tseslint.parser,
+        sourceType: "module",
+        projectService: false,
+        project: false,
+        extraFileExtensions: [".svelte"],
       },
     },
   },
@@ -121,6 +137,42 @@ export default [
     },
   },
   {
-    ignores: ["node_modules/", "**/dist/", ".nuxt/", ".output/", "bun.lock", "docs/.vitepress/dist/", "docs/.vitepress/cache/", "**/storybook-static/", "**/*.md", "**/*.d.ts", "**/.storybook/", "packages/i18n/src/data/**", "packages/i18n/src/sources/uwdata/chunks.ts"],
+    // Must be the LAST rules block for these files — several earlier configs
+    // enable type-aware rules globally, and in flat config the later entry wins.
+    //
+    // The root tsconfig excludes packages/svelte and packages/angular: vue-tsc
+    // cannot resolve `.svelte` named type exports (it falls back to a generic
+    // module shim), and Angular needs ngtsc rather than plain tsc. That leaves
+    // the project service with no project for these files, so every rule needing
+    // type information is turned off here. Both packages still get a full type
+    // check from the root `lint` script — svelte-check for one, `tsc -p
+    // tsconfig.lib.json` for the other.
+    files: [
+      "packages/svelte/**/*.ts",
+      "packages/svelte/**/*.js",
+      "packages/svelte/**/*.svelte",
+      "packages/angular/**/*.ts",
+    ],
+    languageOptions: {
+      parserOptions: {
+        projectService: false,
+        project: false,
+      },
+    },
+    rules: {
+      ...tseslint.configs.disableTypeChecked.rules,
+      // TypeScript resolves DOM lib globals itself, and svelte-check enforces
+      // it. Without type information ESLint cannot see them, so this would
+      // otherwise flag every HTMLElement and PointerEvent annotation.
+      "no-undef": "off",
+      // Svelte's subpath exports (`svelte` and `svelte/attachments`) resolve to
+      // the same declaration file, so this rule reports them as duplicates and
+      // its autofix merges them — moving `createAttachmentKey` onto the wrong
+      // module and breaking the build. The reports are false positives.
+      "import-x/no-duplicates": "off",
+    },
+  },
+  {
+    ignores: ["node_modules/", "**/dist/", ".nuxt/", ".output/", "bun.lock", "docs/.vitepress/dist/", "docs/.vitepress/cache/", "**/storybook-static/", "**/*.md", "**/*.d.ts", "**/.storybook/", "packages/i18n/src/data/**", "packages/i18n/src/sources/uwdata/chunks.ts", "**/.svelte-kit/"],
   },
 ];

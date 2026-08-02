@@ -49,6 +49,7 @@ export class ColorAreaThumb {
   private readonly percentX = computed(
     () => `${convertValueToPercentage(this.root.valueX(), this.root.minX(), this.root.maxX())}%`,
   );
+
   private readonly percentY = computed(
     () => `${convertValueToPercentage(this.root.valueY(), this.root.minY(), this.root.maxY())}%`,
   );
@@ -71,9 +72,11 @@ export class ColorAreaThumb {
   protected readonly left = computed(() =>
     this.root.isSlidingFromLeft() ? this.percentX() : null,
   );
+
   protected readonly right = computed(() =>
     this.root.isSlidingFromLeft() ? null : this.percentX(),
   );
+
   protected readonly top = computed(() => (this.root.isSlidingFromTop() ? this.percentY() : null));
   protected readonly bottom = computed(() =>
     this.root.isSlidingFromTop() ? null : this.percentY(),

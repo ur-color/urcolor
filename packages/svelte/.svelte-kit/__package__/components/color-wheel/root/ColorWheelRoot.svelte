@@ -31,13 +31,13 @@
 <script lang="ts">
   import { untrack } from "svelte";
   import { createAttachmentKey } from "svelte/attachments";
-  import {
-    cartesianToPolar,
-    clampToCircle,
-    Color as ColorClass,
-    colorSpaces,
-    normalizeAngle,
-  } from "@urcolor/core";
+    import {
+      cartesianToPolar,
+      clampToCircle,
+      Color as ColorClass,
+      colorSpaces,
+      normalizeAngle,
+    } from "@urcolor/core";
   import {
     applyDisplayValues,
     clamp,

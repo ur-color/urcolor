@@ -225,8 +225,8 @@
 
   const elementProps = $derived<ChildProps>({
     ...rest,
-    "class": className,
-    "style": style,
+    class: className,
+    style: style,
     [DATA_DISABLED]: disabled ? "" : undefined,
     [DATA_READONLY]: readOnly ? "" : undefined,
   });

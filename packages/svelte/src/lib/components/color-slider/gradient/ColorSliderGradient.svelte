@@ -101,8 +101,8 @@
   function paint(canvas: HTMLCanvasElement): void {
     let stops: Color[];
     if (colorsProp) {
-      const parsed = colorsProp.map((entry) => Color.parse(entry));
-      if (parsed.length < 2 || parsed.some((entry) => !entry)) return;
+      const parsed = colorsProp.map(entry => Color.parse(entry));
+      if (parsed.length < 2 || parsed.some(entry => !entry)) return;
       stops = parsed as Color[];
     } else if (autoColors && autoColors.length >= 2) {
       stops = autoColors;
@@ -140,9 +140,9 @@
 
   const elementProps = $derived<ChildProps>({
     ...rest,
-    "class": className,
+    class: className,
     // The caller's declarations come last so they win the cascade.
-    "style": `background:${CHECKERBOARD_BACKGROUND};${style ?? ""}`,
+    style: `background:${CHECKERBOARD_BACKGROUND};${style ?? ""}`,
   });
 </script>
 
