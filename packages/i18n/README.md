@@ -96,6 +96,14 @@ Omitting `source` walks the default chain — `uwdata` first, then `wikidata`.
 `uwdata` answers the 20 locales it covers, `wikidata` answers the other 278,
 and `resolvedOptions().source` always names whichever one actually did while
 `resolvedOptions().sources` reports the whole chain that was considered.
+Call `getDefaultSources()` to read that chain directly, without constructing
+a `ColorNames` instance first:
+
+```ts
+import { getDefaultSources } from "@urcolor/i18n";
+
+getDefaultSources(); // ["uwdata", "wikidata"]
+```
 
 A tag one source has exactly outranks a tag another source only reaches by
 stripping subtags: `load("zh-Hant")` resolves to `wikidata`'s Traditional

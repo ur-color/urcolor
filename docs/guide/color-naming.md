@@ -167,7 +167,8 @@ Omitting `source` walks the default chain — `uwdata` first, then `wikidata`.
 Provenance is then implicit in the *request* but still explicit in the
 *result*: `resolve().source` and `resolvedOptions().source` always name the
 dataset that answered, and `resolvedOptions().sources` reports the whole chain
-that was considered.
+that was considered. `getDefaultSources()` reads that chain directly —
+`["uwdata", "wikidata"]` — without constructing a `ColorNames` instance first.
 
 Requesting a tag one source has exactly beats a tag another only reaches by
 stripping subtags, so `load("zh-Hant")` gets `wikidata`'s Traditional Chinese

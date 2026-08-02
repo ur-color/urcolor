@@ -37,11 +37,17 @@ export function negotiateLocale(
   available: readonly string[],
 ): string | undefined {
   const requestedTags = typeof requested === "string" ? [requested] : requested;
-  const supported = new Set(available);
+  // BCP 47 tags are case-insensitive, so the comparison is done on lowercased
+  // keys — but the map's values are the original `available` entries, so a
+  // differently-cased request (e.g. "zh-hant") still returns the tag exactly
+  // as it was registered ("zh-Hant"), never the caller's or a lowercased
+  // casing.
+  const supported = new Map(available.map(tag => [tag.toLowerCase(), tag] as const));
 
   for (const tag of requestedTags) {
     for (const rung of localeLadder(tag)) {
-      if (supported.has(rung)) return rung;
+      const match = supported.get(rung.toLowerCase());
+      if (match !== undefined) return match;
     }
   }
 

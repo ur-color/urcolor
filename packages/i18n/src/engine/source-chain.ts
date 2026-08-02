@@ -33,8 +33,19 @@ export function normalizeChain(source: string | readonly string[] | undefined): 
   return chain;
 }
 
-function localesOf(sourceId: string): Set<string> {
-  return new Set(Object.keys(getSource(sourceId).languages));
+/**
+ * Lowercased locale id -> the id exactly as registered. BCP 47 tags are
+ * case-insensitive, so rung comparison is done on the lowercased key, but
+ * the map's values preserve the registry's original casing — callers and
+ * `resolvedOptions().locale` must see "zh-Hant", never a lowercased or
+ * caller-cased "zh-hant", regardless of how the request was cased.
+ */
+function localesOf(sourceId: string): Map<string, string> {
+  const map = new Map<string, string>();
+  for (const locale of Object.keys(getSource(sourceId).languages)) {
+    map.set(locale.toLowerCase(), locale);
+  }
+  return map;
 }
 
 /**
@@ -62,8 +73,10 @@ export function resolveSourceChain(
 
   for (const tag of tags) {
     for (const rung of localeLadder(tag)) {
+      const key = rung.toLowerCase();
       for (const [source, locales_] of available) {
-        if (locales_.has(rung)) return { source, locale: rung };
+        const registered = locales_.get(key);
+        if (registered !== undefined) return { source, locale: registered };
       }
     }
   }
@@ -75,7 +88,7 @@ export function resolveSourceChain(
 export function chainLocales(chain: readonly string[]): string[] {
   const all = new Set<string>();
   for (const id of chain) {
-    for (const locale of localesOf(id)) all.add(locale);
+    for (const locale of localesOf(id).values()) all.add(locale);
   }
   return [...all];
 }

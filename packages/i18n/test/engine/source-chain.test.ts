@@ -109,6 +109,17 @@ describe("resolveSourceChain", () => {
     expect(resolveSourceChain("xx", chain)).toBeUndefined();
     expect(resolveSourceChain([], chain)).toBeUndefined();
   });
+
+  it("resolves a lowercased or uppercased script subtag to the same source and locale as the canonical casing", () => {
+    // "zh-Hant" is registered with that exact casing on "broad" only.
+    // Case-folding only the primary subtag (the pre-fix behaviour) made
+    // "zh-hant" fall through to "narrow"'s "zh" instead — a different
+    // source entirely, silently.
+    const canonical = resolveSourceChain("zh-Hant", chain);
+    expect(canonical).toEqual({ source: "broad", locale: "zh-Hant" });
+    expect(resolveSourceChain("zh-hant", chain)).toEqual(canonical);
+    expect(resolveSourceChain("ZH-HANT", chain)).toEqual(canonical);
+  });
 });
 
 describe("chainLocales", () => {

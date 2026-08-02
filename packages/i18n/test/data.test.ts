@@ -140,8 +140,27 @@ describe("wikidata data integrity", () => {
   });
 
   it("keeps the two sources independent", () => {
-    const ids = listSources().map(source => source.id).sort();
-    expect(ids).toEqual(["uwdata", "wikidata"]);
+    // Not a strict-equality check on purpose. Other test files
+    // (engine/source-chain.test.ts, color-names.test.ts) register throwaway
+    // fake sources into this same shared module-level registry, and there is
+    // no unregisterSource to undo that — so by the time this test runs,
+    // listSources() may carry more than the two shipped sources depending on
+    // which test files Bun happened to schedule first, an order that is
+    // neither alphabetical nor argument order and isn't guaranteed to be
+    // stable across machines or a fresh clone. Assert containment and
+    // correct configuration of the two shipped sources instead: this still
+    // fails if `uwdata` or `wikidata` goes missing or is misconfigured, but
+    // doesn't fail merely because something else is also registered.
+    const sources = listSources();
+    const uwdata = sources.find(source => source.id === "uwdata");
+    const wikidata = sources.find(source => source.id === "wikidata");
+
+    expect(uwdata).toBeDefined();
+    expect(wikidata).toBeDefined();
+    expect(uwdata!.license).toBeTruthy();
+    expect(wikidata!.license).toBe("CC0-1.0");
+    expect(Object.keys(uwdata!.languages).length).toBeGreaterThanOrEqual(20);
+    expect(Object.keys(wikidata!.languages).length).toBeGreaterThanOrEqual(280);
   });
 
   // Unlike uwdata, wikidata has no pinned upstream revision — it queries a
@@ -229,5 +248,19 @@ describe("default source chain against shipped data", () => {
   it("supports every wikidata locale through the default chain", () => {
     const supported = ColorNames.supportedLocalesOf(["ka", "chr", "en", "xx"]);
     expect(supported).toEqual(["ka", "chr", "en"]);
+  });
+
+  it("resolves a lowercased or uppercased script subtag to the same source and locale as the canonical casing, preserving the registered casing", async () => {
+    // BCP 47 tags are case-insensitive and Intl canonicalizes them; this
+    // package didn't, so "zh-hant" used to silently fall through to
+    // uwdata's Simplified "zh" instead of reaching wikidata's Traditional
+    // "zh-Hant" — a different dataset and a different script.
+    const lower = await ColorNames.load("zh-hant");
+    const upper = await ColorNames.load("ZH-HANT");
+
+    for (const names of [lower, upper]) {
+      expect(names.resolvedOptions().source).toBe("wikidata");
+      expect(names.resolvedOptions().locale).toBe("zh-Hant");
+    }
   });
 });

@@ -43,6 +43,58 @@ describe("ColorNames constructor", () => {
   });
 });
 
+describe("not-loaded error message", () => {
+  // Fake sources dedicated to this test, with a locale id ("zz") not used
+  // anywhere else in the suite, so the assertion below can't be defeated by
+  // another test file having already loaded the chunk into shared registry
+  // state first.
+  const chunk: PaletteChunk = { lang: "zz", model: "palette", terms: [], provenance: [], aliases: {} };
+  let realDefaults: readonly string[];
+
+  beforeAll(() => {
+    realDefaults = getDefaultSources();
+    registerSource(
+      {
+        id: "err-a",
+        title: "Err A",
+        url: "https://example.invalid/",
+        license: "CC0-1.0",
+        citation: "Err A",
+        languages: {},
+      },
+      {},
+    );
+    registerSource(
+      {
+        id: "err-b",
+        title: "Err B",
+        url: "https://example.invalid/",
+        license: "CC0-1.0",
+        citation: "Err B",
+        languages: { zz: { model: "palette", terms: 0, coverage: 1 } },
+      },
+      { zz: () => Promise.resolve({ default: chunk }) },
+    );
+    setDefaultSources(["err-a", "err-b"]);
+  });
+
+  afterAll(() => {
+    setDefaultSources(realDefaults);
+  });
+
+  it("names the resolved source chain, not just the winning source or the caller's raw option, so the suggested fix actually works", () => {
+    // "err-a" has no "zz" locale, so resolution falls through to "err-b" —
+    // meaning the winning source ("err-b") differs from the full resolved
+    // chain (["err-a", "err-b"]), and the caller's raw option here is
+    // `undefined` (source omitted), differing from both. A naive fix that
+    // interpolated `match.source` or the caller's raw `options.source`
+    // would pass a narrower test than this one.
+    expect(() => new ColorNames("zz")).toThrow(
+      /ColorNames\.load\("zz", \{ source: \["err-a","err-b"\] \}\)/,
+    );
+  });
+});
+
 describe("style option", () => {
   it("returns the display name for style long and the key for style short", async () => {
     const long = await ColorNames.load("ko", { source: "uwdata", style: "long" });

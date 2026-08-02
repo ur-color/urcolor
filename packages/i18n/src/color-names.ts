@@ -154,9 +154,16 @@ export class ColorNames {
 
     const chunk = getLoadedChunk(match.source, match.locale);
     if (chunk === undefined) {
+      // Name the resolved chain, not just the winning source or the
+      // caller's raw (possibly omitted) `options.source` — retrying with
+      // either of those can silently load the wrong source's chunk and
+      // throw this identical error again, forever. `sources` here is
+      // already the fully-normalized chain this constructor resolved
+      // against, so it's the one command that actually fixes this.
       throw new Error(
         `Colour data for "${match.locale}" from source "${match.source}" is not loaded. `
-        + `Call await ColorNames.load(${JSON.stringify(locales)}) first.`,
+        + `Call await ColorNames.load(${JSON.stringify(locales)}, `
+        + `{ source: ${JSON.stringify(sources)} }) first.`,
       );
     }
 
