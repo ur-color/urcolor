@@ -1,0 +1,61 @@
+{
+  "name": "@urcolor/svelte",
+  "version": "0.0.1",
+  "type": "module",
+  "svelte": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "svelte": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "svelte-package -i src/lib -o dist",
+    "check": "svelte-check --tsconfig ./tsconfig.json"
+  },
+  "keywords": [
+    "color",
+    "color-picker",
+    "svelte",
+    "svelte5",
+    "headless",
+    "accessible",
+    "oklch",
+    "color-slider",
+    "color-wheel"
+  ],
+  "author": {
+    "name": "GrandMagus",
+    "url": "https://github.com/GrandMagus02"
+  },
+  "homepage": "https://urcolor.vercel.app/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ur-color/urcolor",
+    "directory": "packages/svelte"
+  },
+  "bugs": {
+    "url": "https://github.com/ur-color/urcolor/issues"
+  },
+  "dependencies": {
+    "@urcolor/core": "workspace:*",
+    "@urcolor/primitives": "workspace:*"
+  },
+  "peerDependencies": {
+    "svelte": "^5.29"
+  },
+  "devDependencies": {
+    "@sveltejs/package": "^2",
+    "@sveltejs/vite-plugin-svelte": "^5",
+    "svelte": "^5.29",
+    "svelte-check": "^4",
+    "typescript": "^5"
+  }
+}
