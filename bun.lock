@@ -41,6 +41,7 @@
       "version": "0.0.1",
       "dependencies": {
         "@urcolor/core": "workspace:*",
+        "@urcolor/i18n": "workspace:*",
         "@urcolor/react": "workspace:*",
         "@urcolor/vue": "workspace:*",
         "gsap": "^3.12.7",
@@ -67,6 +68,13 @@
     "packages/i18n": {
       "name": "@urcolor/i18n",
       "version": "0.0.4",
+      "dependencies": {
+        "@urcolor/core": "workspace:*",
+      },
+    },
+    "packages/primitives": {
+      "name": "@urcolor/primitives",
+      "version": "0.0.1",
       "dependencies": {
         "@urcolor/core": "workspace:*",
       },
@@ -106,7 +114,7 @@
     },
     "packages/vue": {
       "name": "@urcolor/vue",
-      "version": "0.0.4",
+      "version": "0.1.0",
       "dependencies": {
         "@urcolor/core": "workspace:*",
         "reka-ui": "^2.8.0",
@@ -745,6 +753,8 @@
     "@urcolor/docs": ["@urcolor/docs@workspace:docs"],
 
     "@urcolor/i18n": ["@urcolor/i18n@workspace:packages/i18n"],
+
+    "@urcolor/primitives": ["@urcolor/primitives@workspace:packages/primitives"],
 
     "@urcolor/react": ["@urcolor/react@workspace:packages/react"],
 
