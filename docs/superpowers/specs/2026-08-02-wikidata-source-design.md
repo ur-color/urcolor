@@ -151,6 +151,14 @@ large jump in a future sync is a signal to revisit.
 545 `(language, label)` pairs are shared by two or more items — two distinct
 catalogued colours with the same name in one language.
 
+That 545 counts **raw** upstream pairs: original language tags, case-sensitive.
+The sync reports a different, larger number — **578** — because it counts what
+actually ships: term keys within a *merged* locale, NFC-normalised and
+lowercased. Merging `en-us` into `en` can create a collision that neither tag
+had alone, and lowercasing collapses `White`/`white` into one key. Both figures
+are correct for their own definition; 578 is the one the sync prints, and the
+one to compare future syncs against.
+
 **Both items stay in the palette.** They have different hexes and are genuinely
 different colours; dropping either would lose a centroid that forward lookup
 needs. The collision only affects reverse lookup, where
@@ -287,8 +295,9 @@ between syncs.
 | `fr` | 438 | | `ar` | 199 |
 | `nl` | 370 | | `sl` | 182 |
 
-248 chunks have ≥3 terms, 159 have ≥10, 68 have ≥25. The tail reaches down to 3-term chunks
-(`mn`, `mi`, `lo`, `kab`, `iu`, `gu`, `nap`, `tcy`, `stq`, `ia`, `jam`).
+248 chunks have ≥3 terms, 159 have ≥10, 68 have ≥25 — confirmed against the
+generated `meta.json`. The tail reaches all the way down to single-term chunks
+(`ady`, `av`, `chy`, `dag`, `din`, `dua`, `bdr`, `aeb-Latn`).
 
 **Every language with ≥1 term ships.** A 3-term Georgian chunk cannot name an
 arbitrary colour, but it answers `colorOf("ყვითელი")` correctly — which is
@@ -296,7 +305,9 @@ exactly the capability `uwdata` lacks and this source exists to add. `coverage`
 tells the caller how thin it is.
 
 `coverage` for a palette chunk is `terms / itemCount` — the fraction of
-catalogued colours this language names. `en` ≈ 0.93, `ka` ≈ 0.003.
+catalogued colours this language names. Measured against the generated
+`meta.json`: `en` 0.9305 (897 terms), `de` 0.4979, `ja` 0.2832, `ka` 0.0145
+(14 terms), `chr` 0.0041 (4 terms). The thinnest locales carry a single term.
 
 `itemCount` is **not** a hardcoded 964. It is whatever the sync actually fetched,
 recorded in `meta.json` so a later sync that grows the catalogue recomputes every
