@@ -4,7 +4,7 @@
 
 **Goal:** Ship `@urcolor/angular` and `@urcolor/svelte` at React parity, extract shared behavior into a new `@urcolor/primitives` package, and converge all four packages on a single combined `Thumb` per family.
 
-**Architecture:** A new dependency-free `@urcolor/primitives` package holds every piece of behavior that is currently copy-pasted between `@urcolor/vue` and `@urcolor/react` — math, keyboard resolution, ARIA labels, canvas plumbing, pointer drag, and new slider/toggle state machines. The four framework packages become thin reactivity adapters over it. Svelte uses runes with attachments; Angular uses standalone signal directives composing `@angular/aria`.
+**Architecture:** A new dependency-free `@urcolor/primitives` package holds every piece of behavior that is currently copy-pasted between `@urcolor/vue` and `@urcolor/react` — math, keyboard resolution, ARIA labels, canvas plumbing, pointer drag, and new slider/toggle state machines. The four framework packages become thin reactivity adapters over it. Svelte uses runes with attachments; Angular uses standalone signal directives on Angular 21.2.
 
 **Tech Stack:** TypeScript, Bun (test + build), Vite (vue/react lib builds), `@sveltejs/package` (svelte), `ng-packagr` (angular), `@urcolor/core` for all color math.
 
@@ -14,7 +14,7 @@
 
 - **Baseline:** `bun test` at plan start is **1003 pass, 5 todo, 0 fail, 1008 tests across 111 files**. Any task that ends with fewer passing tests than it started with (minus tests it deliberately deleted) is a failure.
 - `@urcolor/primitives` imports **only** `@urcolor/core`. No `vue`, `react`, `svelte`, or `@angular/*` imports — not even as types.
-- Angular peer dependencies are **`^22` only**, not `^21 || ^22`.
+- Angular peer dependencies are **`^21.2`**. `@angular/aria` is NOT a dependency — see the spec's "`@angular/aria` is not used" section. Angular 22 would require TypeScript 6.0 (beta), which `typescript-eslint` refuses; 21.2 accepts the repo's existing TypeScript 5.9.3.
 - Svelte peer dependency is **`svelte: ^5.29`** — the floor where attachments exist.
 - Svelte source lives under `src/lib/`, not `src/`. Relative imports must be fully specified; `.ts` files are imported with a `.js` extension.
 - Angular file naming: hyphenated, **no** `.directive.ts` suffix (`color-slider-root.ts` → `class ColorSliderRoot`). Selectors are camelCase with the `urc` prefix.
@@ -2625,20 +2625,18 @@ Depends on Phase 1. Independent of Phases 2 and 3.
     "tslib": "^2"
   },
   "peerDependencies": {
-    "@angular/aria": "^22",
-    "@angular/common": "^22",
-    "@angular/core": "^22",
-    "@angular/forms": "^22"
+    "@angular/common": "^21.2",
+    "@angular/core": "^21.2",
+    "@angular/forms": "^21.2"
   },
   "devDependencies": {
-    "@angular/aria": "^22",
-    "@angular/common": "^22",
-    "@angular/compiler": "^22",
-    "@angular/compiler-cli": "^22",
-    "@angular/core": "^22",
-    "@angular/forms": "^22",
-    "ng-packagr": "^22",
-    "typescript": "^5"
+    "@angular/common": "^21.2",
+    "@angular/compiler": "^21.2",
+    "@angular/compiler-cli": "^21.2",
+    "@angular/core": "^21.2",
+    "@angular/forms": "^21.2",
+    "ng-packagr": "^21.2",
+    "typescript": "^5.9"
   }
 }
 ```
@@ -2685,7 +2683,7 @@ export {};
 Run: `bun install && bun run --cwd packages/angular build`
 Expected: exit 0, `packages/angular/dist/` created
 
-**This is Risk 2 from the spec.** If `ng-packagr` cannot resolve the workspace symlinks under Bun, stop and report the exact error rather than working around it — the fallback (a `paths` mapping in `tsconfig.lib.json` pointing at `../primitives/src`) is a decision, not a silent fix.
+**Already completed and verified.** `ng-packagr@21.2` resolves Bun workspace symlinks and builds `@urcolor/angular` cleanly, so Risk 2 from the spec did not materialise. This task is done; it is retained for the record.
 
 - [ ] **Step 5: Commit**
 
@@ -2696,37 +2694,21 @@ git commit -m "chore(angular): scaffold @urcolor/angular package"
 
 ---
 
-### Task 25: Verify `@angular/aria` Listbox value semantics
+### Task 25: ~~Verify `@angular/aria` Listbox value semantics~~ — CANCELLED
 
-This is Risk 3 from the spec and gates Task 31.
+`@angular/aria` was dropped from the design. It has no release before `22.0.5`, and Angular 22
+requires TypeScript 6.0 (beta), which `typescript-eslint@8.55` refuses (`typescript: <6.0.0`).
+Angular 21.2 accepts the repo's existing TypeScript 5.9.3.
 
-**Files:**
-- Create: `packages/angular/src/components/color-swatch-group/LISTBOX-NOTES.md` (findings, deleted once Task 31 lands)
-
-- [ ] **Step 1: Read the installed Listbox source**
-
-```bash
-cat node_modules/@angular/aria/index.d.ts | grep -A 30 -i "listbox"
-```
-
-Answer: does `ngOption` compare `[value]` by reference, by `===`, or through a supplied compare function? Is there a `compareWith`-style input?
-
-- [ ] **Step 2: Record the finding**
-
-If selection compares by reference, `Color` instances cannot be used as `[value]` directly — an immutable `Color` produces a new instance on every change and selection would silently never match. In that case the design is: `ngOption [value]` receives the **serialized string** (`color.toString("hex")`), and `ColorSwatchGroupRoot` maps back to `Color` at its own boundary. Write whichever applies into the notes file.
-
-- [ ] **Step 3: Commit**
-
-```bash
-git add packages/angular
-git commit -m "docs(angular): record @angular/aria Listbox value comparison semantics"
-```
+`ColorSwatchGroup` now uses `@urcolor/primitives` (`toggleAria`, `isToggleActivationKey`,
+`rovingIndexFromKey`, `rovingTabIndex`) like every other Angular family. Nothing to investigate,
+no notes file, and Task 31 no longer depends on this task.
 
 ---
 
 ### Tasks 26–32: Angular component families
 
-Structurally identical and mutually independent — may run in parallel, except Task 31 which depends on Task 25.
+Structurally identical and mutually independent — all may run in parallel.
 
 **Shared requirements for every family task:**
 
@@ -2760,7 +2742,7 @@ Structurally identical and mutually independent — may run in parallel, except 
 
 **Task 30 note (Wheel/Triangle):** Single combined `Thumb` per family. Port the ARIA shape from `packages/vue/src/components/ColorWheel/ColorWheelThumb.vue` and `ColorTriangleThumb.vue`.
 
-**Task 31 note (Swatch):** Compose `ngListbox` on `ColorSwatchGroupRoot` and `ngOption` on `ColorSwatch` through `hostDirectives`, so a consumer writes only the `urc` selectors. Apply whatever Task 25 concluded about `[value]` comparison. A standalone `ColorSwatch` outside a group falls back to `toggleAria` from `@urcolor/primitives`.
+**Task 31 note (Swatch):** No `@angular/aria`. `ColorSwatchGroupRoot` implements roving focus with `rovingIndexFromKey` and `rovingTabIndex` from `@urcolor/primitives`, tracking the active item by **index** rather than by comparing `Color` instances (`Color` is immutable, so reference equality would never match). `ColorSwatch` uses `toggleAria` and `isToggleActivationKey`. Mirror whatever the Svelte `ColorSwatchGroup` does so the two stay behaviourally identical.
 
 ---
 
@@ -2862,7 +2844,7 @@ Task 1 (scaffold + math)
             ├─ Task 10 (react migration) ─ Task 11 (vue migration)
             ├─ Task 12, 13  (react thumb merge)          [parallel with 14+, 24+]
             ├─ Task 14 ─ Task 15 ─ Tasks 16-22 ‖ ─ Task 23      (svelte)
-            └─ Task 24 ─ Task 25 ─ Tasks 26-32 ‖ ─ Task 33      (angular)
+            └─ Task 24 ─ Tasks 26-32 ‖ ─ Task 33      (angular; Task 25 cancelled)
                                                     └─ Task 34 (wiring, last)
 ```
 
@@ -2878,14 +2860,14 @@ Tasks 16–22 are mutually independent. Tasks 26–32 are mutually independent (
 |---|---|
 | `@urcolor/primitives` module table | 1–9 (one task per module) |
 | `@urcolor/svelte` layout, props, child snippet, attachments, hooks, build | 14–23 |
-| `@urcolor/angular` layout, native props, `FormValueControl`, `@angular/aria`, build | 24–33 |
+| `@urcolor/angular` layout, native props, `FormValueControl`, build | 24–33 |
 | Parity matrix (7 families, no Checkerboard) | 16–22, 26–32 |
 | Combined Thumb + React breaking change | 12, 13; new packages via 22, 30 |
 | Vue/React migration + verification bar | 10, 11 |
 | Monorepo wiring | 34 |
 | Risk 1 (new slider code) | Task 8, 22 assertions in its test |
-| Risk 2 (ng-packagr under Bun) | Task 24 Step 4, with an explicit stop-and-report |
-| Risk 3 (`ngOption` value comparison) | Task 25, gating Task 31 |
+| Risk 2 (ng-packagr under Bun) | Task 24 — done, did not materialise |
+| Risk 3 (`ngOption` value comparison) | Moot — `@angular/aria` dropped, Task 25 cancelled |
 | Risk 4 (SSR) | Task 5 guards; Task 26–32 requirement 7 (`afterNextRender`) |
 | Risk 5 (root keyboard) | Tasks 12, 13 Step 4 |
 

@@ -1,0 +1,58 @@
+{
+  "name": "@urcolor/angular",
+  "version": "0.0.1",
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "ng-packagr -p ng-package.json",
+    "check": "tsc -p tsconfig.lib.json --noEmit"
+  },
+  "keywords": [
+    "color",
+    "color-picker",
+    "angular",
+    "headless",
+    "accessible",
+    "signals",
+    "oklch",
+    "color-slider",
+    "color-wheel"
+  ],
+  "author": {
+    "name": "GrandMagus",
+    "url": "https://github.com/GrandMagus02"
+  },
+  "homepage": "https://urcolor.vercel.app/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ur-color/urcolor",
+    "directory": "packages/angular"
+  },
+  "bugs": {
+    "url": "https://github.com/ur-color/urcolor/issues"
+  },
+  "dependencies": {
+    "@urcolor/core": "workspace:*",
+    "@urcolor/primitives": "workspace:*",
+    "tslib": "^2"
+  },
+  "peerDependencies": {
+    "@angular/common": "^21.2",
+    "@angular/core": "^21.2",
+    "@angular/forms": "^21.2"
+  },
+  "devDependencies": {
+    "@angular/common": "^21.2",
+    "@angular/compiler": "^21.2",
+    "@angular/compiler-cli": "^21.2",
+    "@angular/core": "^21.2",
+    "@angular/forms": "^21.2",
+    "ng-packagr": "^21.2",
+    "typescript": "^5.9"
+  }
+}

@@ -44,7 +44,7 @@ Plain functions and small state objects. No signals, no runes, no reactivity pri
 | `math.ts` | `react/src/utils.ts` + `vue/src/shared/utils.ts` (verbatim copies) | `clamp`, `getDecimalCount`, `roundValue`, `snapToStep`, `linearScale`, `convertValueToPercentage`, `getThumbInBoundsOffset`, `getClosestThumbIndex`, `hasMinStepsBetweenValues` |
 | `keys.ts` | both packages | `PAGE_KEYS`, `ARROW_KEYS`, arrow→delta resolution including RTL, inverted, and orientation |
 | `slider.ts` | **new** — replaces base-ui `Slider` | 1D value state machine: pointer→value mapping, keyboard stepping, commit-on-release, ARIA attribute computation |
-| `toggle.ts` | **new** — replaces base-ui `Toggle`/`ToggleGroup` | pressed state, roving focus for the group. Consumed by Svelte's `ColorSwatch` + `ColorSwatchGroup` and Angular's `ColorSwatch`. Angular's `ColorSwatchGroup` uses `@angular/aria` Listbox instead and does not use the group half. |
+| `toggle.ts` | **new** — replaces base-ui `Toggle`/`ToggleGroup` | pressed state, roving focus for the group. Consumed by `ColorSwatch` and `ColorSwatchGroup` in **both** Svelte and Angular. |
 | `drag.ts` | `vue/shared/usePointerDrag.ts` + inline logic in 4 react roots | pointer capture, rect→normalized coordinates, 2D clamp callbacks |
 | `canvas.ts` | `renderToCanvas`, inlined in every Gradient component of both packages | DPR sizing, `OffscreenCanvas` blit, `CHECKERBOARD_BACKGROUND` constant |
 | `channel-model.ts` | `vue/shared/useColorChannelModel.ts` | color↔channel display value round-tripping |
@@ -163,7 +163,7 @@ The `*DataAttributes.ts` enums become `host: { '[attr.data-disabled]': ... }` bi
 
 ### Forms integration: `FormValueControl`, not `ControlValueAccessor`
 
-`ControlValueAccessor` is the legacy path. Angular 21 introduced Signal Forms (`@angular/forms/signals`); they are stable in v22.
+`ControlValueAccessor` is the legacy path. Angular 21 introduced Signal Forms; `@angular/forms@21` ships the `./signals` subpath export, so `FormValueControl` is available on the version this package targets. It is marked experimental in 21 and stabilises in 22.
 
 `FormValueControl<TValue>` requires exactly one member: a `value` property that is a `ModelSignal<TValue>` created via `model()`. **The Root directives already have that** — `model<Color>()` is the same signal backing `[(value)]`. So forms support is a declaration, not an implementation:
 
@@ -179,25 +179,28 @@ Consumers then write `<div urcColorSliderRoot [formField]="form.brandColor">`. A
 
 This is the strongest argument for the native-props decision: mirroring React's `value`/`defaultValue`/`onValueChange` triple would have made forms integration a separate adapter. `model()` gets both for free.
 
-### `@angular/aria`
+### `@angular/aria` is not used — superseded
 
-`@angular/aria` provides Autocomplete, Listbox, Select, Multiselect, Combobox, Menu, Menubar, Toolbar, Accordion, Tabs, Tree, and Grid. It has **no Slider and no Toggle/ToggleGroup**.
+The design originally composed `@angular/aria`'s Listbox for `ColorSwatchGroup`. That is dropped. The dependency chain does not hold:
 
-Used only where a pattern exists:
+- `@angular/aria` has no release before `22.0.5` — it does not exist on Angular 21
+- `@angular/compiler-cli@22` requires `typescript >=6.0 <6.1`; TypeScript 6.0 is on the `beta` tag while `latest` is 7.0.2
+- `typescript-eslint@8.55` declares `typescript: ">=4.8.4 <6.0.0"`, so TypeScript 6 disables linting for the whole repo
+- `@angular/compiler-cli@21.2` accepts `typescript >=5.9 <6.1`, which the repo's existing 5.9.3 already satisfies
 
-- `ColorSwatchGroup.Root` composes `ngListbox` — `[(value)]`, `orientation`, `[multi]`, roving focus, typeahead
-- `ColorSwatch`, when inside a group, composes `ngOption`. Standalone it falls back to `primitives/toggle.ts`
-- Everything else → `@urcolor/primitives`
+Taking `@angular/aria` therefore costs a beta compiler, a second TypeScript version in the monorepo, and the linter — to gain one Listbox. `@angular/forms/signals` and `FormValueControl`, the other reason v22 was chosen, are present in 21 already.
 
-`ngListbox`/`ngOption` are applied through `hostDirectives`, so consumers never write both selectors:
+So **every Angular family, including `ColorSwatchGroup`, runs on `@urcolor/primitives`** — `toggleAria`, `isToggleActivationKey`, `rovingIndexFromKey`, `rovingTabIndex`. Roving focus, Home/End, RTL traversal and looping are covered and unit-tested there. The one thing Listbox offered that primitives does not is **typeahead**, which is out of scope; it can be added to `toggle.ts` later and would then benefit Svelte too.
 
 ```html
-<ul urcColorSwatchGroupRoot [(value)]="selected" [multi]="false">
+<ul urcColorSwatchGroupRoot [(value)]="selected">
   @for (c of palette(); track c) {
     <li urcColorSwatch [value]="c"></li>
   }
 </ul>
 ```
+
+Revisit `@angular/aria` when `typescript-eslint` supports TypeScript 6 and Angular 22 is not on a beta compiler.
 
 ### Usage
 
@@ -214,7 +217,7 @@ Used only where a pattern exists:
 
 `ng-packagr`, producing Angular Package Format. This is the one place the monorepo gains a non-Bun/Vite toolchain — decorators require `ngtsc`.
 
-Peer dependencies: `@angular/core`, `@angular/common`, `@angular/forms`, `@angular/aria` — all **`^22`**, not `^21 || ^22`. Signal Forms are experimental in v21 and stable in v22, and `@angular/aria` is documented against v22. A brand-new package has no legacy consumers to support, so supporting v21 would mean carrying a conditional forms path for no one. Revisit if a consumer asks.
+Peer dependencies: `@angular/core`, `@angular/common`, `@angular/forms` — all **`^21.2`**. That range keeps the monorepo on a single TypeScript (5.9.3), which `@angular/compiler-cli@21.2` accepts and `typescript-eslint` still lints. Verified: `ng-packagr@21.2` resolves Bun workspace symlinks and builds `@urcolor/angular` cleanly, so the "ng-packagr under Bun" concern did not materialise.
 
 File and class naming follow the current Angular style guide: hyphenated filenames with no `.directive.ts` suffix (`color-slider-root.ts` → `class ColorSliderRoot`), camelCase attribute selectors with a library prefix (`[urcColorSliderRoot]`).
 
@@ -296,7 +299,7 @@ The existing vue and react suites (`bun test`) pass unchanged. No new tests are 
 
 1. **`primitives/slider.ts` is genuinely new code.** base-ui's Slider handles RTL, inverted, orientation, page-step, and commit semantics. Reimplementing it is the single largest source of behavior bugs in this work, and Angular/Svelte have no test suite (out of scope) to catch them.
 2. **`ng-packagr` in a Bun monorepo.** First non-Bun toolchain in this repo. Whether `bun install` and `workspace:*` links resolve cleanly for it is unknown until attempted.
-3. **`@angular/aria` is new**, marked "New" in the v22 docs; the Listbox API may still shift. Specific unknown for this design: `ngOption` takes a `[value]`, and ours are `Color` instances rather than primitives. Whether Listbox selection compares by reference or offers a compare function needs checking before `ColorSwatchGroup` is built — reference equality against an immutable `Color` would silently break selection.
+3. ~~`@angular/aria` Listbox value comparison.~~ **Resolved by removal** — `@angular/aria` is no longer a dependency (see above). The `Color`-identity concern it raised is moot: `ColorSwatchGroup` now tracks selection by index through `@urcolor/primitives`, not by comparing `Color` instances.
 4. **`renderToCanvas` uses `OffscreenCanvas`** with no SSR guard today. Angular and SvelteKit both SSR by default. The two frameworks land differently here:
    - **Svelte is safe by construction** — attachments only run when an element enters the DOM, so canvas code never executes during SSR.
    - **Angular is not.** Directive constructors and `effect()` do run on the server. Gradient directives must defer canvas work to `afterNextRender()`, which is the native Angular answer and is cleaner than a `typeof window` guard.
