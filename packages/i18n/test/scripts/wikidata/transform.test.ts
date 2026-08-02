@@ -67,6 +67,14 @@ describe("normalizeLanguage", () => {
       expect(EXCLUDED_LANGUAGES.has(target.toLowerCase())).toBe(false);
     }
   });
+
+  it("merges the simple-English pseudo-tag into en", () => {
+    // `simple` is Simple English Wikipedia's MediaWiki code, not a BCP 47
+    // subtag no `Intl` locale negotiates to it. Its sole term duplicates one
+    // already in `en`, so merging (rather than shipping it standalone) is a
+    // content no-op.
+    expect(normalizeLanguage("simple")).toBe("en");
+  });
 });
 
 describe("pickHex", () => {
@@ -137,6 +145,38 @@ describe("groupLabels", () => {
   it("keeps thin-tail languages", async () => {
     const { labels } = await load();
     expect(labels.get("ka")?.get("Q943")).toBe("ყვითელი");
+  });
+
+  it("breaks a no-base-tag tie by source language tag, ascending, regardless of row order", () => {
+    // Neither row is the base "en" tag, so first-wins-by-arrival would make
+    // this depend on `LABELS_QUERY`'s (unordered) result order. The tiebreak
+    // must land on the lexicographically smaller source tag ("en-ca") in
+    // both input orders.
+    const forward = groupLabels([
+      { qid: "Q1", lang: "en-gb", value: "grey" },
+      { qid: "Q1", lang: "en-ca", value: "gray" },
+    ]);
+    const reversed = groupLabels([
+      { qid: "Q1", lang: "en-ca", value: "gray" },
+      { qid: "Q1", lang: "en-gb", value: "grey" },
+    ]);
+    expect(forward.get("en")?.get("Q1")).toBe("gray");
+    expect(reversed.get("en")?.get("Q1")).toBe("gray");
+  });
+
+  it("lets the base tag win over competing variants regardless of row order", () => {
+    const baseFirst = groupLabels([
+      { qid: "Q1", lang: "en", value: "grey-base" },
+      { qid: "Q1", lang: "en-gb", value: "grey-variant" },
+      { qid: "Q1", lang: "en-ca", value: "gray-variant" },
+    ]);
+    const baseLast = groupLabels([
+      { qid: "Q1", lang: "en-gb", value: "grey-variant" },
+      { qid: "Q1", lang: "en-ca", value: "gray-variant" },
+      { qid: "Q1", lang: "en", value: "grey-base" },
+    ]);
+    expect(baseFirst.get("en")?.get("Q1")).toBe("grey-base");
+    expect(baseLast.get("en")?.get("Q1")).toBe("grey-base");
   });
 });
 

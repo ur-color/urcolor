@@ -21,6 +21,12 @@ export const EXCLUDED_LANGUAGES: ReadonlySet<string> = new Set(["mul", "zxx"]);
  * practice; bare `zh` on Wikidata is Simplified, matching the uwdata `zh` chunk.
  */
 export const LANGUAGE_MERGE: Readonly<Record<string, string>> = {
+  // `simple` is Simple English Wikipedia's MediaWiki content-language code,
+  // not a BCP 47 language subtag — no `Intl` locale negotiation ever reaches
+  // it, so shipping it as its own locale would be dead weight. Its one term
+  // (Q2294901 "baby blue") already appears identically in `en`, so merging is
+  // a content no-op: `en`'s base-tag-wins rule keeps `en`'s own label.
+  "simple": "en",
   "en-ca": "en", "en-gb": "en", "en-us": "en",
   "de-at": "de", "de-ch": "de",
   "pt-br": "pt",
@@ -94,15 +100,27 @@ export function buildItems(rows: readonly RawItemRow[]): ColorItem[] {
   return items;
 }
 
+interface LabelSlot {
+  value: string;
+  /** Source tag, lowercased — the tiebreak key when no base-tag row exists. */
+  lang: string;
+  isBase: boolean;
+}
+
 /**
  * Buckets labels by shipping locale, one label per item.
  *
- * The `lang === target` guard implements base-tag-wins without needing two
- * passes or a stable row order: a base-tag row always overwrites, while a
- * variant row only fills a gap the base tag left.
+ * A base-tag row (`row.lang === target`) always wins, and always overwrites
+ * — that guard needs no row order. But `LABELS_QUERY` has no `ORDER BY`, so
+ * when an item has no base-tag row at all and several variant rows compete
+ * (e.g. only `en-gb` and `en-ca` label an item, no plain `en`), arrival order
+ * is arbitrary and would make the sync non-deterministic. The tiebreak there
+ * is the source language tag itself, ascending — an arbitrary but stable
+ * total order, so re-syncing unchanged upstream data reproduces byte-identical
+ * output regardless of what order WDQS happened to return rows in.
  */
 export function groupLabels(rows: readonly RawLabelRow[]): Map<string, Map<string, string>> {
-  const byLang = new Map<string, Map<string, string>>();
+  const byLang = new Map<string, Map<string, LabelSlot>>();
 
   for (const row of rows) {
     const target = normalizeLanguage(row.lang);
@@ -110,15 +128,28 @@ export function groupLabels(rows: readonly RawLabelRow[]): Map<string, Map<strin
 
     let bucket = byLang.get(target);
     if (bucket === undefined) {
-      bucket = new Map<string, string>();
+      bucket = new Map<string, LabelSlot>();
       byLang.set(target, bucket);
     }
-    if (!bucket.has(row.qid) || row.lang.toLowerCase() === target.toLowerCase()) {
-      bucket.set(row.qid, row.value);
-    }
+
+    const lang = row.lang.toLowerCase();
+    const isBase = lang === target.toLowerCase();
+    const existing = bucket.get(row.qid);
+
+    const winsOverExisting = existing === undefined
+      || (isBase && !existing.isBase)
+      || (!isBase && !existing.isBase && lang < existing.lang);
+
+    if (winsOverExisting) bucket.set(row.qid, { value: row.value, lang, isBase });
   }
 
-  return byLang;
+  const result = new Map<string, Map<string, string>>();
+  for (const [target, bucket] of byLang) {
+    const values = new Map<string, string>();
+    for (const [qid, slot] of bucket) values.set(qid, slot.value);
+    result.set(target, values);
+  }
+  return result;
 }
 
 /** Aliases are many-per-item, so they bucket into a list rather than a map. */
@@ -182,11 +213,18 @@ export function buildPaletteChunk(
  * rather than hardcoded so that a later sync which grows the catalogue
  * recomputes every figure consistently instead of drifting against a stale
  * constant.
+ *
+ * `coverage` is rounded to 4 decimal places — ample for a display/threshold
+ * figure, and it materially shrinks `meta.json`, which is inlined into
+ * `dist/index.js` and paid for by every consumer regardless of whether they
+ * use wikidata at all. `terms` and `itemCount` are exact counts and are never
+ * rounded.
  */
 export function paletteCoverage(chunk: PaletteChunk, itemCount: number): LanguageCoverage {
+  const coverage = itemCount > 0 ? chunk.terms.length / itemCount : 0;
   return {
     model: "palette",
     terms: chunk.terms.length,
-    coverage: itemCount > 0 ? chunk.terms.length / itemCount : 0,
+    coverage: Math.round(coverage * 10000) / 10000,
   };
 }

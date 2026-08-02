@@ -5,4 +5,4 @@
 // sRGB hex triplet.
 //
 // Wikidata content is released under CC0-1.0.
-export default {"lang":"dga","model":"palette","terms":[["aŋkaa","Aŋkaa",[0.7303931417745938,0.11331419732013226,0.1480362289582759],null],["salma","salma",[0.8867710792703533,-0.016925177350215648,0.18139812690946144],null]],"provenance":[["Q39338","FF7F00"],["Q208045","FFD700"]],"aliases":{"aŋkaa waaloŋ":0,"waaloŋ aŋkaa":0,"salma tone":1,"salma waaloŋ":1,"salmatone":1,"salma":1}};
+export default {"lang":"dga","model":"palette","terms":[["aŋkaa","Aŋkaa",[0.7303931417745938,0.11331419732013226,0.1480362289582759],null],["salma","salma",[0.8867710792703533,-0.016925177350215648,0.18139812690946144],null]],"provenance":[["Q39338","FF7F00"],["Q208045","FFD700"]],"aliases":{"aŋkaa waaloŋ":0,"waaloŋ aŋkaa":0,"salma":1,"salma tone":1,"salma waaloŋ":1,"salmatone":1}};

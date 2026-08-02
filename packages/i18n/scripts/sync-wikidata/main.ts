@@ -99,9 +99,18 @@ export function buildOutput(
     languages[lang] = paletteCoverage(chunk, items.length);
   }
 
+  // `languages` is built by iterating `labels`, a Map whose insertion order
+  // follows raw SPARQL row order (`LABELS_QUERY` has no `ORDER BY`). Without
+  // sorting, an otherwise-unchanged re-sync would reshuffle the whole object
+  // and produce a spuriously large diff in the generated `meta.json`.
+  const sortedLanguages: Record<string, LanguageCoverage> = {};
+  for (const lang of Object.keys(languages).sort()) {
+    sortedLanguages[lang] = languages[lang]!;
+  }
+
   return {
     chunks,
-    meta: { source: "wikidata", retrievedAt, itemCount: items.length, languages },
+    meta: { source: "wikidata", retrievedAt, itemCount: items.length, languages: sortedLanguages },
     multiHexItems,
     collisions,
   };

@@ -73,6 +73,33 @@ describe("buildOutput", () => {
       expect(chunk.terms.length).toBeGreaterThan(0);
     }
   });
+
+  it("serialises meta.languages with sorted keys, independent of label row order", () => {
+    const itemRows: RawItemRow[] = [{ qid: "Q1", hex: "FF0000", sitelinks: 1 }];
+    // Deliberately out of order: `labels` (a Map) preserves insertion order,
+    // which follows raw SPARQL row order, which carries no salience signal.
+    const labelRows: RawLabelRow[] = [
+      { qid: "Q1", lang: "zz", value: "z" },
+      { qid: "Q1", lang: "aa", value: "a" },
+      { qid: "Q1", lang: "mm", value: "m" },
+    ];
+    const result = buildOutput(itemRows, labelRows, [], "2026-01-01T00:00:00.000Z");
+    expect(Object.keys(result.meta.languages)).toEqual(["aa", "mm", "zz"]);
+  });
+
+  it("rounds coverage to 4 decimal places without touching terms or itemCount", () => {
+    const itemRows: RawItemRow[] = [
+      { qid: "Q1", hex: "FF0000", sitelinks: 1 },
+      { qid: "Q2", hex: "00FF00", sitelinks: 1 },
+      { qid: "Q3", hex: "0000FF", sitelinks: 1 },
+    ];
+    const labelRows: RawLabelRow[] = [{ qid: "Q1", lang: "xx", value: "one" }];
+    const result = buildOutput(itemRows, labelRows, [], "2026-01-01T00:00:00.000Z");
+    expect(result.meta.itemCount).toBe(3);
+    expect(result.meta.languages.xx?.terms).toBe(1);
+    // 1/3 = 0.3333333… — rounded, not truncated to a fixed string.
+    expect(result.meta.languages.xx?.coverage).toBe(0.3333);
+  });
 });
 
 describe("renderChunkModule", () => {

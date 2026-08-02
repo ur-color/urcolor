@@ -244,7 +244,6 @@ export const wikidataChunks: ChunkLoaders = {
   "shn": () => import("../../data/wikidata/shn.js") as unknown as Promise<{ default: Chunk }>,
   "shy-Latn": () => import("../../data/wikidata/shy-Latn.js") as unknown as Promise<{ default: Chunk }>,
   "si": () => import("../../data/wikidata/si.js") as unknown as Promise<{ default: Chunk }>,
-  "simple": () => import("../../data/wikidata/simple.js") as unknown as Promise<{ default: Chunk }>,
   "sjd": () => import("../../data/wikidata/sjd.js") as unknown as Promise<{ default: Chunk }>,
   "sje": () => import("../../data/wikidata/sje.js") as unknown as Promise<{ default: Chunk }>,
   "sju": () => import("../../data/wikidata/sju.js") as unknown as Promise<{ default: Chunk }>,
