@@ -8,6 +8,27 @@ interface RegisteredSource {
 
 const registry = new Map<string, RegisteredSource>();
 
+let defaultSources: readonly string[] = Object.freeze<string[]>([]);
+
+/**
+ * Sets the source ids `ColorNames` consults, in priority order, when the
+ * caller does not name one. Called by `src/index.ts` once both sources are
+ * registered — the lookup layer never names a dataset itself, so adding a
+ * source later is a one-line change in one file.
+ *
+ * The argument is copied and frozen for the same reason
+ * {@link registerSource} freezes its descriptor: a caller holding the
+ * returned reference must not be able to alter locale resolution for every
+ * subsequent consumer.
+ */
+export function setDefaultSources(ids: readonly string[]): void {
+  defaultSources = Object.freeze([...ids]);
+}
+
+export function getDefaultSources(): readonly string[] {
+  return defaultSources;
+}
+
 /**
  * Freezes the descriptor and its `languages` map before storing it, so a
  * caller holding a reference from {@link getSource}/{@link listSources}

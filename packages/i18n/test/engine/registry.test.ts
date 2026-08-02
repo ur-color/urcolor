@@ -1,6 +1,6 @@
 import { describe, expect, it } from "bun:test";
 import "../../src/index";
-import { getSource, listSources } from "../../src/engine/registry";
+import { getSource, listSources, setDefaultSources, getDefaultSources } from "../../src/engine/registry";
 
 describe("source registry", () => {
   it("lists the uwdata source", () => {
@@ -43,5 +43,27 @@ describe("source registry", () => {
     expect(again.title).toBe("Color Naming in Different Languages");
     expect(again.languages.ko?.terms).toBeGreaterThan(0);
     expect(again.languages.zz).toBeUndefined();
+  });
+});
+
+describe("default sources", () => {
+  it("round-trips what was set", () => {
+    setDefaultSources(["alpha", "beta"]);
+    expect(getDefaultSources()).toEqual(["alpha", "beta"]);
+  });
+
+  it("returns a frozen array so callers cannot corrupt shared state", () => {
+    setDefaultSources(["alpha"]);
+    const sources = getDefaultSources();
+    expect(Object.isFrozen(sources)).toBe(true);
+    expect(() => (sources as string[]).push("beta")).toThrow();
+    expect(getDefaultSources()).toEqual(["alpha"]);
+  });
+
+  it("copies its argument, so later mutation of the caller's array is ignored", () => {
+    const mine = ["alpha"];
+    setDefaultSources(mine);
+    mine.push("beta");
+    expect(getDefaultSources()).toEqual(["alpha"]);
   });
 });
