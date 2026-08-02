@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { parseAliases, parseItems, parseLabels } from "../../../scripts/sync-wikidata/fetch";
+import { parseAliases, parseItems, parseLabels, type RawAliasRow, type RawItemRow, type RawLabelRow } from "../../../scripts/sync-wikidata/fetch";
 import { buildOutput, renderChunkModule, renderManifest } from "../../../scripts/sync-wikidata/main";
 
 const fixture = (name: string) => Bun.file(`${import.meta.dir}/../../fixtures/wikidata/${name}`).text();
@@ -41,6 +41,29 @@ describe("buildOutput", () => {
   it("reports how many name collisions it resolved", async () => {
     const result = await output();
     // English "white" is the label of both Q23444 and Q62391724.
+    expect(result.collisions).toBe(1);
+  });
+
+  it("counts one collision per colliding group, not one per extra occurrence", () => {
+    // Three distinct items all labelled "red" in en: one colliding GROUP of
+    // three, not two "extra occurrences". A naive `seen.has` tally counts
+    // N-1 (= 2) per group; the documented contract on `SyncOutput.collisions`
+    // — "(locale, name) pairs claimed by more than one item" — counts 1.
+    const itemRows: RawItemRow[] = [
+      { qid: "Q1001", hex: "FF0000", sitelinks: 10 },
+      { qid: "Q1002", hex: "FF0001", sitelinks: 5 },
+      { qid: "Q1003", hex: "FF0002", sitelinks: 1 },
+    ];
+    const labelRows: RawLabelRow[] = [
+      { qid: "Q1001", lang: "en", value: "red" },
+      { qid: "Q1002", lang: "en", value: "red" },
+      { qid: "Q1003", lang: "en", value: "red" },
+    ];
+    const aliasRows: RawAliasRow[] = [];
+
+    const result = buildOutput(itemRows, labelRows, aliasRows, "2026-01-01T00:00:00.000Z");
+
+    expect(result.chunks.get("en")?.terms).toHaveLength(3);
     expect(result.collisions).toBe(1);
   });
 

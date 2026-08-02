@@ -87,10 +87,12 @@ export function buildOutput(
     // produce a chunk that can answer nothing; don't ship one.
     if (chunk.terms.length === 0) continue;
 
-    const seen = new Set<string>();
+    const occurrences = new Map<string, number>();
     for (const entry of chunk.terms) {
-      if (seen.has(entry[0])) collisions++;
-      else seen.add(entry[0]);
+      occurrences.set(entry[0], (occurrences.get(entry[0]) ?? 0) + 1);
+    }
+    for (const count of occurrences.values()) {
+      if (count > 1) collisions++;
     }
 
     chunks.set(lang, chunk);
