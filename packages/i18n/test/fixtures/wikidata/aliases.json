@@ -1,0 +1,11 @@
+{
+  "head": { "vars": [ "item", "alias" ] },
+  "results": {
+    "bindings": [
+      { "item": { "type": "uri", "value": "http://www.wikidata.org/entity/Q943" }, "alias": { "xml:lang": "en", "type": "literal", "value": "yellow color" } },
+      { "item": { "type": "uri", "value": "http://www.wikidata.org/entity/Q943" }, "alias": { "xml:lang": "en", "type": "literal", "value": "color yellow" } },
+      { "item": { "type": "uri", "value": "http://www.wikidata.org/entity/Q943" }, "alias": { "xml:lang": "ru", "type": "literal", "value": "жёлтый цвет" } },
+      { "item": { "type": "uri", "value": "http://www.wikidata.org/entity/Q23444" }, "alias": { "xml:lang": "en", "type": "literal", "value": "White" } }
+    ]
+  }
+}
