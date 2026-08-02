@@ -87,7 +87,7 @@ export function buildItems(rows: readonly RawItemRow[]): ColorItem[] {
   for (const [qid, values] of hexes) {
     const hex = pickHex(values);
     const [l, a, b] = Color.parse(`#${hex}`)!.to("oklab").coords;
-    items.push({ qid, hex, sitelinks: sitelinks.get(qid) ?? 0, centroid: [l!, a!, b!] });
+    items.push({ qid, hex, sitelinks: sitelinks.get(qid) ?? 0, centroid: [l, a, b] });
   }
 
   items.sort((x, y) => y.sitelinks - x.sitelinks || qidNumber(x.qid) - qidNumber(y.qid));
@@ -157,13 +157,21 @@ export function buildPaletteChunk(
     provenance.push([item.qid, item.hex]);
   }
 
+  // `aliases` preserves raw SPARQL row order, which carries no salience
+  // information (`ALIASES_QUERY` has no `ORDER BY`). Sort by each alias's
+  // item's term index — which *is* salience order, per the loop above —
+  // before applying first-wins, so the winner is deterministic. `Array.sort`
+  // is stable, so multiple aliases on the same item keep their relative order.
   const aliasIndex: Record<string, number> = {};
-  for (const alias of aliases) {
-    const index = indexByQid.get(alias.qid);
-    if (index === undefined) continue;
+  const orderedAliases = aliases
+    .map(alias => ({ alias, termIndex: indexByQid.get(alias.qid) }))
+    .filter((entry): entry is { alias: typeof aliases[number]; termIndex: number } => entry.termIndex !== undefined)
+    .sort((a, b) => a.termIndex - b.termIndex);
+
+  for (const { alias, termIndex } of orderedAliases) {
     const key = alias.value.normalize("NFC").toLowerCase();
-    // First wins, and `items` order means "first" is the most-linked item.
-    if (!(key in aliasIndex)) aliasIndex[key] = index;
+    // First wins, and the sort above means "first" is the most-linked item.
+    if (!(key in aliasIndex)) aliasIndex[key] = termIndex;
   }
 
   return { lang, model: "palette", terms, provenance, aliases: aliasIndex };

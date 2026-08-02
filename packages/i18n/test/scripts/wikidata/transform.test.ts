@@ -97,9 +97,9 @@ describe("buildItems", () => {
     const { items } = await load();
     const yellow = items.find(i => i.qid === "Q943")!;
     const expected = Color.parse("#FFFF00")!.to("oklab").coords;
-    expect(yellow.centroid[0]).toBeCloseTo(expected[0]!, 10);
-    expect(yellow.centroid[1]).toBeCloseTo(expected[1]!, 10);
-    expect(yellow.centroid[2]).toBeCloseTo(expected[2]!, 10);
+    expect(yellow.centroid[0]).toBeCloseTo(expected[0], 10);
+    expect(yellow.centroid[1]).toBeCloseTo(expected[1], 10);
+    expect(yellow.centroid[2]).toBeCloseTo(expected[2], 10);
   });
 
   it("breaks a sitelink tie by ascending numeric QID", () => {
@@ -180,6 +180,26 @@ describe("buildPaletteChunk", () => {
     expect(chunk.terms[chunk.aliases["color yellow"]!]?.[0]).toBe("yellow");
     // "White" is an alias of Q23444, lowercased on the way in.
     expect(chunk.terms[chunk.aliases["white"]!]?.[0]).toBe("white");
+  });
+
+  it("resolves a shared alias to the more-salient item, regardless of row order", () => {
+    // Q1 is far more linked than Q2, but Q2's alias row comes first in the
+    // input array — `ALIASES_QUERY` has no `ORDER BY`, so raw row order
+    // carries no salience signal. The alias must still resolve to Q1.
+    const items = buildItems([
+      { qid: "Q2", hex: "000000", sitelinks: 1 },
+      { qid: "Q1", hex: "FFFFFF", sitelinks: 100 },
+    ]);
+    const labels = new Map([
+      ["Q1", "foo"],
+      ["Q2", "bar"],
+    ]);
+    const aliases = [
+      { qid: "Q2", value: "shared" },
+      { qid: "Q1", value: "shared" },
+    ];
+    const chunk = buildPaletteChunk("xx", items, labels, aliases);
+    expect(chunk.terms[chunk.aliases.shared!]?.[1]).toBe("foo");
   });
 
   it("omits items this language has no label for", async () => {
