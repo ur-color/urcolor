@@ -1,7 +1,11 @@
 /** Which naming model backs a language, and how much of the space it covers. */
 export interface LanguageCoverage {
-  /** `"full"` = Oklab-cube model; `"hue"` = saturated-hue-circle model only. */
-  model: "full" | "hue";
+  /**
+   * `"full"` = Oklab-cube model; `"hue"` = saturated-hue-circle model only;
+   * `"palette"` = a discrete catalogue of named colours with exact values,
+   * not a model of a colour space at all.
+   */
+  model: "full" | "hue" | "palette";
   /** Number of distinct colour terms modelled for this language. */
   terms: number;
   /** Fraction of the model's colour space that has data, 0–1. */
@@ -16,6 +20,11 @@ export interface NameSource {
   url: string;
   /** Upstream revision the shipped data was generated from. */
   commitSha?: string;
+  /**
+   * When the shipped data was retrieved, for sources with no pinnable
+   * revision (a live query endpoint rather than a git repo).
+   */
+  retrievedAt?: string;
   /** SPDX identifier, or a plain-language note when the upstream has none. */
   license: string;
   /** Attribution text consumers should display. */
@@ -65,7 +74,29 @@ export interface HueChunk {
   binTerms: [termIndex: number, pTC: number][][];
 }
 
-export type Chunk = FullChunk | HueChunk;
+/**
+ * Discrete named colours, each with one exact sRGB value. Unlike the full and
+ * hue models, this catalogues named points rather than modelling how speakers
+ * name a space — so there are no bins and no sampled distribution.
+ */
+export interface PaletteChunk {
+  lang: string;
+  model: "palette";
+  /**
+   * One entry per (item, label in this language), ordered by the source's
+   * salience ranking so that a first-match reverse lookup is deterministic.
+   * `centroid` is always present in generated data — an item without a colour
+   * value is filtered out at sync time. `pCT` is always `null`: this source
+   * carries no "probability the colour is named this term" signal at all.
+   */
+  terms: TermEntry[];
+  /** Parallel to `terms`: `[qid, hex]` provenance for each entry. */
+  provenance: [qid: string, hex: string][];
+  /** NFC-normalised, lowercased alias -> index into `terms`. Reverse lookup only. */
+  aliases: Record<string, number>;
+}
+
+export type Chunk = FullChunk | HueChunk | PaletteChunk;
 
 /** Locale -> lazy loader for that locale's chunk. */
 export type ChunkLoaders = Record<string, () => Promise<{ default: Chunk }>>;

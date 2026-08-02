@@ -1,0 +1,12 @@
+{
+  "head": { "vars": [ "item", "hex", "sitelinks" ] },
+  "results": {
+    "bindings": [
+      { "item": { "type": "uri", "value": "http://www.wikidata.org/entity/Q943" }, "hex": { "type": "literal", "value": "FFFF00" }, "sitelinks": { "type": "literal", "datatype": "http://www.w3.org/2001/XMLSchema#integer", "value": "189" } },
+      { "item": { "type": "uri", "value": "http://www.wikidata.org/entity/Q23444" }, "hex": { "type": "literal", "value": "FFFFFF" }, "sitelinks": { "type": "literal", "datatype": "http://www.w3.org/2001/XMLSchema#integer", "value": "183" } },
+      { "item": { "type": "uri", "value": "http://www.wikidata.org/entity/Q62391724" }, "hex": { "type": "literal", "value": "FFFFFF" }, "sitelinks": { "type": "literal", "datatype": "http://www.w3.org/2001/XMLSchema#integer", "value": "0" } },
+      { "item": { "type": "uri", "value": "http://www.wikidata.org/entity/Q12894641" }, "hex": { "type": "literal", "value": "C8A2C8" }, "sitelinks": { "type": "literal", "datatype": "http://www.w3.org/2001/XMLSchema#integer", "value": "38" } },
+      { "item": { "type": "uri", "value": "http://www.wikidata.org/entity/Q12894641" }, "hex": { "type": "literal", "value": "BF00FF" }, "sitelinks": { "type": "literal", "datatype": "http://www.w3.org/2001/XMLSchema#integer", "value": "38" } }
+    ]
+  }
+}

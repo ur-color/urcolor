@@ -6,9 +6,9 @@ import {
   parseFullBinned,
   parseHueBinned,
   upstreamUrl,
-} from "../../scripts/sync-uwdata/fetch";
+} from "../../../scripts/sync-uwdata/fetch";
 
-const fixture = (name: string) => Bun.file(`${import.meta.dir}/../fixtures/uwdata/${name}`).text();
+const fixture = (name: string) => Bun.file(`${import.meta.dir}/../../fixtures/uwdata/${name}`).text();
 
 describe("parseFullBinned", () => {
   it("parses upstream records", async () => {

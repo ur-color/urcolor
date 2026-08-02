@@ -1,9 +1,9 @@
 import { Color } from "@urcolor/core";
 import { describe, expect, it } from "bun:test";
-import type { FullChunk } from "../../src/engine/types";
-import type { RawBasicRow, RawFullRecord, RawHueTerm } from "../../scripts/sync-uwdata/fetch";
-import { parseBasicInfo, parseFullBinned, parseHueBinned } from "../../scripts/sync-uwdata/fetch";
-import { buildFullChunk, buildHueChunk, chunkCoverage } from "../../scripts/sync-uwdata/transform";
+import type { FullChunk } from "../../../src/engine/types";
+import type { RawBasicRow, RawFullRecord, RawHueTerm } from "../../../scripts/sync-uwdata/fetch";
+import { parseBasicInfo, parseFullBinned, parseHueBinned } from "../../../scripts/sync-uwdata/fetch";
+import { buildFullChunk, buildHueChunk, chunkCoverage } from "../../../scripts/sync-uwdata/transform";
 
 /**
  * Independently reproduces the reachable-bin measurement that `chunkCoverage`
@@ -27,7 +27,7 @@ function measureReachableBinCount(binSize: number): number {
   return bins.size;
 }
 
-const fixture = (name: string) => Bun.file(`${import.meta.dir}/../fixtures/uwdata/${name}`).text();
+const fixture = (name: string) => Bun.file(`${import.meta.dir}/../../fixtures/uwdata/${name}`).text();
 
 describe("buildFullChunk", () => {
   it("groups records into bins with a shared term table", async () => {

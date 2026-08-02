@@ -1,6 +1,8 @@
-import { describe, expect, it } from "bun:test";
+import { beforeAll, describe, expect, it } from "bun:test";
 import { Color } from "@urcolor/core";
 import { ColorNames } from "../src/index";
+import { registerSource } from "../src/engine/registry";
+import type { PaletteChunk } from "../src/engine/types";
 
 const BLUE = Color.parse("#3b82f6")!;
 
@@ -241,5 +243,76 @@ describe("resolvedOptions", () => {
       style: "long",
       fallback: "nearest",
     });
+  });
+});
+
+describe("palette model", () => {
+  const paletteChunk: PaletteChunk = {
+    lang: "en",
+    model: "palette",
+    terms: [
+      ["yellow", "yellow", [...Color.parse("#FFFF00")!.to("oklab").coords] as [number, number, number], null],
+      ["white", "white", [...Color.parse("#FFFFFF")!.to("oklab").coords] as [number, number, number], null],
+    ],
+    provenance: [["Q943", "FFFF00"], ["Q23444", "FFFFFF"]],
+    aliases: { "color yellow": 0, "yellow color": 0 },
+  };
+
+  beforeAll(() => {
+    registerSource(
+      {
+        id: "test-palette",
+        title: "Test Palette",
+        url: "https://example.invalid/",
+        license: "CC0-1.0",
+        citation: "Test",
+        languages: { en: { model: "palette", terms: 2, coverage: 1 } },
+      },
+      { en: () => Promise.resolve({ default: paletteChunk }) },
+    );
+  });
+
+  it("names an exact catalogued colour", async () => {
+    const names = await ColorNames.load("en", { source: "test-palette" });
+    expect(names.of(Color.parse("#FFFF00")!)).toBe("yellow");
+    expect(names.resolve(Color.parse("#FFFF00")!).coverage).toBe("exact");
+  });
+
+  it("reports the palette model in resolvedOptions with no binSize", async () => {
+    const names = await ColorNames.load("en", { source: "test-palette" });
+    expect(names.resolvedOptions().model).toBe("palette");
+    expect(names.resolvedOptions().binSize).toBeUndefined();
+  });
+
+  it("falls back to the nearest catalogued colour", async () => {
+    const names = await ColorNames.load("en", { source: "test-palette" });
+    const result = names.resolve(Color.parse("#FFFEF0")!);
+    expect(result.coverage).toBe("nearest");
+    expect(result.name).toBe("white");
+    expect(result.binDistance).toBeGreaterThan(0);
+  });
+
+  it("withholds a nearest match when fallback is none", async () => {
+    const names = await ColorNames.load("en", { source: "test-palette", fallback: "none" });
+    expect(names.of(Color.parse("#FFFEF0")!)).toBeUndefined();
+    // resolve() still reports the truth regardless of fallback.
+    expect(names.resolve(Color.parse("#FFFEF0")!).name).toBe("white");
+  });
+
+  it("reverse-looks-up by term", async () => {
+    const names = await ColorNames.load("en", { source: "test-palette" });
+    // Oklab round-trips exactly for these values; verified against @urcolor/core.
+    expect(names.colorOf("yellow")?.toString("hex")).toBe("#ffff00");
+  });
+
+  it("reverse-looks-up by alias", async () => {
+    const names = await ColorNames.load("en", { source: "test-palette" });
+    expect(names.resolveColorOf("color yellow")?.term).toBe("yellow");
+    expect(names.resolveColorOf("YELLOW COLOR")?.term).toBe("yellow");
+  });
+
+  it("returns undefined for an unknown alias", async () => {
+    const names = await ColorNames.load("en", { source: "test-palette" });
+    expect(names.resolveColorOf("not a colour")).toBeUndefined();
   });
 });
