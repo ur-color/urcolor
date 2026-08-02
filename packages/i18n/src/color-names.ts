@@ -1,14 +1,27 @@
 import { Color } from "@urcolor/core";
-import { filterSupportedLocales, negotiateLocale } from "./engine/locale";
+import { filterSupportedLocales } from "./engine/locale";
 import { getLoadedChunk, getSource, loadChunk } from "./engine/registry";
+import { chainLocales, normalizeChain, resolveSourceChain } from "./engine/source-chain";
 import { lookupFull, type BinMatch, type Candidate } from "./engine/lookup-full";
 import { lookupHue, type HueMatch } from "./engine/lookup-hue";
 import { lookupPalette } from "./engine/lookup-palette";
 import type { Chunk } from "./engine/types";
 
 export interface ColorNamesOptions {
-  /** Which dataset answers. Required — provenance is never implicit. */
-  source: string;
+  /**
+   * Which dataset(s) answer, in priority order.
+   *
+   * Omit it for the package default chain. A single id pins the instance to
+   * that source and throws when it has no data for the locale — unchanged
+   * from before this option became optional. An array walks the sources in
+   * order.
+   *
+   * Sources are never merged: exactly one answers an entire instance, chosen
+   * at load time and fixed thereafter, so two colours resolved from the same
+   * instance always come from the same dataset. `resolvedOptions().source`
+   * and `resolve().source` always name the one that answered.
+   */
+  source?: string | readonly string[];
   /** `"long"` gives the display name, `"short"` the matching key. */
   style?: "long" | "short";
   /**
@@ -72,6 +85,8 @@ export interface ColorNameResolution {
 export interface ResolvedColorNamesOptions {
   locale: string;
   source: string;
+  /** The chain that was considered, in priority order. */
+  sources: string[];
   model: "full" | "hue" | "palette";
   style: "long" | "short";
   fallback: "nearest" | "none";
@@ -94,10 +109,6 @@ const DEFAULT_PALETTE_MAX_DISTANCE = 0.15;
  * distance from it, the model has nothing meaningful to say.
  */
 const MAX_HUE_DISTANCE = 0.2;
-
-function localesOf(sourceId: string): string[] {
-  return Object.keys(getSource(sourceId).languages);
-}
 
 /** Extract a colour's Oklab coordinates as a plain tuple. */
 function oklabOf(color: Color): [number, number, number] {
@@ -128,30 +139,32 @@ function hueProjectionDistanceOf(match: BinMatch | HueMatch): number | undefined
 export class ColorNames {
   readonly #locale: string;
   readonly #options: Required<Omit<ColorNamesOptions, "source">> & { source: string };
+  readonly #sources: string[];
   readonly #chunk: Chunk;
 
-  constructor(locales: string | readonly string[], options: ColorNamesOptions) {
-    const available = localesOf(options.source);
-    const locale = negotiateLocale(locales, available);
-    if (locale === undefined) {
+  constructor(locales: string | readonly string[], options: ColorNamesOptions = {}) {
+    const sources = normalizeChain(options.source);
+    const match = resolveSourceChain(locales, sources);
+    if (match === undefined) {
       throw new RangeError(
-        `Source "${options.source}" has no data for the requested locale(s). `
+        `No source has data for the requested locale(s). Tried: ${sources.join(", ")}. `
         + "Use ColorNames.supportedLocalesOf() to check first.",
       );
     }
 
-    const chunk = getLoadedChunk(options.source, locale);
+    const chunk = getLoadedChunk(match.source, match.locale);
     if (chunk === undefined) {
       throw new Error(
-        `Colour data for "${locale}" from source "${options.source}" is not loaded. `
-        + `Call await ColorNames.load(${JSON.stringify(locales)}, ${JSON.stringify(options)}) first.`,
+        `Colour data for "${match.locale}" from source "${match.source}" is not loaded. `
+        + `Call await ColorNames.load(${JSON.stringify(locales)}) first.`,
       );
     }
 
-    this.#locale = locale;
+    this.#locale = match.locale;
+    this.#sources = sources;
     this.#chunk = chunk;
     this.#options = {
-      source: options.source,
+      source: match.source,
       style: options.style ?? "long",
       fallback: options.fallback ?? "nearest",
       maxDistance: options.maxDistance
@@ -160,26 +173,34 @@ export class ColorNames {
     };
   }
 
-  /** Resolve the locale, load its chunk, and construct an instance. */
+  /**
+   * Resolve the source and locale, load the chunk, and construct an instance.
+   *
+   * The original `locales` and `options` are handed to the constructor rather
+   * than the resolved pair, so `resolvedOptions().sources` still reports the
+   * whole chain that was considered rather than collapsing to the winner.
+   * Resolution is deterministic, so the constructor reaches the same match.
+   */
   static async load(
     locales: string | readonly string[],
-    options: ColorNamesOptions,
+    options: ColorNamesOptions = {},
   ): Promise<ColorNames> {
-    const locale = negotiateLocale(locales, localesOf(options.source));
-    if (locale === undefined) {
+    const sources = normalizeChain(options.source);
+    const match = resolveSourceChain(locales, sources);
+    if (match === undefined) {
       throw new RangeError(
-        `Source "${options.source}" has no data for the requested locale(s).`,
+        `No source has data for the requested locale(s). Tried: ${sources.join(", ")}.`,
       );
     }
-    await loadChunk(options.source, locale);
-    return new ColorNames(locale, options);
+    await loadChunk(match.source, match.locale);
+    return new ColorNames(locales, options);
   }
 
   static supportedLocalesOf(
     locales: string | readonly string[],
-    options: { source: string },
+    options: { source?: string | readonly string[] } = {},
   ): string[] {
-    return filterSupportedLocales(locales, localesOf(options.source));
+    return filterSupportedLocales(locales, chainLocales(normalizeChain(options.source)));
   }
 
   /**
@@ -278,6 +299,7 @@ export class ColorNames {
     return {
       locale: this.#locale,
       source: this.#options.source,
+      sources: [...this.#sources],
       model: this.#chunk.model,
       style: this.#options.style,
       fallback: this.#options.fallback,

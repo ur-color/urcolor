@@ -1,7 +1,7 @@
 import { beforeAll, describe, expect, it } from "bun:test";
 import { Color } from "@urcolor/core";
 import { ColorNames } from "../src/index";
-import { registerSource } from "../src/engine/registry";
+import { registerSource, setDefaultSources } from "../src/engine/registry";
 import type { PaletteChunk } from "../src/engine/types";
 
 const BLUE = Color.parse("#3b82f6")!;
@@ -314,5 +314,130 @@ describe("palette model", () => {
   it("returns undefined for an unknown alias", async () => {
     const names = await ColorNames.load("en", { source: "test-palette" });
     expect(names.resolveColorOf("not a colour")).toBeUndefined();
+  });
+});
+
+describe("source chains", () => {
+  const chunkFor = (lang: string): PaletteChunk => ({
+    lang,
+    model: "palette",
+    terms: [["yellow", "yellow", [...Color.parse("#FFFF00")!.to("oklab").coords] as [number, number, number], null]],
+    provenance: [["Q943", "FFFF00"]],
+    aliases: {},
+  });
+
+  beforeAll(() => {
+    registerSource(
+      {
+        id: "chain-narrow",
+        title: "Narrow",
+        url: "https://example.invalid/",
+        license: "CC0-1.0",
+        citation: "Narrow",
+        languages: { en: { model: "palette", terms: 1, coverage: 1 }, zh: { model: "palette", terms: 1, coverage: 1 } },
+      },
+      { en: () => Promise.resolve({ default: chunkFor("en") }), zh: () => Promise.resolve({ default: chunkFor("zh") }) },
+    );
+    registerSource(
+      {
+        id: "chain-broad",
+        title: "Broad",
+        url: "https://example.invalid/",
+        license: "CC0-1.0",
+        citation: "Broad",
+        languages: {
+          "en": { model: "palette", terms: 1, coverage: 1 },
+          "zh": { model: "palette", terms: 1, coverage: 1 },
+          "zh-Hant": { model: "palette", terms: 1, coverage: 1 },
+          "ka": { model: "palette", terms: 1, coverage: 1 },
+        },
+      },
+      {
+        "en": () => Promise.resolve({ default: chunkFor("en") }),
+        "zh": () => Promise.resolve({ default: chunkFor("zh") }),
+        "zh-Hant": () => Promise.resolve({ default: chunkFor("zh-Hant") }),
+        "ka": () => Promise.resolve({ default: chunkFor("ka") }),
+      },
+    );
+    setDefaultSources(["chain-narrow", "chain-broad"]);
+  });
+
+  it("uses the default chain when source is omitted entirely", async () => {
+    const names = await ColorNames.load("ka");
+    expect(names.resolvedOptions().source).toBe("chain-broad");
+    expect(names.resolvedOptions().locale).toBe("ka");
+  });
+
+  it("prefers the first source in the default chain", async () => {
+    const names = await ColorNames.load("en");
+    expect(names.resolvedOptions().source).toBe("chain-narrow");
+  });
+
+  it("reports the whole chain it considered", async () => {
+    const names = await ColorNames.load("en");
+    expect(names.resolvedOptions().sources).toEqual(["chain-narrow", "chain-broad"]);
+  });
+
+  it("reports a single-element chain when pinned to one source", async () => {
+    const names = await ColorNames.load("en", { source: "chain-broad" });
+    expect(names.resolvedOptions().source).toBe("chain-broad");
+    expect(names.resolvedOptions().sources).toEqual(["chain-broad"]);
+  });
+
+  it("keeps single-source behaviour unchanged, including the throw", async () => {
+    // Backwards compatibility: pinning to a source that lacks the locale
+    // must still reject rather than quietly falling back.
+    // eslint-disable-next-line @typescript-eslint/await-thenable
+    await expect(ColorNames.load("ka", { source: "chain-narrow" })).rejects.toThrow(RangeError);
+  });
+
+  it("honours an explicit chain", async () => {
+    const names = await ColorNames.load("ka", { source: ["chain-narrow", "chain-broad"] });
+    expect(names.resolvedOptions().source).toBe("chain-broad");
+  });
+
+  it("honours a reversed chain", async () => {
+    const names = await ColorNames.load("en", { source: ["chain-broad", "chain-narrow"] });
+    expect(names.resolvedOptions().source).toBe("chain-broad");
+  });
+
+  it("lets an exact tag in a later source beat a stripped match in an earlier one", async () => {
+    const names = await ColorNames.load("zh-Hant");
+    expect(names.resolvedOptions().source).toBe("chain-broad");
+    expect(names.resolvedOptions().locale).toBe("zh-Hant");
+  });
+
+  it("names every source tried when nothing resolves", async () => {
+    const attempt = ColorNames.load("xx");
+    // eslint-disable-next-line @typescript-eslint/await-thenable
+    await expect(attempt).rejects.toThrow(RangeError);
+    // eslint-disable-next-line @typescript-eslint/await-thenable
+    await expect(attempt).rejects.toThrow(/chain-narrow/);
+    // eslint-disable-next-line @typescript-eslint/await-thenable
+    await expect(attempt).rejects.toThrow(/chain-broad/);
+  });
+
+  it("rejects an empty chain rather than treating it as the default", async () => {
+    // eslint-disable-next-line @typescript-eslint/await-thenable
+    await expect(ColorNames.load("en", { source: [] })).rejects.toThrow(RangeError);
+  });
+
+  it("rejects an unknown source id", async () => {
+    // eslint-disable-next-line @typescript-eslint/await-thenable
+    await expect(ColorNames.load("en", { source: ["chain-narrow", "nosuch"] })).rejects.toThrow(/nosuch/);
+  });
+
+  it("unions the chain's locales in supportedLocalesOf", () => {
+    expect(ColorNames.supportedLocalesOf(["ka", "en", "xx"])).toEqual(["ka", "en"]);
+  });
+
+  it("filters against a single source when one is named", () => {
+    expect(ColorNames.supportedLocalesOf(["ka", "en"], { source: "chain-narrow" })).toEqual(["en"]);
+  });
+
+  it("still answers lookups from the source that won", async () => {
+    const names = await ColorNames.load("ka");
+    expect(names.of(Color.parse("#FFFF00")!)).toBe("yellow");
+    expect(names.resolve(Color.parse("#FFFF00")!).source).toBe("chain-broad");
   });
 });
