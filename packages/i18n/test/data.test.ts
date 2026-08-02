@@ -1,11 +1,16 @@
-import { describe, expect, it } from "bun:test";
+import { beforeAll, describe, expect, it } from "bun:test";
 import { Color } from "@urcolor/core";
+// Side-effect import: this file asserts against the real registered sources
+// and the shipped default chain, so it must register them itself rather
+// than depending on some other test file having imported the entry point
+// (and run its side effects) first when this file is executed standalone.
+import "../src/index";
 import meta from "../src/data/uwdata/meta.json";
 import wikidataMeta from "../src/data/wikidata/meta.json";
 import { uwdataChunks } from "../src/sources/uwdata/chunks";
 import type { FullChunk, HueChunk } from "../src/engine/types";
 import { ColorNames } from "../src/color-names";
-import { getSource, listSources, loadChunk } from "../src/engine/registry";
+import { getSource, listSources, loadChunk, setDefaultSources } from "../src/engine/registry";
 
 const FULL_LANGS = ["de", "en", "es", "fa", "fi", "fr", "ko", "nl", "pl", "pt", "ro", "ru", "sv", "zh"];
 
@@ -173,6 +178,16 @@ describe("wikidata data integrity", () => {
 });
 
 describe("default source chain against shipped data", () => {
+  // Other suites (engine/registry.test.ts, engine/source-chain.test.ts,
+  // color-names.test.ts) call setDefaultSources() with fake ids to test the
+  // chain mechanism in isolation. That call mutates shared module state, so
+  // whichever chain was installed last leaks into whatever runs next in the
+  // same process. Restore the real shipped chain here so these assertions
+  // hold regardless of test-file execution order.
+  beforeAll(() => {
+    setDefaultSources(["uwdata", "wikidata"]);
+  });
+
   it("defaults to uwdata for a locale both sources cover", async () => {
     const names = await ColorNames.load("en");
     expect(names.resolvedOptions().source).toBe("uwdata");
