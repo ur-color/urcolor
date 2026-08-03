@@ -56,6 +56,23 @@ describe("resolveWorkspaceDeps", () => {
     expect(m.peerDependencies).toEqual({ "@urcolor/core": "^1.2.3", react: ">=18" });
   });
 
+  it("resolves devDependencies too, so a build-only workspace range never reaches the tarball", async () => {
+    const ws = await workspace({
+      shared: { name: "@urcolor/shared", version: "1.0.0" },
+      core: {
+        name: "@urcolor/core",
+        version: "2.0.0",
+        devDependencies: { "@urcolor/shared": "workspace:*" },
+      },
+    });
+
+    await resolveWorkspaceDeps(join(ws, "packages/core"), ws);
+
+    expect((await manifestOf(join(ws, "packages/core"))).devDependencies).toEqual({
+      "@urcolor/shared": "^1.0.0",
+    });
+  });
+
   it("keeps an explicit range, dropping only the protocol", async () => {
     const ws = await workspace({
       core: { name: "@urcolor/core", version: "1.2.3" },

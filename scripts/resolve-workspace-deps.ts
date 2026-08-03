@@ -19,7 +19,12 @@
  * Usage: `bun run scripts/resolve-workspace-deps.ts packages/<name>`
  */
 
-const DEP_FIELDS = ["dependencies", "peerDependencies", "optionalDependencies"] as const;
+const DEP_FIELDS = [
+  "dependencies",
+  "peerDependencies",
+  "optionalDependencies",
+  "devDependencies",
+] as const;
 
 type Manifest = {
   name?: string;
