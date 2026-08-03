@@ -123,6 +123,20 @@ export interface FeatureStrings {
 }
 
 /**
+ * Lucide glyphs, inlined because VitePress's own feature cards take their icon
+ * as a raw markup string in page data — there is no component slot to hand a
+ * `lucide-vue-next` import to. Parallel to the six cards below.
+ */
+export const FEATURE_ICONS = [
+  /* paintbrush */ "<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='m14.622 17.897-10.68-2.913'/><path d='M18.376 2.622a1 1 0 1 1 3.002 3.002L17.36 9.643a.5.5 0 0 0 0 .707l.944.944a2.41 2.41 0 0 1 0 3.408l-.944.944a.5.5 0 0 1-.707 0L8.354 7.348a.5.5 0 0 1 0-.707l.944-.944a2.41 2.41 0 0 1 3.408 0l.944.944a.5.5 0 0 0 .707 0z'/><path d='M9 8c-1.804 2.71-3.97 3.46-6.583 3.948a.507.507 0 0 0-.302.819l7.32 8.883a1 1 0 0 0 1.185.204C12.735 20.405 16 16.792 16 15'/></svg>",
+  /* palette */ "<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M12 22a1 1 0 0 1 0-20 10 9 0 0 1 10 9 5 5 0 0 1-5 5h-2.25a1.75 1.75 0 0 0-1.4 2.8l.3.4a1.75 1.75 0 0 1-1.4 2.8z'/><circle cx='13.5' cy='6.5' r='.5' fill='currentColor'/><circle cx='17.5' cy='10.5' r='.5' fill='currentColor'/><circle cx='6.5' cy='12.5' r='.5' fill='currentColor'/><circle cx='8.5' cy='7.5' r='.5' fill='currentColor'/></svg>",
+  /* keyboard */ "<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M10 8h.01'/><path d='M12 12h.01'/><path d='M14 8h.01'/><path d='M16 12h.01'/><path d='M18 8h.01'/><path d='M6 8h.01'/><path d='M7 16h10'/><path d='M8 12h.01'/><rect width='20' height='16' x='2' y='4' rx='2'/></svg>",
+  /* zap */ "<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z'/></svg>",
+  /* blocks */ "<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M10 22V7a1 1 0 0 0-1-1H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-5a1 1 0 0 0-1-1H2'/><rect x='14' y='2' width='8' height='8' rx='1'/></svg>",
+  /* globe */ "<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='10'/><path d='M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20'/><path d='M2 12h20'/></svg>",
+] as const;
+
+/**
  * Six cards per locale, in display order — most central to the library first.
  * `@urcolor/i18n` is an optional add-on package, so it comes last.
  */
@@ -187,4 +201,38 @@ export const FEATURE_STRINGS: Record<string, FeatureStrings[]> = {
 
 export function featureStrings(lang: string): FeatureStrings[] {
   return FEATURE_STRINGS[lang] ?? FEATURE_STRINGS.en!;
+}
+
+/* ---------- home page front matter ---------- */
+
+/**
+ * The landing page renders through VitePress's stock `home` layout, which
+ * reads its hero and cards out of page data rather than from markup. Building
+ * that data here keeps all seven locales in the tables above instead of
+ * duplicating the copy — and six inline SVGs — across seven `index.md` files.
+ * `docs/.vitepress/config.ts` merges the result in `transformPageData`.
+ */
+export function homeFrontmatter(lang: string) {
+  const s = heroStrings(lang);
+  const prefix = lang === "en" ? "" : `/${lang}`;
+
+  return {
+    hero: {
+      // The theme renders `name` as raw markup; only the "Ur" carries the
+      // brand gradient, the rest reads as plain heading text (see custom.css).
+      name: "<span class='hero-ur'>Ur</span>Color",
+      text: s.tagline,
+      tagline: s.lede,
+      actions: [
+        { theme: "brand", text: s.getStarted, link: `${prefix}/guide/` },
+        { theme: "alt", text: s.components, link: `${prefix}/components/` },
+      ],
+    },
+    features: featureStrings(lang).map((f, i) => ({
+      icon: FEATURE_ICONS[i],
+      title: f.title,
+      details: f.details,
+      link: `${prefix}/guide/features#${f.anchor}`,
+    })),
+  };
 }

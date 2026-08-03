@@ -9,13 +9,15 @@ export type LayoutMode = "grid" | "compact" | "stack";
 
 /**
  * `width` is the stage's own width, not the viewport's. The hero is two
- * columns, so the stage is roughly half the page: a 1440px viewport gives it
- * about 630px, and a 1080px viewport about 470px. The thresholds are set
- * against those numbers, not against page breakpoints.
+ * columns inside VitePress's own 1152px container, so the stage gets about
+ * 510px on a 1440px viewport and about 470px on a 1080px one. The thresholds
+ * are set against those numbers, not against page breakpoints — and grid mode
+ * has to reach down to them, because the taller compact stack would push the
+ * rest of the landing page off the fold.
  */
 export function layoutModeForWidth(width: number): LayoutMode {
-  if (width < 420) return "stack";
-  if (width < 620) return "compact";
+  if (width < 380) return "stack";
+  if (width < 460) return "compact";
   return "grid";
 }
 

@@ -171,6 +171,11 @@ onUnmounted(() => {
   height: 100vh;
   opacity: 1;
   pointer-events: none;
-  z-index: 0;
+  /*
+   * Behind the page rather than in front of it: the stock home layout has no
+   * stacking context of its own, so anything at or above 0 would paint over
+   * the in-flow hero copy and feature cards.
+   */
+  z-index: -1;
 }
 </style>

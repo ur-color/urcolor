@@ -457,6 +457,120 @@ export function sidebarFor(lang: string, exists: PageExists = () => true) {
   };
 }
 
+/* ---------- local search ---------- */
+
+/**
+ * The default theme's built-in search. Its own strings ship English-only, so
+ * every locale gets its own set — VitePress builds one index per locale, and
+ * the modal is resolved from the locale's `themeConfig`.
+ */
+interface SearchLabels {
+  button: string;
+  details: string;
+  reset: string;
+  back: string;
+  noResults: string;
+  select: string;
+  navigate: string;
+  close: string;
+}
+
+const SEARCH_LABELS: Record<string, SearchLabels> = {
+  en: {
+    button: "Search",
+    details: "Show detailed list",
+    reset: "Clear the query",
+    back: "Back to the search results",
+    noResults: "No results for",
+    select: "to select",
+    navigate: "to navigate",
+    close: "to close",
+  },
+  zh: {
+    button: "搜索",
+    details: "显示详细列表",
+    reset: "清除查询条件",
+    back: "返回搜索结果",
+    noResults: "无法找到相关结果",
+    select: "选择",
+    navigate: "切换",
+    close: "关闭",
+  },
+  ja: {
+    button: "検索",
+    details: "詳細を表示",
+    reset: "検索をクリア",
+    back: "検索結果に戻る",
+    noResults: "見つかりませんでした",
+    select: "選択",
+    navigate: "移動",
+    close: "閉じる",
+  },
+  es: {
+    button: "Buscar",
+    details: "Mostrar lista detallada",
+    reset: "Borrar la búsqueda",
+    back: "Volver a los resultados",
+    noResults: "Sin resultados para",
+    select: "para seleccionar",
+    navigate: "para navegar",
+    close: "para cerrar",
+  },
+  fr: {
+    button: "Rechercher",
+    details: "Afficher la liste détaillée",
+    reset: "Effacer la recherche",
+    back: "Retour aux résultats",
+    noResults: "Aucun résultat pour",
+    select: "pour sélectionner",
+    navigate: "pour naviguer",
+    close: "pour fermer",
+  },
+  de: {
+    button: "Suchen",
+    details: "Detaillierte Liste anzeigen",
+    reset: "Suche zurücksetzen",
+    back: "Zurück zu den Ergebnissen",
+    noResults: "Keine Ergebnisse für",
+    select: "zum Auswählen",
+    navigate: "zum Navigieren",
+    close: "zum Schließen",
+  },
+  ru: {
+    button: "Поиск",
+    details: "Показать подробный список",
+    reset: "Очистить запрос",
+    back: "Назад к результатам",
+    noResults: "Ничего не найдено по запросу",
+    select: "выбрать",
+    navigate: "переход",
+    close: "закрыть",
+  },
+};
+
+export function searchFor(lang: string) {
+  const t = SEARCH_LABELS[lang] ?? SEARCH_LABELS.en!;
+  return {
+    provider: "local" as const,
+    options: {
+      translations: {
+        button: { buttonText: t.button, buttonAriaLabel: t.button },
+        modal: {
+          displayDetails: t.details,
+          resetButtonTitle: t.reset,
+          backButtonTitle: t.back,
+          noResultsText: t.noResults,
+          footer: {
+            selectText: t.select,
+            navigateText: t.navigate,
+            closeText: t.close,
+          },
+        },
+      },
+    },
+  };
+}
+
 /** The default theme's own chrome, which ships English-only. */
 export function themeChromeFor(lang: string) {
   const t = labelsFor(lang);

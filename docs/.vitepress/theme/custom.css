@@ -22,12 +22,79 @@
   display: none;
 }
 
-.is-home .VPContent .VPDoc .container .content {
-  padding: 0;
+/*
+ * The stock hero's image slot is sized for a ~320px logo; ours holds the live
+ * picker, so it needs a real box and no blurred halo behind it. The container
+ * keeps the theme's own width — only what sits inside the slot changes.
+ */
+
+/*
+ * The theme gradient-clips the whole hero name. The wordmark only brands its
+ * "Ur", so the gradient moves off the heading and onto that span alone.
+ */
+.VPHome .VPHero .name {
+  background: none;
+  -webkit-text-fill-color: var(--vp-c-text-1);
 }
 
-.is-home .VPContent .VPDoc .container .content .content-container {
-  max-width: 100%;
+.VPHome .VPHero .name .hero-ur {
+  background: var(--vp-home-hero-name-background);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/*
+ * Stacked, the stock theme floats the hero image above the copy — fine for a
+ * logo, but a full picker there buries the pitch below the fold. Copy first.
+ */
+.VPHome .VPHero .main {
+  order: 1;
+}
+
+.VPHome .VPHero .image {
+  order: 2;
+  margin: 32px 0 0;
+}
+
+.VPHome .VPHero .image-container {
+  margin: 0;
+  width: 100%;
+  height: auto;
+  transform: none;
+}
+
+.VPHome .VPHero .image-bg {
+  display: none;
+}
+
+@media (min-width: 960px) {
+  /* The copy takes a fixed half and stops growing, so the rest of the row is
+     the picker's — otherwise both columns grow and neither share is deliberate. */
+  .VPHome .VPHero.has-image .main {
+    flex: 0 0 auto;
+    width: 50%;
+    padding-right: 40px;
+  }
+
+  .VPHome .VPHero .image {
+    order: 2;
+    flex: 1 1 0;
+    min-width: 0;
+    margin: 0;
+  }
+}
+
+/* The feature cards sit on the animated backdrop, so they read better
+   translucent than as the theme's flat `--vp-c-bg-soft` blocks. */
+.VPHome .VPFeature {
+  background-color: color-mix(in srgb, var(--vp-c-bg-soft) 55%, transparent);
+  border-color: color-mix(in srgb, var(--vp-c-text-1) 12%, transparent);
+  backdrop-filter: blur(16px);
+}
+
+.VPHome .VPFeature .icon {
+  color: var(--vp-c-brand-2);
 }
 
 .dark {

@@ -1,9 +1,3 @@
 ---
-layout: page
+layout: home
 ---
-
-<script setup>
-import HeroSection from '../.vitepress/components/HeroSection.vue'
-</script>
-
-<HeroSection />

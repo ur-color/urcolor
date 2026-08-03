@@ -2,13 +2,18 @@ import DefaultTheme from "vitepress/theme";
 import "./custom.css";
 import "./icons.css";
 import type { Theme } from "vitepress";
+import CopyPageButtons from "../components/CopyPageButtons.vue";
 import Layout from "../components/Layout.vue";
 import { installCodeGroupSync } from "./codeGroupSync";
 
 export default {
   extends: DefaultTheme,
   Layout,
-  enhanceApp() {
+  enhanceApp({ app }) {
+    // The markdown-it plugin in `config.ts` injects this after every page's
+    // first `<h1>`, so it has to be registered globally rather than imported.
+    app.component("CopyPageButtons", CopyPageButtons);
+
     if (typeof window === "undefined") return;
 
     // One framework choice for the whole page — and the whole site.

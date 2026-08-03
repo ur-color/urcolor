@@ -7,25 +7,25 @@ import {
 } from "../.vitepress/composables/heroLayout";
 
 describe("layoutModeForWidth", () => {
-  it("picks stack below 420", () => {
+  it("picks stack below 380", () => {
     expect(layoutModeForWidth(343)).toBe("stack");
-    expect(layoutModeForWidth(419)).toBe("stack");
+    expect(layoutModeForWidth(379)).toBe("stack");
   });
 
-  it("picks compact from 420 up to 620", () => {
-    expect(layoutModeForWidth(420)).toBe("compact");
-    expect(layoutModeForWidth(619)).toBe("compact");
+  it("picks compact from 380 up to 460", () => {
+    expect(layoutModeForWidth(380)).toBe("compact");
+    expect(layoutModeForWidth(459)).toBe("compact");
   });
 
-  it("picks grid at 620 and above", () => {
-    expect(layoutModeForWidth(620)).toBe("grid");
+  it("picks grid at 460 and above", () => {
+    expect(layoutModeForWidth(460)).toBe("grid");
     expect(layoutModeForWidth(900)).toBe("grid");
   });
 
-  it("puts a 1440px viewport's right column in grid and a 1080px one in compact", () => {
-    // The two-column stage gets roughly half the page width.
-    expect(layoutModeForWidth(630)).toBe("grid");
-    expect(layoutModeForWidth(470)).toBe("compact");
+  it("keeps the hero's own column in grid mode on a desktop viewport", () => {
+    // Half of VitePress's 1152px hero container, minus its padding.
+    expect(layoutModeForWidth(510)).toBe("grid");
+    expect(layoutModeForWidth(470)).toBe("grid");
   });
 });
 
