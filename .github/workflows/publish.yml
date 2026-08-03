@@ -75,18 +75,33 @@ jobs:
             echo "changed=false" >> "$GITHUB_OUTPUT"
           fi
 
-      # Checked before the build rather than at `npm publish`, so a missing
-      # token costs seconds instead of a full test-and-build cycle.
-      - name: Check the npm token is configured
+      # Two ways to authenticate, and the job reports which one it is about to
+      # use rather than discovering it at the upload.
+      #
+      # Trusted publishing (OIDC) is preferred: npm mints a short-lived
+      # credential from this job's identity, so there is no token to leak or
+      # rotate, and it is not subject to the account's 2FA-on-publish rule that
+      # makes a token fail with EOTP. It needs a Trusted Publisher configured
+      # on npmjs.com for the package, naming this repository and *this caller
+      # workflow's* filename — npm validates the calling workflow, not the
+      # reusable one that runs `npm publish`.
+      #
+      # A token still works where trusted publishing is not configured yet.
+      - name: Determine how npm will authenticate
+        id: auth
         if: steps.version.outputs.changed == 'true'
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
-          if [ -z "$NPM_TOKEN" ]; then
-            echo "::error::NPM_TOKEN is not set for this repository, so ${{ inputs.package-name }} cannot be published."
-            echo "Add one with: gh secret set NPM_TOKEN --repo ${{ github.repository }}"
-            echo "The token needs Read and write access to packages under the @urcolor scope."
-            exit 1
+          if [ -n "$NPM_TOKEN" ]; then
+            echo "mode=token" >> "$GITHUB_OUTPUT"
+            echo "Publishing with NPM_TOKEN. Configure a Trusted Publisher for ${{ inputs.package-name }} to drop the token."
+          else
+            echo "mode=oidc" >> "$GITHUB_OUTPUT"
+            echo "No NPM_TOKEN set — relying on trusted publishing (OIDC)."
+            echo "That requires a Trusted Publisher on npmjs.com for ${{ inputs.package-name }}:"
+            echo "  repository: ${{ github.repository }}"
+            echo "  workflow:   $(basename '${{ github.workflow_ref }}' | cut -d@ -f1)"
           fi
 
       - name: Setup Bun
@@ -116,6 +131,8 @@ jobs:
           node-version: '24'
           registry-url: 'https://registry.npmjs.org'
 
+      # Trusted publishing needs npm 11.5.1 or later; `latest` satisfies that
+      # and keeps provenance signing current.
       - name: Update npm
         if: steps.version.outputs.changed == 'true'
         run: npm install -g npm@latest
@@ -139,12 +156,15 @@ jobs:
         if: steps.version.outputs.changed == 'true'
         run: bun run scripts/check-publishable.ts "${{ steps.dir.outputs.path }}"
 
+      # NODE_AUTH_TOKEN is set only in token mode. Passing an empty one under
+      # OIDC would have npm present an anonymous credential and fail, rather
+      # than falling through to trusted publishing.
       - name: Publish to npm with provenance
         if: steps.version.outputs.changed == 'true'
         working-directory: ${{ steps.dir.outputs.path }}
         run: npm publish --provenance --access public
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ steps.auth.outputs.mode == 'token' && secrets.NPM_TOKEN || '' }}
 
       # Reads "## Unreleased" and "## [Unreleased]" both. The workflows this
       # replaces matched only the bracketed form while every changelog here uses
