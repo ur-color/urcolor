@@ -62,6 +62,22 @@ if (names.length > 0 && selected.length !== names.length) {
   process.exit(1);
 }
 
+// Checked first, because npm answers a PUT from an unauthenticated client with
+// 404 rather than 401 — the same status as a package that does not exist. That
+// makes "you are not logged in" read as "this package is not in the registry",
+// which sends you looking in the wrong place entirely.
+if (!dryRun) {
+  const who = await $`npm whoami`.nothrow().quiet();
+  if (who.exitCode !== 0) {
+    console.error("npm is not authenticated on this machine.");
+    console.error("Run `npm login` first — publishing a package for the first time");
+    console.error("needs a real login, since npm asks for a one-time password and a");
+    console.error("CI token has no way to answer.");
+    process.exit(1);
+  }
+  console.log(`Publishing as ${who.text().trim()}.`);
+}
+
 console.log(`Building all packages first — a stale dist is worse than no dist.`);
 await $`bun run build`.quiet();
 
