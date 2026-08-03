@@ -38,7 +38,8 @@ docs/.vitepress/cache
 
 # npmrc — holds the npm auth token. The glob also covers renamed variants
 # (.npmrc.disabled-by-claude and the like) so one can never be staged.
-.npmrc*
+.npmrc
+.npmrc.*
 
 # Storybook
 storybook-static
