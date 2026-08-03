@@ -1,57 +1,30 @@
 <script setup lang="ts">
+import { computed } from "vue";
 import {
   Globe,
-  Accessibility,
+  Keyboard,
   Blocks,
   Paintbrush,
   Zap,
   Palette,
 } from "lucide-vue-next";
+import { featureStrings } from "../i18n/strings";
+import { useDocsLang } from "../composables/useDocsLang";
 
-const features = [
-  {
-    icon: Globe,
-    title: "74 Languages",
-    details:
-      "Channel labels translated across 74 languages, with zero runtime dependencies.",
-    href: "/guide/features#languages",
-  },
-  {
-    icon: Accessibility,
-    title: "Accessible",
-    details:
-      "WAI-ARIA color picker pattern with full keyboard and screen reader support.",
-    href: "/guide/features#accessible",
-  },
-  {
-    icon: Blocks,
-    title: "Multi-Framework",
-    details:
-      "Vue support today, with React, Svelte, Angular, and more planned.",
-    href: "/guide/features#multi-framework",
-  },
-  {
-    icon: Paintbrush,
-    title: "Unstyled",
-    details:
-      "Headless, renderless primitives — bring your own design system.",
-    href: "/guide/features#unstyled",
-  },
-  {
-    icon: Zap,
-    title: "Fast",
-    details:
-      "GPU-accelerated WebGL gradients and zero-dependency runtime performance.",
-    href: "/guide/features#fast",
-  },
-  {
-    icon: Palette,
-    title: "Any Color Space",
-    details:
-      "sRGB, HSL, HSB, LCH, OKLCH, and more via a zero-dependency CSS Color 4 engine.",
-    href: "/guide/features#color-spaces",
-  },
-];
+/** Parallel to the six cards in `FEATURE_STRINGS`, which carry the prose. */
+const ICONS = [Paintbrush, Palette, Keyboard, Zap, Blocks, Globe];
+
+const lang = useDocsLang();
+
+const features = computed(() => {
+  const prefix = lang.value === "en" ? "" : `/${lang.value}`;
+  return featureStrings(lang.value).map((f, i) => ({
+    icon: ICONS[i],
+    title: f.title,
+    details: f.details,
+    href: `${prefix}/guide/features#${f.anchor}`,
+  }));
+});
 </script>
 
 <template>
@@ -62,14 +35,16 @@ const features = [
       :href="f.href"
       class="feature-card"
     >
-      <component
-        :is="f.icon"
-        :size="20"
-        class="feature-icon"
-      />
-      <h3 class="feature-title">
-        {{ f.title }}
-      </h3>
+      <div class="feature-head">
+        <component
+          :is="f.icon"
+          :size="20"
+          class="feature-icon"
+        />
+        <h3 class="feature-title">
+          {{ f.title }}
+        </h3>
+      </div>
       <p class="feature-details">
         {{ f.details }}
       </p>
@@ -101,15 +76,23 @@ const features = [
   border-color: color-mix(in srgb, var(--vp-c-brand-1) 30%, transparent);
 }
 
+/* Icon and title share a line; the description sits under both. */
+.feature-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
 .feature-icon {
   color: var(--vp-c-brand-2);
-  margin-bottom: 12px;
+  flex: none;
 }
 
 .feature-title {
   font-size: 16px;
   font-weight: 700;
-  margin-bottom: 8px;
+  line-height: 1.3;
   color: var(--vp-c-text-1);
 }
 

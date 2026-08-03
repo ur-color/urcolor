@@ -1,11 +1,20 @@
 <script setup lang="ts">
+import { computed } from "vue";
+import { heroStrings } from "../i18n/strings";
+import { useDocsLang } from "../composables/useDocsLang";
 import { provideHeroColor } from "../composables/useHeroColor";
 import FeaturesGrid from "./FeaturesGrid.vue";
 import HeroBgCanvas from "./HeroBgCanvas.vue";
-import HeroOrbit from "./HeroOrbit.vue";
+import HeroGrid from "./HeroGrid.vue";
 import HeroTitle from "./HeroTitle.vue";
 
 provideHeroColor();
+
+const lang = useDocsLang();
+const strings = computed(() => heroStrings(lang.value));
+
+/** English is the root locale; every other one lives under its own directory. */
+const prefix = computed(() => (lang.value === "en" ? "" : `/${lang.value}`));
 </script>
 
 <template>
@@ -16,26 +25,25 @@ provideHeroColor();
       <div class="hero-copy">
         <HeroTitle />
         <p class="hero-tagline">
-          Universal color picker component library
+          {{ strings.tagline }}
         </p>
         <p class="hero-lede">
-          Headless, accessible primitives for every color space — sRGB, HSL,
-          LCH, OKLCH — in any framework, with no runtime dependencies.
+          {{ strings.lede }}
         </p>
         <div class="hero-actions">
           <a
-            href="/guide/"
+            :href="`${prefix}/guide/`"
             class="hero-btn hero-btn-brand"
-          >Get Started</a>
+          >{{ strings.getStarted }}</a>
           <a
-            href="/components/"
+            :href="`${prefix}/components/`"
             class="hero-btn hero-btn-alt"
-          >Components</a>
+          >{{ strings.components }}</a>
         </div>
       </div>
 
       <div class="hero-cluster">
-        <HeroOrbit />
+        <HeroGrid />
       </div>
     </div>
 

@@ -88,10 +88,14 @@ afterEach(() => {
 });
 
 describe("HeroSection", () => {
-  it("provides the hero color to the orbit", () => {
+  it("provides the hero color to the grid", () => {
     const wrapper = mount(HeroSection);
-    expect(wrapper.find(".hero-orbit").exists()).toBe(true);
+    expect(wrapper.find(".hero-grid").exists()).toBe(true);
     expect(wrapper.find("[data-core-mode]").exists()).toBe(true);
+  });
+
+  it("titles the hero with the wordmark alone", () => {
+    expect(mount(HeroSection).find("h1.hero-title").text()).toBe("Color");
   });
 
   it("keeps both calls to action", () => {

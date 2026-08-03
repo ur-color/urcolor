@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { Color } from "@urcolor/core";
-import { hueRamp } from "../../composables/heroOrbit";
+import { hueRamp } from "../../composables/heroLayout";
 import { useHeroColor } from "../../composables/useHeroColor";
 import {
   ColorSwatchPickerItem,
