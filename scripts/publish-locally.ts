@@ -50,7 +50,9 @@ const args = process.argv.slice(2);
 const dryRun = args.includes("--dry-run");
 const otpIndex = args.indexOf("--otp");
 const otp = otpIndex >= 0 ? args[otpIndex + 1] : undefined;
-const names = args.filter((a, i) => !a.startsWith("--") && i !== otpIndex + 1);
+// `otpIndex < 0` guard matters: without it, a missing `--otp` makes the value
+// index 0, which quietly drops the first package name from the list.
+const names = args.filter((a, i) => !a.startsWith("--") && (otpIndex < 0 || i !== otpIndex + 1));
 
 const selected = names.length > 0
   ? ORDER.filter(p => names.includes(p.name))
