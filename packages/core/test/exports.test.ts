@@ -29,6 +29,7 @@ describe("@urcolor/core exports", () => {
       "SPACES",
       "spaceDef",
       "hueIndexOf",
+      "channelIndexOf",
     ]) {
       expect(core).toHaveProperty(name);
     }

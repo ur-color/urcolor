@@ -14,7 +14,7 @@ export { alpha, complement, darken, desaturate, lighten, negate, rotateHue, satu
 export { deltaE, deltaEOK, type DeltaEMethod } from "./color/deltaE";
 export { contrast, type ContrastAlgorithm, type ContrastOptions } from "./color/contrast";
 export { NAMED_COLORS, parseNamed } from "./color/named";
-export { SPACES, spaceDef, hueIndexOf } from "./color/registry";
+export { SPACES, spaceDef, hueIndexOf, channelIndexOf } from "./color/registry";
 export type { ColorIn, OklchColor, P3Color, SrgbColor } from "./color/tagged";
 export type { ColorObject, Coords, SpaceDef, SpaceId } from "./color/types";
 
