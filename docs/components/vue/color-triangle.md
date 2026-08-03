@@ -143,7 +143,6 @@ The root container that manages triangle state and color channel binding. Clips 
 | `changeEnd` | `Color` | Emitted when a change-producing interaction ends. |
 
 ::: tip
-`xChannel`, `yChannel` and `zChannel` are the Vue spelling. React, Svelte and Angular name the same three props `channelX`, `channelY` and `channelZ`.
 :::
 
 A pointer press that lands outside the outline is ignored: the root's box is a full square and the clip path hides the corners without stopping the event, so the root hit-tests every `pointerdown` against the triangle itself.

@@ -364,8 +364,8 @@ function MyPicker() {
         value={color}
         onValueChange={setColor}
         colorSpace="hsv"
-        channelX="s"
-        channelY="v"
+        xChannel="s"
+        yChannel="v"
         yInverted
         className="absolute inset-[20.3%] cursor-crosshair touch-none overflow-clip rounded-sm"
       >
@@ -419,8 +419,8 @@ function MyPicker() {
   <ColorArea.Root
     bind:value={() => colorState.color, colorState.setColor}
     colorSpace="hsv"
-    channelX="s"
-    channelY="v"
+    xChannel="s"
+    yChannel="v"
     yInverted={true}
     class="absolute inset-[20.3%] cursor-crosshair touch-none overflow-clip rounded-sm"
   >
@@ -478,8 +478,8 @@ import { COLOR_AREA_DIRECTIVES, COLOR_RING_DIRECTIVES } from "@urcolor/angular";
         urcColorAreaRoot
         [(value)]="color"
         colorSpace="hsv"
-        channelX="s"
-        channelY="v"
+        xChannel="s"
+        yChannel="v"
         yInverted
         class="absolute inset-[20.3%] cursor-crosshair touch-none overflow-clip rounded-sm"
       >
@@ -507,7 +507,7 @@ export class MyPicker {
 
 The key is `inset-[20.3%]` — this inscribes the square perfectly inside the ring's inner circle (`50% × (1 − 0.84/√2) ≈ 20.3%`). The `:y-inverted="true"` prop flips the Y axis so value increases upward. Both components share the same `v-model="color"`, so dragging the hue ring updates the area's gradient, and dragging the area updates the color while keeping the hue ring in sync.
 
-React, Svelte and Angular reach the same result with two naming differences. Their area root takes `channelX` / `channelY` where Vue takes `x-channel` / `y-channel`, and the Y flip is `yInverted` rather than `:y-inverted`. They also have no `ColorAreaArea` part: the root is the interactive surface, so the gradient and thumb are its direct children. Binding both roots to the same state is what keeps them in sync — `value={color}` plus `onValueChange={setColor}` on both roots in React, `bind:value={() => colorState.color, colorState.setColor}` twice in Svelte, `[(value)]="color"` twice in Angular.
+React, Svelte and Angular reach the same result with two naming differences. Their area root takes `xChannel` / `yChannel` where Vue takes `x-channel` / `y-channel`, and the Y flip is `yInverted` rather than `:y-inverted`. They also have no `ColorAreaArea` part: the root is the interactive surface, so the gradient and thumb are its direct children. Binding both roots to the same state is what keeps them in sync — `value={color}` plus `onValueChange={setColor}` on both roots in React, `bind:value={() => colorState.color, colorState.setColor}` twice in Svelte, `[(value)]="color"` twice in Angular.
 
 ::: tip
 All components are completely unstyled — the classes above are just an example using Tailwind CSS. To compute the inset for any `inner-radius`, use `50% × (1 − innerRadius / √2)`.

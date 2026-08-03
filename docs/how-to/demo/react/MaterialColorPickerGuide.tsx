@@ -16,8 +16,8 @@ export default function MaterialColorPickerGuide() {
         value={color}
         onValueChange={setColor}
         colorSpace="hsv"
-        channelX="s"
-        channelY="v"
+        xChannel="s"
+        yChannel="v"
         yInverted
         className="
           relative block h-[180px] w-full cursor-crosshair touch-none overflow-clip

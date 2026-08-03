@@ -71,8 +71,8 @@ The root container that manages area state and color channel binding. Renders a 
 | `value` | `Color \| string \| null` | — | Controlled color value. |
 | `defaultValue` | `Color \| string` | `'hsl(0, 100%, 50%)'` | Initial color when uncontrolled. |
 | `colorSpace` | `SpaceId` | `'hsl'` | Color space (e.g. `'hsl'`, `'oklch'`). |
-| `channelX` | `string` | Auto | Channel mapped to the X axis, or `'alpha'`. Defaults to the color space's first channel. |
-| `channelY` | `string` | Auto | Channel mapped to the Y axis, or `'alpha'`. Defaults to the color space's second channel. |
+| `xChannel` | `string` | Auto | Channel mapped to the X axis, or `'alpha'`. Defaults to the color space's first channel. |
+| `yChannel` | `string` | Auto | Channel mapped to the Y axis, or `'alpha'`. Defaults to the color space's second channel. |
 | `disabled` | `boolean` | `false` | Disables interaction. |
 | `dir` | `'ltr' \| 'rtl'` | `'ltr'` | Reading direction. `'rtl'` mirrors the X axis. |
 | `xInverted` | `boolean` | `false` | Runs the X axis opposite to its natural direction. |
@@ -85,7 +85,6 @@ The root container that manages area state and color channel binding. Renders a 
 | `children` | `React.ReactNode` | — | The area's parts. |
 
 ::: tip
-`channelX` and `channelY` are the React, Svelte and Angular spelling. Vue names the same two props `xChannel` and `yChannel`.
 :::
 
 ::: warning

@@ -7,8 +7,8 @@
 <ColorTriangle.Root
   bind:value={() => colorState.color, colorState.setColor}
   colorSpace="hsv"
-  channelX="s"
-  channelY="v"
+  xChannel="s"
+  yChannel="v"
   class="relative block size-64"
 >
   <ColorTriangle.Gradient class="absolute inset-0 block" />

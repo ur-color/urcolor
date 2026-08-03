@@ -8,8 +8,8 @@ export default function ColorAreaOKLCh() {
       value={color}
       onValueChange={setColor}
       colorSpace="oklch"
-      channelX="c"
-      channelY="l"
+      xChannel="c"
+      yChannel="l"
       className="
         relative block h-[200px] w-full cursor-crosshair touch-none
         overflow-clip rounded-lg

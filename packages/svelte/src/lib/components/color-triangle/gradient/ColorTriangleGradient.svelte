@@ -78,17 +78,17 @@
     // change while one is in flight.
     if (context.dragging) return;
 
-    const xConfig = getChannelConfig(context.colorSpace, context.xChannel);
-    const yConfig = getChannelConfig(context.colorSpace, context.yChannel);
+    const xConfig = getChannelConfig(context.colorSpace, context.xChannelKey);
+    const yConfig = getChannelConfig(context.colorSpace, context.yChannelKey);
     if (!xConfig || !yConfig) return;
 
     let zChannel: string | undefined;
     let zMin: number | undefined;
     let zMax: number | undefined;
-    if (context.isThreeChannel && context.zChannel !== undefined) {
-      const zConfig = getChannelConfig(context.colorSpace, context.zChannel);
+    if (context.isThreeChannel && context.zChannelKey !== undefined) {
+      const zConfig = getChannelConfig(context.colorSpace, context.zChannelKey);
       if (zConfig) {
-        zChannel = context.zChannel;
+        zChannel = context.zChannelKey;
         zMin = zConfig.nativeMin ?? zConfig.min;
         zMax = zConfig.nativeMax ?? zConfig.max;
       }
@@ -98,8 +98,8 @@
     const pixels = sampleTriangleGrid(
       withOverrides(context.color),
       context.colorSpace,
-      context.xChannel,
-      context.yChannel,
+      context.xChannelKey,
+      context.yChannelKey,
       xConfig.nativeMin ?? xConfig.min,
       xConfig.nativeMax ?? xConfig.max,
       yConfig.nativeMin ?? yConfig.min,

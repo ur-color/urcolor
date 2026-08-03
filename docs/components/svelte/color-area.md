@@ -14,8 +14,8 @@ A rectangular 2D area component for adjusting two color channels mapped to the h
 <ColorArea.Root
   bind:value={() => colorState.color, colorState.setColor}
   colorSpace="hsl"
-  channelX="h"
-  channelY="s"
+  xChannel="h"
+  yChannel="s"
   class="relative block h-[200px] w-full cursor-crosshair touch-none overflow-clip rounded-lg"
 >
   <ColorArea.Gradient class="absolute inset-0" />
@@ -52,8 +52,8 @@ HSL color area with Hue on the horizontal axis and Saturation on the vertical ax
 <ColorArea.Root
   bind:value={() => colorState.color, colorState.setColor}
   colorSpace="hsl"
-  channelX="h"
-  channelY="s"
+  xChannel="h"
+  yChannel="s"
   class="relative block h-[200px] w-full touch-none overflow-clip rounded-lg"
 >
   <ColorArea.Gradient class="absolute inset-0" />
@@ -69,8 +69,8 @@ OKLCh color area with Chroma on the horizontal axis and Lightness on the vertica
 <ColorArea.Root
   bind:value={() => colorState.color, colorState.setColor}
   colorSpace="oklch"
-  channelX="c"
-  channelY="l"
+  xChannel="c"
+  yChannel="l"
   class="relative block h-[200px] w-full touch-none overflow-clip rounded-lg"
 >
   <ColorArea.Gradient class="absolute inset-0" />
@@ -80,14 +80,14 @@ OKLCh color area with Chroma on the horizontal axis and Lightness on the vertica
 
 ### Alpha on an axis
 
-Map `channelY` to `"alpha"` to make the vertical axis drive opacity. The gradient is drawn with real transparency and composites over its own checkerboard.
+Map `yChannel` to `"alpha"` to make the vertical axis drive opacity. The gradient is drawn with real transparency and composites over its own checkerboard.
 
 ```svelte
 <ColorArea.Root
   bind:value={() => colorState.color, colorState.setColor}
   colorSpace="hsl"
-  channelX="h"
-  channelY="alpha"
+  xChannel="h"
+  yChannel="alpha"
   class="relative block h-[200px] w-full touch-none overflow-clip rounded-lg"
 >
   <ColorArea.Gradient class="absolute inset-0" />
@@ -173,8 +173,8 @@ Extends `HTMLAttributes<HTMLDivElement>`.
 | `value` | `Color \| string \| null` | — | The color value. Bindable with `bind:value`. |
 | `defaultValue` | `Color \| string \| null` | — | The color used until the first interaction when `value` is not bound. Falls back to `hsl(0, 100%, 50%)`. |
 | `colorSpace` | `SpaceId` | `'hsl'` | Color space (e.g. `'hsl'`, `'oklch'`). |
-| `channelX` | `string` | Auto | Channel driven by the horizontal axis, or `'alpha'`. Defaults to the color space's first channel. |
-| `channelY` | `string` | Auto | Channel driven by the vertical axis, or `'alpha'`. Defaults to the color space's second channel. |
+| `xChannel` | `string` | Auto | Channel driven by the horizontal axis, or `'alpha'`. Defaults to the color space's first channel. |
+| `yChannel` | `string` | Auto | Channel driven by the vertical axis, or `'alpha'`. Defaults to the color space's second channel. |
 | `disabled` | `boolean` | `false` | Prevents the user from interacting with the area. |
 | `dir` | `'ltr' \| 'rtl'` | `'ltr'` | Reading direction. `'rtl'` mirrors the horizontal axis, and is applied to the rendered element as well. |
 | `xInverted` | `boolean` | `false` | Runs the horizontal axis opposite to its natural direction. |
@@ -186,7 +186,6 @@ Extends `HTMLAttributes<HTMLDivElement>`.
 | `child` | `Snippet<[ChildSnippetArgs]>` | — | Replaces the default element; receives the props it would have received. |
 
 ::: tip
-`channelX` and `channelY` are the Svelte, React and Angular spelling. Vue names the same two props `xChannel` and `yChannel`.
 :::
 
 The root publishes `--reka-slider-area-thumb-transform` on its own `style`, which is the centring transform the thumb consumes. `dir` and `xInverted` each mirror the horizontal axis, so setting both cancels out.

@@ -109,8 +109,8 @@ function MyTriangle() {
       value={color}
       onValueChange={setColor}
       colorSpace="hsv"
-      channelX="s"
-      channelY="v"
+      xChannel="s"
+      yChannel="v"
     >
       {/* children go here */}
     </ColorTriangle.Root>
@@ -129,8 +129,8 @@ function MyTriangle() {
 <ColorTriangle.Root
   bind:value={() => colorState.color, colorState.setColor}
   colorSpace="hsv"
-  channelX="s"
-  channelY="v"
+  xChannel="s"
+  yChannel="v"
 >
   <!-- children go here -->
 </ColorTriangle.Root>
@@ -150,8 +150,8 @@ import { COLOR_TRIANGLE_DIRECTIVES } from "@urcolor/angular"; // [!code ++]
       urcColorTriangleRoot
       [(value)]="color"
       colorSpace="hsv"
-      channelX="s"
-      channelY="v"
+      xChannel="s"
+      yChannel="v"
     >
       <!-- children go here -->
     </div>
@@ -169,8 +169,8 @@ Vue's `v-model` and Angular's `[(value)]` are true two-way bindings. React is on
 Angular ships every part of a family as a `COLOR_*_DIRECTIVES` array, so one entry in `imports` brings in the whole set.
 
 - `color-space` / `colorSpace` — the color space to work in (`hsv`, `hsl`, `srgb`, etc.)
-- `x-channel` / `channelX` — the channel mapped to the horizontal axis
-- `y-channel` / `channelY` — the channel mapped to the vertical axis
+- `x-channel` / `xChannel` — the channel mapped to the horizontal axis
+- `y-channel` / `yChannel` — the channel mapped to the vertical axis
 
 ## Step 3: Add the gradient
 
@@ -213,8 +213,8 @@ function MyTriangle() {
       value={color}
       onValueChange={setColor}
       colorSpace="hsv"
-      channelX="s"
-      channelY="v"
+      xChannel="s"
+      yChannel="v"
       className="relative block size-64"
     >
       <ColorTriangle.Gradient className="absolute inset-0 block" /> {/* [!code ++] */}
@@ -233,8 +233,8 @@ function MyTriangle() {
 <ColorTriangle.Root
   bind:value={() => colorState.color, colorState.setColor}
   colorSpace="hsv"
-  channelX="s"
-  channelY="v"
+  xChannel="s"
+  yChannel="v"
   class="relative block size-64"
 >
   <ColorTriangle.Gradient class="absolute inset-0 block" /> <!-- [!code ++] -->
@@ -254,8 +254,8 @@ import { COLOR_TRIANGLE_DIRECTIVES } from "@urcolor/angular";
       urcColorTriangleRoot
       [(value)]="color"
       colorSpace="hsv"
-      channelX="s"
-      channelY="v"
+      xChannel="s"
+      yChannel="v"
       class="relative block size-64"
     >
       <!-- [!code ++] -->
@@ -321,8 +321,8 @@ function MyTriangle() {
       value={color}
       onValueChange={setColor}
       colorSpace="hsv"
-      channelX="s"
-      channelY="v"
+      xChannel="s"
+      yChannel="v"
       className="relative block size-64"
     >
       <ColorTriangle.Gradient className="absolute inset-0 block" />
@@ -350,8 +350,8 @@ function MyTriangle() {
 <ColorTriangle.Root
   bind:value={() => colorState.color, colorState.setColor}
   colorSpace="hsv"
-  channelX="s"
-  channelY="v"
+  xChannel="s"
+  yChannel="v"
   class="relative block size-64"
 >
   <ColorTriangle.Gradient class="absolute inset-0 block" />
@@ -380,8 +380,8 @@ import { COLOR_TRIANGLE_DIRECTIVES } from "@urcolor/angular";
       urcColorTriangleRoot
       [(value)]="color"
       colorSpace="hsv"
-      channelX="s"
-      channelY="v"
+      xChannel="s"
+      yChannel="v"
       class="relative block size-64"
     >
       <canvas urcColorTriangleGradient class="absolute inset-0 block"></canvas>
@@ -435,8 +435,8 @@ Use the `rotation` prop to rotate the triangle (in degrees):
   onValueChange={setColor}
   colorSpace="hsv"
   rotation={180}
-  channelX="s"
-  channelY="v"
+  xChannel="s"
+  yChannel="v"
 >
   {/* ... */}
 </ColorTriangle.Root>
@@ -447,8 +447,8 @@ Use the `rotation` prop to rotate the triangle (in degrees):
   bind:value={() => colorState.color, colorState.setColor}
   colorSpace="hsv"
   rotation={180}
-  channelX="s"
-  channelY="v"
+  xChannel="s"
+  yChannel="v"
 >
   <!-- ... -->
 </ColorTriangle.Root>
@@ -460,8 +460,8 @@ Use the `rotation` prop to rotate the triangle (in degrees):
   [(value)]="color"
   colorSpace="hsv"
   [rotation]="180"
-  channelX="s"
-  channelY="v"
+  xChannel="s"
+  yChannel="v"
 >
   <!-- ... -->
 </div>
@@ -494,9 +494,9 @@ Add a Z channel to enable barycentric three-channel mode. This maps all three ch
   value={color}
   onValueChange={setColor}
   colorSpace="srgb"
-  channelX="r"
-  channelY="g"
-  channelZ="b"
+  xChannel="r"
+  yChannel="g"
+  zChannel="b"
 >
   {/* ... */}
 </ColorTriangle.Root>
@@ -506,9 +506,9 @@ Add a Z channel to enable barycentric three-channel mode. This maps all three ch
 <ColorTriangle.Root
   bind:value={() => colorState.color, colorState.setColor}
   colorSpace="srgb"
-  channelX="r"
-  channelY="g"
-  channelZ="b"
+  xChannel="r"
+  yChannel="g"
+  zChannel="b"
 >
   <!-- ... -->
 </ColorTriangle.Root>
@@ -519,9 +519,9 @@ Add a Z channel to enable barycentric three-channel mode. This maps all three ch
   urcColorTriangleRoot
   [(value)]="color"
   colorSpace="srgb"
-  channelX="r"
-  channelY="g"
-  channelZ="b"
+  xChannel="r"
+  yChannel="g"
+  zChannel="b"
 >
   <!-- ... -->
 </div>
@@ -588,8 +588,8 @@ const onColorCommit = (color: Color) => {
   onValueChange={onColorChange}
   onValueCommit={onColorCommit}
   colorSpace="hsv"
-  channelX="s"
-  channelY="v"
+  xChannel="s"
+  yChannel="v"
 >
   {/* ... */}
 </ColorTriangle.Root>
@@ -612,8 +612,8 @@ const onColorCommit = (color: Color) => {
   colorSpace="hsv"
   onValueChange={onColorChange}
   onValueCommit={onColorCommit}
-  channelX="s"
-  channelY="v"
+  xChannel="s"
+  yChannel="v"
 >
   <!-- ... -->
 </ColorTriangle.Root>
@@ -634,8 +634,8 @@ import { COLOR_TRIANGLE_DIRECTIVES } from "@urcolor/angular";
       (valueChange)="onColorChange($event)"
       (valueCommit)="onColorCommit($event)"
       colorSpace="hsv"
-      channelX="s"
-      channelY="v"
+      xChannel="s"
+      yChannel="v"
     >
       <!-- ... -->
     </div>

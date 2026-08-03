@@ -12,9 +12,9 @@
     /** The colour space mode (e.g. `"hsl"`, `"oklch"`). */
     colorSpace?: SpaceId;
     /** Which channel maps to the horizontal axis. Defaults to the space's first channel. */
-    channelX?: string;
+    xChannel?: string;
     /** Which channel maps to the vertical axis. Defaults to the space's second channel. */
-    channelY?: string;
+    yChannel?: string;
     /** When true, prevents the user from interacting with the area. */
     disabled?: boolean;
     /** The reading direction. */
@@ -72,8 +72,8 @@
     value = $bindable(),
     defaultValue,
     colorSpace = "hsl",
-    channelX,
-    channelY,
+    xChannel,
+    yChannel,
     disabled = false,
     dir = "ltr",
     xInverted = false,
@@ -101,10 +101,10 @@
 
   const color = $derived(parseColor(value) ?? internalColor);
 
-  const xChannel = $derived(channelX ?? colorSpaces[colorSpace]?.channels[0]?.key ?? "h");
-  const yChannel = $derived(channelY ?? colorSpaces[colorSpace]?.channels[1]?.key ?? "s");
-  const xConfig = $derived(resolveChannelConfig(colorSpace, xChannel));
-  const yConfig = $derived(resolveChannelConfig(colorSpace, yChannel));
+  const xChannelKey = $derived(xChannel ?? colorSpaces[colorSpace]?.channels[0]?.key ?? "h");
+  const yChannelKey = $derived(yChannel ?? colorSpaces[colorSpace]?.channels[1]?.key ?? "s");
+  const xConfig = $derived(resolveChannelConfig(colorSpace, xChannelKey));
+  const yConfig = $derived(resolveChannelConfig(colorSpace, yChannelKey));
 
   const minX = $derived(xConfig?.min ?? 0);
   const maxX = $derived(xConfig?.max ?? 100);
@@ -118,8 +118,8 @@
   /** Reading direction never affects the vertical axis. */
   const isSlidingFromTop = $derived(!yInverted);
 
-  const valueX = $derived(colorToDisplayValue(color, colorSpace, xChannel));
-  const valueY = $derived(colorToDisplayValue(color, colorSpace, yChannel));
+  const valueX = $derived(colorToDisplayValue(color, colorSpace, xChannelKey));
+  const valueY = $derived(colorToDisplayValue(color, colorSpace, yChannelKey));
 
   /** Writes both display-space channel values back as a single colour. */
   function setDisplayValues(nextXRaw: number, nextYRaw: number): void {
@@ -127,7 +127,7 @@
     const nextX = snapToStep(nextXRaw, minX, maxX, stepX);
     const nextY = snapToStep(nextYRaw, minY, maxY, stepY);
     if (Math.abs(nextX - valueX) < FEEDBACK_EPSILON && Math.abs(nextY - valueY) < FEEDBACK_EPSILON) return;
-    const nextColor = applyDisplayValues(color, colorSpace, [xChannel, yChannel], [nextX, nextY]);
+    const nextColor = applyDisplayValues(color, colorSpace, [xChannelKey, yChannelKey], [nextX, nextY]);
     internalColor = nextColor;
     value = nextColor;
     onValueChange?.(nextColor);
@@ -284,11 +284,11 @@
     get colorSpace() {
       return colorSpace;
     },
-    get xChannel() {
-      return xChannel;
+    get xChannelKey() {
+      return xChannelKey;
     },
-    get yChannel() {
-      return yChannel;
+    get yChannelKey() {
+      return yChannelKey;
     },
     get minX() {
       return minX;

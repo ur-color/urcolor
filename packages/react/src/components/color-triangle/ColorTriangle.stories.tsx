@@ -26,10 +26,10 @@ const meta: Meta<typeof ColorTriangle.Root> = {
 };
 export default meta;
 
-export const HSV_SaturationValue: Story = { name: "HSV / S × V", render: () => <TriangleDemo colorSpace="hsv" channelX="s" channelY="v" /> };
-export const HSL_SaturationLightness: Story = { name: "HSL / S × L", render: () => <TriangleDemo colorSpace="hsl" channelX="s" channelY="l" /> };
-export const OKLCh_ChromaLightness: Story = { name: "OKLCh / C × L", render: () => <TriangleDemo colorSpace="oklch" channelX="c" channelY="l" /> };
-export const Rotated: Story = { name: "HSV / Rotated 90°", render: () => <TriangleDemo colorSpace="hsv" channelX="s" channelY="v" rotation={90} /> };
+export const HSV_SaturationValue: Story = { name: "HSV / S × V", render: () => <TriangleDemo colorSpace="hsv" xChannel="s" yChannel="v" /> };
+export const HSL_SaturationLightness: Story = { name: "HSL / S × L", render: () => <TriangleDemo colorSpace="hsl" xChannel="s" yChannel="l" /> };
+export const OKLCh_ChromaLightness: Story = { name: "OKLCh / C × L", render: () => <TriangleDemo colorSpace="oklch" xChannel="c" yChannel="l" /> };
+export const Rotated: Story = { name: "HSV / Rotated 90°", render: () => <TriangleDemo colorSpace="hsv" xChannel="s" yChannel="v" rotation={90} /> };
 export const Disabled: Story = { name: "Disabled", render: () => <TriangleDemo disabled /> };
-export const Maxwell_RGB: Story = { name: "Maxwell's RGB Triangle", render: () => <TriangleDemo colorSpace="srgb" channelX="r" channelY="g" channelZ="b" /> };
-export const P3_RGB: Story = { name: "Display P3 Triangle", render: () => <TriangleDemo colorSpace="display-p3" channelX="r" channelY="g" channelZ="b" /> };
+export const Maxwell_RGB: Story = { name: "Maxwell's RGB Triangle", render: () => <TriangleDemo colorSpace="srgb" xChannel="r" yChannel="g" zChannel="b" /> };
+export const P3_RGB: Story = { name: "Display P3 Triangle", render: () => <TriangleDemo colorSpace="display-p3" xChannel="r" yChannel="g" zChannel="b" /> };

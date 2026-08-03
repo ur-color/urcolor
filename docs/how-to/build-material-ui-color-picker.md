@@ -132,8 +132,8 @@ function MaterialColorPicker() {
         value={color}
         onValueChange={setColor}
         colorSpace="hsv"
-        channelX="s"
-        channelY="v"
+        xChannel="s"
+        yChannel="v"
         yInverted
         className="relative block h-[180px] w-full cursor-crosshair touch-none overflow-clip rounded-lg"
       >
@@ -163,8 +163,8 @@ function MaterialColorPicker() {
   <ColorArea.Root
     bind:value={() => colorState.color, colorState.setColor}
     colorSpace="hsv"
-    channelX="s"
-    channelY="v"
+    xChannel="s"
+    yChannel="v"
     yInverted
     class="relative block h-[180px] w-full cursor-crosshair touch-none overflow-clip rounded-lg"
   >
@@ -195,8 +195,8 @@ import { COLOR_AREA_DIRECTIVES } from "@urcolor/angular"; // [!code ++]
         urcColorAreaRoot
         [(value)]="color"
         colorSpace="hsv"
-        channelX="s"
-        channelY="v"
+        xChannel="s"
+        yChannel="v"
         yInverted
         class="relative block h-[180px] w-full cursor-crosshair touch-none overflow-clip rounded-lg"
       >
@@ -224,7 +224,7 @@ Vue's `v-model` and Angular's `[(value)]` are true two-way bindings. React is on
 
 Angular ships every part of a family as a `COLOR_*_DIRECTIVES` array, so one entry in `imports` brings in the whole set. This recipe composes three families, so it ends up with three entries.
 
-Two structural differences are worth calling out. Vue nests the gradient and thumb inside a `ColorAreaArea` element; React, Svelte and Angular have no `Area` part — `Gradient` and `Thumb` are direct children of `Root`. And the axis props are named `x-channel` / `y-channel` / `:y-inverted` in Vue but `channelX` / `channelY` / `yInverted` in React, Svelte and Angular. In Angular the gradient's selector is `canvas[urcColorAreaGradient]`, so it goes on a `<canvas>` element you own; Vue, React and Svelte render their own canvas for you. The thumb positions itself in all four, so you never set `top`/`left` yourself.
+Two structural differences are worth calling out. Vue nests the gradient and thumb inside a `ColorAreaArea` element; React, Svelte and Angular have no `Area` part — `Gradient` and `Thumb` are direct children of `Root`. And the axis props are named `x-channel` / `y-channel` / `:y-inverted` in Vue but `xChannel` / `yChannel` / `yInverted` in React, Svelte and Angular. In Angular the gradient's selector is `canvas[urcColorAreaGradient]`, so it goes on a `<canvas>` element you own; Vue, React and Svelte render their own canvas for you. The thumb positions itself in all four, so you never set `top`/`left` yourself.
 
 ## Step 3: Add the hue slider
 
@@ -310,8 +310,8 @@ function MaterialColorPicker() {
         value={color}
         onValueChange={setColor}
         colorSpace="hsv"
-        channelX="s"
-        channelY="v"
+        xChannel="s"
+        yChannel="v"
         yInverted
         className="relative block h-[180px] w-full cursor-crosshair touch-none overflow-clip rounded-lg"
       >
@@ -365,8 +365,8 @@ function MaterialColorPicker() {
   <ColorArea.Root
     bind:value={() => colorState.color, colorState.setColor}
     colorSpace="hsv"
-    channelX="s"
-    channelY="v"
+    xChannel="s"
+    yChannel="v"
     yInverted
     class="relative block h-[180px] w-full cursor-crosshair touch-none overflow-clip rounded-lg"
   >
@@ -418,8 +418,8 @@ import { COLOR_AREA_DIRECTIVES, COLOR_SLIDER_DIRECTIVES } from "@urcolor/angular
         urcColorAreaRoot
         [(value)]="color"
         colorSpace="hsv"
-        channelX="s"
-        channelY="v"
+        xChannel="s"
+        yChannel="v"
         yInverted
         class="relative block h-[180px] w-full cursor-crosshair touch-none overflow-clip rounded-lg"
       >

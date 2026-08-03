@@ -38,8 +38,8 @@ import { COLOR_AREA_DIRECTIVES, COLOR_RING_DIRECTIVES } from "@urcolor/angular";
         urcColorAreaRoot
         [(value)]="color"
         colorSpace="hsv"
-        channelX="s"
-        channelY="v"
+        xChannel="s"
+        yChannel="v"
         yInverted
         class="absolute inset-[20.3%] cursor-crosshair touch-none overflow-clip rounded-sm"
       >

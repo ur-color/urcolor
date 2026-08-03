@@ -34,8 +34,8 @@ export default function ColorPickerTriangleInRingGuide() {
         value={color}
         onValueChange={setColor}
         colorSpace="hsv"
-        channelX="s"
-        channelY="v"
+        xChannel="s"
+        yChannel="v"
         rotation={90}
         inverted
         className="absolute inset-[8%]"

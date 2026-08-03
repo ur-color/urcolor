@@ -83,9 +83,9 @@ The root container that manages triangle state and color channel binding. Render
 | `value` | `Color \| string \| null` | — | Controlled color value. |
 | `defaultValue` | `Color \| string` | `'hsl(0, 100%, 50%)'` | Initial color when uncontrolled. |
 | `colorSpace` | `SpaceId` | `'hsv'` | Color space (e.g. `'hsv'`, `'hsl'`, `'srgb'`). |
-| `channelX` | `string` | Auto | The channel mapped to the first vertex. Defaults to the color space's second channel. |
-| `channelY` | `string` | Auto | The channel mapped to the second vertex. Defaults to the color space's third channel. |
-| `channelZ` | `string` | — | The channel mapped to the third vertex. Supplying it switches the triangle to a three-channel barycentric simplex. |
+| `xChannel` | `string` | Auto | The channel mapped to the first vertex. Defaults to the color space's second channel. |
+| `yChannel` | `string` | Auto | The channel mapped to the second vertex. Defaults to the color space's third channel. |
+| `zChannel` | `string` | — | The channel mapped to the third vertex. Supplying it switches the triangle to a three-channel barycentric simplex. |
 | `rotation` | `number` | `0` | Rotation of the triangle, in degrees. |
 | `inverted` | `boolean` | `false` | Swaps the second and third vertices, mirroring the triangle. |
 | `thumbAlignment` | `'contain' \| 'overflow'` | `'overflow'` | Whether the thumb is centred on the edge or kept inside it. |
@@ -97,7 +97,6 @@ The root container that manages triangle state and color channel binding. Render
 | `children` | `React.ReactNode` | — | The triangle's parts. |
 
 ::: tip
-`channelX`, `channelY` and `channelZ` are the React, Svelte and Angular spelling. Vue names the same three props `xChannel`, `yChannel` and `zChannel`.
 :::
 
 The root's props are an explicit list, not a DOM prop spread — it does not extend `ComponentPropsWithoutRef<"div">`. A pointer press that lands outside the outline is ignored: the root's box is a full square and the clip path hides the corners without stopping the event, so the root hit-tests every `pointerdown` against the triangle itself.
@@ -154,9 +153,9 @@ ColorTriangle exposes a single focusable thumb that drives both triangle axes �
 | Attribute | Description |
 |-----------|-------------|
 | `role="slider"` | Applied to `ColorTriangle.Thumb`, with `aria-roledescription="Color thumb"`. |
-| `aria-label` | Defaults to the channel labels in order, e.g. `"Saturation, Brightness"` — three entries when `channelZ` is set. Pass your own `aria-label` on the thumb to override. |
+| `aria-label` | Defaults to the channel labels in order, e.g. `"Saturation, Brightness"` — three entries when `zChannel` is set. Pass your own `aria-label` on the thumb to override. |
 | `aria-valuemin` / `aria-valuemax` | The first channel's range. |
-| `aria-valuenow` | The current first-channel value. Only one number can be carried here, so the `channelX` axis owns it. |
+| `aria-valuenow` | The current first-channel value. Only one number can be carried here, so the `xChannel` axis owns it. |
 | `aria-valuetext` | Every active channel formatted, e.g. `"Saturation 80%, Brightness 50%"`. |
 | `aria-disabled` | Applied to the root and the thumb when `disabled` is set. |
 
@@ -178,7 +177,7 @@ The reachable region is the half-simplex, so a step that would push the point pa
 
 #### Three-Channel Mode
 
-With `channelZ` set, the keys move the barycentric weight of the `channelX` axis and redistribute the remainder across the other two, so there is no third-axis key.
+With `zChannel` set, the keys move the barycentric weight of the `xChannel` axis and redistribute the remainder across the other two, so there is no third-axis key.
 
 | Key | Action |
 |-----|--------|

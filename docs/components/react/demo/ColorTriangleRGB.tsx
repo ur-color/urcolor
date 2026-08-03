@@ -10,9 +10,9 @@ export default function ColorTriangleRGB() {
         value={color}
         onValueChange={setColor}
         colorSpace="srgb"
-        channelX="r"
-        channelY="g"
-        channelZ="b"
+        xChannel="r"
+        yChannel="g"
+        zChannel="b"
         className="relative block size-64"
       >
         <ColorTriangle.Gradient className="absolute inset-0 block" />

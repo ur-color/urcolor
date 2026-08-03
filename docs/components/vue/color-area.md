@@ -146,7 +146,6 @@ The root container that owns the color state, the channel maths and the keyboard
 | `asChild` | `boolean` | `false` | Merge props onto the single child instead of rendering an element. |
 
 ::: tip
-`xChannel` and `yChannel` are the Vue spelling. React, Svelte and Angular name the same two props `channelX` and `channelY`.
 :::
 
 ColorArea currently renders a single thumb, so `minXStepsBetweenThumbs` and

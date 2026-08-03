@@ -96,10 +96,10 @@ export class ColorTriangleThumb {
   /** The third entry is present only in three-channel mode. */
   private readonly labels = computed(() => {
     const space = this.root.colorSpace();
-    const zChannel = this.root.zChannel();
+    const zChannel = this.root.zChannelKey();
     return {
-      x: channelLabel(space, this.root.xChannel()),
-      y: channelLabel(space, this.root.yChannel()),
+      x: channelLabel(space, this.root.xChannelKey()),
+      y: channelLabel(space, this.root.yChannelKey()),
       z: zChannel === undefined ? undefined : channelLabel(space, zChannel),
     };
   });
@@ -114,10 +114,10 @@ export class ColorTriangleThumb {
     const space = this.root.colorSpace();
     const labels = this.labels();
     const parts = [
-      `${labels.x} ${formatChannelValue(space, this.root.xChannel(), this.root.valueX())}`,
-      `${labels.y} ${formatChannelValue(space, this.root.yChannel(), this.root.valueY())}`,
+      `${labels.x} ${formatChannelValue(space, this.root.xChannelKey(), this.root.valueX())}`,
+      `${labels.y} ${formatChannelValue(space, this.root.yChannelKey(), this.root.valueY())}`,
     ];
-    const zChannel = this.root.zChannel();
+    const zChannel = this.root.zChannelKey();
     if (labels.z !== undefined && zChannel !== undefined) {
       parts.push(`${labels.z} ${formatChannelValue(space, zChannel, this.root.valueZ())}`);
     }

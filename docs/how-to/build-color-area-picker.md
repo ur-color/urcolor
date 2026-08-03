@@ -110,8 +110,8 @@ function MyArea() {
       value={color}
       onValueChange={setColor}
       colorSpace="hsl"
-      channelX="h"
-      channelY="s"
+      xChannel="h"
+      yChannel="s"
     >
       {/* children go here */}
     </ColorArea.Root>
@@ -130,8 +130,8 @@ function MyArea() {
 <ColorArea.Root
   bind:value={() => colorState.color, colorState.setColor}
   colorSpace="hsl"
-  channelX="h"
-  channelY="s"
+  xChannel="h"
+  yChannel="s"
 >
   <!-- children go here -->
 </ColorArea.Root>
@@ -151,8 +151,8 @@ import { COLOR_AREA_DIRECTIVES } from "@urcolor/angular"; // [!code ++]
       urcColorAreaRoot
       [(value)]="color"
       colorSpace="hsl"
-      channelX="h"
-      channelY="s"
+      xChannel="h"
+      yChannel="s"
     >
       <!-- children go here -->
     </div>
@@ -170,8 +170,8 @@ Vue's `v-model` and Angular's `[(value)]` are true two-way bindings. React is on
 Angular ships every part of a family as a `COLOR_*_DIRECTIVES` array, so one entry in `imports` brings in the whole set.
 
 - `color-space` / `colorSpace` — the color space to work in (`hsl`, `oklch`, `hsv`, etc.)
-- `x-channel` / `channelX` — the channel mapped to the horizontal axis
-- `y-channel` / `channelY` — the channel mapped to the vertical axis
+- `x-channel` / `xChannel` — the channel mapped to the horizontal axis
+- `y-channel` / `yChannel` — the channel mapped to the vertical axis
 
 ## Step 3: Add the interaction surface
 
@@ -226,8 +226,8 @@ function MyArea() {
       value={color}
       onValueChange={setColor}
       colorSpace="hsl"
-      channelX="h"
-      channelY="s"
+      xChannel="h"
+      yChannel="s"
       className=" // [!code ++:4]
         relative h-[200px] w-full cursor-crosshair
         touch-none overflow-clip rounded-lg
@@ -249,8 +249,8 @@ function MyArea() {
 <ColorArea.Root
   bind:value={() => colorState.color, colorState.setColor}
   colorSpace="hsl"
-  channelX="h"
-  channelY="s"
+  xChannel="h"
+  yChannel="s"
   class="
     relative block h-[200px] w-full cursor-crosshair
     touch-none overflow-clip rounded-lg
@@ -273,8 +273,8 @@ import { COLOR_AREA_DIRECTIVES } from "@urcolor/angular";
       urcColorAreaRoot
       [(value)]="color"
       colorSpace="hsl"
-      channelX="h"
-      channelY="s"
+      xChannel="h"
+      yChannel="s"
       class="
         relative block h-[200px] w-full cursor-crosshair
         touch-none overflow-clip rounded-lg
@@ -346,8 +346,8 @@ function MyArea() {
       value={color}
       onValueChange={setColor}
       colorSpace="hsl"
-      channelX="h"
-      channelY="s"
+      xChannel="h"
+      yChannel="s"
       className="
         relative h-[200px] w-full cursor-crosshair
         touch-none overflow-clip rounded-lg
@@ -369,8 +369,8 @@ function MyArea() {
 <ColorArea.Root
   bind:value={() => colorState.color, colorState.setColor}
   colorSpace="hsl"
-  channelX="h"
-  channelY="s"
+  xChannel="h"
+  yChannel="s"
   class="
     relative block h-[200px] w-full cursor-crosshair
     touch-none overflow-clip rounded-lg
@@ -393,8 +393,8 @@ import { COLOR_AREA_DIRECTIVES } from "@urcolor/angular";
       urcColorAreaRoot
       [(value)]="color"
       colorSpace="hsl"
-      channelX="h"
-      channelY="s"
+      xChannel="h"
+      yChannel="s"
       class="
         relative block h-[200px] w-full cursor-crosshair
         touch-none overflow-clip rounded-lg
@@ -476,8 +476,8 @@ function MyArea() {
       value={color}
       onValueChange={setColor}
       colorSpace="hsl"
-      channelX="h"
-      channelY="s"
+      xChannel="h"
+      yChannel="s"
       className="
         relative h-[200px] w-full cursor-crosshair
         touch-none overflow-clip rounded-lg
@@ -507,8 +507,8 @@ function MyArea() {
 <ColorArea.Root
   bind:value={() => colorState.color, colorState.setColor}
   colorSpace="hsl"
-  channelX="h"
-  channelY="s"
+  xChannel="h"
+  yChannel="s"
   class="
     relative block h-[200px] w-full cursor-crosshair
     touch-none overflow-clip rounded-lg
@@ -539,8 +539,8 @@ import { COLOR_AREA_DIRECTIVES } from "@urcolor/angular";
       urcColorAreaRoot
       [(value)]="color"
       colorSpace="hsl"
-      channelX="h"
-      channelY="s"
+      xChannel="h"
+      yChannel="s"
       class="
         relative block h-[200px] w-full cursor-crosshair
         touch-none overflow-clip rounded-lg
@@ -607,8 +607,8 @@ const { color, setColor } = useColor("oklch(0.6 0.15 210)");
   value={color}
   onValueChange={setColor}
   colorSpace="oklch"
-  channelX="c"
-  channelY="l"
+  xChannel="c"
+  yChannel="l"
 >
   {/* ... */}
 </ColorArea.Root>
@@ -624,8 +624,8 @@ const { color, setColor } = useColor("oklch(0.6 0.15 210)");
 <ColorArea.Root
   bind:value={() => colorState.color, colorState.setColor}
   colorSpace="oklch"
-  channelX="c"
-  channelY="l"
+  xChannel="c"
+  yChannel="l"
 >
   <!-- ... -->
 </ColorArea.Root>
@@ -644,8 +644,8 @@ import { COLOR_AREA_DIRECTIVES } from "@urcolor/angular";
       urcColorAreaRoot
       [(value)]="color"
       colorSpace="oklch"
-      channelX="c"
-      channelY="l"
+      xChannel="c"
+      yChannel="l"
     >
       <!-- ... -->
     </div>
@@ -680,8 +680,8 @@ Or map different HSL channels to create a saturation × lightness picker:
   value={color}
   onValueChange={setColor}
   colorSpace="hsl"
-  channelX="s"
-  channelY="l"
+  xChannel="s"
+  yChannel="l"
 >
   {/* ... */}
 </ColorArea.Root>
@@ -691,8 +691,8 @@ Or map different HSL channels to create a saturation × lightness picker:
 <ColorArea.Root
   bind:value={() => colorState.color, colorState.setColor}
   colorSpace="hsl"
-  channelX="s"
-  channelY="l"
+  xChannel="s"
+  yChannel="l"
 >
   <!-- ... -->
 </ColorArea.Root>
@@ -703,8 +703,8 @@ Or map different HSL channels to create a saturation × lightness picker:
   urcColorAreaRoot
   [(value)]="color"
   colorSpace="hsl"
-  channelX="s"
-  channelY="l"
+  xChannel="s"
+  yChannel="l"
 >
   <!-- ... -->
 </div>
@@ -738,8 +738,8 @@ Reverse the direction of the horizontal or vertical axis to map from right-to-le
   value={color}
   onValueChange={setColor}
   colorSpace="hsl"
-  channelX="h"
-  channelY="l"
+  xChannel="h"
+  yChannel="l"
   xInverted
   yInverted
 >
@@ -751,8 +751,8 @@ Reverse the direction of the horizontal or vertical axis to map from right-to-le
 <ColorArea.Root
   bind:value={() => colorState.color, colorState.setColor}
   colorSpace="hsl"
-  channelX="h"
-  channelY="l"
+  xChannel="h"
+  yChannel="l"
   xInverted
   yInverted
 >
@@ -765,8 +765,8 @@ Reverse the direction of the horizontal or vertical axis to map from right-to-le
   urcColorAreaRoot
   [(value)]="color"
   colorSpace="hsl"
-  channelX="h"
-  channelY="l"
+  xChannel="h"
+  yChannel="l"
   xInverted
   yInverted
 >
@@ -827,8 +827,8 @@ const onColorCommit = (color: Color) => {
   onValueChange={onColorChange}
   onValueCommit={onColorCommit}
   colorSpace="hsl"
-  channelX="h"
-  channelY="s"
+  xChannel="h"
+  yChannel="s"
 >
   {/* ... */}
 </ColorArea.Root>
@@ -849,8 +849,8 @@ const onColorCommit = (color: Color) => {
 <ColorArea.Root
   bind:value={() => colorState.color, colorState.setColor}
   colorSpace="hsl"
-  channelX="h"
-  channelY="s"
+  xChannel="h"
+  yChannel="s"
   onValueChange={onColorChange}
   onValueCommit={onColorCommit}
 >
@@ -873,8 +873,8 @@ import { COLOR_AREA_DIRECTIVES } from "@urcolor/angular";
       (valueChange)="onColorChange($event)"
       (valueCommit)="onColorCommit($event)"
       colorSpace="hsl"
-      channelX="h"
-      channelY="s"
+      xChannel="h"
+      yChannel="s"
     >
       <!-- ... -->
     </div>

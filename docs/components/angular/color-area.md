@@ -19,8 +19,8 @@ import { COLOR_AREA_DIRECTIVES } from "@urcolor/angular";
       urcColorAreaRoot
       [(value)]="color"
       colorSpace="hsl"
-      channelX="h"
-      channelY="s"
+      xChannel="h"
+      yChannel="s"
       class="relative block h-[200px] w-full cursor-crosshair touch-none overflow-clip rounded-lg"
     >
       <canvas urcColorAreaGradient class="absolute inset-0"></canvas>
@@ -55,8 +55,8 @@ HSL color area with Hue on the horizontal axis and Saturation on the vertical ax
   urcColorAreaRoot
   [(value)]="color"
   colorSpace="hsl"
-  channelX="h"
-  channelY="s"
+  xChannel="h"
+  yChannel="s"
   class="relative block h-[200px] w-full touch-none overflow-clip rounded-lg"
 >
   <canvas urcColorAreaGradient class="absolute inset-0"></canvas>
@@ -73,8 +73,8 @@ OKLCh color area with Chroma on the horizontal axis and Lightness on the vertica
   urcColorAreaRoot
   [(value)]="color"
   colorSpace="oklch"
-  channelX="c"
-  channelY="l"
+  xChannel="c"
+  yChannel="l"
   class="relative block h-[200px] w-full touch-none overflow-clip rounded-lg"
 >
   <canvas urcColorAreaGradient class="absolute inset-0"></canvas>
@@ -84,10 +84,10 @@ OKLCh color area with Chroma on the horizontal axis and Lightness on the vertica
 
 ### Alpha on an axis
 
-Map `channelY` to `"alpha"` to make the vertical axis drive opacity. The canvas is painted with real transparency and composites over its own checkerboard background.
+Map `yChannel` to `"alpha"` to make the vertical axis drive opacity. The canvas is painted with real transparency and composites over its own checkerboard background.
 
 ```html
-<div urcColorAreaRoot [(value)]="color" colorSpace="hsl" channelX="h" channelY="alpha">
+<div urcColorAreaRoot [(value)]="color" colorSpace="hsl" xChannel="h" yChannel="alpha">
   <canvas urcColorAreaGradient></canvas>
   <div urcColorAreaThumb></div>
 </div>
@@ -173,8 +173,8 @@ The root of the area. Owns the color, the pointer and keyboard interaction, and 
 |------|------|---------|-------------|
 | `value` | `model<Color>` | `hsl(0, 100%, 50%)` | The color, two-way bindable as `[(value)]`. Also the Signal Forms contract. |
 | `colorSpace` | `input<SpaceId>` | `'hsl'` | The color space both axes operate in. |
-| `channelX` | `input<string \| undefined>` | Auto | Channel driven by the horizontal axis, or `'alpha'`. Defaults to the color space's first channel. |
-| `channelY` | `input<string \| undefined>` | Auto | Channel driven by the vertical axis, or `'alpha'`. Defaults to the color space's second channel. |
+| `xChannel` | `input<string \| undefined>` | Auto | Channel driven by the horizontal axis, or `'alpha'`. Defaults to the color space's first channel. |
+| `yChannel` | `input<string \| undefined>` | Auto | Channel driven by the vertical axis, or `'alpha'`. Defaults to the color space's second channel. |
 | `xInverted` | `input<boolean>` | `false` | Runs the horizontal axis opposite to its natural direction. Coerced with `booleanAttribute`. |
 | `yInverted` | `input<boolean>` | `false` | Runs the vertical axis opposite to its natural direction. Coerced with `booleanAttribute`. |
 | `thumbAlignment` | `input<ColorAreaThumbAlignment>` | `'overflow'` | Whether the thumb straddles the edge (`'overflow'`) or is pulled fully inside it. |
@@ -204,7 +204,6 @@ Readable signals, for `exportAs` template references and for `inject(ColorAreaRo
 | `isSlidingFromTop` | `Signal<boolean>` | False when the vertical axis is mirrored. |
 
 ::: tip
-`channelX` and `channelY` are the Angular, React and Svelte spelling. Vue names the same two props `xChannel` and `yChannel`.
 :::
 
 The root publishes `--reka-slider-area-thumb-transform` on its own style, which is the centring transform the thumb consumes.

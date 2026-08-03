@@ -19,8 +19,8 @@ import { COLOR_TRIANGLE_DIRECTIVES } from "@urcolor/angular";
       urcColorTriangleRoot
       [(value)]="color"
       colorSpace="hsv"
-      channelX="s"
-      channelY="v"
+      xChannel="s"
+      yChannel="v"
       class="relative block size-64"
       style="container-type: inline-size"
     >
@@ -56,8 +56,8 @@ HSV triangle with Saturation and Brightness on the two axes. Both channels are t
   urcColorTriangleRoot
   [(value)]="color"
   colorSpace="hsv"
-  channelX="s"
-  channelY="v"
+  xChannel="s"
+  yChannel="v"
   class="relative block size-64"
   style="container-type: inline-size"
 >
@@ -75,8 +75,8 @@ The same two axes in HSL, where the second channel is Lightness.
   urcColorTriangleRoot
   [(value)]="color"
   colorSpace="hsl"
-  channelX="s"
-  channelY="l"
+  xChannel="s"
+  yChannel="l"
   class="relative block size-64"
 >
   <canvas urcColorTriangleGradient class="absolute inset-0 block"></canvas>
@@ -86,16 +86,16 @@ The same two axes in HSL, where the second channel is Lightness.
 
 ### Maxwell's RGB triangle
 
-Supplying `channelZ` switches the triangle from a two-channel half-simplex to a full three-channel barycentric simplex. One thumb still drives all three.
+Supplying `zChannel` switches the triangle from a two-channel half-simplex to a full three-channel barycentric simplex. One thumb still drives all three.
 
 ```html
 <div
   urcColorTriangleRoot
   [(value)]="color"
   colorSpace="srgb"
-  channelX="r"
-  channelY="g"
-  channelZ="b"
+  xChannel="r"
+  yChannel="g"
+  zChannel="b"
   class="relative block size-64"
 >
   <canvas urcColorTriangleGradient class="absolute inset-0 block"></canvas>
@@ -184,9 +184,9 @@ The root of the triangle. Owns the color, the pointer and keyboard interaction, 
 |------|------|---------|-------------|
 | `value` | `model<Color>` | `hsl(0, 100%, 50%)` | The color, two-way bindable as `[(value)]`. Also the Signal Forms contract. |
 | `colorSpace` | `input<SpaceId>` | `'hsv'` | The color space the triangle operates in. |
-| `channelX` | `input<string \| undefined>` | Auto | The channel mapped to the first vertex. Defaults to the color space's second channel. |
-| `channelY` | `input<string \| undefined>` | Auto | The channel mapped to the second vertex. Defaults to the color space's third channel. |
-| `channelZ` | `input<string \| undefined>` | — | The channel mapped to the third vertex. Supplying it selects the three-channel simplex. |
+| `xChannel` | `input<string \| undefined>` | Auto | The channel mapped to the first vertex. Defaults to the color space's second channel. |
+| `yChannel` | `input<string \| undefined>` | Auto | The channel mapped to the second vertex. Defaults to the color space's third channel. |
+| `zChannel` | `input<string \| undefined>` | — | The channel mapped to the third vertex. Supplying it selects the three-channel simplex. |
 | `rotation` | `input<number>` | `0` | Rotation of the triangle, in degrees. Coerced with `numberAttribute`. |
 | `inverted` | `input<boolean>` | `false` | Swaps the second and third vertices, mirroring the triangle. Coerced with `booleanAttribute`. |
 | `thumbAlignment` | `input<ColorTriangleThumbAlignment>` | `'overflow'` | Whether the thumb is centred on the edge or kept inside it. |
@@ -215,7 +215,6 @@ Readable signals, for `exportAs` template references and for `inject(ColorTriang
 | `positionVertices` | `Signal<[Point, Point, Point]>` | The corners the thumb is positioned against — identical to `vertices` unless `thumbAlignment` is `"contain"`. |
 
 ::: tip
-`channelX`, `channelY` and `channelZ` are the Angular, React and Svelte spelling. Vue names the same three props `xChannel`, `yChannel` and `zChannel`.
 :::
 
 A pointer press that lands outside the outline is ignored: the host's box is a full square and the `clip-path` hides the corners without stopping the event, so the root hit-tests every `pointerdown` against the triangle itself.
@@ -263,9 +262,9 @@ ColorTriangle exposes a single focusable thumb that drives both triangle axes �
 | Attribute | Description |
 |-----------|-------------|
 | `role="slider"` | Applied to `urcColorTriangleThumb`, with `aria-roledescription="Color thumb"`. |
-| `aria-label` | Defaults to the channel labels in order, e.g. `"Saturation, Brightness"` — three entries when `channelZ` is set. Set your own `aria-label` on the thumb element to override. |
+| `aria-label` | Defaults to the channel labels in order, e.g. `"Saturation, Brightness"` — three entries when `zChannel` is set. Set your own `aria-label` on the thumb element to override. |
 | `aria-valuemin` / `aria-valuemax` | The first channel's range. |
-| `aria-valuenow` | The current first-channel value. Only one number can be carried here, so the `channelX` axis owns it. |
+| `aria-valuenow` | The current first-channel value. Only one number can be carried here, so the `xChannel` axis owns it. |
 | `aria-valuetext` | Every active channel formatted, e.g. `"Saturation 80%, Brightness 50%"`. |
 | `aria-disabled` | Applied to the root and the thumb when the native `disabled` attribute is set. |
 
@@ -282,6 +281,6 @@ ColorTriangle exposes a single focusable thumb that drives both triangle axes �
 | Home | Move both channels to their minimum |
 | End | Move both channels to their maximum |
 
-There is no third-axis key. In three-channel mode the `channelZ` value falls out of the barycentric renormalization of the other two, so the same four arrows cover the whole simplex.
+There is no third-axis key. In three-channel mode the `zChannel` value falls out of the barycentric renormalization of the other two, so the same four arrows cover the whole simplex.
 
 In two-channel mode the reachable region is the half-simplex, so a step that would push the point past the hypotenuse gives way on the axis you did not drive. `(valueCommit)` fires once on key release, not on every repeat.

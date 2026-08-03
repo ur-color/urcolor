@@ -8,9 +8,9 @@ export interface ColorTriangleRootProps {
   defaultValue?: Color | string;
   disabled?: boolean;
   colorSpace?: SpaceId;
-  channelX?: string;
-  channelY?: string;
-  channelZ?: string;
+  xChannel?: string;
+  yChannel?: string;
+  zChannel?: string;
   rotation?: number;
   inverted?: boolean;
   thumbAlignment?: "contain" | "overflow";
@@ -36,9 +36,9 @@ export const ColorTriangleRoot = forwardRef<HTMLDivElement, ColorTriangleRootPro
       defaultValue: defaultValueProp = "hsl(0, 100%, 50%)",
       disabled = false,
       colorSpace = "hsv",
-      channelX: channelXProp,
-      channelY: channelYProp,
-      channelZ: channelZProp,
+      xChannel: xChannelProp,
+      yChannel: yChannelProp,
+      zChannel: zChannelProp,
       rotation = 0,
       inverted = false,
       thumbAlignment = "overflow",
@@ -62,9 +62,9 @@ export const ColorTriangleRoot = forwardRef<HTMLDivElement, ColorTriangleRootPro
     const colorRef = isControlled ? (parseColor(valueProp) ?? internalColor) : internalColor;
 
     const spaceConfig = colorSpaces[colorSpace];
-    const xChannelKey = channelXProp ?? spaceConfig?.channels[1]?.key ?? "s";
-    const yChannelKey = channelYProp ?? spaceConfig?.channels[2]?.key ?? "v";
-    const zChannelKey = channelZProp;
+    const xChannelKey = xChannelProp ?? spaceConfig?.channels[1]?.key ?? "s";
+    const yChannelKey = yChannelProp ?? spaceConfig?.channels[2]?.key ?? "v";
+    const zChannelKey = zChannelProp;
     const isThreeChannel = zChannelKey != null;
 
     const xIsAlpha = xChannelKey === "alpha";

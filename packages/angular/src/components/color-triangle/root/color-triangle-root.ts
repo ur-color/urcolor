@@ -71,7 +71,7 @@ const STEP_KEYS: Record<string, { axis: "x" | "y"; sign: 1 | -1 }> = {
  * </div>
  * ```
  *
- * Supplying `channelZ` switches the triangle from a two-channel half-simplex to
+ * Supplying `zChannel` switches the triangle from a two-channel half-simplex to
  * a full three-channel barycentric simplex.
  *
  * `implements FormValueControl<Color>` is satisfied by the `value` model alone,
@@ -103,11 +103,11 @@ export class ColorTriangleRoot implements FormValueControl<Color> {
   /** The colour space the triangle operates in. */
   readonly colorSpace = input<SpaceId>("hsv");
   /** The channel mapped to the first vertex. Defaults to the space's second channel. */
-  readonly channelX = input<string>();
+  readonly xChannel = input<string>();
   /** The channel mapped to the second vertex. Defaults to the space's third channel. */
-  readonly channelY = input<string>();
+  readonly yChannel = input<string>();
   /** The channel mapped to the third vertex. Supplying it selects the three-channel simplex. */
-  readonly channelZ = input<string>();
+  readonly zChannel = input<string>();
   /** Rotation of the triangle, in degrees. */
   readonly rotation = input(0, { transform: numberAttribute });
   /** Swaps the second and third vertices, mirroring the triangle. */
@@ -143,30 +143,30 @@ export class ColorTriangleRoot implements FormValueControl<Color> {
   private readonly thumbSize = signal(0);
 
   /** The channel at the first vertex. */
-  readonly xChannel = computed(
-    () => this.channelX() ?? colorSpaces[this.colorSpace()]?.channels[1]?.key ?? "s",
+  readonly xChannelKey = computed(
+    () => this.xChannel() ?? colorSpaces[this.colorSpace()]?.channels[1]?.key ?? "s",
   );
 
   /** The channel at the second vertex. */
-  readonly yChannel = computed(
-    () => this.channelY() ?? colorSpaces[this.colorSpace()]?.channels[2]?.key ?? "v",
+  readonly yChannelKey = computed(
+    () => this.yChannel() ?? colorSpaces[this.colorSpace()]?.channels[2]?.key ?? "v",
   );
 
   /** The channel at the third vertex, or `undefined` in two-channel mode. */
-  readonly zChannel = computed(() => this.channelZ());
+  readonly zChannelKey = computed(() => this.zChannel());
   /** True when a third channel turns the half-simplex into a full simplex. */
-  readonly isThreeChannel = computed(() => this.zChannel() !== undefined);
+  readonly isThreeChannel = computed(() => this.zChannelKey() !== undefined);
 
   private readonly xConfig = computed(() =>
-    resolveChannelConfig(this.colorSpace(), this.xChannel()),
+    resolveChannelConfig(this.colorSpace(), this.xChannelKey()),
   );
 
   private readonly yConfig = computed(() =>
-    resolveChannelConfig(this.colorSpace(), this.yChannel()),
+    resolveChannelConfig(this.colorSpace(), this.yChannelKey()),
   );
 
   private readonly zConfig = computed(() => {
-    const channel = this.zChannel();
+    const channel = this.zChannelKey();
     return channel === undefined ? undefined : resolveChannelConfig(this.colorSpace(), channel);
   });
 
@@ -185,17 +185,17 @@ export class ColorTriangleRoot implements FormValueControl<Color> {
 
   /** The first channel of the current colour, in display units. */
   readonly valueX = computed(() =>
-    colorToDisplayValue(this.value(), this.colorSpace(), this.xChannel()),
+    colorToDisplayValue(this.value(), this.colorSpace(), this.xChannelKey()),
   );
 
   /** The second channel of the current colour, in display units. */
   readonly valueY = computed(() =>
-    colorToDisplayValue(this.value(), this.colorSpace(), this.yChannel()),
+    colorToDisplayValue(this.value(), this.colorSpace(), this.yChannelKey()),
   );
 
   /** The third channel of the current colour, or `minZ` in two-channel mode. */
   readonly valueZ = computed(() => {
-    const channel = this.zChannel();
+    const channel = this.zChannelKey();
     return channel === undefined
       ? this.minZ()
       : colorToDisplayValue(this.value(), this.colorSpace(), channel);
@@ -326,19 +326,19 @@ export class ColorTriangleRoot implements FormValueControl<Color> {
         || (nextZ !== undefined && Math.abs(nextZ - this.valueZ()) >= FEEDBACK_EPSILON);
     if (!moved) return;
 
-    const zChannel = this.zChannel();
+    const zChannelKey = this.zChannelKey();
     const next
-      = this.isThreeChannel() && zChannel !== undefined
+      = this.isThreeChannel() && zChannelKey !== undefined
         ? applyDisplayValues(
             this.value(),
             this.colorSpace(),
-            [this.xChannel(), this.yChannel(), zChannel],
+            [this.xChannelKey(), this.yChannelKey(), zChannelKey],
             [nextX, nextY, nextZ ?? this.valueZ()],
           )
         : applyDisplayValues(
             this.value(),
             this.colorSpace(),
-            [this.xChannel(), this.yChannel()],
+            [this.xChannelKey(), this.yChannelKey()],
             [nextX, nextY],
           );
 

@@ -7,8 +7,8 @@
 <ColorArea.Root
   bind:value={() => colorState.color, colorState.setColor}
   colorSpace="hsl"
-  channelX="h"
-  channelY="s"
+  xChannel="h"
+  yChannel="s"
   class="
     relative block h-[200px] w-full cursor-crosshair touch-none overflow-clip
     rounded-lg

@@ -20,9 +20,9 @@ export interface ColorAreaRootProps {
   /** The color space mode. */
   colorSpace?: SpaceId;
   /** Which channel maps to the X axis. */
-  channelX?: string;
+  xChannel?: string;
   /** Which channel maps to the Y axis. */
-  channelY?: string;
+  yChannel?: string;
   /** Thumb alignment. */
   thumbAlignment?: "contain" | "overflow";
   /** Callback fired when the color value changes. */
@@ -52,8 +52,8 @@ export const ColorAreaRoot = forwardRef<HTMLDivElement, ColorAreaRootProps>(
       xInverted = false,
       yInverted = false,
       colorSpace = "hsl",
-      channelX: channelXProp,
-      channelY: channelYProp,
+      xChannel: xChannelProp,
+      yChannel: yChannelProp,
       thumbAlignment = "overflow",
       onValueChange,
       onValueCommit,
@@ -77,8 +77,8 @@ export const ColorAreaRoot = forwardRef<HTMLDivElement, ColorAreaRootProps>(
     const colorRef = isControlled ? (parseColor(valueProp) ?? internalColor) : internalColor;
 
     const spaceConfig = colorSpaces[colorSpace];
-    const xChannelKey = channelXProp ?? spaceConfig?.channels[0]?.key ?? "h";
-    const yChannelKey = channelYProp ?? spaceConfig?.channels[1]?.key ?? "s";
+    const xChannelKey = xChannelProp ?? spaceConfig?.channels[0]?.key ?? "h";
+    const yChannelKey = yChannelProp ?? spaceConfig?.channels[1]?.key ?? "s";
     const xIsAlpha = xChannelKey === "alpha";
     const yIsAlpha = yChannelKey === "alpha";
     const xConfig = xIsAlpha ? ALPHA_CONFIG : getChannelConfig(colorSpace, xChannelKey);

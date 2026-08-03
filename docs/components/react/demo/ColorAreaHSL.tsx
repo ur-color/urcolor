@@ -8,8 +8,8 @@ export default function ColorAreaHSL() {
       value={color}
       onValueChange={setColor}
       colorSpace="hsl"
-      channelX="h"
-      channelY="s"
+      xChannel="h"
+      yChannel="s"
       className="
         relative block h-[200px] w-full cursor-crosshair touch-none
         overflow-clip rounded-lg

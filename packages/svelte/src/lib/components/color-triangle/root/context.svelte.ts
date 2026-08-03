@@ -14,12 +14,12 @@ export interface ColorTriangleContextValue {
   /** The colour space all three axes operate in. */
   readonly colorSpace: SpaceId;
   /** The channel mapped to the first vertex, or `"alpha"`. */
-  readonly xChannel: string;
+  readonly xChannelKey: string;
   /** The channel mapped to the second vertex, or `"alpha"`. */
-  readonly yChannel: string;
+  readonly yChannelKey: string;
   /** The channel mapped to the third vertex, or `undefined` in two-channel mode. */
-  readonly zChannel: string | undefined;
-  /** True when a `channelZ` was supplied and the triangle is a full simplex. */
+  readonly zChannelKey: string | undefined;
+  /** True when a `zChannel` was supplied and the triangle is a full simplex. */
   readonly isThreeChannel: boolean;
   readonly minX: number;
   readonly maxX: number;

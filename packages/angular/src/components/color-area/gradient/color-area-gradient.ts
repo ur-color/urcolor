@@ -70,8 +70,8 @@ export class ColorAreaGradient {
   private readonly injector = inject(Injector);
   private readonly destroyRef = inject(DestroyRef);
 
-  private readonly xIsAlpha = computed(() => this.root.xChannel() === "alpha");
-  private readonly yIsAlpha = computed(() => this.root.yChannel() === "alpha");
+  private readonly xIsAlpha = computed(() => this.root.xChannelKey() === "alpha");
+  private readonly yIsAlpha = computed(() => this.root.yChannelKey() === "alpha");
   /** One axis being alpha means the surface itself must be drawn with transparency. */
   private readonly hasAlphaAxis = computed(() => this.xIsAlpha() || this.yIsAlpha());
 
@@ -173,8 +173,8 @@ export class ColorAreaGradient {
   /** Both axes carry a real channel: the core sampler covers it directly. */
   private paintChannelGrid(canvas: HTMLCanvasElement, base: Color): void {
     const colorSpace = this.root.colorSpace();
-    const xChannel = this.root.xChannel();
-    const yChannel = this.root.yChannel();
+    const xChannel = this.root.xChannelKey();
+    const yChannel = this.root.yChannelKey();
     const xConfig = getChannelConfig(colorSpace, xChannel);
     const yConfig = getChannelConfig(colorSpace, yChannel);
     if (!xConfig || !yConfig) return;
@@ -258,8 +258,8 @@ export class ColorAreaGradient {
     const channelKey = this.xIsAlpha()
       ? this.yIsAlpha()
         ? undefined
-        : this.root.yChannel()
-      : this.root.xChannel();
+        : this.root.yChannelKey()
+      : this.root.xChannelKey();
     if (channelKey === undefined) return;
     this.paintAlphaAxisGrid(canvas, base, channelKey);
   }

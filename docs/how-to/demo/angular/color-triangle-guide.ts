@@ -10,8 +10,8 @@ import { COLOR_TRIANGLE_DIRECTIVES } from "@urcolor/angular";
       urcColorTriangleRoot
       [(value)]="color"
       colorSpace="hsv"
-      channelX="s"
-      channelY="v"
+      xChannel="s"
+      yChannel="v"
       class="relative block size-64"
     >
       <canvas urcColorTriangleGradient class="absolute inset-0 block"></canvas>

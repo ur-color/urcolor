@@ -118,8 +118,8 @@ export class ColorTriangleGradient {
     if (this.root.dragging()) return;
 
     const colorSpace = this.root.colorSpace();
-    const xChannel = this.root.xChannel();
-    const yChannel = this.root.yChannel();
+    const xChannel = this.root.xChannelKey();
+    const yChannel = this.root.yChannelKey();
     const xConfig = getChannelConfig(colorSpace, xChannel);
     const yConfig = getChannelConfig(colorSpace, yChannel);
     if (!xConfig || !yConfig) return;
@@ -127,7 +127,7 @@ export class ColorTriangleGradient {
     let zChannel: string | undefined;
     let zMin: number | undefined;
     let zMax: number | undefined;
-    const rootZChannel = this.root.zChannel();
+    const rootZChannel = this.root.zChannelKey();
     if (this.root.isThreeChannel() && rootZChannel !== undefined) {
       const zConfig = getChannelConfig(colorSpace, rootZChannel);
       if (zConfig) {

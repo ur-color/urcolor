@@ -14,8 +14,8 @@ A triangular 2D area component for adjusting two color channels — or three, as
 <ColorTriangle.Root
   bind:value={() => colorState.color, colorState.setColor}
   colorSpace="hsv"
-  channelX="s"
-  channelY="v"
+  xChannel="s"
+  yChannel="v"
   class="relative block size-64"
   style="container-type: inline-size"
 >
@@ -51,8 +51,8 @@ HSV triangle with Saturation and Brightness on the two axes. Both channels are t
 <ColorTriangle.Root
   bind:value={() => colorState.color, colorState.setColor}
   colorSpace="hsv"
-  channelX="s"
-  channelY="v"
+  xChannel="s"
+  yChannel="v"
   class="relative block size-64"
   style="container-type: inline-size"
 >
@@ -69,8 +69,8 @@ The same two axes in HSL, where the second channel is Lightness.
 <ColorTriangle.Root
   bind:value={() => colorState.color, colorState.setColor}
   colorSpace="hsl"
-  channelX="s"
-  channelY="l"
+  xChannel="s"
+  yChannel="l"
   class="relative block size-64"
   style="container-type: inline-size"
 >
@@ -81,15 +81,15 @@ The same two axes in HSL, where the second channel is Lightness.
 
 ### Maxwell's RGB triangle
 
-Supplying `channelZ` switches the triangle from a two-channel half-simplex to a full three-channel barycentric simplex. One thumb still drives all three.
+Supplying `zChannel` switches the triangle from a two-channel half-simplex to a full three-channel barycentric simplex. One thumb still drives all three.
 
 ```svelte
 <ColorTriangle.Root
   bind:value={() => colorState.color, colorState.setColor}
   colorSpace="srgb"
-  channelX="r"
-  channelY="g"
-  channelZ="b"
+  xChannel="r"
+  yChannel="g"
+  zChannel="b"
   class="relative block size-64"
   style="container-type: inline-size"
 >
@@ -171,9 +171,9 @@ Extends `HTMLAttributes<HTMLDivElement>`.
 | `value` | `Color \| string \| null` | — | The color value. Bindable with `bind:value`. |
 | `defaultValue` | `Color \| string \| null` | — | The color used until the first interaction when `value` is not bound. Falls back to `hsl(0, 100%, 50%)`. |
 | `colorSpace` | `SpaceId` | `'hsv'` | Color space (e.g. `'hsv'`, `'hsl'`, `'srgb'`). |
-| `channelX` | `string` | Auto | The channel mapped to the first vertex. Defaults to the color space's second channel. |
-| `channelY` | `string` | Auto | The channel mapped to the second vertex. Defaults to the color space's third channel. |
-| `channelZ` | `string` | — | The channel mapped to the third vertex. Supplying it switches the triangle to a three-channel simplex. |
+| `xChannel` | `string` | Auto | The channel mapped to the first vertex. Defaults to the color space's second channel. |
+| `yChannel` | `string` | Auto | The channel mapped to the second vertex. Defaults to the color space's third channel. |
+| `zChannel` | `string` | — | The channel mapped to the third vertex. Supplying it switches the triangle to a three-channel simplex. |
 | `rotation` | `number` | `0` | Rotation of the triangle, in degrees. |
 | `inverted` | `boolean` | `false` | Swaps the second and third vertices, mirroring the triangle. |
 | `thumbAlignment` | `'contain' \| 'overflow'` | `'overflow'` | Whether the thumb is centred on the edge or kept inside it. |
@@ -184,7 +184,6 @@ Extends `HTMLAttributes<HTMLDivElement>`.
 | `child` | `Snippet<[ChildSnippetArgs]>` | — | Replaces the default element; receives the props it would have received. |
 
 ::: tip
-`channelX`, `channelY` and `channelZ` are the Svelte, React and Angular spelling. Vue names the same three props `xChannel`, `yChannel` and `zChannel`.
 :::
 
 A pointer press that lands outside the outline is ignored: the root's box is a full square and the clip path hides the corners without stopping the event, so the root hit-tests every `pointerdown` against the triangle itself.
@@ -236,9 +235,9 @@ ColorTriangle exposes a single focusable thumb that drives both triangle axes �
 | Attribute | Description |
 |-----------|-------------|
 | `role="slider"` | Applied to `ColorTriangle.Thumb`, with `aria-roledescription="Color thumb"`. |
-| `aria-label` | Defaults to the channel labels in order, e.g. `"Saturation, Brightness"` — three entries when `channelZ` is set. Pass your own `aria-label` on the thumb to override. |
+| `aria-label` | Defaults to the channel labels in order, e.g. `"Saturation, Brightness"` — three entries when `zChannel` is set. Pass your own `aria-label` on the thumb to override. |
 | `aria-valuemin` / `aria-valuemax` | The first channel's range. |
-| `aria-valuenow` | The current first-channel value. Only one number can be carried here, so the `channelX` axis owns it. |
+| `aria-valuenow` | The current first-channel value. Only one number can be carried here, so the `xChannel` axis owns it. |
 | `aria-valuetext` | Every active channel formatted, e.g. `"Saturation 80%, Brightness 50%"`. |
 | `aria-disabled` | Applied to the root and the thumb when `disabled` is set. |
 
@@ -255,6 +254,6 @@ ColorTriangle exposes a single focusable thumb that drives both triangle axes �
 | Home | Move both channels to their minimum |
 | End | Move both channels to their maximum |
 
-There is no third-axis key. In three-channel mode the `channelZ` value falls out of the barycentric renormalization of the other two, so the same four arrows cover the whole simplex.
+There is no third-axis key. In three-channel mode the `zChannel` value falls out of the barycentric renormalization of the other two, so the same four arrows cover the whole simplex.
 
 In two-channel mode the reachable region is the half-simplex, so a step that would push the point past the hypotenuse gives way on the axis you did not drive. `onValueCommit` fires once on key release, not on every repeat.

@@ -355,8 +355,8 @@ function MyPicker() {
         value={color}
         onValueChange={setColor}
         colorSpace="hsv"
-        channelX="s"
-        channelY="v"
+        xChannel="s"
+        yChannel="v"
         className="absolute inset-[8%]"
       >
         <ColorTriangle.Gradient className="absolute inset-0 block" />
@@ -410,8 +410,8 @@ function MyPicker() {
   <ColorTriangle.Root
     bind:value={() => colorState.color, colorState.setColor}
     colorSpace="hsv"
-    channelX="s"
-    channelY="v"
+    xChannel="s"
+    yChannel="v"
     class="absolute inset-[8%]"
   >
     <ColorTriangle.Gradient class="absolute inset-0 block" />
@@ -469,8 +469,8 @@ import { COLOR_RING_DIRECTIVES, COLOR_TRIANGLE_DIRECTIVES } from "@urcolor/angul
         urcColorTriangleRoot
         [(value)]="color"
         colorSpace="hsv"
-        channelX="s"
-        channelY="v"
+        xChannel="s"
+        yChannel="v"
         class="absolute inset-[8%]"
       >
         <canvas urcColorTriangleGradient class="absolute inset-0 block"></canvas>
@@ -496,7 +496,7 @@ export class MyPicker {
 
 The key is `inset-[8%]` — this positions the triangle so its vertices touch the ring's inner edge. Both components share the same `v-model="color"`, so dragging the hue ring updates the triangle's gradient, and dragging the triangle updates the color while keeping the hue ring in sync.
 
-React passes the same `color` / `setColor` pair to both roots, Svelte binds the same `colorState` on both roots, and Angular binds the same `color` signal with `[(value)]` twice, which gives the identical shared-state wiring. Two naming details differ: Vue spells the triangle's axes `x-channel` / `y-channel`, while React, Svelte and Angular spell them `channelX` / `channelY`; and in Angular both gradients are `<canvas>` elements you own — the selectors are `canvas[urcColorRingGradient]` and `canvas[urcColorTriangleGradient]` — whereas Vue, React and Svelte render the canvas for you inside a wrapper element.
+React passes the same `color` / `setColor` pair to both roots, Svelte binds the same `colorState` on both roots, and Angular binds the same `color` signal with `[(value)]` twice, which gives the identical shared-state wiring. Two naming details differ: Vue spells the triangle's axes `x-channel` / `y-channel`, while React, Svelte and Angular spell them `xChannel` / `yChannel`; and in Angular both gradients are `<canvas>` elements you own — the selectors are `canvas[urcColorRingGradient]` and `canvas[urcColorTriangleGradient]` — whereas Vue, React and Svelte render the canvas for you inside a wrapper element.
 
 The triangle ships a single combined thumb — `<ColorTriangle.Thumb />` in React and Svelte, `ColorTriangleThumb` in Vue, `urcColorTriangleThumb` in Angular. There are no separate per-axis thumbs: one focusable handle moves across both channels.
 

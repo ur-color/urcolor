@@ -32,8 +32,8 @@
   <ColorTriangle.Root
     bind:value={() => colorState.color, colorState.setColor}
     colorSpace="hsv"
-    channelX="s"
-    channelY="v"
+    xChannel="s"
+    yChannel="v"
     rotation={90}
     inverted
     class="absolute inset-[8%]"

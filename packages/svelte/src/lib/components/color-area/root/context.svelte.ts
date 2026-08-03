@@ -14,9 +14,9 @@ export interface ColorAreaContextValue {
   /** The colour space both axes operate in. */
   readonly colorSpace: SpaceId;
   /** The channel mapped to the horizontal axis, or `"alpha"`. */
-  readonly xChannel: string;
+  readonly xChannelKey: string;
   /** The channel mapped to the vertical axis, or `"alpha"`. */
-  readonly yChannel: string;
+  readonly yChannelKey: string;
   readonly minX: number;
   readonly maxX: number;
   readonly minY: number;

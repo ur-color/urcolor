@@ -8,8 +8,8 @@ export default function ColorTriangleGuide() {
       value={color}
       onValueChange={setColor}
       colorSpace="hsv"
-      channelX="s"
-      channelY="v"
+      xChannel="s"
+      yChannel="v"
       className="relative block size-64"
     >
       <ColorTriangle.Gradient className="absolute inset-0 block" />

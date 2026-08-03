@@ -10,8 +10,8 @@ export default function ColorTriangleSL() {
         value={color}
         onValueChange={setColor}
         colorSpace="hsl"
-        channelX="s"
-        channelY="l"
+        xChannel="s"
+        yChannel="l"
         className="relative block size-64"
       >
         <ColorTriangle.Gradient className="absolute inset-0 block" />

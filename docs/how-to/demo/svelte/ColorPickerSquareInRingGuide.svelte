@@ -32,8 +32,8 @@
   <ColorArea.Root
     bind:value={() => colorState.color, colorState.setColor}
     colorSpace="hsv"
-    channelX="s"
-    channelY="v"
+    xChannel="s"
+    yChannel="v"
     yInverted={true}
     class="absolute inset-[20.3%] cursor-crosshair touch-none overflow-clip rounded-sm"
   >

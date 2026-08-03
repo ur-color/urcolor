@@ -50,7 +50,7 @@ const STEP_KEYS: Record<string, { axis: "x" | "y"; sign: 1 | -1 }> = {
  * and every piece of state the other parts read through `inject(ColorAreaRoot)`.
  *
  * ```html
- * <div urcColorAreaRoot [(value)]="color" colorSpace="hsl" channelX="s" channelY="l">
+ * <div urcColorAreaRoot [(value)]="color" colorSpace="hsl" xChannel="s" yChannel="l">
  *   <canvas urcColorAreaGradient></canvas>
  *   <span urcColorAreaThumb></span>
  * </div>
@@ -85,9 +85,9 @@ export class ColorAreaRoot implements FormValueControl<Color> {
   /** The colour space both axes operate in. */
   readonly colorSpace = input<SpaceId>("hsl");
   /** The channel on the horizontal axis. Defaults to the space's first channel. */
-  readonly channelX = input<string>();
+  readonly xChannel = input<string>();
   /** The channel on the vertical axis. Defaults to the space's second channel. */
-  readonly channelY = input<string>();
+  readonly yChannel = input<string>();
   /** Whether the horizontal axis runs opposite to its natural direction. */
   readonly xInverted = input(false, { transform: booleanAttribute });
   /** Whether the vertical axis runs opposite to its natural direction. */
@@ -124,21 +124,21 @@ export class ColorAreaRoot implements FormValueControl<Color> {
   readonly dragging = this.draggingState.asReadonly();
 
   /** The channel mapped to the horizontal axis, or `"alpha"`. */
-  readonly xChannel = computed(
-    () => this.channelX() ?? colorSpaces[this.colorSpace()]?.channels[0]?.key ?? "h",
+  readonly xChannelKey = computed(
+    () => this.xChannel() ?? colorSpaces[this.colorSpace()]?.channels[0]?.key ?? "h",
   );
 
   /** The channel mapped to the vertical axis, or `"alpha"`. */
-  readonly yChannel = computed(
-    () => this.channelY() ?? colorSpaces[this.colorSpace()]?.channels[1]?.key ?? "s",
+  readonly yChannelKey = computed(
+    () => this.yChannel() ?? colorSpaces[this.colorSpace()]?.channels[1]?.key ?? "s",
   );
 
   private readonly xConfig = computed(() =>
-    resolveChannelConfig(this.colorSpace(), this.xChannel()),
+    resolveChannelConfig(this.colorSpace(), this.xChannelKey()),
   );
 
   private readonly yConfig = computed(() =>
-    resolveChannelConfig(this.colorSpace(), this.yChannel()),
+    resolveChannelConfig(this.colorSpace(), this.yChannelKey()),
   );
 
   readonly minX = computed(() => this.xConfig()?.min ?? 0);
@@ -159,12 +159,12 @@ export class ColorAreaRoot implements FormValueControl<Color> {
 
   /** The horizontal channel in display units. */
   readonly valueX = computed(() =>
-    colorToDisplayValue(this.value(), this.colorSpace(), this.xChannel()),
+    colorToDisplayValue(this.value(), this.colorSpace(), this.xChannelKey()),
   );
 
   /** The vertical channel in display units. */
   readonly valueY = computed(() =>
-    colorToDisplayValue(this.value(), this.colorSpace(), this.yChannel()),
+    colorToDisplayValue(this.value(), this.colorSpace(), this.yChannelKey()),
   );
 
   /**
@@ -229,7 +229,7 @@ export class ColorAreaRoot implements FormValueControl<Color> {
       applyDisplayValues(
         this.value(),
         this.colorSpace(),
-        [this.xChannel(), this.yChannel()],
+        [this.xChannelKey(), this.yChannelKey()],
         [nextX, nextY],
       ),
     );

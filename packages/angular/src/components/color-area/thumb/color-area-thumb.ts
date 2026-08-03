@@ -59,14 +59,14 @@ export class ColorAreaThumb {
   protected readonly label = computed(
     () =>
       this.ariaLabelAttr
-      ?? `${channelLabel(this.root.colorSpace(), this.root.xChannel())} and `
-      + `${channelLabel(this.root.colorSpace(), this.root.yChannel())}`,
+      ?? `${channelLabel(this.root.colorSpace(), this.root.xChannelKey())} and `
+      + `${channelLabel(this.root.colorSpace(), this.root.yChannelKey())}`,
   );
 
   protected readonly valueText = computed(
     () =>
-      `${formatChannelValue(this.root.colorSpace(), this.root.xChannel(), this.root.valueX())}, `
-      + `${formatChannelValue(this.root.colorSpace(), this.root.yChannel(), this.root.valueY())}`,
+      `${formatChannelValue(this.root.colorSpace(), this.root.xChannelKey(), this.root.valueX())}, `
+      + `${formatChannelValue(this.root.colorSpace(), this.root.yChannelKey(), this.root.valueY())}`,
   );
 
   protected readonly left = computed(() =>
