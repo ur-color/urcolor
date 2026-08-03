@@ -1,6 +1,6 @@
 # The Color Class
 
-`Color` is the ergonomic heart of `@urcolor/core`: an **immutable, `Temporal`-shaped** object for parsing, converting, manipulating, comparing, and serialising colors. Every instance is frozen and every method returns a new `Color`, so a color value never changes underneath you.
+`Color` is the ergonomic heart of `@urcolor/core`: an **immutable, `Temporal`-shaped** object for parsing, converting, manipulating, comparing, and serialising colors. Every method returns a new `Color`, so a color value never changes underneath you.
 
 ```ts
 import { Color } from "@urcolor/core";
@@ -62,7 +62,7 @@ Color.fromRgb(59, 130, 246, 0.5); // 50% opaque
 
 ## Immutability
 
-Every `Color` is deeply frozen. Methods that "change" a color return a **new** one; the original is never mutated.
+Methods that "change" a color return a **new** one; the original is never mutated. `space` and `alpha` are `readonly`, and the coordinate tuple is a private field no caller can reach.
 
 ```ts
 const c = Color.parse("red")!;

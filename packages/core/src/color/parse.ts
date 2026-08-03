@@ -18,20 +18,43 @@ import type { ColorObject } from "./types";
 /** A parser: returns a ColorObject, or null when the input isn't its notation. */
 export type ColorParser = (input: string) => ColorObject | null;
 
-// Ordered by cheapest / most common first. Functional notations are mutually
-// exclusive by name, so order among them doesn't matter for correctness.
-const PARSERS: ColorParser[] = [
-  parseHex,
-  parseNamed,
-  parseRgb,
-  parseHsl,
-  parseHwb,
-  parseColorFn,
-  parseOklch,
-  parseOklab,
-  parseLch,
-  parseLab,
-];
+/**
+ * The functional notations, keyed by the lowercased name before the `(`.
+ *
+ * Trying every parser in turn meant a `lab()` string was offered to nine
+ * parsers that could not possibly match, and an unparseable string to all ten —
+ * each one compiling a `RegExp` to say no. Since the names are mutually
+ * exclusive, one string scan picks the single candidate instead. Each parser
+ * still runs unchanged: this only decides *which* to call, never how it behaves.
+ */
+const FN_PARSERS: Readonly<Record<string, ColorParser>> = {
+  rgb: parseRgb,
+  rgba: parseRgb,
+  hsl: parseHsl,
+  hsla: parseHsl,
+  hwb: parseHwb,
+  color: parseColorFn,
+  oklch: parseOklch,
+  oklab: parseOklab,
+  lch: parseLch,
+  lab: parseLab,
+};
+
+/**
+ * The one built-in that could match `input`, or `null` if none can.
+ *
+ * Dispatch reads the trimmed input, but the chosen parser is handed the
+ * original string — every built-in trims for itself, so nothing downstream can
+ * observe the difference.
+ */
+function builtinFor(input: string): ColorParser | null {
+  const s = input.trim();
+  if (s.charCodeAt(0) === 35 /* # */) return parseHex;
+  const open = s.indexOf("(");
+  if (open > 0) return FN_PARSERS[s.slice(0, open).toLowerCase()] ?? null;
+  // No `(` and no `#`: only a bare keyword is left.
+  return open < 0 ? parseNamed : null;
+}
 
 /** Parsers contributed by plugins, consulted after every built-in. */
 const registered: ColorParser[] = [];
@@ -66,8 +89,11 @@ function isNumeric(color: ColorObject): boolean {
 
 /** Parse a CSS color string, or `null` if no notation matches. */
 export function tryParse(input: string): ColorObject | null {
-  for (const p of PARSERS) {
-    const result = p(input);
+  const builtin = builtinFor(input);
+  if (builtin) {
+    const result = builtin(input);
+    // A non-numeric result is a miss, not a match: it lets a registered parser
+    // (relative color syntax, say) see `hsl(from red h s l)` for itself.
     if (result && isNumeric(result)) return result;
   }
   for (const p of registered) {

@@ -1,8 +1,14 @@
 /**
  * `Color` — an immutable, Temporal-shaped facade over the functional core.
- * Every instance is frozen; every method returns a new `Color`. Import this
+ * Every method returns a new `Color`; nothing mutates in place. Import this
  * only when you want the ergonomic object; the standalone functions
  * (`parse`, `convert`, `serialize`, …) stay tree-shakeable on their own.
+ *
+ * Immutability is structural rather than enforced by `Object.freeze`: `space`
+ * and `alpha` are `readonly`, the coordinate tuple lives in a `#private` field,
+ * and `get coords()` hands back a copy. Freezing every instance cost ~400 ns
+ * apiece — more than the color math itself — which made per-pixel work like
+ * gradient sampling an order of magnitude slower than it needed to be.
  */
 
 import { type ContrastOptions, contrast } from "./contrast";
@@ -12,7 +18,7 @@ import { gamutMap, inGamut } from "./gamut";
 import { type MixOptions, mix } from "./interpolate";
 import { complement, darken, desaturate, lighten, negate, rotateHue, saturate } from "./manipulate";
 import { parse, tryParse } from "./parse";
-import { spaceDef } from "./registry";
+import { channelIndexOf, spaceDef } from "./registry";
 import { type ColorFormat, serialize } from "./serialize";
 import type { ColorObject, Coords, SpaceId } from "./types";
 
@@ -36,8 +42,6 @@ export class Color {
     this.space = space;
     this.#coords = [coords[0], coords[1], coords[2]];
     this.alpha = alpha;
-    Object.freeze(this.#coords);
-    Object.freeze(this);
   }
 
   /** The coordinate tuple (a fresh copy — safe to mutate). */
@@ -115,10 +119,19 @@ export class Color {
 
   // --- Conversion ----------------------------------------------------------
 
-  /** Convert to `space`, returning a new `Color` (lossless in precision). */
+  /**
+   * Convert to `space`, returning a new `Color` (lossless in precision).
+   *
+   * `convert` only reads its argument, so the intermediate is built inline
+   * rather than via `toObject()` — that skips one object and one coords copy
+   * per call, which the grid samplers pay per pixel.
+   */
   to(space: SpaceId): Color {
-    const o = convert(this.toObject(), space);
-    return new Color(o.space, o.coords, o.alpha);
+    // Deliberately still allocates when `space` is already this space: `to()`
+    // has always returned a distinct instance, and identity is observable.
+    const c = this.#coords;
+    const o = convert({ space: this.space, coords: [c[0], c[1], c[2]], alpha: this.alpha }, space);
+    return new Color(space, o.coords, o.alpha);
   }
 
   /** Gamut-map into `dest` (default sRGB); returns an Oklch `Color`. */
@@ -141,7 +154,7 @@ export class Color {
 
   /** Read a channel value by name (in the current space). */
   get(channel: string): number {
-    const i = spaceDef(this.space).channels.indexOf(channel);
+    const i = channelIndexOf(this.space, channel);
     if (i < 0) throw new RangeError(`No channel "${channel}" in ${this.space}`);
     return this.#coords[i] as number;
   }
@@ -153,19 +166,34 @@ export class Color {
    */
   with(patch: ColorPatch): Color {
     const target = patch.space ?? this.space;
-    const base = target === this.space ? this : this.to(target);
-    const { channels } = spaceDef(target);
-    const coords = base.coords;
-    for (const [key, value] of Object.entries(patch)) {
-      if (key === "space" || key === "alpha" || value === undefined) continue;
-      const i = channels.indexOf(key);
+    const c = this.#coords;
+    // Convert straight into the working coords rather than by way of an
+    // intermediate `Color`; `spaceDef` still validates an unknown target.
+    let coords: Coords;
+    let baseAlpha: number;
+    if (target === this.space) {
+      spaceDef(target);
+      coords = [c[0], c[1], c[2]];
+      baseAlpha = this.alpha;
+    } else {
+      const o = convert({ space: this.space, coords: [c[0], c[1], c[2]], alpha: this.alpha }, target);
+      coords = o.coords;
+      baseAlpha = o.alpha;
+    }
+    // `Object.keys` over `Object.entries`: same own-enumerable keys in the same
+    // order, without materialising a pair array per call.
+    for (const key of Object.keys(patch)) {
+      if (key === "space" || key === "alpha") continue;
+      const value = patch[key];
+      if (value === undefined) continue;
+      const i = channelIndexOf(target, key);
       if (i < 0) throw new RangeError(`No channel "${key}" in ${target}`);
       if (typeof value !== "number") {
         throw new TypeError(`Channel "${key}" must be a number, got ${JSON.stringify(value)}`);
       }
       coords[i] = value;
     }
-    return new Color(target, coords, patch.alpha ?? base.alpha);
+    return new Color(target, coords, patch.alpha ?? baseAlpha);
   }
 
   /** Copy with alpha set to `value`. */
@@ -245,3 +273,18 @@ export class Color {
     throw new TypeError("Color has no primitive value; use toString() or coords");
   }
 }
+
+/**
+ * `markRaw`'s marker, carried on the prototype.
+ *
+ * Vue skips reactive-proxying a value that is frozen *or* flagged this way.
+ * Freezing used to earn the skip as a side effect; without it a `Color` handed
+ * to `ref()`/`reactive()` — or to a component as a prop — gets wrapped in a
+ * `Proxy`, and reading `#coords` through that proxy is a `TypeError`, since a
+ * private field lives on the instance and the proxy is not it.
+ *
+ * On the prototype rather than as a field: it costs nothing per instance, and
+ * stays non-enumerable so it never turns up in a spread or `Object.keys`.
+ * Harmless in React/Svelte/Angular, which don't proxy class instances.
+ */
+Object.defineProperty(Color.prototype, "__v_skip", { value: true });

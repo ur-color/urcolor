@@ -97,6 +97,25 @@ export function hueIndexOf(space: SpaceId): number {
   return SPACES[space].hueIndex ?? -1;
 }
 
+/**
+ * Channel name -> coordinate index, precomputed per space.
+ *
+ * Resolving a channel used to be `channels.indexOf(name)` — a string-comparing
+ * linear scan, run three times per pixel by the grid samplers. Null-prototype
+ * maps so a channel can never collide with something off `Object.prototype`.
+ */
+const CHANNEL_INDEX: Record<string, Record<string, number>> = Object.create(null);
+for (const [id, def] of Object.entries(SPACES)) {
+  const table: Record<string, number> = Object.create(null);
+  for (let i = 0; i < 3; i++) table[def.channels[i] as string] = i;
+  CHANNEL_INDEX[id] = table;
+}
+
+/** Index of `channel` within `space`'s coords, or `-1` when it has no such channel. */
+export function channelIndexOf(space: SpaceId, channel: string): number {
+  return CHANNEL_INDEX[space]?.[channel] ?? -1;
+}
+
 /** Copy a coords tuple. */
 export function copyCoords(c: Coords): Coords {
   return [c[0], c[1], c[2]];

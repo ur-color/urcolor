@@ -1,6 +1,56 @@
 import { Color } from "./color/color";
-import type { SpaceId } from "./color/types";
+import { convert } from "./color/convert";
+import { interpolate } from "./color/interpolate";
+import { channelIndexOf } from "./color/registry";
+import type { ColorObject, Coords, SpaceId } from "./color/types";
 import { barycentricCoords, type Point } from "./geometry";
+
+/**
+ * Shared inner loop for the grid samplers.
+ *
+ * Every sampler used to run the full object API per pixel: build a patch object
+ * with a computed key, `Object.keys` it, resolve the channel by string scan,
+ * convert, allocate a `Color`, convert again for sRGB, then resolve `r`/`g`/`b`
+ * by three more string scans. All of that is loop-invariant except the channel
+ * *values*, so it is hoisted into {@link GridWriter} and done once.
+ *
+ * The maths is untouched — the same `convert()` runs on the same coordinates,
+ * so output is byte-for-byte what the old per-pixel path produced.
+ */
+class GridWriter {
+  readonly data: Uint8ClampedArray;
+  /** Working coordinates, mutated in place between pixels. */
+  readonly coords: Coords;
+  /** Reused conversion input; `convert` only ever reads it. */
+  readonly #scratch: ColorObject;
+  readonly #alpha: boolean;
+
+  constructor(base: Color, space: SpaceId, w: number, h: number, alpha: boolean) {
+    this.data = new Uint8ClampedArray(w * h * 4);
+    const src = convert(base.toObject(), space);
+    this.coords = src.coords;
+    this.#scratch = { space, coords: this.coords, alpha: src.alpha };
+    this.#alpha = alpha;
+  }
+
+  /** Resolve a channel name against the working space, or throw as `Color.with` would. */
+  static channel(space: SpaceId, name: string): number {
+    const i = channelIndexOf(space, name);
+    if (i < 0) throw new RangeError(`No channel "${name}" in ${space}`);
+    return i;
+  }
+
+  /** Convert the current coordinates to sRGB and write one RGBA pixel at `i`. */
+  write(i: number): void {
+    const rgb = convert(this.#scratch, "srgb");
+    const c = rgb.coords;
+    const d = this.data;
+    d[i] = Math.round(Math.max(0, Math.min(1, c[0])) * 255);
+    d[i + 1] = Math.round(Math.max(0, Math.min(1, c[1])) * 255);
+    d[i + 2] = Math.round(Math.max(0, Math.min(1, c[2])) * 255);
+    d[i + 3] = this.#alpha ? Math.round(rgb.alpha * 255) : 255;
+  }
+}
 
 const VERTEX_SHADER = `
 attribute vec2 a_position;
@@ -244,15 +294,17 @@ export function drawLinearGradient(
  */
 export function interpolateStops(colors: Color[], steps: number, space: SpaceId): Color[] {
   if (colors.length < 2) return [...colors];
+  // One interpolator per segment, not one per step: building it converts both
+  // endpoints, and there are only `colors.length - 1` distinct endpoint pairs.
+  const segments = colors.slice(0, -1).map((a, i) =>
+    interpolate(a.toObject(), colors[i + 1]!.toObject(), { space }));
   const result: Color[] = [];
   for (let i = 0; i < steps; i++) {
     const t = i / (steps - 1);
     const segment = t * (colors.length - 1);
     const idx = Math.min(Math.floor(segment), colors.length - 2);
-    const localT = segment - idx;
-    const a = colors[idx]!;
-    const b = colors[idx + 1]!;
-    result.push(a.mix(b, localT, { space }).to("srgb"));
+    const o = convert(segments[idx]!(segment - idx), "srgb");
+    result.push(new Color(o.space, o.coords, o.alpha));
   }
   return result;
 }
@@ -272,18 +324,28 @@ export function sampleBilinearGrid(
   alpha = false,
 ): Uint8ClampedArray {
   const data = new Uint8ClampedArray(w * h * 4);
+  // The top and bottom edges depend only on x, so each column's pair of edge
+  // colors is computed once for the whole grid rather than once per pixel —
+  // w evaluations instead of w × h, and two fewer interpolator builds per pixel.
+  const topEdge = interpolate(tl.toObject(), tr.toObject(), { space });
+  const botEdge = interpolate(bl.toObject(), br.toObject(), { space });
+  const tops: ColorObject[] = [];
+  const bots: ColorObject[] = [];
+  for (let x = 0; x < w; x++) {
+    const vx = x / (w - 1);
+    tops.push(topEdge(vx));
+    bots.push(botEdge(vx));
+  }
   for (let y = 0; y < h; y++) {
     const vy = y / (h - 1);
     for (let x = 0; x < w; x++) {
-      const vx = x / (w - 1);
       // Bilinear: mix top-left/top-right, bottom-left/bottom-right, then mix results
-      const topMix = tl.mix(tr, vx, { space });
-      const botMix = bl.mix(br, vx, { space });
-      const rgb = topMix.mix(botMix, vy, { space }).to("srgb");
+      const rgb = convert(interpolate(tops[x]!, bots[x]!, { space })(vy), "srgb");
       const idx = (y * w + x) * 4;
-      data[idx] = Math.round(Math.max(0, Math.min(1, rgb.get("r"))) * 255);
-      data[idx + 1] = Math.round(Math.max(0, Math.min(1, rgb.get("g"))) * 255);
-      data[idx + 2] = Math.round(Math.max(0, Math.min(1, rgb.get("b"))) * 255);
+      const c = rgb.coords;
+      data[idx] = Math.round(Math.max(0, Math.min(1, c[0])) * 255);
+      data[idx + 1] = Math.round(Math.max(0, Math.min(1, c[1])) * 255);
+      data[idx + 2] = Math.round(Math.max(0, Math.min(1, c[2])) * 255);
       data[idx + 3] = alpha ? Math.round(rgb.alpha * 255) : 255;
     }
   }
@@ -308,24 +370,23 @@ export function sampleChannelGrid(
   h: number,
   alpha = false,
 ): Uint8ClampedArray {
-  const data = new Uint8ClampedArray(w * h * 4);
+  const grid = new GridWriter(baseColor, colorSpace, w, h, alpha);
+  const xi = GridWriter.channel(colorSpace, xChannel);
+  const yi = GridWriter.channel(colorSpace, yChannel);
+  const coords = grid.coords;
   for (let y = 0; y < h; y++) {
     const vy = y / (h - 1);
     const yVal = yMin + vy * (yMax - yMin);
     for (let x = 0; x < w; x++) {
       const vx = x / (w - 1);
-      const xVal = xMin + vx * (xMax - xMin);
-      const rgb = baseColor
-        .with({ space: colorSpace, [xChannel]: xVal, [yChannel]: yVal })
-        .to("srgb");
-      const idx = (y * w + x) * 4;
-      data[idx] = Math.round(Math.max(0, Math.min(1, rgb.get("r"))) * 255);
-      data[idx + 1] = Math.round(Math.max(0, Math.min(1, rgb.get("g"))) * 255);
-      data[idx + 2] = Math.round(Math.max(0, Math.min(1, rgb.get("b"))) * 255);
-      data[idx + 3] = alpha ? Math.round(rgb.alpha * 255) : 255;
+      // Written x-then-y, matching the old `{ [xChannel]: …, [yChannel]: … }`
+      // patch: when both name the same channel, y is what survives.
+      coords[xi] = xMin + vx * (xMax - xMin);
+      coords[yi] = yVal;
+      grid.write((y * w + x) * 4);
     }
   }
-  return data;
+  return grid.data;
 }
 
 export function sampleTriangleGrid(
@@ -348,7 +409,11 @@ export function sampleTriangleGrid(
   zMax?: number,
 ): Uint8ClampedArray {
   const threeChannel = zChannel != null && zMin != null && zMax != null;
-  const data = new Uint8ClampedArray(w * h * 4);
+  const grid = new GridWriter(baseColor, colorSpace, w, h, alpha);
+  const xi = GridWriter.channel(colorSpace, xChannel);
+  const yi = GridWriter.channel(colorSpace, yChannel);
+  const zi = threeChannel ? GridWriter.channel(colorSpace, zChannel) : -1;
+  const coords = grid.coords;
   for (let py = 0; py < h; py++) {
     const ny = py / (h - 1);
     for (let px = 0; px < w; px++) {
@@ -362,34 +427,21 @@ export function sampleTriangleGrid(
       const nv = cv / sum;
       const nw = cw / sum;
 
-      let xVal: number, yVal: number;
-      const updates: Record<string, number> = {};
-
       if (threeChannel) {
         // 3-channel mode: v0→(xMax,yMin,zMin), v1→(xMin,yMax,zMin), v2→(xMin,yMin,zMax)
-        xVal = nu2 * xMax + (1 - nu2) * xMin;
-        yVal = nv * yMax + (1 - nv) * yMin;
-        const zVal = nw * zMax! + (1 - nw) * zMin!;
-        updates[xChannel] = xVal;
-        updates[yChannel] = yVal;
-        updates[zChannel!] = zVal;
+        coords[xi] = nu2 * xMax + (1 - nu2) * xMin;
+        coords[yi] = nv * yMax + (1 - nv) * yMin;
+        coords[zi] = nw * zMax! + (1 - nw) * zMin!;
       } else {
         // 2-channel mode: v0→(xMax,yMax), v1→(xMin,yMax), v2→(xMin,yMin)
-        xVal = nu2 * xMax + nv * xMin + nw * xMin;
-        yVal = nu2 * yMax + nv * yMax + nw * yMin;
-        updates[xChannel] = xVal;
-        updates[yChannel] = yVal;
+        coords[xi] = nu2 * xMax + nv * xMin + nw * xMin;
+        coords[yi] = nu2 * yMax + nv * yMax + nw * yMin;
       }
 
-      const rgb = baseColor.with({ space: colorSpace, ...updates }).to("srgb");
-      const idx = (py * w + px) * 4;
-      data[idx] = Math.round(Math.max(0, Math.min(1, rgb.get("r"))) * 255);
-      data[idx + 1] = Math.round(Math.max(0, Math.min(1, rgb.get("g"))) * 255);
-      data[idx + 2] = Math.round(Math.max(0, Math.min(1, rgb.get("b"))) * 255);
-      data[idx + 3] = alpha ? Math.round(rgb.alpha * 255) : 255;
+      grid.write((py * w + px) * 4);
     }
   }
-  return data;
+  return grid.data;
 }
 
 export function samplePolarGrid(
@@ -406,7 +458,10 @@ export function samplePolarGrid(
   startAngle = 0,
   alpha = false,
 ): Uint8ClampedArray {
-  const data = new Uint8ClampedArray(w * h * 4);
+  const grid = new GridWriter(baseColor, colorSpace, w, h, alpha);
+  const ai = GridWriter.channel(colorSpace, angleChannel);
+  const ri = GridWriter.channel(colorSpace, radiusChannel);
+  const coords = grid.coords;
   const cx = (w - 1) / 2;
   const cy = (h - 1) / 2;
   const startRad = (startAngle * Math.PI) / 180;
@@ -418,19 +473,12 @@ export function samplePolarGrid(
       let angle = Math.atan2(dx, -dy) - startRad;
       if (angle < 0) angle += 2 * Math.PI;
       const angleFrac = angle / (2 * Math.PI);
-      const angleVal = angleMin + angleFrac * (angleMax - angleMin);
-      const radiusVal = radiusMin + r * (radiusMax - radiusMin);
-      const rgb = baseColor
-        .with({ space: colorSpace, [angleChannel]: angleVal, [radiusChannel]: radiusVal })
-        .to("srgb");
-      const idx = (y * w + x) * 4;
-      data[idx] = Math.round(Math.max(0, Math.min(1, rgb.get("r"))) * 255);
-      data[idx + 1] = Math.round(Math.max(0, Math.min(1, rgb.get("g"))) * 255);
-      data[idx + 2] = Math.round(Math.max(0, Math.min(1, rgb.get("b"))) * 255);
-      data[idx + 3] = alpha ? Math.round(rgb.alpha * 255) : 255;
+      coords[ai] = angleMin + angleFrac * (angleMax - angleMin);
+      coords[ri] = radiusMin + r * (radiusMax - radiusMin);
+      grid.write((y * w + x) * 4);
     }
   }
-  return data;
+  return grid.data;
 }
 
 export function sampleConicRing(
@@ -444,7 +492,9 @@ export function sampleConicRing(
   startAngle = 0,
   alpha = false,
 ): Uint8ClampedArray {
-  const data = new Uint8ClampedArray(w * h * 4);
+  const grid = new GridWriter(baseColor, colorSpace, w, h, alpha);
+  const ci = GridWriter.channel(colorSpace, channel);
+  const coords = grid.coords;
   const cx = (w - 1) / 2;
   const cy = (h - 1) / 2;
   const startRad = (startAngle * Math.PI) / 180;
@@ -455,16 +505,11 @@ export function sampleConicRing(
       let angle = Math.atan2(dx, -dy) - startRad;
       if (angle < 0) angle += 2 * Math.PI;
       const frac = angle / (2 * Math.PI);
-      const val = channelMin + frac * (channelMax - channelMin);
-      const rgb = baseColor.with({ space: colorSpace, [channel]: val }).to("srgb");
-      const idx = (y * w + x) * 4;
-      data[idx] = Math.round(Math.max(0, Math.min(1, rgb.get("r"))) * 255);
-      data[idx + 1] = Math.round(Math.max(0, Math.min(1, rgb.get("g"))) * 255);
-      data[idx + 2] = Math.round(Math.max(0, Math.min(1, rgb.get("b"))) * 255);
-      data[idx + 3] = alpha ? Math.round(rgb.alpha * 255) : 255;
+      coords[ci] = channelMin + frac * (channelMax - channelMin);
+      grid.write((y * w + x) * 4);
     }
   }
-  return data;
+  return grid.data;
 }
 
 const cache = new WeakMap<HTMLCanvasElement, GradientProgram>();

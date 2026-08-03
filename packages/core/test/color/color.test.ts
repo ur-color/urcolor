@@ -9,13 +9,15 @@ describe("construction", () => {
     expect(c.alpha).toBe(1);
   });
 
-  test("instances are immutable (frozen)", () => {
+  // Immutability is structural, not `Object.freeze` — see the note in color.ts
+  // for why. What matters is that no method hands out a mutable reference to
+  // the internals and that every "change" produces a new instance.
+  test("methods return new instances instead of mutating", () => {
     const c = new Color("srgb", [1, 0, 0]);
-    expect(Object.isFrozen(c)).toBe(true);
-    expect(() => {
-      // @ts-expect-error runtime immutability check
-      c.alpha = 0.5;
-    }).toThrow();
+    const faded = c.withAlpha(0.5);
+    expect(faded).not.toBe(c);
+    expect(c.alpha).toBe(1);
+    expect(faded.alpha).toBe(0.5);
   });
 
   test("coords getter returns a copy, not the internal tuple", () => {

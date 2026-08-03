@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { ref, nextTick, defineComponent, h } from "vue";
+import { reactive, ref, nextTick, defineComponent, h } from "vue";
 import { Color } from "@urcolor/core";
 import { mount } from "@vue/test-utils";
 import {
@@ -200,5 +200,25 @@ describe("useRec2020", () => {
     expect(typeof result.r.value).toBe("number");
     expect(typeof result.g.value).toBe("number");
     expect(typeof result.b.value).toBe("number");
+  });
+});
+
+// `Color` stores its coordinates in a `#private` field, which is unreachable
+// through a `Proxy`. Vue must therefore leave the instance alone rather than
+// wrap it — it used to do so because every instance was frozen, and now does so
+// because the class carries `markRaw`'s flag. Without that, a color put in a
+// deep `ref()` or `reactive()` throws on the first read.
+describe("Color under Vue reactivity", () => {
+  it("is never wrapped in a reactive proxy", () => {
+    const color = Color.parse("hsl(210, 80%, 50%)")!;
+    expect(reactive(color)).toBe(color);
+    expect(ref(color).value).toBe(color);
+    expect(reactive({ color }).color).toBe(color);
+  });
+
+  it("stays readable through a deep ref", () => {
+    const state = ref({ color: Color.parse("#3b82f6")! });
+    expect(state.value.color.coords).toHaveLength(3);
+    expect(state.value.color.to("oklch").toString()).toContain("oklch");
   });
 });

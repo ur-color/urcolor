@@ -5,7 +5,7 @@
  */
 
 import { parseHex } from "./spaces/srgb";
-import type { ColorObject } from "./types";
+import type { ColorObject, Coords } from "./types";
 
 /** Keyword -> `#rrggbb`. Lowercase keys; look up after lowercasing input. */
 export const NAMED_COLORS: Readonly<Record<string, string>> = {
@@ -159,10 +159,24 @@ export const NAMED_COLORS: Readonly<Record<string, string>> = {
   yellowgreen: "#9acd32",
 };
 
+/**
+ * Keyword -> already-decoded `0..1` sRGB coordinates.
+ *
+ * Resolving a keyword used to re-run {@link parseHex} — a regex test plus three
+ * `parseInt`s — on a string literal known at module load. The table is built
+ * *by* `parseHex`, so the values cannot drift from {@link NAMED_COLORS}; only
+ * the repeated decoding is gone.
+ */
+const NAMED_COORDS: Record<string, Coords> = Object.create(null);
+for (const [key, hex] of Object.entries(NAMED_COLORS)) {
+  NAMED_COORDS[key] = parseHex(hex)!.coords;
+}
+
 /** Resolve a CSS color keyword to an sRGB color, or `null` if unknown. */
 export function parseNamed(input: string): ColorObject | null {
   const key = input.trim().toLowerCase();
   if (key === "transparent") return { space: "srgb", coords: [0, 0, 0], alpha: 0 };
-  const hex = NAMED_COLORS[key];
-  return hex ? parseHex(hex) : null;
+  const c = NAMED_COORDS[key];
+  // Fresh coords per call: the returned object is the caller's to mutate.
+  return c ? { space: "srgb", coords: [c[0], c[1], c[2]], alpha: 1 } : null;
 }

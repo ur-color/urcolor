@@ -11,7 +11,14 @@ import type { ColorObject, Coords } from "../types";
 
 const clamp01 = (n: number): number => (n < 0 ? 0 : n > 1 ? 1 : n);
 const toByte = (n: number): number => Math.round(clamp01(n) * 255);
-const hex2 = (n: number): string => n.toString(16).padStart(2, "0");
+
+/** `0..255` -> two lowercase hex digits, precomputed to avoid per-call formatting. */
+const HEX_BYTE: string[] = [];
+for (let i = 0; i < 256; i++) HEX_BYTE.push(i.toString(16).padStart(2, "0"));
+
+// The `??` is not dead code: a NaN coordinate reaches here as a NaN index, and
+// must still format as the old expression did rather than as `undefined`.
+const hex2 = (n: number): string => HEX_BYTE[n] ?? n.toString(16).padStart(2, "0");
 
 /** Parse `#rgb`, `#rgba`, `#rrggbb`, `#rrggbbaa`. Returns `null` if not hex. */
 export function parseHex(input: string): ColorObject | null {
