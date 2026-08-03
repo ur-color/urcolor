@@ -6,13 +6,6 @@ Let's combine a color ring and color triangle into a Photoshop-style HSV color p
 import ColorPickerGuide from './demo/vue/ColorPickerTriangleInRingGuide.vue'
 </script>
 
-::: info No React version yet
-This recipe covers `@urcolor/vue`, `@urcolor/svelte` and `@urcolor/angular`. The React
-package ships the same primitives — compose `ColorRing`, `ColorArea`, `ColorSlider` and
-`ColorField` the same way — but a step-by-step React version of this particular
-composition isn't written yet.
-:::
-
 Here's what we'll end up with:
 
 <ColorPickerGuide />
@@ -24,6 +17,7 @@ Here's what we'll end up with:
 ::: code-group
 
 <<< @/how-to/demo/vue/ColorPickerTriangleInRingGuide.vue [Vue]
+<<< @/how-to/demo/react/ColorPickerTriangleInRingGuide.tsx [React]
 <<< @/how-to/demo/svelte/ColorPickerTriangleInRingGuide.svelte [Svelte]
 <<< @/how-to/demo/angular/color-picker-triangle-in-ring-guide.ts [Angular]
 
@@ -43,6 +37,14 @@ import { useColor } from "@urcolor/vue";  // [!code ++]
 
 const { color } = useColor("hsl(210, 80%, 50%)");  // [!code ++]
 </script>
+```
+
+```tsx [React]
+import { useColor } from "@urcolor/react"; // [!code ++]
+
+function MyPicker() {
+  const { color, setColor } = useColor("hsl(210, 80%, 50%)"); // [!code ++]
+}
 ```
 
 ```svelte [Svelte]
@@ -117,6 +119,44 @@ const { color } = useColor("hsl(210, 80%, 50%)");
     </ColorRingRoot>
   </div>
 </template>
+```
+
+```tsx [React]
+import { useColor, ColorRing } from "@urcolor/react"; // [!code ++]
+
+function MyPicker() {
+  const { color, setColor } = useColor("hsl(210, 80%, 50%)");
+
+  return (
+    // [!code ++:26]
+    <div className="relative size-64">
+      <ColorRing.Root
+        value={color}
+        onValueChange={setColor}
+        colorSpace="hsv"
+        channel="h"
+        innerRadius={0.84}
+        className="absolute inset-0"
+        style={{ containerType: "inline-size" }}
+      >
+        <ColorRing.Track className="relative block size-full">
+          <ColorRing.Gradient
+            className="absolute inset-0 block"
+            channelOverrides={{ s: 1, v: 1, alpha: 1 }}
+          />
+          <ColorRing.Thumb
+            className="
+              size-4 rounded-full border-2 border-white
+              shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_2px_4px_rgba(0,0,0,0.3)]
+              focus-visible:shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_0_0_3px_rgba(66,153,225,0.6)]
+            "
+            aria-label="Hue"
+          />
+        </ColorRing.Track>
+      </ColorRing.Root>
+    </div>
+  );
+}
 ```
 
 ```svelte [Svelte]
@@ -277,6 +317,63 @@ const { color } = useColor("hsl(210, 80%, 50%)");
 </template>
 ```
 
+```tsx [React]
+import { useColor, ColorRing, ColorTriangle } from "@urcolor/react"; // [!code ++]
+
+function MyPicker() {
+  const { color, setColor } = useColor("hsl(210, 80%, 50%)");
+
+  return (
+    <div className="relative size-64">
+      <ColorRing.Root
+        value={color}
+        onValueChange={setColor}
+        colorSpace="hsv"
+        channel="h"
+        innerRadius={0.84}
+        className="absolute inset-0"
+        style={{ containerType: "inline-size" }}
+      >
+        <ColorRing.Track className="relative block size-full">
+          <ColorRing.Gradient
+            className="absolute inset-0 block"
+            channelOverrides={{ s: 1, v: 1, alpha: 1 }}
+          />
+          <ColorRing.Thumb
+            className="
+              size-4 rounded-full border-2 border-white
+              shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_2px_4px_rgba(0,0,0,0.3)]
+              focus-visible:shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_0_0_3px_rgba(66,153,225,0.6)]
+            "
+            aria-label="Hue"
+          />
+        </ColorRing.Track>
+      </ColorRing.Root>
+
+      {/* [!code ++:18] */}
+      <ColorTriangle.Root
+        value={color}
+        onValueChange={setColor}
+        colorSpace="hsv"
+        channelX="s"
+        channelY="v"
+        className="absolute inset-[8%]"
+      >
+        <ColorTriangle.Gradient className="absolute inset-0 block" />
+        <ColorTriangle.Thumb
+          className="
+            size-4 rounded-full border-2 border-white
+            shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_2px_4px_rgba(0,0,0,0.3)]
+            focus-visible:shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_0_0_3px_rgba(66,153,225,0.6)]
+          "
+          aria-label="Color"
+        />
+      </ColorTriangle.Root>
+    </div>
+  );
+}
+```
+
 ```svelte [Svelte]
 <script lang="ts">
   import { ColorRing, ColorTriangle, useColor } from "@urcolor/svelte"; // [!code ++]
@@ -399,9 +496,11 @@ export class MyPicker {
 
 The key is `inset-[8%]` — this positions the triangle so its vertices touch the ring's inner edge. Both components share the same `v-model="color"`, so dragging the hue ring updates the triangle's gradient, and dragging the triangle updates the color while keeping the hue ring in sync.
 
-Svelte binds the same `colorState` on both roots and Angular binds the same `color` signal with `[(value)]` twice, which gives the identical shared-state wiring. Two naming details differ: Vue spells the triangle's axes `x-channel` / `y-channel`, while Svelte and Angular spell them `channelX` / `channelY`; and in Angular both gradients are `<canvas>` elements you own — the selectors are `canvas[urcColorRingGradient]` and `canvas[urcColorTriangleGradient]` — whereas Vue and Svelte render the canvas for you inside a wrapper element.
+React passes the same `color` / `setColor` pair to both roots, Svelte binds the same `colorState` on both roots, and Angular binds the same `color` signal with `[(value)]` twice, which gives the identical shared-state wiring. Two naming details differ: Vue spells the triangle's axes `x-channel` / `y-channel`, while React, Svelte and Angular spell them `channelX` / `channelY`; and in Angular both gradients are `<canvas>` elements you own — the selectors are `canvas[urcColorRingGradient]` and `canvas[urcColorTriangleGradient]` — whereas Vue, React and Svelte render the canvas for you inside a wrapper element.
 
-The full demo at the top of this page also passes `rotation` and `inverted` to the triangle so it points the same way in every framework. Vue additionally accepts an `orientation` prop that Svelte and Angular do not ship; it does not affect the geometry, which comes from `rotation` and `inverted` alone.
+The triangle ships a single combined thumb — `<ColorTriangle.Thumb />` in React and Svelte, `ColorTriangleThumb` in Vue, `urcColorTriangleThumb` in Angular. There are no separate per-axis thumbs: one focusable handle moves across both channels.
+
+The full demo at the top of this page also passes `rotation` and `inverted` to the triangle so it points the same way in every framework. Vue additionally accepts an `orientation` prop that React, Svelte and Angular do not ship; it does not affect the geometry, which comes from `rotation` and `inverted` alone.
 
 ::: tip
 All components are completely unstyled — the classes above are just an example using Tailwind CSS. Adjust the `inset` value based on your ring's `inner-radius` to fit the triangle snugly inside.

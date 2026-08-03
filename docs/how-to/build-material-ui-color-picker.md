@@ -6,13 +6,6 @@ Let's build a Material-style color picker with a color area, hue slider, alpha s
 import MaterialColorPickerGuide from './demo/vue/MaterialColorPickerGuide.vue'
 </script>
 
-::: info No React walkthrough yet
-This recipe is written against `@urcolor/vue`, `@urcolor/svelte` and `@urcolor/angular`.
-The React package ships the same primitives — compose `ColorArea`, `ColorSlider` and
-`ColorField` the same way — but a step-by-step React version of this particular
-composition isn't written yet.
-:::
-
 Here's what we'll end up with:
 
 <MaterialColorPickerGuide />
@@ -24,6 +17,7 @@ Here's what we'll end up with:
 ::: code-group
 
 <<< @/how-to/demo/vue/MaterialColorPickerGuide.vue [Vue]
+<<< @/how-to/demo/react/MaterialColorPickerGuide.tsx [React]
 <<< @/how-to/demo/svelte/MaterialColorPickerGuide.svelte [Svelte]
 <<< @/how-to/demo/angular/material-color-picker-guide.ts [Angular]
 
@@ -43,6 +37,14 @@ import { useColor } from "@urcolor/vue";  // [!code ++]
 
 const { color } = useColor("hsl(210, 80%, 50%)");  // [!code ++]
 </script>
+```
+
+```tsx [React]
+import { useColor } from "@urcolor/react"; // [!code ++]
+
+function MaterialColorPicker() {
+  const { color, setColor } = useColor("hsl(210, 80%, 50%)"); // [!code ++]
+}
 ```
 
 ```svelte [Svelte]
@@ -115,6 +117,38 @@ const { color } = useColor("hsl(210, 80%, 50%)");
     </ColorAreaRoot>
   </div>
 </template>
+```
+
+```tsx [React]
+import { useColor, ColorArea } from "@urcolor/react"; // [!code ++]
+
+function MaterialColorPicker() {
+  const { color, setColor } = useColor("hsl(210, 80%, 50%)");
+
+  return (
+    // [!code ++:20]
+    <div className="flex w-full max-w-xs flex-col gap-3 rounded-xl p-3">
+      <ColorArea.Root
+        value={color}
+        onValueChange={setColor}
+        colorSpace="hsv"
+        channelX="s"
+        channelY="v"
+        yInverted
+        className="relative block h-[180px] w-full cursor-crosshair touch-none overflow-clip rounded-lg"
+      >
+        <ColorArea.Gradient className="absolute inset-0" />
+        <ColorArea.Thumb
+          className="
+            absolute size-5 rounded-full border-2 border-white
+            shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_2px_4px_rgba(0,0,0,0.3)]
+            focus-visible:shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_0_0_3px_rgba(66,153,225,0.6)]
+          "
+        />
+      </ColorArea.Root>
+    </div>
+  );
+}
 ```
 
 ```svelte [Svelte]
@@ -190,7 +224,7 @@ Vue's `v-model` and Angular's `[(value)]` are true two-way bindings. React is on
 
 Angular ships every part of a family as a `COLOR_*_DIRECTIVES` array, so one entry in `imports` brings in the whole set. This recipe composes three families, so it ends up with three entries.
 
-Two structural differences are worth calling out. Vue nests the gradient and thumb inside a `ColorAreaArea` element; Svelte and Angular have no `Area` part — `Gradient` and `Thumb` are direct children of `Root`. And the axis props are named `x-channel` / `y-channel` / `:y-inverted` in Vue but `channelX` / `channelY` / `yInverted` in Svelte and Angular. In Angular the gradient's selector is `canvas[urcColorAreaGradient]`, so it goes on a `<canvas>` element you own; Vue and Svelte render their own canvas for you. The thumb positions itself in all three, so you never set `top`/`left` yourself.
+Two structural differences are worth calling out. Vue nests the gradient and thumb inside a `ColorAreaArea` element; React, Svelte and Angular have no `Area` part — `Gradient` and `Thumb` are direct children of `Root`. And the axis props are named `x-channel` / `y-channel` / `:y-inverted` in Vue but `channelX` / `channelY` / `yInverted` in React, Svelte and Angular. In Angular the gradient's selector is `canvas[urcColorAreaGradient]`, so it goes on a `<canvas>` element you own; Vue, React and Svelte render their own canvas for you. The thumb positions itself in all four, so you never set `top`/`left` yourself.
 
 ## Step 3: Add the hue slider
 
@@ -262,6 +296,62 @@ const { color } = useColor("hsl(210, 80%, 50%)");
     </ColorSliderRoot>
   </div>
 </template>
+```
+
+```tsx [React]
+import { useColor, ColorArea, ColorSlider } from "@urcolor/react"; // [!code ++]
+
+function MaterialColorPicker() {
+  const { color, setColor } = useColor("hsl(210, 80%, 50%)");
+
+  return (
+    <div className="flex w-full max-w-xs flex-col gap-3 rounded-xl p-3">
+      <ColorArea.Root
+        value={color}
+        onValueChange={setColor}
+        colorSpace="hsv"
+        channelX="s"
+        channelY="v"
+        yInverted
+        className="relative block h-[180px] w-full cursor-crosshair touch-none overflow-clip rounded-lg"
+      >
+        <ColorArea.Gradient className="absolute inset-0" />
+        <ColorArea.Thumb
+          className="
+            absolute size-5 rounded-full border-2 border-white
+            shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_2px_4px_rgba(0,0,0,0.3)]
+            focus-visible:shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_0_0_3px_rgba(66,153,225,0.6)]
+          "
+        />
+      </ColorArea.Root>
+
+      {/* [!code ++:23] */}
+      <ColorSlider.Root
+        value={color}
+        onValueChange={setColor}
+        colorSpace="hsv"
+        channel="h"
+      >
+        <ColorSlider.Control>
+          <ColorSlider.Track className="relative h-4 overflow-hidden rounded-full">
+            <ColorSlider.Gradient
+              className="absolute inset-0 rounded-full"
+              colors={["red", "yellow", "lime", "cyan", "blue", "magenta", "red"]}
+            />
+            <ColorSlider.Thumb
+              className="
+                block size-4 rounded-full border-2 border-white
+                shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_2px_4px_rgba(0,0,0,0.3)]
+                focus-visible:shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_0_0_3px_rgba(66,153,225,0.6)]
+              "
+              aria-label="Hue"
+            />
+          </ColorSlider.Track>
+        </ColorSlider.Control>
+      </ColorSlider.Root>
+    </div>
+  );
+}
 ```
 
 ```svelte [Svelte]
@@ -373,7 +463,7 @@ export class MaterialColorPicker {
 
 :::
 
-The slider binds to the same color as the area, so dragging either one updates the other. Vue and Svelte go straight from the slider root to the track; React would wrap them in a `ColorSlider.Control`, and Angular puts the gradient on a `<canvas>` because its selector is `canvas[urcColorSliderGradient]`.
+The slider binds to the same color as the area, so dragging either one updates the other. Vue, Svelte and Angular go straight from the slider root to the track; React wraps the track in a `ColorSlider.Control`, which Base UI's slider requires. Angular puts the gradient on a `<canvas>` because its selector is `canvas[urcColorSliderGradient]`.
 
 ## Step 4: Add the alpha slider
 
@@ -422,6 +512,42 @@ const { color } = useColor("hsl(210, 80%, 50%)");
     </ColorSliderRoot>
   </div>
 </template>
+```
+
+```tsx [React]
+import { useColor, ColorArea, ColorSlider } from "@urcolor/react";
+
+function MaterialColorPicker() {
+  const { color, setColor } = useColor("hsl(210, 80%, 50%)");
+
+  return (
+    <div className="flex w-full max-w-xs flex-col gap-3 rounded-xl p-3">
+      {/* ...color area and hue slider... */}
+
+      {/* [!code ++:20] */}
+      <ColorSlider.Root
+        value={color}
+        onValueChange={setColor}
+        colorSpace="hsv"
+        channel="alpha"
+      >
+        <ColorSlider.Control>
+          <ColorSlider.Track className="relative h-4 overflow-hidden rounded-full">
+            <ColorSlider.Gradient className="absolute inset-0 rounded-full" />
+            <ColorSlider.Thumb
+              className="
+                block size-4 rounded-full border-2 border-white
+                shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_2px_4px_rgba(0,0,0,0.3)]
+                focus-visible:shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_0_0_3px_rgba(66,153,225,0.6)]
+              "
+              aria-label="Alpha"
+            />
+          </ColorSlider.Track>
+        </ColorSlider.Control>
+      </ColorSlider.Root>
+    </div>
+  );
+}
 ```
 
 ```svelte [Svelte]
@@ -492,7 +618,7 @@ export class MaterialColorPicker {
 
 :::
 
-`ColorSliderGradient` renders the checkerboard behind the canvas itself, so transparency is visible with no extra element. That holds in Vue, Svelte and Angular alike — none of the packages ship a `Checkerboard` part, because the gradient already paints one. Dropping the `colors` prop is what makes the gradient derive its stops from the channel, which for `alpha` means fully transparent to fully opaque in the current color.
+`ColorSliderGradient` renders the checkerboard behind the canvas itself, so transparency is visible with no extra element. That holds in Vue, React, Svelte and Angular alike — none of them need a separate `Checkerboard` part, because the gradient already paints one. Dropping the `colors` prop is what makes the gradient derive its stops from the channel, which for `alpha` means fully transparent to fully opaque in the current color.
 
 ## Step 5: Add color field inputs
 
@@ -565,6 +691,58 @@ const channels = computed(() => colorSpaces["hsl"]?.channels ?? []); // [!code +
     </div>
   </div>
 </template>
+```
+
+```tsx [React]
+import { colorSpaces } from "@urcolor/core"; // [!code ++]
+import { useColor, ColorArea, ColorField, ColorSlider } from "@urcolor/react"; // [!code ++]
+
+function MaterialColorPicker() {
+  const { color, setColor } = useColor("hsl(210, 80%, 50%)");
+  const channels = colorSpaces["hsl"]?.channels ?? []; // [!code ++]
+
+  return (
+    <div className="flex w-full max-w-xs flex-col gap-3 rounded-xl p-3">
+      {/* ...color area, hue slider, alpha slider... */}
+
+      {/* [!code ++:34] */}
+      <div className="flex flex-1 flex-wrap gap-2">
+        {channels.map((ch) => (
+          <div key={ch.key} className="flex min-w-[60px] flex-1 flex-col gap-1">
+            <label
+              htmlFor={`material-field-${ch.key}`}
+              className="text-xs font-semibold"
+            >
+              {ch.label}
+            </label>
+            <ColorField.Root
+              value={color}
+              onValueChange={setColor}
+              colorSpace="hsl"
+              channel={ch.key}
+              className="flex items-center overflow-hidden rounded-md border"
+            >
+              <ColorField.Decrement
+                className="flex size-7 shrink-0 cursor-pointer items-center justify-center"
+              >
+                &minus;
+              </ColorField.Decrement>
+              <ColorField.Input
+                id={`material-field-${ch.key}`}
+                className="w-0 min-w-0 flex-1 border-none bg-transparent px-0.5 py-1 text-center font-mono text-sm outline-none"
+              />
+              <ColorField.Increment
+                className="flex size-7 shrink-0 cursor-pointer items-center justify-center"
+              >
+                +
+              </ColorField.Increment>
+            </ColorField.Root>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 ```
 
 ```svelte [Svelte]
@@ -679,9 +857,9 @@ export class MaterialColorPicker {
 
 :::
 
-The `colorSpaces["hsl"].channels` array gives us channel metadata (key and label) so we can dynamically render a field for each HSL channel. Vue wraps that list in a `computed`, Svelte reads it once at module scope because `colorSpaces` never changes, and Angular keeps it as a plain readonly field on the component.
+The `colorSpaces["hsl"].channels` array gives us channel metadata (key and label) so we can dynamically render a field for each HSL channel. Vue wraps that list in a `computed`, React reads it straight in the component body (no `useMemo` needed — `colorSpaces` is a static import), Svelte reads it once at module scope because `colorSpaces` never changes, and Angular keeps it as a plain readonly field on the component.
 
-Angular's field parts are element-scoped: the selectors are `input[urcColorFieldInput]`, `button[urcColorFieldIncrement]` and `button[urcColorFieldDecrement]`, so you write the `<input>` and the two `<button type="button">` elements yourself. Vue and Svelte render those elements for you.
+Angular's field parts are element-scoped: the selectors are `input[urcColorFieldInput]`, `button[urcColorFieldIncrement]` and `button[urcColorFieldDecrement]`, so you write the `<input>` and the two `<button type="button">` elements yourself. Vue, React and Svelte render those elements for you.
 
 ::: tip
 All components are completely unstyled — the classes above are just an example using Tailwind CSS. You can style the card, inputs, and sliders however you like.
