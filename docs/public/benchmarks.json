@@ -1,0 +1,1412 @@
+{
+  "context": {
+    "cpu": "Apple M1",
+    "runtime": "bun 1.3.0"
+  },
+  "versions": {
+    "@urcolor/core": "0.0.4",
+    "@ctrl/tinycolor": "^4.2.0",
+    "@types/chroma-js": "^3.1.2",
+    "@types/culori": "^4.0.1",
+    "@types/tinycolor2": "^1.4.6",
+    "chroma-js": "^3.2.0",
+    "colord": "^2.9.3",
+    "colorjs.io": "^0.7.1",
+    "culori": "^4.0.2",
+    "mitata": "^1.0.34",
+    "tinycolor2": "^1.6.0"
+  },
+  "groups": [
+    {
+      "title": "parse · hex",
+      "rows": [
+        {
+          "label": "urcolor  Color.parse",
+          "avg": 137.0435312751408
+        },
+        {
+          "label": "urcolor  parse (fn)",
+          "avg": 136.6008940989625
+        },
+        {
+          "label": "culori   parse",
+          "avg": 141.8031104450718
+        },
+        {
+          "label": "colord",
+          "avg": 138.49096838220373
+        },
+        {
+          "label": "chroma-js",
+          "avg": 329.78127365703733
+        },
+        {
+          "label": "tinycolor2",
+          "avg": 362.2666635086287
+        },
+        {
+          "label": "@ctrl/tinycolor",
+          "avg": 392.56122042944804
+        },
+        {
+          "label": "colorjs.io",
+          "avg": 4522.376691385479
+        }
+      ]
+    },
+    {
+      "title": "parse · hex + alpha (#rrggbbaa)",
+      "rows": [
+        {
+          "label": "urcolor",
+          "avg": 167.40650590354596
+        },
+        {
+          "label": "culori",
+          "avg": 157.39922510901164
+        },
+        {
+          "label": "colord",
+          "avg": 183.42554606383158
+        },
+        {
+          "label": "chroma-js",
+          "avg": 452.73469511382496
+        },
+        {
+          "label": "tinycolor2",
+          "avg": 383.4107792484868
+        },
+        {
+          "label": "@ctrl/tinycolor",
+          "avg": 315.87501460280373
+        },
+        {
+          "label": "colorjs.io",
+          "avg": 4419.3702357700895
+        }
+      ]
+    },
+    {
+      "title": "parse · rgb() modern syntax",
+      "rows": [
+        {
+          "label": "urcolor",
+          "avg": 551.2667503628041
+        },
+        {
+          "label": "culori",
+          "avg": 680.9632482960391
+        },
+        {
+          "label": "colord",
+          "avg": 225.28651756780465
+        },
+        {
+          "label": "chroma-js",
+          "avg": 2504.1400282592963
+        },
+        {
+          "label": "colorjs.io",
+          "avg": 8397.220128266936
+        }
+      ]
+    },
+    {
+      "title": "parse · rgba() legacy syntax",
+      "rows": [
+        {
+          "label": "urcolor",
+          "avg": 666.8444669821516
+        },
+        {
+          "label": "culori",
+          "avg": 435.31669170673075
+        },
+        {
+          "label": "colord",
+          "avg": 229.1036522782089
+        },
+        {
+          "label": "tinycolor2",
+          "avg": 430.37668302511867
+        },
+        {
+          "label": "@ctrl/tinycolor",
+          "avg": 383.3293325063345
+        },
+        {
+          "label": "colorjs.io",
+          "avg": 8132.969884535845
+        }
+      ]
+    },
+    {
+      "title": "parse · hsl()",
+      "rows": [
+        {
+          "label": "urcolor",
+          "avg": 545.1008183028537
+        },
+        {
+          "label": "culori",
+          "avg": 799.8455365077015
+        },
+        {
+          "label": "colord",
+          "avg": 360.2246848930747
+        },
+        {
+          "label": "chroma-js",
+          "avg": 2560.3987432374647
+        },
+        {
+          "label": "tinycolor2",
+          "avg": 728.3688680714574
+        },
+        {
+          "label": "@ctrl/tinycolor",
+          "avg": 969.3615217537715
+        },
+        {
+          "label": "colorjs.io",
+          "avg": 4553.443165498621
+        }
+      ]
+    },
+    {
+      "title": "parse · named color",
+      "rows": [
+        {
+          "label": "urcolor",
+          "avg": 64.61651836011622
+        },
+        {
+          "label": "culori",
+          "avg": 228.24642275233958
+        },
+        {
+          "label": "colord",
+          "avg": 99.00823861319061
+        },
+        {
+          "label": "chroma-js",
+          "avg": 198.61762547520738
+        },
+        {
+          "label": "tinycolor2",
+          "avg": 402.26183360575504
+        },
+        {
+          "label": "@ctrl/tinycolor",
+          "avg": 539.9892966883957
+        },
+        {
+          "label": "colorjs.io",
+          "avg": 4169.993065086571
+        }
+      ]
+    },
+    {
+      "title": "parse · oklch() [CSS Color 4]",
+      "rows": [
+        {
+          "label": "urcolor",
+          "avg": 535.2991093502769
+        },
+        {
+          "label": "culori",
+          "avg": 903.7686173546123
+        },
+        {
+          "label": "colorjs.io",
+          "avg": 6365.40753903519
+        }
+      ]
+    },
+    {
+      "title": "parse · lab() [CSS Color 4]",
+      "rows": [
+        {
+          "label": "urcolor",
+          "avg": 499.642735123986
+        },
+        {
+          "label": "culori",
+          "avg": 893.3546025702294
+        },
+        {
+          "label": "colorjs.io",
+          "avg": 5677.712045522837
+        }
+      ]
+    },
+    {
+      "title": "parse · color(display-p3 …) [CSS Color 4]",
+      "rows": [
+        {
+          "label": "urcolor",
+          "avg": 649.8658112632722
+        },
+        {
+          "label": "culori",
+          "avg": 1049.4024276733398
+        },
+        {
+          "label": "colorjs.io",
+          "avg": 8337.51235961914
+        }
+      ]
+    },
+    {
+      "title": "parse · invalid input (rejection)",
+      "rows": [
+        {
+          "label": "urcolor  tryParse",
+          "avg": 47.74293247885487
+        },
+        {
+          "label": "culori   parse",
+          "avg": 260.8370697301462
+        },
+        {
+          "label": "colord   .isValid()",
+          "avg": 92.48613408144965
+        },
+        {
+          "label": "tinycolor2",
+          "avg": 191.07237921060468
+        },
+        {
+          "label": "@ctrl/tinycolor",
+          "avg": 184.57220022073278
+        }
+      ]
+    },
+    {
+      "title": "convert · sRGB → HSL",
+      "rows": [
+        {
+          "label": "urcolor  .to()",
+          "avg": 49.53491738423814
+        },
+        {
+          "label": "urcolor  convert (fn)",
+          "avg": 31.62163132449162
+        },
+        {
+          "label": "culori",
+          "avg": 16.72242996261551
+        },
+        {
+          "label": "colord",
+          "avg": 38.64676013775467
+        },
+        {
+          "label": "chroma-js",
+          "avg": 84.42708172184406
+        },
+        {
+          "label": "tinycolor2",
+          "avg": 57.41288204797602
+        },
+        {
+          "label": "@ctrl/tinycolor",
+          "avg": 276.81643196983896
+        },
+        {
+          "label": "colorjs.io",
+          "avg": 883.1003790604441
+        }
+      ]
+    },
+    {
+      "title": "convert · sRGB → Oklch",
+      "rows": [
+        {
+          "label": "urcolor  .to()",
+          "avg": 169.81834601407027
+        },
+        {
+          "label": "urcolor  convert (fn)",
+          "avg": 145.01439269086904
+        },
+        {
+          "label": "culori",
+          "avg": 153.17433282826514
+        },
+        {
+          "label": "chroma-js",
+          "avg": 885.6587006441177
+        },
+        {
+          "label": "colorjs.io",
+          "avg": 1078.0778147051412
+        }
+      ]
+    },
+    {
+      "title": "convert · sRGB → Oklab",
+      "rows": [
+        {
+          "label": "urcolor",
+          "avg": 126.46353798676103
+        },
+        {
+          "label": "culori",
+          "avg": 96.2389970290493
+        },
+        {
+          "label": "chroma-js",
+          "avg": 785.9189003998379
+        },
+        {
+          "label": "colorjs.io",
+          "avg": 964.7800924366918
+        }
+      ]
+    },
+    {
+      "title": "convert · sRGB → CIE Lab",
+      "rows": [
+        {
+          "label": "urcolor",
+          "avg": 125.42081490627294
+        },
+        {
+          "label": "culori",
+          "avg": 95.22079688915308
+        },
+        {
+          "label": "colord",
+          "avg": 124.81493980006168
+        },
+        {
+          "label": "chroma-js",
+          "avg": 182.79444692476915
+        },
+        {
+          "label": "colorjs.io",
+          "avg": 1069.2351727333798
+        }
+      ]
+    },
+    {
+      "title": "convert · sRGB → XYZ D65",
+      "rows": [
+        {
+          "label": "urcolor",
+          "avg": 87.16642385605529
+        },
+        {
+          "label": "culori",
+          "avg": 61.18700111537038
+        },
+        {
+          "label": "colorjs.io",
+          "avg": 932.0867994108253
+        }
+      ]
+    },
+    {
+      "title": "convert · Oklch → sRGB",
+      "rows": [
+        {
+          "label": "urcolor",
+          "avg": 164.86023503547705
+        },
+        {
+          "label": "culori",
+          "avg": 100.61207537381154
+        },
+        {
+          "label": "chroma-js",
+          "avg": 919.7149698446085
+        },
+        {
+          "label": "colorjs.io",
+          "avg": 1062.8280369239517
+        }
+      ]
+    },
+    {
+      "title": "convert · sRGB → Display P3",
+      "rows": [
+        {
+          "label": "urcolor",
+          "avg": 146.59251720650522
+        },
+        {
+          "label": "culori",
+          "avg": 138.02502431553924
+        },
+        {
+          "label": "colorjs.io",
+          "avg": 1053.0266996684827
+        }
+      ]
+    },
+    {
+      "title": "convert · sRGB → Rec. 2020",
+      "rows": [
+        {
+          "label": "urcolor",
+          "avg": 151.79337456307096
+        },
+        {
+          "label": "culori",
+          "avg": 143.7404240107677
+        },
+        {
+          "label": "colorjs.io",
+          "avg": 1062.3853327111353
+        }
+      ]
+    },
+    {
+      "title": "convert · chain sRGB → Oklch → Lab → sRGB",
+      "rows": [
+        {
+          "label": "urcolor",
+          "avg": 419.02742192310654
+        },
+        {
+          "label": "culori",
+          "avg": 448.5838014322917
+        },
+        {
+          "label": "colorjs.io",
+          "avg": 3748.1214773995534
+        }
+      ]
+    },
+    {
+      "title": "gamut · map into sRGB",
+      "rows": [
+        {
+          "label": "urcolor  .toGamut()",
+          "avg": 208.70363997475815
+        },
+        {
+          "label": "culori   clampChroma",
+          "avg": 115.75759798728814
+        },
+        {
+          "label": "colorjs.io .toGamut()",
+          "avg": 1747.4653335437918
+        }
+      ]
+    },
+    {
+      "title": "gamut · inGamut check",
+      "rows": [
+        {
+          "label": "urcolor",
+          "avg": 193.66021970993543
+        },
+        {
+          "label": "culori",
+          "avg": 109.53663864429556
+        },
+        {
+          "label": "colorjs.io",
+          "avg": 696.8426076630016
+        }
+      ]
+    },
+    {
+      "title": "mix · sRGB, 50%",
+      "rows": [
+        {
+          "label": "urcolor  .mix()",
+          "avg": 135.06745599660488
+        },
+        {
+          "label": "urcolor  mix (fn)",
+          "avg": 90.85008113741176
+        },
+        {
+          "label": "culori",
+          "avg": 619.7568237571793
+        },
+        {
+          "label": "colord",
+          "avg": 468.63565451268994
+        },
+        {
+          "label": "chroma-js",
+          "avg": 346.81693887515945
+        },
+        {
+          "label": "tinycolor2",
+          "avg": 1065.3907385176155
+        },
+        {
+          "label": "@ctrl/tinycolor",
+          "avg": 905.4436245169691
+        },
+        {
+          "label": "colorjs.io",
+          "avg": 3024.305708028198
+        }
+      ]
+    },
+    {
+      "title": "mix · Oklab, 50%",
+      "rows": [
+        {
+          "label": "urcolor  .mix()",
+          "avg": 335.1629043970353
+        },
+        {
+          "label": "urcolor  mix (fn)",
+          "avg": 283.28923583984374
+        },
+        {
+          "label": "culori",
+          "avg": 669.4066137984807
+        },
+        {
+          "label": "chroma-js",
+          "avg": 3470.850623089334
+        },
+        {
+          "label": "colorjs.io",
+          "avg": 2891.800288609096
+        }
+      ]
+    },
+    {
+      "title": "mix · Oklch (shorter hue arc), 50%",
+      "rows": [
+        {
+          "label": "urcolor",
+          "avg": 436.16711551626935
+        },
+        {
+          "label": "culori",
+          "avg": 845.8389518392745
+        },
+        {
+          "label": "chroma-js",
+          "avg": 3657.572884493096
+        },
+        {
+          "label": "colorjs.io",
+          "avg": 6969.705257506615
+        }
+      ]
+    },
+    {
+      "title": "mix · CIE Lab, 50%",
+      "rows": [
+        {
+          "label": "urcolor",
+          "avg": 333.9026300996132
+        },
+        {
+          "label": "culori",
+          "avg": 717.1055155003324
+        },
+        {
+          "label": "chroma-js",
+          "avg": 813.6955896644777
+        },
+        {
+          "label": "colorjs.io",
+          "avg": 3129.447414024203
+        }
+      ]
+    },
+    {
+      "title": "gradient · 64 Oklab samples (interpolator reused)",
+      "rows": [
+        {
+          "label": "urcolor",
+          "avg": 2613.1358558391703
+        },
+        {
+          "label": "culori",
+          "avg": 9880.031032354756
+        },
+        {
+          "label": "chroma-js",
+          "avg": 265637.52415644174
+        },
+        {
+          "label": "colorjs.io",
+          "avg": 47883.49954819277
+        }
+      ]
+    },
+    {
+      "title": "gradient · 64 Oklab samples (mix per sample)",
+      "rows": [
+        {
+          "label": "urcolor",
+          "avg": 17658.414443739483
+        },
+        {
+          "label": "culori",
+          "avg": 47470.78788248698
+        },
+        {
+          "label": "chroma-js",
+          "avg": 250445.1206647399
+        },
+        {
+          "label": "colorjs.io",
+          "avg": 199759.38344545188
+        }
+      ]
+    },
+    {
+      "title": "palette · 11 stops from two anchors",
+      "rows": [
+        {
+          "label": "urcolor",
+          "avg": 3443.5950874660325
+        },
+        {
+          "label": "culori",
+          "avg": 4063.1010035464637
+        },
+        {
+          "label": "chroma-js",
+          "avg": 41267.28474934896
+        },
+        {
+          "label": "colorjs.io",
+          "avg": 50301.87194676621
+        }
+      ]
+    },
+    {
+      "title": "manipulate · lighten (perceptual: urcolor/chroma-js; HSL: rest)",
+      "rows": [
+        {
+          "label": "urcolor  .lighten()",
+          "avg": 789.5787601999559
+        },
+        {
+          "label": "urcolor  lighten (fn)",
+          "avg": 394.47743918678975
+        },
+        {
+          "label": "colord   .lighten()",
+          "avg": 322.77264964918226
+        },
+        {
+          "label": "chroma-js .brighten()",
+          "avg": 855.5634327389758
+        },
+        {
+          "label": "tinycolor2",
+          "avg": 2804.0062452147545
+        },
+        {
+          "label": "@ctrl/tinycolor",
+          "avg": 4238.146862610351
+        }
+      ]
+    },
+    {
+      "title": "manipulate · darken",
+      "rows": [
+        {
+          "label": "urcolor",
+          "avg": 478.8165084484012
+        },
+        {
+          "label": "colord",
+          "avg": 438.5992538379956
+        },
+        {
+          "label": "chroma-js",
+          "avg": 508.2497353310342
+        },
+        {
+          "label": "tinycolor2",
+          "avg": 2053.426640625
+        },
+        {
+          "label": "@ctrl/tinycolor",
+          "avg": 2084.6569292117388
+        }
+      ]
+    },
+    {
+      "title": "manipulate · saturate",
+      "rows": [
+        {
+          "label": "urcolor",
+          "avg": 419.6061191704437
+        },
+        {
+          "label": "colord",
+          "avg": 140.53577334411068
+        },
+        {
+          "label": "chroma-js",
+          "avg": 952.8755795362023
+        },
+        {
+          "label": "tinycolor2",
+          "avg": 1690.4829350685586
+        },
+        {
+          "label": "@ctrl/tinycolor",
+          "avg": 1844.237611920646
+        }
+      ]
+    },
+    {
+      "title": "manipulate · rotate hue 60°",
+      "rows": [
+        {
+          "label": "urcolor",
+          "avg": 382.3168083639706
+        },
+        {
+          "label": "colord",
+          "avg": 159.9509648364212
+        },
+        {
+          "label": "tinycolor2",
+          "avg": 1679.9768608940972
+        },
+        {
+          "label": "@ctrl/tinycolor",
+          "avg": 1920.0027774586397
+        }
+      ]
+    },
+    {
+      "title": "channel · set lightness in Oklch",
+      "rows": [
+        {
+          "label": "urcolor  .with()",
+          "avg": 210.90842846224768
+        },
+        {
+          "label": "colorjs.io .set()",
+          "avg": 2228.3931299497003
+        }
+      ]
+    },
+    {
+      "title": "channel · read one channel",
+      "rows": [
+        {
+          "label": "urcolor  .get()",
+          "avg": 7.966578832331376
+        },
+        {
+          "label": "colord",
+          "avg": 22.210893656588546
+        },
+        {
+          "label": "chroma-js",
+          "avg": 104.23808008656964
+        },
+        {
+          "label": "colorjs.io",
+          "avg": 773.6941493169176
+        }
+      ]
+    },
+    {
+      "title": "alpha · set opacity",
+      "rows": [
+        {
+          "label": "urcolor  .withAlpha()",
+          "avg": 37.198824921717026
+        },
+        {
+          "label": "colord   .alpha()",
+          "avg": 89.61433811167474
+        },
+        {
+          "label": "chroma-js .alpha()",
+          "avg": 219.62781764382333
+        },
+        {
+          "label": "tinycolor2",
+          "avg": 687.624513968894
+        },
+        {
+          "label": "@ctrl/tinycolor",
+          "avg": 995.2296811034367
+        }
+      ]
+    },
+    {
+      "title": "deltaE · CIEDE2000",
+      "rows": [
+        {
+          "label": "urcolor  .deltaE()",
+          "avg": 456.10426642305106
+        },
+        {
+          "label": "urcolor  deltaE (fn)",
+          "avg": 545.276154162837
+        },
+        {
+          "label": "culori",
+          "avg": 436.7779891139777
+        },
+        {
+          "label": "colord   .delta()",
+          "avg": 625.3962783529856
+        },
+        {
+          "label": "chroma-js",
+          "avg": 698.138096473029
+        },
+        {
+          "label": "colorjs.io",
+          "avg": 1887.8688151041667
+        }
+      ]
+    },
+    {
+      "title": "deltaE · CIE76 (Euclidean Lab)",
+      "rows": [
+        {
+          "label": "urcolor",
+          "avg": 269.6814023250598
+        },
+        {
+          "label": "culori",
+          "avg": 304.95424463415657
+        },
+        {
+          "label": "colorjs.io",
+          "avg": 1195.6250122070312
+        }
+      ]
+    },
+    {
+      "title": "deltaE · ΔEOK (Oklab Euclidean)",
+      "rows": [
+        {
+          "label": "urcolor",
+          "avg": 270.5510786506021
+        },
+        {
+          "label": "culori",
+          "avg": 324.31165855349474
+        },
+        {
+          "label": "colorjs.io",
+          "avg": 1510.7486045907397
+        }
+      ]
+    },
+    {
+      "title": "contrast · WCAG 2.1 ratio",
+      "rows": [
+        {
+          "label": "urcolor  .contrast()",
+          "avg": 174.69975721431783
+        },
+        {
+          "label": "urcolor  contrast (fn)",
+          "avg": 151.6909043932175
+        },
+        {
+          "label": "culori",
+          "avg": 154.73210579810743
+        },
+        {
+          "label": "colord",
+          "avg": 280.9286903869423
+        },
+        {
+          "label": "chroma-js",
+          "avg": 280.4025322166649
+        },
+        {
+          "label": "tinycolor2",
+          "avg": 1199.3526750284668
+        },
+        {
+          "label": "@ctrl/tinycolor",
+          "avg": 1205.6072608837183
+        },
+        {
+          "label": "colorjs.io",
+          "avg": 3660.759347098214
+        }
+      ]
+    },
+    {
+      "title": "contrast · APCA",
+      "rows": [
+        {
+          "label": "urcolor",
+          "avg": 285.46683305938564
+        },
+        {
+          "label": "colorjs.io",
+          "avg": 2334.3295778971606
+        }
+      ]
+    },
+    {
+      "title": "relative luminance",
+      "rows": [
+        {
+          "label": "urcolor",
+          "avg": 91.4281338778409
+        },
+        {
+          "label": "culori",
+          "avg": 83.07694676654637
+        },
+        {
+          "label": "chroma-js",
+          "avg": 109.22827651496097
+        },
+        {
+          "label": "colord",
+          "avg": 64.42200847961982
+        }
+      ]
+    },
+    {
+      "title": "equality · same color, different space",
+      "rows": [
+        {
+          "label": "urcolor  .equals()",
+          "avg": 471.68840467269496
+        },
+        {
+          "label": "colord   .isEqual()",
+          "avg": 437.1023572154881
+        },
+        {
+          "label": "chroma-js hex compare",
+          "avg": 409.294532665308
+        }
+      ]
+    },
+    {
+      "title": "serialize · → hex",
+      "rows": [
+        {
+          "label": "urcolor  .toString()",
+          "avg": 68.08884606943462
+        },
+        {
+          "label": "urcolor  serialize (fn)",
+          "avg": 44.39105738049175
+        },
+        {
+          "label": "culori   formatHex",
+          "avg": 66.11573569611964
+        },
+        {
+          "label": "colord   .toHex()",
+          "avg": 97.14215322237644
+        },
+        {
+          "label": "chroma-js .hex()",
+          "avg": 163.8376891794988
+        },
+        {
+          "label": "tinycolor2",
+          "avg": 133.86197604416466
+        },
+        {
+          "label": "@ctrl/tinycolor",
+          "avg": 121.26200708999689
+        },
+        {
+          "label": "colorjs.io",
+          "avg": 625.4715679773985
+        }
+      ]
+    },
+    {
+      "title": "serialize · → rgb()",
+      "rows": [
+        {
+          "label": "urcolor",
+          "avg": 53.07485596468456
+        },
+        {
+          "label": "culori",
+          "avg": 46.83723118732185
+        },
+        {
+          "label": "colord",
+          "avg": 56.24771041844677
+        },
+        {
+          "label": "chroma-js",
+          "avg": 304.67094648434545
+        },
+        {
+          "label": "tinycolor2",
+          "avg": 12.781168455782256
+        },
+        {
+          "label": "@ctrl/tinycolor",
+          "avg": 12.772516107867599
+        },
+        {
+          "label": "colorjs.io",
+          "avg": 755.461916242327
+        }
+      ]
+    },
+    {
+      "title": "serialize · → hsl()",
+      "rows": [
+        {
+          "label": "urcolor",
+          "avg": 118.93349983667247
+        },
+        {
+          "label": "culori",
+          "avg": 120.85475413724991
+        },
+        {
+          "label": "colord",
+          "avg": 62.85846790469393
+        },
+        {
+          "label": "tinycolor2",
+          "avg": 101.60325826376354
+        },
+        {
+          "label": "@ctrl/tinycolor",
+          "avg": 428.8161240209399
+        },
+        {
+          "label": "colorjs.io",
+          "avg": 3005.809791708051
+        }
+      ]
+    },
+    {
+      "title": "serialize · → oklch()",
+      "rows": [
+        {
+          "label": "urcolor",
+          "avg": 62.483194141784125
+        },
+        {
+          "label": "culori",
+          "avg": 69.46581188403023
+        },
+        {
+          "label": "colorjs.io",
+          "avg": 2170.365524088542
+        }
+      ]
+    },
+    {
+      "title": "serialize · sRGB color → oklch() string (convert + print)",
+      "rows": [
+        {
+          "label": "urcolor",
+          "avg": 233.27400134059062
+        },
+        {
+          "label": "culori",
+          "avg": 200.68734586646053
+        },
+        {
+          "label": "colorjs.io",
+          "avg": 2439.853668668377
+        }
+      ]
+    },
+    {
+      "title": "canvas · 512px linear track, Oklab → RGBA bytes",
+      "rows": [
+        {
+          "label": "urcolor  interpolateStops",
+          "avg": 121077.04685289957
+        },
+        {
+          "label": "culori   (hand-rolled)",
+          "avg": 118245.09058280636
+        },
+        {
+          "label": "chroma-js (hand-rolled)",
+          "avg": 2016398.1782477342
+        },
+        {
+          "label": "colorjs.io (hand-rolled)",
+          "avg": 989708.0557939914
+        }
+      ]
+    },
+    {
+      "title": "canvas · 128×128 bilinear plane, Oklab → RGBA bytes",
+      "rows": [
+        {
+          "label": "urcolor  sampleBilinearGrid",
+          "avg": 4370334.6751592355
+        },
+        {
+          "label": "culori   (hand-rolled)",
+          "avg": 35315070.375
+        },
+        {
+          "label": "colorjs.io (hand-rolled)",
+          "avg": 169455961.75
+        }
+      ]
+    },
+    {
+      "title": "canvas · 128×128 HSV S/V plane → RGBA bytes",
+      "rows": [
+        {
+          "label": "urcolor  sampleChannelGrid",
+          "avg": 2215598.717948718
+        },
+        {
+          "label": "culori   (hand-rolled)",
+          "avg": 1226166.446017699
+        },
+        {
+          "label": "colorjs.io (hand-rolled)",
+          "avg": 31023153.684210528
+        }
+      ]
+    },
+    {
+      "title": "canvas · 128×128 Oklch polar wheel → RGBA bytes",
+      "rows": [
+        {
+          "label": "urcolor  samplePolarGrid",
+          "avg": 4117780.5636363635
+        },
+        {
+          "label": "culori   (hand-rolled)",
+          "avg": 3159173.729357798
+        }
+      ]
+    },
+    {
+      "title": "canvas · 128×128 conic hue ring → RGBA bytes",
+      "rows": [
+        {
+          "label": "urcolor  sampleConicRing",
+          "avg": 4088972.2023809524
+        },
+        {
+          "label": "culori   (hand-rolled)",
+          "avg": 3340537.7772277226
+        }
+      ]
+    },
+    {
+      "title": "canvas · per-pixel cost, 1 000 Oklch → sRGB pixels",
+      "rows": [
+        {
+          "label": "urcolor  sampleConicRing",
+          "avg": 134647.1413364873
+        },
+        {
+          "label": "culori   (hand-rolled)",
+          "avg": 166090.66820724885
+        },
+        {
+          "label": "chroma-js (hand-rolled)",
+          "avg": 1665639.420673077
+        },
+        {
+          "label": "colorjs.io (hand-rolled)",
+          "avg": 2297961.2317880793
+        }
+      ]
+    },
+    {
+      "title": "pipeline · hex → lighten → hex",
+      "rows": [
+        {
+          "label": "urcolor  Color",
+          "avg": 840.6290515214566
+        },
+        {
+          "label": "urcolor  fn",
+          "avg": 641.6048410934507
+        },
+        {
+          "label": "culori   (hand-rolled)",
+          "avg": 560.8420102959437
+        },
+        {
+          "label": "colord",
+          "avg": 429.8971827163309
+        },
+        {
+          "label": "chroma-js",
+          "avg": 1171.6569004725743
+        },
+        {
+          "label": "tinycolor2",
+          "avg": 1541.96994104118
+        },
+        {
+          "label": "@ctrl/tinycolor",
+          "avg": 1958.757556733631
+        },
+        {
+          "label": "colorjs.io",
+          "avg": 37223.15426086957
+        }
+      ]
+    },
+    {
+      "title": "pipeline · hex → oklch → hex (round trip)",
+      "rows": [
+        {
+          "label": "urcolor  Color",
+          "avg": 804.2772479627691
+        },
+        {
+          "label": "urcolor  fn",
+          "avg": 621.125289689249
+        },
+        {
+          "label": "culori",
+          "avg": 577.3705851940961
+        },
+        {
+          "label": "chroma-js",
+          "avg": 3277.7965312101405
+        },
+        {
+          "label": "colorjs.io",
+          "avg": 9299.793038504464
+        }
+      ]
+    },
+    {
+      "title": "pipeline · two hex strings → mixed hex (Oklab)",
+      "rows": [
+        {
+          "label": "urcolor  Color",
+          "avg": 898.019392860127
+        },
+        {
+          "label": "urcolor  fn",
+          "avg": 860.103509364984
+        },
+        {
+          "label": "culori",
+          "avg": 1337.862703125
+        },
+        {
+          "label": "chroma-js",
+          "avg": 5278.345568426724
+        },
+        {
+          "label": "colorjs.io",
+          "avg": 21113.559305826824
+        }
+      ]
+    },
+    {
+      "title": "pipeline · two hex strings → ΔE2000",
+      "rows": [
+        {
+          "label": "urcolor  Color",
+          "avg": 915.3342778773907
+        },
+        {
+          "label": "urcolor  fn",
+          "avg": 790.2314338504988
+        },
+        {
+          "label": "culori",
+          "avg": 1017.7332503376098
+        },
+        {
+          "label": "colord",
+          "avg": 794.2991440036285
+        },
+        {
+          "label": "chroma-js",
+          "avg": 1598.8846684428095
+        },
+        {
+          "label": "colorjs.io",
+          "avg": 11081.213216145834
+        }
+      ]
+    },
+    {
+      "title": "pipeline · two hex strings → WCAG contrast",
+      "rows": [
+        {
+          "label": "urcolor  Color",
+          "avg": 658.2212301553468
+        },
+        {
+          "label": "urcolor  fn",
+          "avg": 568.806062135858
+        },
+        {
+          "label": "culori",
+          "avg": 3427.334281009197
+        },
+        {
+          "label": "colord",
+          "avg": 620.8952289287861
+        },
+        {
+          "label": "chroma-js",
+          "avg": 1525.5819924613027
+        },
+        {
+          "label": "tinycolor2",
+          "avg": 1139.1467487203663
+        },
+        {
+          "label": "colorjs.io",
+          "avg": 15093.989464620372
+        }
+      ]
+    },
+    {
+      "title": "batch · 10 swatches → darken → hex",
+      "rows": [
+        {
+          "label": "urcolor  Color",
+          "avg": 6395.444580078125
+        },
+        {
+          "label": "urcolor  fn",
+          "avg": 5776.049532376803
+        },
+        {
+          "label": "culori   (hand-rolled)",
+          "avg": 6298.051188151042
+        },
+        {
+          "label": "colord",
+          "avg": 4973.1199202999
+        },
+        {
+          "label": "chroma-js",
+          "avg": 12059.376087535511
+        },
+        {
+          "label": "tinycolor2",
+          "avg": 15494.374552408854
+        },
+        {
+          "label": "colorjs.io",
+          "avg": 216847.31134729602
+        }
+      ]
+    }
+  ]
+}
