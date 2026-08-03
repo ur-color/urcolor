@@ -9,14 +9,12 @@ import {
   Injector,
   input,
 } from "@angular/core";
+import { Color, getChannelConfig, type SpaceId } from "@urcolor/core";
 import {
-  Color,
+  CHECKERBOARD_BACKGROUND,
   drawLinearGradient,
-  getChannelConfig,
   interpolateStops,
-  type SpaceId,
-} from "@urcolor/core";
-import { CHECKERBOARD_BACKGROUND } from "@urcolor/shared";
+} from "@urcolor/shared";
 import { ColorSliderRoot } from "../root/color-slider-root";
 
 const AUTO_STEPS = 12;

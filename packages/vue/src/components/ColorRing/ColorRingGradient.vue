@@ -13,7 +13,8 @@ export interface ColorRingGradientProps extends /* @vue-ignore */ PrimitiveProps
 <script setup lang="ts">
 import { ref, computed } from "vue";
 import { useForwardExpose, Primitive } from "reka-ui";
-import { sampleConicRing, getChannelConfig } from "@urcolor/core";
+import { getChannelConfig } from "@urcolor/core";
+import { sampleConicRing } from "@urcolor/shared";
 import { applyChannelOverrides, renderToCanvas, useGradientCanvas } from "../../shared/useGradientCanvas";
 import { CHECKERBOARD_BACKGROUND } from "../../shared/checkerboard";
 import { injectColorRingRootContext } from "./ColorRingRoot.vue";

@@ -31,14 +31,15 @@
 
 <script lang="ts">
   import { createAttachmentKey } from "svelte/attachments";
+  import { Color, getChannelConfig } from "@urcolor/core";
   import {
-    Color,
+    CHECKERBOARD_BACKGROUND,
+    DATA_DISABLED,
     drawGradient,
-    getChannelConfig,
+    renderToCanvas,
     sampleBilinearGrid,
     sampleChannelGrid,
-  } from "@urcolor/core";
-  import { CHECKERBOARD_BACKGROUND, DATA_DISABLED, renderToCanvas } from "@urcolor/shared";
+  } from "@urcolor/shared";
   import type { ChildProps } from "../../../shared/child.js";
   import { gradientAttachment } from "../../../shared/gradient.svelte.js";
   import { colorAreaContext } from "../root/context.svelte.js";

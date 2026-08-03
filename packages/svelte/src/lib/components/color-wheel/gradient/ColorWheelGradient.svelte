@@ -20,8 +20,8 @@
 
 <script lang="ts">
   import { createAttachmentKey } from "svelte/attachments";
-  import { Color, getChannelConfig, samplePolarGrid } from "@urcolor/core";
-  import { CHECKERBOARD_BACKGROUND, DATA_DISABLED, renderToCanvas } from "@urcolor/shared";
+  import { Color, getChannelConfig } from "@urcolor/core";
+  import { CHECKERBOARD_BACKGROUND, DATA_DISABLED, renderToCanvas, samplePolarGrid } from "@urcolor/shared";
   import type { ChildProps } from "../../../shared/child.js";
   import { gradientAttachment } from "../../../shared/gradient.svelte.js";
   import { colorWheelContext } from "../root/context.svelte.js";

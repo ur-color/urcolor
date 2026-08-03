@@ -1,7 +1,6 @@
 import { forwardRef, useCallback, useEffect, useMemo, useRef, type ComponentPropsWithoutRef } from "react";
-import { Color, type SpaceId } from "@urcolor/core";
-import { drawGradient, sampleBilinearGrid, sampleChannelGrid, getChannelConfig } from "@urcolor/core";
-import { renderToCanvas } from "@urcolor/shared";
+import { Color, getChannelConfig, type SpaceId } from "@urcolor/core";
+import { drawGradient, renderToCanvas, sampleBilinearGrid, sampleChannelGrid } from "@urcolor/shared";
 import { useColorAreaContext } from "../root/ColorAreaRootContext";
 import { CHECKERBOARD_BACKGROUND } from "../../../utils";
 

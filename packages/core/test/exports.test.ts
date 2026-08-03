@@ -35,10 +35,8 @@ describe("@urcolor/core exports", () => {
     }
   });
 
-  it("still exposes the gradient, geometry and space-config surface", () => {
+  it("still exposes the geometry and space-config surface", () => {
     for (const name of [
-      "drawGradient",
-      "sampleChannelGrid",
       "polarToCartesian",
       "colorSpaces",
       "getChannelConfig",

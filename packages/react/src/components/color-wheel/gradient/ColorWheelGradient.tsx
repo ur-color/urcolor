@@ -1,7 +1,6 @@
 import { forwardRef, useCallback, useEffect, useRef, type ComponentPropsWithoutRef } from "react";
-import { Color } from "@urcolor/core";
-import { samplePolarGrid, getChannelConfig } from "@urcolor/core";
-import { renderToCanvas } from "@urcolor/shared";
+import { Color, getChannelConfig } from "@urcolor/core";
+import { renderToCanvas, samplePolarGrid } from "@urcolor/shared";
 import { useColorWheelContext } from "../root/ColorWheelRootContext";
 import { CHECKERBOARD_BACKGROUND } from "../../../utils";
 

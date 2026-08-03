@@ -94,6 +94,7 @@
         "@types/chroma-js": "^3.1.2",
         "@types/culori": "^4.0.1",
         "@types/tinycolor2": "^1.4.6",
+        "@urcolor/shared": "workspace:*",
         "chroma-js": "^3.2.0",
         "colord": "^2.9.3",
         "colorjs.io": "^0.7.1",

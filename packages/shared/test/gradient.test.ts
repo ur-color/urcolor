@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { Color } from "../src/color/color";
+import { Color } from "@urcolor/core";
 import {
   interpolateStops,
   sampleBilinearGrid,

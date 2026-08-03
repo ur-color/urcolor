@@ -11,7 +11,8 @@ export interface ColorWheelGradientProps extends /* @vue-ignore */ PrimitiveProp
 <script setup lang="ts">
 import { ref } from "vue";
 import { useForwardExpose, Primitive } from "reka-ui";
-import { samplePolarGrid, getChannelConfig } from "@urcolor/core";
+import { getChannelConfig } from "@urcolor/core";
+import { samplePolarGrid } from "@urcolor/shared";
 import { applyChannelOverrides, renderToCanvas, useGradientCanvas } from "../../shared/useGradientCanvas";
 import { CHECKERBOARD_BACKGROUND } from "../../shared/checkerboard";
 import { injectColorWheelRootContext } from "./ColorWheelRoot.vue";

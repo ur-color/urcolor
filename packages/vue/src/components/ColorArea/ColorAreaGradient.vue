@@ -28,8 +28,8 @@ export interface ColorAreaGradientProps extends /* @vue-ignore */ PrimitiveProps
 <script setup lang="ts">
 import { ref, computed } from "vue";
 import { useForwardExpose, Primitive } from "reka-ui";
-import { Color } from "@urcolor/core";
-import { drawGradient, sampleBilinearGrid, sampleChannelGrid, getChannelConfig } from "@urcolor/core";
+import { Color, getChannelConfig } from "@urcolor/core";
+import { drawGradient, sampleBilinearGrid, sampleChannelGrid } from "@urcolor/shared";
 import { applyChannelOverrides, renderToCanvas, useGradientCanvas } from "../../shared/useGradientCanvas";
 import { CHECKERBOARD_BACKGROUND } from "../../shared/checkerboard";
 import { injectColorAreaRootContext } from "./ColorAreaRoot.vue";

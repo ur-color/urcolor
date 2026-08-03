@@ -9,8 +9,7 @@
  */
 
 import { describe, expect, it } from "bun:test";
-import { Color } from "../src/color/color";
-import type { SpaceId } from "../src/color/types";
+import { Color, type SpaceId } from "@urcolor/core";
 import {
   interpolateStops,
   sampleBilinearGrid,

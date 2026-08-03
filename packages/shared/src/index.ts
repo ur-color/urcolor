@@ -7,3 +7,4 @@ export * from "./channel-model";
 export * from "./drag";
 export * from "./slider";
 export * from "./toggle";
+export * from "./gradient";

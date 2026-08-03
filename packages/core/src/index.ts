@@ -18,9 +18,6 @@ export { SPACES, spaceDef, hueIndexOf, channelIndexOf } from "./color/registry";
 export type { ColorIn, OklchColor, P3Color, SrgbColor } from "./color/tagged";
 export type { ColorObject, Coords, SpaceDef, SpaceId } from "./color/types";
 
-// Gradient rendering.
-export { drawGradient, drawLinearGradient, interpolateStops, sampleBilinearGrid, sampleChannelGrid, sampleTriangleGrid, samplePolarGrid, sampleConicRing } from "./gradient";
-
 // Geometry helpers.
 export { polarToCartesian, cartesianToPolar, clampToCircle, normalizeAngle, triangleVertices, barycentricCoords, barycentricToCartesian, pointInTriangle, clampToTriangle, insetTriangle, type Point, type PolarCoord } from "./geometry";
 

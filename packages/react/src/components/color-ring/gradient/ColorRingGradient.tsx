@@ -1,7 +1,6 @@
 import { forwardRef, useCallback, useEffect, useRef, useMemo, type ComponentPropsWithoutRef } from "react";
-import { Color, type SpaceId } from "@urcolor/core";
-import { sampleConicRing, getChannelConfig } from "@urcolor/core";
-import { renderToCanvas } from "@urcolor/shared";
+import { Color, getChannelConfig, type SpaceId } from "@urcolor/core";
+import { renderToCanvas, sampleConicRing } from "@urcolor/shared";
 import { useColorRingContext } from "../root/ColorRingRootContext";
 import { CHECKERBOARD_BACKGROUND } from "../../../utils";
 

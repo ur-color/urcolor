@@ -19,13 +19,14 @@
  */
 
 import { bench, do_not_optimize, group, summary } from "mitata";
+import type { Color as SharedColor } from "@urcolor/core";
 import {
   interpolateStops,
   sampleBilinearGrid,
   sampleChannelGrid,
   sampleConicRing,
   samplePolarGrid,
-} from "../src/gradient";
+} from "@urcolor/shared";
 import {
   A,
   B,
@@ -40,6 +41,16 @@ import {
   culoriB,
   toRgb,
 } from "./setup";
+
+// `A`/`B` come from `../src/color/color` (via `./setup`), while the sampler
+// signatures above resolve `Color` through `@urcolor/core`'s published
+// declaration file (`@urcolor/shared` re-exports it as a bare specifier).
+// Same class, two on-disk declarations — TypeScript's private-field branding
+// treats them as distinct types even though they're structurally identical.
+// This bridges that dual-package hazard without touching `setup.ts`, which
+// every other bench file also depends on for the `../src`-identity `Color`.
+const sharedA = A as unknown as SharedColor;
+const sharedB = B as unknown as SharedColor;
 
 /** A slider track at 2× DPR. */
 const TRACK = 512;
@@ -65,7 +76,7 @@ export function register(): void {
   summary(() => {
     group(`canvas · ${TRACK}px linear track, Oklab → RGBA bytes`, () => {
       bench("urcolor  interpolateStops", () => {
-        const stops = interpolateStops([A, B], TRACK, "oklab");
+        const stops = interpolateStops([sharedA, sharedB], TRACK, "oklab");
         const data = new Uint8ClampedArray(TRACK * 4);
         for (let x = 0; x < TRACK; x++) {
           const c = stops[x]!;
@@ -107,7 +118,7 @@ export function register(): void {
   summary(() => {
     group(`canvas · ${PLANE}×${PLANE} bilinear plane, Oklab → RGBA bytes`, () => {
       bench("urcolor  sampleBilinearGrid", () =>
-        do_not_optimize(sampleBilinearGrid(A, B, B, A, PLANE, PLANE, "oklab")));
+        do_not_optimize(sampleBilinearGrid(sharedA, sharedB, sharedB, sharedA, PLANE, PLANE, "oklab")));
       bench("culori   (hand-rolled)", () => {
         const data = new Uint8ClampedArray(PLANE * PLANE * 4);
         for (let y = 0; y < PLANE; y++) {
@@ -145,7 +156,7 @@ export function register(): void {
     group(`canvas · ${PLANE}×${PLANE} HSV S/V plane → RGBA bytes`, () => {
       bench("urcolor  sampleChannelGrid", () =>
         do_not_optimize(
-          sampleChannelGrid(A, "hsv", "s", "v", 0, 1, 1, 0, PLANE, PLANE),
+          sampleChannelGrid(sharedA, "hsv", "s", "v", 0, 1, 1, 0, PLANE, PLANE),
         ));
       bench("culori   (hand-rolled)", () => {
         const data = new Uint8ClampedArray(PLANE * PLANE * 4);
@@ -179,7 +190,7 @@ export function register(): void {
     group(`canvas · ${PLANE}×${PLANE} Oklch polar wheel → RGBA bytes`, () => {
       bench("urcolor  samplePolarGrid", () =>
         do_not_optimize(
-          samplePolarGrid(A, "oklch", "h", "c", 0, 360, 0, 0.4, PLANE, PLANE),
+          samplePolarGrid(sharedA, "oklch", "h", "c", 0, 360, 0, 0.4, PLANE, PLANE),
         ));
       bench("culori   (hand-rolled)", () => {
         const data = new Uint8ClampedArray(PLANE * PLANE * 4);
@@ -204,7 +215,7 @@ export function register(): void {
   summary(() => {
     group(`canvas · ${PLANE}×${PLANE} conic hue ring → RGBA bytes`, () => {
       bench("urcolor  sampleConicRing", () =>
-        do_not_optimize(sampleConicRing(A, "oklch", "h", 0, 360, PLANE, PLANE)));
+        do_not_optimize(sampleConicRing(sharedA, "oklch", "h", 0, 360, PLANE, PLANE)));
       bench("culori   (hand-rolled)", () => {
         const data = new Uint8ClampedArray(PLANE * PLANE * 4);
         const base = culori.converter("oklch")(culoriA);
@@ -229,7 +240,7 @@ export function register(): void {
   summary(() => {
     group("canvas · per-pixel cost, 1 000 Oklch → sRGB pixels", () => {
       bench("urcolor  sampleConicRing", () =>
-        do_not_optimize(sampleConicRing(A, "oklch", "h", 0, 360, 1000, 1)));
+        do_not_optimize(sampleConicRing(sharedA, "oklch", "h", 0, 360, 1000, 1)));
       bench("culori   (hand-rolled)", () => {
         const data = new Uint8ClampedArray(1000 * 4);
         const base = culori.converter("oklch")(culoriA);
