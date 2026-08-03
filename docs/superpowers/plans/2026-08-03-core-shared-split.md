@@ -17,6 +17,18 @@
 - Moved module bodies change **only** their import lines. No refactoring, no renaming, no reformatting of the code inside.
 - `@urcolor/core` must never import `@urcolor/shared` in `dependencies`. The single permitted edge is a `devDependencies` entry used by `packages/core/bench/gradient.bench.ts`.
 - Every task ends on a green `bun test`. The tree is never committed broken.
+- **The verification gate is delta-based, not absolute.** `bun run lint` is red on this repo's base commit and is not run by CI: `eslint` crashes outright on `docs/how-to/demo/svelte/ColorFieldGuide.svelte` (typed-linting misconfiguration, `svelte-eslint-parser` does not forward `parserOptions.project`), and reports 230 pre-existing problems across `packages/` and `scripts/`. `vue-tsc --noEmit` reports 44 pre-existing errors at base `d2faaab`, mostly `@angular/core` resolution failures in `docs/how-to/demo/angular/`. Fixing those is out of scope.
+  Where a task says "run the gate", run:
+
+  ```bash
+  bun test
+  bun run --cwd packages/svelte check     # must be 0 errors — clean at base
+  bun run --cwd packages/angular check    # must be 0 errors — clean at base
+  bunx vue-tsc --noEmit 2>&1 | grep -c "error TS"   # must not exceed the baseline below
+  bun run build
+  ```
+
+  Baselines measured at `d2faaab`: `vue-tsc` **44** errors, `eslint packages scripts` **230** problems. A task passes when `bun test` and `bun run build` are green, svelte-check and the Angular check report zero, and the `vue-tsc` count has not risen. Report the count in your task report either way. Do not attempt to make `bun run lint` exit zero.
 - Package versions after the change: `@urcolor/core` **2.0.0**, `@urcolor/shared` **1.0.0**, `urcolor` **2.0.0**, `@urcolor/vue` **2.0.0**, `@urcolor/react` **2.0.0**, `@urcolor/svelte` **2.0.0**, `@urcolor/angular` **2.0.0**, `@urcolor/relative` **2.0.0**, `@urcolor/i18n` **2.0.0**.
 - Dependency ranges after the change: anything depending on core uses `"@urcolor/core": "^2.0.0"` when published, `"workspace:*"` in-repo. Framework packages add `"@urcolor/shared": "workspace:*"` in place of `"@urcolor/primitives": "workspace:*"`.
 - The npm deprecation of `@urcolor/primitives` is a release-time action and is **not** part of this plan.
