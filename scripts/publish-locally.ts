@@ -115,11 +115,29 @@ for (const pkg of selected) {
     continue;
   }
 
-  const otpArgs = otp ? ["--otp", otp] : [];
-  const result = await $`npm publish ${tarball} --access public ${otpArgs}`.nothrow();
-  if (result.exitCode !== 0) {
-    console.error(`  publish failed for ${name}. Later packages were not attempted.`);
-    process.exit(result.exitCode);
+  // One code per publish, asked for at the moment it is needed. npm treats each
+  // publish as a separate write, so a single code cannot cover six of them, and
+  // npm 11 does not prompt on its own — it fails with EOTP and tells you to
+  // pass --otp. A code entered up front would also have expired by the time the
+  // later packages are reached.
+  let published = false;
+  for (let attempt = 1; attempt <= 3 && !published; attempt++) {
+    const code = otp ?? prompt(`  one-time password for ${name}@${version}:`)?.trim();
+    const otpArgs = code ? ["--otp", code] : [];
+    const result = await $`npm publish ${tarball} --access public ${otpArgs}`.nothrow();
+
+    if (result.exitCode === 0) {
+      published = true;
+      break;
+    }
+    // A wrong or expired code is worth another try; anything else is not.
+    const expired = result.stderr.toString().includes("EOTP");
+    if (!expired || otp || attempt === 3) {
+      console.error(`  publish failed for ${name}. Later packages were not attempted.`);
+      console.error(`  the packed tarball is kept at ${tarball}`);
+      process.exit(result.exitCode);
+    }
+    console.error(`  that code was rejected or had expired — try the next one.`);
   }
   await $`rm -f ${tarball}`.quiet();
   console.log(`  published ${name}@${version}`);
