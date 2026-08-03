@@ -27,8 +27,13 @@ on:
         default: ''
         type: string
     secrets:
+      # Deliberately not `required: true`. A required secret that is not
+      # configured fails the run at startup, before any job exists — no logs,
+      # no annotation, just "this run likely failed because of a workflow file
+      # issue", which sends you looking at the YAML instead of at the missing
+      # secret. Optional, plus the explicit check below, says what is wrong.
       NPM_TOKEN:
-        required: true
+        required: false
 
 jobs:
   publish:
@@ -55,6 +60,20 @@ jobs:
             echo "changed=true" >> "$GITHUB_OUTPUT"
           else
             echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      # Checked before the build rather than at `npm publish`, so a missing
+      # token costs seconds instead of a full test-and-build cycle.
+      - name: Check the npm token is configured
+        if: steps.version.outputs.changed == 'true'
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          if [ -z "$NPM_TOKEN" ]; then
+            echo "::error::NPM_TOKEN is not set for this repository, so ${{ inputs.package-name }} cannot be published."
+            echo "Add one with: gh secret set NPM_TOKEN --repo ${{ github.repository }}"
+            echo "The token needs Read and write access to packages under the @urcolor scope."
+            exit 1
           fi
 
       - name: Setup Bun
