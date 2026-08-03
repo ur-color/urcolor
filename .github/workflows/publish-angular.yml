@@ -12,5 +12,8 @@ jobs:
     with:
       package-dir: 'packages/angular'
       package-name: '@urcolor/angular'
+      # ng-packagr writes the importable manifest (exports, module, typings)
+      # into dist/; the package root's own manifest has none of them.
+      publish-dir: 'packages/angular/dist'
     secrets:
       NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

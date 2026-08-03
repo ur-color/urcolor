@@ -17,6 +17,15 @@ on:
         description: npm name, used for the git tag and release title
         required: true
         type: string
+      publish-dir:
+        description: >
+          Directory to publish from, when it is not the package itself.
+          @urcolor/angular builds with ng-packagr, which writes the importable
+          manifest into dist/ — publishing from the package root would ship one
+          with no entry points. Defaults to package-dir.
+        required: false
+        default: ''
+        type: string
     secrets:
       NPM_TOKEN:
         required: true
@@ -79,15 +88,28 @@ jobs:
         if: steps.version.outputs.changed == 'true'
         run: npm install -g npm@latest
 
+      - name: Resolve the publish directory
+        id: dir
+        if: steps.version.outputs.changed == 'true'
+        run: |
+          DIR="${{ inputs.publish-dir }}"
+          echo "path=${DIR:-${{ inputs.package-dir }}}" >> "$GITHUB_OUTPUT"
+
       # npm rejects a manifest containing `workspace:` ranges. Rewritten on the
       # runner's checkout only — the committed manifest is left alone.
       - name: Resolve workspace dependencies
         if: steps.version.outputs.changed == 'true'
-        run: bun run scripts/resolve-workspace-deps.ts "${{ inputs.package-dir }}"
+        run: bun run scripts/resolve-workspace-deps.ts "${{ steps.dir.outputs.path }}"
+
+      # The last gate before a version number is spent for good: entry points
+      # exist, metadata is complete, no workspace range survived.
+      - name: Verify the package is publishable
+        if: steps.version.outputs.changed == 'true'
+        run: bun run scripts/check-publishable.ts "${{ steps.dir.outputs.path }}"
 
       - name: Publish to npm with provenance
         if: steps.version.outputs.changed == 'true'
-        working-directory: ${{ inputs.package-dir }}
+        working-directory: ${{ steps.dir.outputs.path }}
         run: npm publish --provenance --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

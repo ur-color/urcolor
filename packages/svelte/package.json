@@ -1,6 +1,7 @@
 {
   "name": "@urcolor/svelte",
   "version": "0.0.1",
+  "license": "MIT",
   "type": "module",
   "svelte": "./dist/index.js",
   "types": "./dist/index.d.ts",
