@@ -1,16 +1,16 @@
-name: Publish @urcolor/react
+name: Publish @urcolor/angular
 
 on:
   push:
     branches: [main]
     paths:
-      - 'packages/react/package.json'
+      - 'packages/angular/package.json'
 
 jobs:
   publish:
     uses: ./.github/workflows/publish.yml
     with:
-      package-dir: 'packages/react'
-      package-name: '@urcolor/react'
+      package-dir: 'packages/angular'
+      package-name: '@urcolor/angular'
     secrets:
       NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

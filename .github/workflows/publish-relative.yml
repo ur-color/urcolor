@@ -1,16 +1,16 @@
-name: Publish @urcolor/react
+name: Publish @urcolor/relative
 
 on:
   push:
     branches: [main]
     paths:
-      - 'packages/react/package.json'
+      - 'packages/relative/package.json'
 
 jobs:
   publish:
     uses: ./.github/workflows/publish.yml
     with:
-      package-dir: 'packages/react'
-      package-name: '@urcolor/react'
+      package-dir: 'packages/relative'
+      package-name: '@urcolor/relative'
     secrets:
       NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

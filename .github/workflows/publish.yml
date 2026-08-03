@@ -1,0 +1,134 @@
+# Reusable publish job, called by one thin `publish-<package>.yml` per package.
+#
+# The trigger contract is unchanged from the hand-copied workflows it replaces:
+# a push to main that edits the package's own package.json, publishing only when
+# the "version" field actually differs from the previous commit. Editing any
+# other field is a no-op.
+name: Publish package
+
+on:
+  workflow_call:
+    inputs:
+      package-dir:
+        description: Path to the package, e.g. packages/core
+        required: true
+        type: string
+      package-name:
+        description: npm name, used for the git tag and release title
+        required: true
+        type: string
+    secrets:
+      NPM_TOKEN:
+        required: true
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Check for version change
+        id: version
+        run: |
+          MANIFEST="${{ inputs.package-dir }}/package.json"
+          OLD_VERSION=$(git show HEAD~1:"$MANIFEST" 2>/dev/null | grep '"version"' | sed 's/.*: "\(.*\)".*/\1/' || echo "")
+          NEW_VERSION=$(grep '"version"' "$MANIFEST" | sed 's/.*: "\(.*\)".*/\1/')
+          echo "old=$OLD_VERSION" >> "$GITHUB_OUTPUT"
+          echo "new=$NEW_VERSION" >> "$GITHUB_OUTPUT"
+          if [ -n "$OLD_VERSION" ] && [ "$OLD_VERSION" != "$NEW_VERSION" ]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Setup Bun
+        if: steps.version.outputs.changed == 'true'
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        if: steps.version.outputs.changed == 'true'
+        run: bun install --frozen-lockfile
+
+      # The whole suite, not just this package's own tests: publishing the core
+      # can break an adapter that never changed, and the run takes seconds.
+      - name: Run tests
+        if: steps.version.outputs.changed == 'true'
+        run: bun test
+
+      - name: Build packages
+        if: steps.version.outputs.changed == 'true'
+        run: bun run build
+
+      - name: Setup Node.js for npm publish
+        if: steps.version.outputs.changed == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Update npm
+        if: steps.version.outputs.changed == 'true'
+        run: npm install -g npm@latest
+
+      # npm rejects a manifest containing `workspace:` ranges. Rewritten on the
+      # runner's checkout only — the committed manifest is left alone.
+      - name: Resolve workspace dependencies
+        if: steps.version.outputs.changed == 'true'
+        run: bun run scripts/resolve-workspace-deps.ts "${{ inputs.package-dir }}"
+
+      - name: Publish to npm with provenance
+        if: steps.version.outputs.changed == 'true'
+        working-directory: ${{ inputs.package-dir }}
+        run: npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      # Reads "## Unreleased" and "## [Unreleased]" both. The workflows this
+      # replaces matched only the bracketed form while every changelog here uses
+      # the bare one, so each release so far shipped with empty notes.
+      - name: Extract changelog for release
+        id: notes
+        if: steps.version.outputs.changed == 'true'
+        run: |
+          CHANGELOG="${{ inputs.package-dir }}/CHANGELOG.md"
+          if [ -f "$CHANGELOG" ]; then
+            bun run scripts/print-unreleased.ts "$CHANGELOG" > /tmp/release-notes.md
+            echo "found=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "found=false" >> "$GITHUB_OUTPUT"
+          fi
+          if [ ! -s /tmp/release-notes.md ]; then
+            echo "${{ inputs.package-name }}@${{ steps.version.outputs.new }}" > /tmp/release-notes.md
+          fi
+
+      - name: Create GitHub Release
+        if: steps.version.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${{ inputs.package-name }}@${{ steps.version.outputs.new }}" \
+            --title "${{ inputs.package-name }}@${{ steps.version.outputs.new }}" \
+            --notes-file /tmp/release-notes.md
+
+      # Restores the manifest first: the resolve step above edited it, and that
+      # edit must never reach main.
+      - name: Update CHANGELOG.md
+        if: steps.version.outputs.changed == 'true' && steps.notes.outputs.found == 'true'
+        run: |
+          git checkout -- "${{ inputs.package-dir }}/package.json"
+          bun run scripts/rollover-changelog.ts \
+            "${{ inputs.package-dir }}/CHANGELOG.md" "${{ steps.version.outputs.new }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add "${{ inputs.package-dir }}/CHANGELOG.md"
+          git commit -m "chore: update ${{ inputs.package-name }} CHANGELOG.md for v${{ steps.version.outputs.new }}"
+          git push
