@@ -29,7 +29,9 @@
     "headless",
     "framework-agnostic",
     "slider",
-    "state-machine"
+    "state-machine",
+    "gradient",
+    "webgl"
   ],
   "author": {
     "name": "GrandMagus",

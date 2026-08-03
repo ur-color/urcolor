@@ -7,7 +7,8 @@
     "rootDir": "src",
     "outDir": "dist",
     "paths": {
-      "@urcolor/core": ["../core/dist/index.d.ts"]
+      "@urcolor/core": ["../core/dist/index.d.ts"],
+      "@urcolor/shared": ["../shared/dist/index.d.ts"]
     }
   },
   "include": ["src"],
