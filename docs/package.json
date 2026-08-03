@@ -24,6 +24,7 @@
   },
   "dependencies": {
     "@urcolor/core": "workspace:*",
+    "@urcolor/i18n": "workspace:*",
     "@urcolor/vue": "workspace:*",
     "@urcolor/react": "workspace:*",
     "gsap": "^3.12.7"

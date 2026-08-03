@@ -1,7 +1,50 @@
+import fs from "node:fs";
 import path from "node:path";
 import { defineConfig } from "vitepress";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
+import { navFor, sidebarFor, themeChromeFor } from "./i18n/nav";
+
+const DOCS_ROOT = path.resolve(__dirname, "..");
+
+/** Docs-root-relative existence check, used to keep sidebars free of 404s. */
+function pageExists(relativePath: string): boolean {
+  return fs.existsSync(path.join(DOCS_ROOT, relativePath));
+}
+
+/**
+ * A locale ships as soon as it has a home page. Translation lands page by page
+ * after that, and the sidebar generators filter themselves against what is
+ * actually on disk, so a half-translated locale never links into thin air.
+ */
+const ALL_LANGS = ["en", "zh", "ja", "es", "fr", "de", "ru"] as const;
+const READY_LANGS = ALL_LANGS.filter(
+  lang => lang === "en" || pageExists(`${lang}/index.md`),
+);
+
+const LOCALE_NAMES: Record<string, string> = {
+  en: "English",
+  zh: "简体中文",
+  ja: "日本語",
+  es: "Español",
+  fr: "Français",
+  de: "Deutsch",
+  ru: "Русский",
+};
+
+const BCP47: Record<string, string> = {
+  en: "en-US",
+  zh: "zh-CN",
+  ja: "ja-JP",
+  es: "es-ES",
+  fr: "fr-FR",
+  de: "de-DE",
+  ru: "ru-RU",
+};
+
+const SOCIAL_LINKS = [
+  { icon: "github" as const, link: "https://github.com/GrandMagus02/urcolor" },
+];
 
 export default defineConfig({
   cleanUrls: true,
@@ -54,6 +97,7 @@ export default defineConfig({
         "@urcolor/core": path.resolve(__dirname, "../../packages/core/src/index.ts"),
         "@urcolor/vue": path.resolve(__dirname, "../../packages/vue/src/index.ts"),
         "@urcolor/react": path.resolve(__dirname, "../../packages/react/src/index.ts"),
+        "@urcolor/i18n": path.resolve(__dirname, "../../packages/i18n/src/index.ts"),
       },
       dedupe: ["vue", "react", "react-dom"],
     },
@@ -61,93 +105,22 @@ export default defineConfig({
       include: ["reka-ui", "@vueuse/core", "react", "react-dom"],
     },
   },
+  locales: Object.fromEntries(
+    READY_LANGS.map(lang => [
+      lang === "en" ? "root" : lang,
+      {
+        label: LOCALE_NAMES[lang]!,
+        lang: BCP47[lang]!,
+        themeConfig: {
+          nav: navFor(lang, pageExists),
+          sidebar: sidebarFor(lang, pageExists),
+          ...themeChromeFor(lang),
+          socialLinks: SOCIAL_LINKS,
+        },
+      },
+    ]),
+  ),
   themeConfig: {
-    nav: [
-      { text: "Guide", link: "/guide/" },
-      { text: "Components", link: "/components/" },
-    ],
-    sidebar: {
-      "/guide/": [
-        {
-          text: "Getting Started",
-          items: [
-            { text: "Introduction", link: "/guide/" },
-            { text: "Features", link: "/guide/features" },
-            { text: "Installation", link: "/guide/installation" },
-            { text: "The Color Class", link: "/guide/color-class" },
-            { text: "Relative Colors", link: "/guide/relative-colors" },
-            { text: "Color Naming", link: "/guide/color-naming" },
-          ],
-        },
-        {
-          text: "Vue How to",
-          items: [
-            { text: "Build Color Area Picker", link: "/guide/vue/build-color-area-picker" },
-            { text: "Build Color Channel Slider", link: "/guide/vue/build-color-channel-slider" },
-            { text: "Build Color Fields", link: "/guide/vue/build-color-fields" },
-            { text: "Build Color Swatches", link: "/guide/vue/build-color-swatches" },
-            { text: "Build Color Swatch Picker", link: "/guide/vue/build-color-swatch-picker" },
-            { text: "Build Color Ring", link: "/guide/vue/build-color-ring" },
-            { text: "Build Color Triangle", link: "/guide/vue/build-color-triangle" },
-            { text: "Build Color Wheel", link: "/guide/vue/build-color-wheel" },
-            { text: "Build Color Picker (Triangle in Ring)", link: "/guide/vue/build-color-picker-triangle-in-ring" },
-            { text: "Build Color Picker (Square in Ring)", link: "/guide/vue/build-color-picker-square-in-ring" },
-            { text: "Build Material UI Color Picker", link: "/guide/vue/build-material-ui-color-picker" },
-          ],
-        },
-        {
-          text: "React How to",
-          items: [
-            { text: "Build Color Channel Slider", link: "/guide/react/build-color-channel-slider" },
-            { text: "Build Color Area Picker", link: "/guide/react/build-color-area-picker" },
-            { text: "Build Color Fields", link: "/guide/react/build-color-fields" },
-            { text: "Build Color Swatches", link: "/guide/react/build-color-swatches" },
-            { text: "Build Color Swatch Group", link: "/guide/react/build-color-swatch-group" },
-            { text: "Build Color Ring", link: "/guide/react/build-color-ring" },
-            { text: "Build Color Triangle", link: "/guide/react/build-color-triangle" },
-            { text: "Build Color Wheel", link: "/guide/react/build-color-wheel" },
-          ],
-        },
-      ],
-      "/components/": [
-        {
-          text: "Components",
-          items: [
-            { text: "Overview", link: "/components/" },
-            { text: "Preview", link: "/components/vue/preview" },
-            { text: "Stories", link: "/components/vue/stories" },
-          ],
-        },
-        {
-          text: "Vue",
-          items: [
-            { text: "Color Area", link: "/components/vue/color-area" },
-            { text: "Color Slider", link: "/components/vue/color-slider" },
-            { text: "Color Field", link: "/components/vue/color-field" },
-            { text: "Color Swatch", link: "/components/vue/color-swatch" },
-            { text: "Color Swatch Picker", link: "/components/vue/color-swatch-picker" },
-            { text: "Color Wheel", link: "/components/vue/color-wheel" },
-            { text: "Color Triangle", link: "/components/vue/color-triangle" },
-            { text: "Color Ring", link: "/components/vue/color-ring" },
-          ],
-        },
-        {
-          text: "React",
-          items: [
-            { text: "Color Slider", link: "/components/react/color-slider" },
-            { text: "Color Area", link: "/components/react/color-area" },
-            { text: "Color Field", link: "/components/react/color-field" },
-            { text: "Color Swatch", link: "/components/react/color-swatch" },
-            { text: "Color Swatch Group", link: "/components/react/color-swatch-group" },
-            { text: "Color Wheel", link: "/components/react/color-wheel" },
-            { text: "Color Triangle", link: "/components/react/color-triangle" },
-            { text: "Color Ring", link: "/components/react/color-ring" },
-          ],
-        },
-      ],
-    },
-    socialLinks: [
-      { icon: "github", link: "https://github.com/GrandMagus02/urcolor" },
-    ],
+    socialLinks: SOCIAL_LINKS,
   },
 });

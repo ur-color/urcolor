@@ -5,8 +5,17 @@ UrColor is a universal, headless color picker component library. It provides uns
 ## Packages
 
 - `@urcolor/core` — A zero-dependency CSS Color 4 library (parse, convert, serialize, gamut-map, interpolate) plus WebGL canvas gradient generators for color area sliders.
+- `@urcolor/primitives` — The framework-agnostic behavior layer: drag handling, keyboard maps, channel models, canvas plumbing and data attributes shared by every binding.
 - `@urcolor/relative` — Opt-in CSS Color 5 relative color syntax (`rgb(from red r g b)`) for `@urcolor/core`. See [Relative Colors](/guide/relative-colors).
+- `@urcolor/i18n` — Multilingual color naming and channel labels. See [Color Naming](/guide/color-naming).
 - `@urcolor/vue` — Headless Vue 3 components and composables for building color pickers.
+- `@urcolor/react` — The same primitives for React.
+- `@urcolor/svelte` — The same primitives for Svelte 5, as components plus rune-based hooks.
+- `@urcolor/angular` — The same primitives for Angular, as directives plus signal stores.
+
+All four bindings ship the same eight component families. Every recipe under
+[How to](/how-to/build-color-area-picker) shows Vue, React, Svelte and Angular
+side by side, so pick the tab that matches your stack.
 
 ## Philosophy
 
