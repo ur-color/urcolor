@@ -2,8 +2,11 @@
 
 The unscoped name for [`@urcolor/core`](https://www.npmjs.com/package/@urcolor/core) — a
 zero-dependency CSS Color 4 engine: parse, convert, mix, compare, gamut-map and
-serialize colors across 15 spaces, plus the grid samplers and WebGL gradient
-renderer the [urcolor](https://urcolor.vercel.app/) picker components draw with.
+serialize colors across 15 spaces.
+
+Color math only. The grid samplers, WebGL gradient renderer and picker geometry
+that the [urcolor](https://urcolor.vercel.app/) components draw with live in
+[`@urcolor/shared`](https://www.npmjs.com/package/@urcolor/shared).
 
 ```sh
 bun add urcolor    # or: npm i urcolor

@@ -4,18 +4,37 @@ Headless, accessible color picker components for Vue 3. Unstyled primitives — 
 
 ## Installation
 
-```bash
-bun add @urcolor/vue
+```sh
+bun add @urcolor/vue     # or: npm i @urcolor/vue
 ```
+
+Requires Vue `^3`. Pulls in [`@urcolor/core`](../core) (the color engine) and
+[`@urcolor/shared`](../shared) (rendering and interaction) automatically.
 
 ## Features
 
 - **Headless** — Radix/Reka UI-style unstyled primitives with full styling freedom
-- **12 Color Spaces** — HSL, HSV, HWB, OKLCh, OKLab, LCh, Lab, RGB, Display P3, A98 RGB, ProPhoto RGB, Rec. 2020
+- **12 Color Spaces** — HSL, HSV, HWB, OKLCh, OKLab, LCh, Lab, sRGB, Display P3, A98 RGB, ProPhoto RGB, Rec. 2020, all with alpha
 - **Accessible** — Keyboard navigation, ARIA attributes, roving focus
-- **WebGL Gradients** — GPU-accelerated canvas backgrounds via `@urcolor/core`
+- **WebGL Gradients** — GPU-accelerated canvas backgrounds via `@urcolor/shared`, with a CPU sampler fallback
 - **Alpha Support** — Built-in transparency controls with checkerboard backgrounds
 - **Form Integration** — Hidden inputs for native form submission
+
+> **Upgrading from 1.x?** 2.0.0 renamed the channel props, split
+> `ColorAreaRoot`'s interaction surface into `ColorAreaArea`, replaced
+> `valueCommit` with four events, and moved `Color` onto `@urcolor/core`'s
+> CSS Color 4 space ids (`rgb` → `srgb`, `p3` → `display-p3`, …). See
+> [`CHANGELOG.md`](./CHANGELOG.md) for the migration.
+
+## Two import styles
+
+Every component is exported both flat and namespaced. They are the same
+components:
+
+```ts
+import { ColorAreaRoot, ColorAreaGradient, ColorAreaThumb } from "@urcolor/vue";
+import { ColorArea } from "@urcolor/vue/namespaced";  // ColorArea.Root, .Gradient, .Thumb
+```
 
 ## Components
 
@@ -195,9 +214,30 @@ Every color root emits the same four events:
 
 `ColorSwatchPicker` is the exception: it emits the Listbox event set — `update:modelValue`, `highlight`, `entryFocus` and `leave`.
 
+## Composables
+
+`useColor(input)` holds a `Color` in a `shallowRef` and exposes writable `hex`
+and `alpha` computeds alongside it. `input` may be a ref, getter or plain value,
+and the color resyncs when it changes.
+
+```ts
+import { useColor } from "@urcolor/vue";
+
+const { color, hex, alpha } = useColor("#3b82f6");
+```
+
+Each color space also has a named shorthand that additionally exposes its
+channels — `useRGB`, `useHSL`, `useHSV`, `useHWB`, `useOKLCh`, `useOKLab`,
+`useLCh`, `useLab`, `useP3`, `useA98`, `useProPhoto`, `useRec2020`.
+
+Each root also exports its context injector (`injectColorAreaRootContext`,
+`injectColorSliderRootContext`, …) for building custom parts.
+
 ## Supported Color Spaces
 
-HSL, HSV, HWB, OKLCh, OKLab, LCh, Lab, RGB, Display P3, A98 RGB, ProPhoto RGB, Rec. 2020 — all with alpha channel support.
+HSL, HSV, HWB, OKLCh, OKLab, LCh, Lab, sRGB, Display P3, A98 RGB, ProPhoto RGB,
+Rec. 2020 — all with alpha channel support. Space ids are the CSS Color 4 names
+(`srgb`, `display-p3`, `a98-rgb`, `prophoto-rgb`, `rec2020`).
 
 ## License
 
