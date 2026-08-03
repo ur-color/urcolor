@@ -23,8 +23,12 @@ function onUpdate(next: Color | undefined) {
       color-space="hsv"
       format="hex"
       as="div"
+      class="sat-hex-field"
       @update:model-value="onUpdate"
     >
+      <!-- "HEX" is the format's own token, the same in every locale the site
+           ships, so it is not routed through the string table. -->
+      <label class="sat-hex-label">Hex</label>
       <ColorFieldInput
         as="input"
         class="sat-hex-input"
@@ -41,6 +45,22 @@ function onUpdate(next: Color | undefined) {
   flex-direction: column;
   gap: 8px;
   width: clamp(96px, 22cqw, 150px);
+}
+
+.sat-hex-field {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* Matches `.sat-field-label` and `.hero-panel-label`, so the readouts all
+   caption themselves the same way. */
+.sat-hex-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--vp-c-text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
 }
 
 .sat-hex-input {

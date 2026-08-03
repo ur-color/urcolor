@@ -1,19 +1,37 @@
 <script setup lang="ts">
 import type { Color } from "@urcolor/core";
+import { computed } from "vue";
+import { useDocsLang } from "../../composables/useDocsLang";
 import { setHeroColor, useHeroColor } from "../../composables/useHeroColor";
 import {
   ColorFieldInput,
   ColorFieldRoot,
 } from "../../../../packages/vue/src/components/ColorField";
+// Deep import rather than the package root: `@urcolor/i18n`'s index also
+// registers the colour-name sources, and pulling those into the hero's first
+// chunk is exactly what SatName's lazy `import()` exists to avoid. Channel
+// labels are a static table with no data chunks behind them.
+import { ChannelNames, type ChannelKey } from "../../../../packages/i18n/src/channel-names";
 
 const color = useHeroColor();
+const lang = useDocsLang();
 
-const CHANNELS = [
-  { channel: "h", label: "H", aria: "Hue" },
-  { channel: "s", label: "S", aria: "Saturation" },
-  { channel: "v", label: "V", aria: "Value" },
-  { channel: "alpha", label: "A", aria: "Alpha" },
-] as const;
+const CHANNELS: readonly { channel: string; key: ChannelKey }[] = [
+  { channel: "h", key: "hue" },
+  { channel: "s", key: "saturation" },
+  { channel: "v", key: "value" },
+  { channel: "alpha", key: "alpha" },
+];
+
+/**
+ * `ChannelNames` negotiates down to English for a locale it has no table for,
+ * so the fallback here only covers an unknown *channel* — which the literal
+ * list above rules out. It is kept so the template never renders `undefined`.
+ */
+const fields = computed(() => {
+  const names = new ChannelNames(lang.value);
+  return CHANNELS.map(c => ({ ...c, label: names.of(c.key) ?? c.key }));
+});
 
 function onUpdate(next: Color | undefined) {
   setHeroColor(color, next);
@@ -23,7 +41,7 @@ function onUpdate(next: Color | undefined) {
 <template>
   <div class="sat-fields">
     <ColorFieldRoot
-      v-for="c in CHANNELS"
+      v-for="c in fields"
       :key="c.channel"
       :model-value="color"
       color-space="hsv"
@@ -32,11 +50,15 @@ function onUpdate(next: Color | undefined) {
       class="sat-field"
       @update:model-value="onUpdate"
     >
-      <label class="sat-field-label">{{ c.label }}</label>
+      <label
+        class="sat-field-label"
+        :title="c.label"
+        :lang="lang"
+      >{{ c.label }}</label>
       <ColorFieldInput
         as="input"
         class="sat-field-input"
-        :aria-label="c.aria"
+        :aria-label="c.label"
       />
     </ColorFieldRoot>
   </div>
@@ -55,12 +77,21 @@ function onUpdate(next: Color | undefined) {
   width: clamp(56px, 10cqw, 80px);
 }
 
+/*
+ * A whole translated word now, not a one-letter initial, so it has to be able
+ * to give up: the longest of them ("Насыщенность") is wider than the field on a
+ * narrow stage. The `title` on the element carries the untruncated text.
+ */
 .sat-field-label {
+  max-width: 100%;
   font-size: 10px;
   font-weight: 600;
   color: var(--vp-c-text-3);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .sat-field-input {

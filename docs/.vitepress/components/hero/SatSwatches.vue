@@ -3,6 +3,7 @@ import { computed } from "vue";
 import { Color } from "@urcolor/core";
 import { hueRamp } from "../../composables/heroLayout";
 import { useHeroColor } from "../../composables/useHeroColor";
+import { ColorSwatchRoot } from "../../../../packages/vue/src/components/ColorSwatch";
 import {
   ColorSwatchPickerItem,
   ColorSwatchPickerItemIndicator,
@@ -35,6 +36,18 @@ function onSelect(value: unknown) {
 
 <template>
   <div class="sat-swatches">
+    <!--
+      The ramp only ever shows *derived* colors, so the picked one had nowhere
+      to be seen at full size. `alpha` is on so the checkerboard shows through
+      when the alpha field or slider is pulled down.
+    -->
+    <ColorSwatchRoot
+      :model-value="color"
+      alpha
+      as="div"
+      class="sat-swatch-current"
+    />
+
     <ColorSwatchPickerRoot
       :model-value="selected"
       as="div"
@@ -65,7 +78,29 @@ function onSelect(value: unknown) {
 
 <style scoped>
 .sat-swatches {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
   width: clamp(72px, 17cqw, 110px);
+  /*
+   * Own container, so `cqw` below means this panel's width rather than the
+   * stage's — that is what lets the wide swatch measure a ramp cell.
+   */
+  container-type: inline-size;
+}
+
+/*
+ * Full width but exactly one ramp cell tall: the ramp is two equal columns with
+ * a 6px gutter, so a cell is `(width - 6px) / 2`. Stated in `cqw` rather than
+ * `%` because a percentage height would resolve against the panel's height, not
+ * its width. The inset ring keeps a pale swatch from dissolving into the panel
+ * fill.
+ */
+.sat-swatch-current {
+  width: 100%;
+  height: calc((100cqw - 6px) / 2);
+  border-radius: 6px;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--vp-c-text-1) 12%, transparent);
 }
 
 /*

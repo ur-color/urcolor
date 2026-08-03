@@ -1,7 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import { mount } from "@vue/test-utils";
-import { defineComponent, h } from "vue";
+import { computed, defineComponent, h } from "vue";
 import { Color } from "@urcolor/core";
+import { provideDocsLang } from "../.vitepress/composables/useDocsLang";
 import { provideHeroColor } from "../.vitepress/composables/useHeroColor";
 import SatFields from "../.vitepress/components/hero/SatFields.vue";
 import SatSliders from "../.vitepress/components/hero/SatSliders.vue";
@@ -61,10 +62,11 @@ afterEach(() => {
     Object.defineProperty(HTMLCanvasElement.prototype, "getContext", originalGetContext);
 });
 
-function harness(Inner: unknown) {
+function harness(Inner: unknown, lang = "en") {
   return defineComponent({
     setup() {
       const color = provideHeroColor();
+      provideDocsLang(computed(() => lang));
       return { color };
     },
     render() {
@@ -89,11 +91,19 @@ describe("SatSliders", () => {
 });
 
 describe("SatFields", () => {
-  it("renders four labelled channel inputs", () => {
+  it("renders four channel inputs labelled from @urcolor/i18n", () => {
     const wrapper = mount(harness(SatFields));
     expect(wrapper.findAll("input")).toHaveLength(4);
-    expect(wrapper.text()).toContain("H");
-    expect(wrapper.text()).toContain("A");
+    const labels = wrapper.findAll(".sat-field-label").map(l => l.text());
+    expect(labels).toEqual(["Hue", "Saturation", "Value", "Alpha"]);
+  });
+
+  it("translates the channel labels with the page language", () => {
+    const wrapper = mount(harness(SatFields, "ru"));
+    const labels = wrapper.findAll(".sat-field-label").map(l => l.text());
+    expect(labels).toEqual(["Тон", "Насыщенность", "Значение", "Альфа"]);
+    // The accessible name travels with the visible label.
+    expect(wrapper.findAll("input")[0]!.attributes("aria-label")).toBe("Тон");
   });
 
   it("writes a typed value back into the shared color", async () => {

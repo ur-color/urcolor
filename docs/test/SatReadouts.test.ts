@@ -25,6 +25,10 @@ describe("SatHex", () => {
     expect(wrapper.findAll("input")).toHaveLength(1);
   });
 
+  it("captions the input", () => {
+    expect(mount(harness(SatHex)).find(".sat-hex-label").text()).toBe("Hex");
+  });
+
   it("omits the format lines by default", () => {
     expect(mount(harness(SatHex)).findAll(".sat-format-line")).toHaveLength(0);
   });
@@ -67,5 +71,14 @@ describe("SatSwatches", () => {
     wrapper.vm.color = new Color("hsv", [120, 1, 1]);
     await wrapper.vm.$nextTick();
     expect(wrapper.html()).toContain("hsl(120, 85%");
+  });
+
+  it("shows the picked color in a wide swatch above the ramp, outside the picker", async () => {
+    const wrapper = mount(harness(SatSwatches));
+    wrapper.vm.color = new Color("hsv", [120, 1, 1]);
+    await wrapper.vm.$nextTick();
+    const current = wrapper.find(".sat-swatch-current");
+    expect(current.attributes("data-swatch-index")).toBeUndefined();
+    expect(current.attributes("style")).toContain("--swatch-color: rgb(0 255 0)");
   });
 });
