@@ -17,3 +17,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   for.
 - `ChannelNames`, translating channel labels into 77 languages, with negotiation
   down to English for a locale that has no table.
+- Requires `@urcolor/core ^2.0.0`.

@@ -17,3 +17,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Versions track `@urcolor/core` one-for-one; this package has no release notes
   of its own beyond that. See
   [the core changelog](../core/CHANGELOG.md) for what actually changed.
+
+### Removed
+
+- **BREAKING:** Because `export * from "@urcolor/core"` re-exports whatever
+  core exports, this package silently loses the same rendering and
+  picker-UI surface core just dropped — the gradient renderer, the geometry
+  helpers and the per-channel space config. Those names now live in
+  `@urcolor/shared` instead; see
+  [the core changelog](../core/CHANGELOG.md#unreleased) for the full list and
+  the migration line.

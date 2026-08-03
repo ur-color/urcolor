@@ -7,6 +7,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Added
+
+- `channelIndexOf` — the general form of `hueIndexOf`, now exported from
+  `src/index.ts` rather than staying an internal of the space registry. It
+  became part of the public surface because `@urcolor/shared`'s gradient
+  renderer needs it now that the renderer no longer lives inside core.
+
+### Removed
+
+- **BREAKING:** Every rendering and picker-UI export is removed. Nothing here
+  was color math — it moves to `@urcolor/shared`, unchanged:
+  - **Gradient:** `drawGradient`, `drawLinearGradient`, `interpolateStops`,
+    `sampleBilinearGrid`, `sampleChannelGrid`, `sampleTriangleGrid`,
+    `samplePolarGrid`, `sampleConicRing`
+  - **Geometry:** `polarToCartesian`, `cartesianToPolar`, `clampToCircle`,
+    `normalizeAngle`, `triangleVertices`, `barycentricCoords`,
+    `barycentricToCartesian`, `pointInTriangle`, `clampToTriangle`,
+    `insetTriangle`, and the `Point`/`PolarCoord` types
+  - **Space config:** `colorSpaces`, `getChannelConfig`, `displayToNative`,
+    `nativeToDisplay`, and the `ChannelConfig`/`ColorSpaceConfig` types
+
+  `@urcolor/core` is a color library now — parse, convert, serialize, gamut,
+  mix, deltaE, contrast, named colors, the space registry — and nothing that
+  paints a canvas or lays out a wheel.
+
+### Migration
+
+An import of any of the names above moves from `@urcolor/core` to
+`@urcolor/shared`:
+
+```diff
+-import { drawGradient, insetTriangle, colorSpaces } from "@urcolor/core";
++import { drawGradient, insetTriangle, colorSpaces } from "@urcolor/shared";
+```
+
 ## [1.0.0] - 2026-08-03
 
 ### Changed

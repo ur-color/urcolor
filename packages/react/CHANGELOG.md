@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **BREAKING:** Depends on `@urcolor/shared` in place of `@urcolor/primitives`,
+  and now requires `@urcolor/core ^2.0.0`.
 - **BREAKING:** `Color` now comes from `@urcolor/core`'s vendored, zero-dependency
   CSS Color 4 library instead of `internationalized-color`. `color-space` prop
   values (and any other space id passed to a component) use CSS Color 4 ids —

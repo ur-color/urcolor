@@ -14,3 +14,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   same unstyled, composable shape as the Vue and React bindings.
 - WebGL gradient rendering with a CPU sampler fallback, keyboard navigation and
   ARIA wiring throughout.
+- Depends on `@urcolor/shared` (not `@urcolor/primitives`) and requires
+  `@urcolor/core ^2.0.0`.
