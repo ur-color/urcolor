@@ -17,6 +17,16 @@ on:
         description: npm name, used for the git tag and release title
         required: true
         type: string
+      force:
+        description: >
+          Publish the version currently in the manifest, without requiring it to
+          differ from the previous commit. For re-running a release that failed
+          for reasons outside the package — a missing token, a permissions
+          problem — where the version bump is already committed and so can never
+          trigger a push again.
+        required: false
+        default: false
+        type: boolean
       publish-dir:
         description: >
           Directory to publish from, when it is not the package itself.
@@ -56,7 +66,10 @@ jobs:
           NEW_VERSION=$(grep '"version"' "$MANIFEST" | sed 's/.*: "\(.*\)".*/\1/')
           echo "old=$OLD_VERSION" >> "$GITHUB_OUTPUT"
           echo "new=$NEW_VERSION" >> "$GITHUB_OUTPUT"
-          if [ -n "$OLD_VERSION" ] && [ "$OLD_VERSION" != "$NEW_VERSION" ]; then
+          if [ "${{ inputs.force }}" = "true" ]; then
+            echo "forced: publishing $NEW_VERSION regardless of the previous commit"
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          elif [ -n "$OLD_VERSION" ] && [ "$OLD_VERSION" != "$NEW_VERSION" ]; then
             echo "changed=true" >> "$GITHUB_OUTPUT"
           else
             echo "changed=false" >> "$GITHUB_OUTPUT"

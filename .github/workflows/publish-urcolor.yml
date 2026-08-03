@@ -5,12 +5,24 @@ on:
     branches: [main]
     paths:
       - 'packages/urcolor/package.json'
+  # Manual re-release, for when a publish failed for reasons outside the
+  # package and the version bump is already committed — a push can no longer
+  # trigger it, because the version no longer differs from the last commit.
+  workflow_dispatch:
 
 jobs:
   publish:
+    # Must be declared here, not only in the called workflow: a reusable
+    # workflow cannot hold more permission than the job calling it, and this
+    # repository's default is read-only. Without this the run fails at startup,
+    # before any job exists.
+    permissions:
+      contents: write
+      id-token: write
     uses: ./.github/workflows/publish.yml
     with:
       package-dir: 'packages/urcolor'
       package-name: 'urcolor'
+      force: ${{ github.event_name == 'workflow_dispatch' }}
     secrets:
       NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
