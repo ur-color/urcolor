@@ -45,6 +45,7 @@
         "@urcolor/core": "workspace:*",
         "@urcolor/i18n": "workspace:*",
         "@urcolor/react": "workspace:*",
+        "@urcolor/shared": "workspace:*",
         "@urcolor/vue": "workspace:*",
         "gsap": "^3.12.7",
       },

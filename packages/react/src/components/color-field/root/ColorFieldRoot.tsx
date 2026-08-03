@@ -1,6 +1,6 @@
 import { forwardRef, useCallback, useMemo, useRef, useState } from "react";
 import { Color, type SpaceId } from "@urcolor/core";
-import { getChannelConfig, displayToNative, nativeToDisplay, type ChannelConfig } from "@urcolor/core";
+import { getChannelConfig, displayToNative, nativeToDisplay, type ChannelConfig } from "@urcolor/shared";
 import { clamp, snapToStep } from "../../../utils";
 import { ColorFieldContext, type ColorFieldContextValue } from "./ColorFieldRootContext";
 

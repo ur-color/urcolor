@@ -1,4 +1,4 @@
-import type { SpaceId } from "./color/types";
+import type { SpaceId } from "@urcolor/core";
 
 export interface ChannelConfig {
   /** Channel key (e.g. 'h', 's', 'l') */

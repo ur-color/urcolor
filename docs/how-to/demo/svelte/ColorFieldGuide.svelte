@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { colorSpaces } from "@urcolor/core";
+  import { colorSpaces } from "@urcolor/shared";
   import { ColorField, useColor } from "@urcolor/svelte";
 
   const colorState = useColor("hsl(210, 80%, 50%)");

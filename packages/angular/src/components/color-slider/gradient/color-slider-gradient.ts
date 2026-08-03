@@ -9,10 +9,11 @@ import {
   Injector,
   input,
 } from "@angular/core";
-import { Color, getChannelConfig, type SpaceId } from "@urcolor/core";
+import { Color, type SpaceId } from "@urcolor/core";
 import {
   CHECKERBOARD_BACKGROUND,
   drawLinearGradient,
+  getChannelConfig,
   interpolateStops,
 } from "@urcolor/shared";
 import { ColorSliderRoot } from "../root/color-slider-root";

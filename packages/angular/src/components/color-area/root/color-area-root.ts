@@ -13,9 +13,10 @@ import {
   signal,
 } from "@angular/core";
 import type { FormValueControl } from "@angular/forms/signals";
-import { Color, colorSpaces, type SpaceId } from "@urcolor/core";
+import { Color, type SpaceId } from "@urcolor/core";
 import {
   applyDisplayValues,
+  colorSpaces,
   colorToDisplayValue,
   createDragController,
   DATA_DISABLED,

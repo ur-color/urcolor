@@ -20,6 +20,3 @@ export type { ColorObject, Coords, SpaceDef, SpaceId } from "./color/types";
 
 // Geometry helpers.
 export { polarToCartesian, cartesianToPolar, clampToCircle, normalizeAngle, triangleVertices, barycentricCoords, barycentricToCartesian, pointInTriangle, clampToTriangle, insetTriangle, type Point, type PolarCoord } from "./geometry";
-
-// Color-space UI configuration.
-export { colorSpaces, getChannelConfig, displayToNative, nativeToDisplay, type ChannelConfig, type ColorSpaceConfig } from "./color-spaces";

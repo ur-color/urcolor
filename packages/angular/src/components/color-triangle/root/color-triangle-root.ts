@@ -18,7 +18,6 @@ import {
   barycentricCoords,
   clampToTriangle,
   Color,
-  colorSpaces,
   insetTriangle,
   pointInTriangle,
   triangleVertices,
@@ -27,6 +26,7 @@ import {
 } from "@urcolor/core";
 import {
   applyDisplayValues,
+  colorSpaces,
   colorToDisplayValue,
   createDragController,
   DATA_COLOR_TRIANGLE_ROOT,

@@ -37,7 +37,7 @@
 
 <script lang="ts">
   import { untrack } from "svelte";
-  import { Color as ColorClass, type ChannelConfig } from "@urcolor/core";
+  import { Color as ColorClass } from "@urcolor/core";
   import {
     applyDisplayValue,
     clamp,
@@ -48,6 +48,7 @@
     parseColor,
     resolveChannelConfig,
     snapToStep,
+    type ChannelConfig,
   } from "@urcolor/shared";
   import type { ChildProps } from "../../../shared/child.js";
   // `ColorFieldFormat` is already in scope from the module block above.

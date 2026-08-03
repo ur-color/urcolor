@@ -81,7 +81,7 @@ export const [injectColorFieldRootContext, provideColorFieldRootContext]
 
 <script setup lang="ts">
 import { computed, ref, shallowRef, toRef, toRefs, watch } from "vue";
-import { getChannelConfig, displayToNative, nativeToDisplay, type ChannelConfig } from "@urcolor/core";
+import { getChannelConfig, displayToNative, nativeToDisplay, type ChannelConfig } from "@urcolor/shared";
 import { clamp, snapToStep, useFormControl } from "../../shared/utils";
 
 const props = withDefaults(defineProps<ColorFieldRootProps>(), {

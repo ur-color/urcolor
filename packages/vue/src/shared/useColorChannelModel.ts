@@ -1,7 +1,8 @@
 import type { ComputedRef, Ref, ShallowRef } from "vue";
 import { computed, ref, shallowRef, watch } from "vue";
-import type { ChannelConfig, SpaceId } from "@urcolor/core";
-import { Color, displayToNative, getChannelConfig, nativeToDisplay } from "@urcolor/core";
+import type { SpaceId } from "@urcolor/core";
+import { Color } from "@urcolor/core";
+import { displayToNative, getChannelConfig, nativeToDisplay, type ChannelConfig } from "@urcolor/shared";
 
 /**
  * The alpha channel is displayed as a 0–100 percentage but stored natively as

@@ -4,7 +4,7 @@ import type { PrimitiveProps } from "reka-ui";
 import { createContext, useDirection, useForwardExpose, VisuallyHidden } from "reka-ui";
 import { computed, ref, toRef, toRefs } from "vue";
 import { Color, type SpaceId } from "@urcolor/core";
-import { colorSpaces } from "@urcolor/core";
+import { colorSpaces } from "@urcolor/shared";
 import { cartesianToPolar, normalizeAngle } from "@urcolor/core";
 import { cyclicWrap, snapToStep, useFormControl } from "../../shared/utils";
 import { useColorChannelModel } from "../../shared/useColorChannelModel";

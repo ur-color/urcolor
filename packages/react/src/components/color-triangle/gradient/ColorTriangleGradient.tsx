@@ -1,6 +1,6 @@
 import { forwardRef, useEffect, useRef, type ComponentPropsWithoutRef } from "react";
-import { Color, getChannelConfig, type SpaceId } from "@urcolor/core";
-import { sampleTriangleGrid } from "@urcolor/shared";
+import { Color, type SpaceId } from "@urcolor/core";
+import { getChannelConfig, sampleTriangleGrid } from "@urcolor/shared";
 import { useColorTriangleContext } from "../root/ColorTriangleRootContext";
 import { CHECKERBOARD_BACKGROUND } from "../../../utils";
 

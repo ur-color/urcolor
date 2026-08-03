@@ -1,4 +1,4 @@
-import { type SpaceId } from "@urcolor/core";
+import type { SpaceId } from "@urcolor/core";
 import { type ColorInput, type UseColorReturn } from "./useColor.svelte.js";
 /**
  * `useColor` plus one readonly getter per channel of the requested space and a

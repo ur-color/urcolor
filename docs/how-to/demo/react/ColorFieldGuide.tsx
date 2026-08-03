@@ -1,4 +1,4 @@
-import { colorSpaces } from "@urcolor/core";
+import { colorSpaces } from "@urcolor/shared";
 import { ColorField, useColor } from "@urcolor/react";
 
 export default function ColorFieldGuide() {

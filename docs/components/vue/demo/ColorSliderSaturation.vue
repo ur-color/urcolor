@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import { getChannelConfig } from "@urcolor/core";
+import { getChannelConfig } from "@urcolor/shared";
 import {
   ColorSliderRoot,
   ColorSliderTrack,

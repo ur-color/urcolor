@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import { Color, getChannelConfig, type SpaceId } from "@urcolor/core";
+import { Color, type SpaceId } from "@urcolor/core";
+import { getChannelConfig } from "@urcolor/shared";
 import {
   Label,
   CheckboxRoot,

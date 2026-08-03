@@ -9,8 +9,8 @@ import {
   Injector,
   input,
 } from "@angular/core";
-import { Color, getChannelConfig } from "@urcolor/core";
-import { CHECKERBOARD_BACKGROUND, DATA_DISABLED, renderToCanvas, sampleTriangleGrid } from "@urcolor/shared";
+import { Color } from "@urcolor/core";
+import { CHECKERBOARD_BACKGROUND, DATA_DISABLED, getChannelConfig, renderToCanvas, sampleTriangleGrid } from "@urcolor/shared";
 import { ColorTriangleRoot } from "../root/color-triangle-root";
 
 /** Both axes are sampled at this resolution and then smoothly upscaled. */

@@ -4,7 +4,8 @@ import type { PrimitiveProps } from "reka-ui";
 import { createContext, useDirection, useForwardExpose, VisuallyHidden } from "reka-ui";
 import { computed, ref, toRef, toRefs } from "vue";
 import { Color, type SpaceId } from "@urcolor/core";
-import { colorSpaces, triangleVertices, clampToTriangle, barycentricCoords, pointInTriangle, insetTriangle, type Point } from "@urcolor/core";
+import { triangleVertices, clampToTriangle, barycentricCoords, pointInTriangle, insetTriangle, type Point } from "@urcolor/core";
+import { colorSpaces } from "@urcolor/shared";
 
 type Direction = "ltr" | "rtl";
 

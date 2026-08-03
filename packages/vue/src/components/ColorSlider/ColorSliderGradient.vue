@@ -24,8 +24,8 @@ export interface ColorSliderGradientProps extends /* @vue-ignore */ PrimitivePro
 <script setup lang="ts">
 import { ref, computed } from "vue";
 import { useForwardExpose, Primitive } from "reka-ui";
-import { Color, getChannelConfig } from "@urcolor/core";
-import { drawLinearGradient, interpolateStops } from "@urcolor/shared";
+import { Color } from "@urcolor/core";
+import { drawLinearGradient, getChannelConfig, interpolateStops } from "@urcolor/shared";
 import { applyChannelOverrides, useGradientCanvas } from "../../shared/useGradientCanvas";
 import { CHECKERBOARD_BACKGROUND } from "../../shared/checkerboard";
 import { injectColorSliderRootContext } from "./ColorSliderRoot.vue";

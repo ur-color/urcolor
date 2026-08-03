@@ -1,6 +1,6 @@
 import type { Color, SpaceId } from "@urcolor/core";
 import type { Ref } from "vue";
-import { getChannelConfig } from "@urcolor/core";
+import { getChannelConfig } from "@urcolor/shared";
 import { useResizeObserver } from "@vueuse/core";
 import { getCurrentInstance, onBeforeUnmount, watch } from "vue";
 

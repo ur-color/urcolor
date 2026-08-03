@@ -11,8 +11,7 @@ export interface ColorTriangleGradientProps extends /* @vue-ignore */ PrimitiveP
 <script setup lang="ts">
 import { ref, computed } from "vue";
 import { useForwardExpose, Primitive } from "reka-ui";
-import { getChannelConfig } from "@urcolor/core";
-import { sampleTriangleGrid } from "@urcolor/shared";
+import { getChannelConfig, sampleTriangleGrid } from "@urcolor/shared";
 import { applyChannelOverrides, renderToCanvas, useGradientCanvas } from "../../shared/useGradientCanvas";
 import { CHECKERBOARD_BACKGROUND } from "../../shared/checkerboard";
 import { injectColorTriangleRootContext } from "./ColorTriangleRoot.vue";

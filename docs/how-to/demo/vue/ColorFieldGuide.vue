@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import { colorSpaces } from "@urcolor/core";
+import { colorSpaces } from "@urcolor/shared";
 import { Label } from "reka-ui";
 import {
   useColor,

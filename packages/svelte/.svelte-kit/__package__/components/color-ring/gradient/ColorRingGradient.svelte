@@ -20,8 +20,8 @@
 
 <script lang="ts">
   import { createAttachmentKey } from "svelte/attachments";
-  import { getChannelConfig, type Color } from "@urcolor/core";
-  import { CHECKERBOARD_BACKGROUND, DATA_DISABLED, renderToCanvas, sampleConicRing } from "@urcolor/shared";
+  import type { Color } from "@urcolor/core";
+  import { CHECKERBOARD_BACKGROUND, DATA_DISABLED, getChannelConfig, renderToCanvas, sampleConicRing } from "@urcolor/shared";
   import type { ChildProps } from "../../../shared/child.js";
   import { gradientAttachment } from "../../../shared/gradient.svelte.js";
   import { colorRingContext } from "../root/context.svelte.js";

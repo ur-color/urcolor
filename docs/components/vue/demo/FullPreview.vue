@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from "vue";
-import { colorSpaces, getChannelConfig, type SpaceId } from "@urcolor/core";
+import type { SpaceId } from "@urcolor/core";
+import { colorSpaces, getChannelConfig } from "@urcolor/shared";
 import {
   SelectRoot,
   SelectTrigger,

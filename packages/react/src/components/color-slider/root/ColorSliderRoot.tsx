@@ -1,7 +1,7 @@
 import { forwardRef, useCallback, useMemo, useRef, useState } from "react";
 import { Slider } from "@base-ui-components/react/slider";
 import { Color, type SpaceId } from "@urcolor/core";
-import { getChannelConfig, displayToNative, nativeToDisplay } from "@urcolor/core";
+import { getChannelConfig, displayToNative, nativeToDisplay } from "@urcolor/shared";
 import { ColorSliderContext, type ColorSliderContextValue } from "./ColorSliderRootContext";
 
 export interface ColorSliderRootProps {

@@ -1,5 +1,6 @@
 import { Component, signal } from "@angular/core";
-import { Color, colorSpaces } from "@urcolor/core";
+import { Color } from "@urcolor/core";
+import { colorSpaces } from "@urcolor/shared";
 import { COLOR_FIELD_DIRECTIVES } from "@urcolor/angular";
 
 @Component({

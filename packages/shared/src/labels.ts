@@ -1,5 +1,5 @@
 import type { SpaceId } from "@urcolor/core";
-import { getChannelConfig } from "@urcolor/core";
+import { getChannelConfig } from "./color-spaces";
 
 const ALPHA_LABEL = "Alpha";
 

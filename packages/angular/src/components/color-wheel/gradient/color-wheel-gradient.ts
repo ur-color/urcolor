@@ -8,8 +8,8 @@ import {
   Injector,
   input,
 } from "@angular/core";
-import { Color, getChannelConfig } from "@urcolor/core";
-import { CHECKERBOARD_BACKGROUND, DATA_DISABLED, renderToCanvas, samplePolarGrid } from "@urcolor/shared";
+import { Color } from "@urcolor/core";
+import { CHECKERBOARD_BACKGROUND, DATA_DISABLED, getChannelConfig, renderToCanvas, samplePolarGrid } from "@urcolor/shared";
 import { ColorWheelRoot } from "../root/color-wheel-root";
 
 /** Edge length of the sampled square the disc is cut from. */

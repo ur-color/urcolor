@@ -1,9 +1,9 @@
+import type { SpaceId } from "@urcolor/core";
 import {
   colorSpaces,
   nativeToDisplay,
   displayToNative,
-  type SpaceId,
-} from "@urcolor/core";
+} from "@urcolor/shared";
 import {
   computed,
   markRaw,

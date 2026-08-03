@@ -1,4 +1,4 @@
-import { colorSpaces } from "@urcolor/core";
+import { colorSpaces } from "@urcolor/shared";
 import { ColorArea, ColorField, ColorSlider, useColor } from "@urcolor/react";
 
 export default function MaterialColorPickerGuide() {

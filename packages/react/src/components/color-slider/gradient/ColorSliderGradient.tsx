@@ -1,6 +1,6 @@
 import { forwardRef, useCallback, useEffect, useMemo, useRef, type ComponentPropsWithoutRef } from "react";
-import { Color, getChannelConfig, type SpaceId } from "@urcolor/core";
-import { drawLinearGradient, interpolateStops } from "@urcolor/shared";
+import { Color, type SpaceId } from "@urcolor/core";
+import { drawLinearGradient, getChannelConfig, interpolateStops } from "@urcolor/shared";
 import { useColorSliderContext } from "../root/ColorSliderRootContext";
 import { CHECKERBOARD_BACKGROUND } from "../../../utils";
 

@@ -35,12 +35,12 @@
       cartesianToPolar,
       clampToCircle,
       Color as ColorClass,
-      colorSpaces,
       normalizeAngle,
     } from "@urcolor/core";
   import {
     applyDisplayValues,
     clamp,
+    colorSpaces,
     colorToDisplayValue,
     createDragController,
     DATA_DISABLED,

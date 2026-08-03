@@ -1,5 +1,5 @@
-import type { ChannelConfig, SpaceId } from "@urcolor/core";
-import { Color, displayToNative, getChannelConfig, nativeToDisplay } from "@urcolor/core";
+import { Color, type SpaceId } from "@urcolor/core";
+import { displayToNative, getChannelConfig, nativeToDisplay, type ChannelConfig } from "./color-spaces";
 
 /**
  * The alpha channel is displayed as a 0-100 percentage but stored natively as

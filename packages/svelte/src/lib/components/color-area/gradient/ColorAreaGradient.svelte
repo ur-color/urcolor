@@ -31,11 +31,12 @@
 
 <script lang="ts">
   import { createAttachmentKey } from "svelte/attachments";
-  import { Color, getChannelConfig } from "@urcolor/core";
+  import { Color } from "@urcolor/core";
   import {
     CHECKERBOARD_BACKGROUND,
     DATA_DISABLED,
     drawGradient,
+    getChannelConfig,
     renderToCanvas,
     sampleBilinearGrid,
     sampleChannelGrid,

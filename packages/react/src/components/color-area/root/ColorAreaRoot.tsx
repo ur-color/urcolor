@@ -1,6 +1,6 @@
 import { forwardRef, useCallback, useMemo, useRef, useState } from "react";
 import { Color, type SpaceId } from "@urcolor/core";
-import { colorSpaces, getChannelConfig, displayToNative, nativeToDisplay, type ChannelConfig } from "@urcolor/core";
+import { colorSpaces, getChannelConfig, displayToNative, nativeToDisplay, type ChannelConfig } from "@urcolor/shared";
 import { snapToStep, linearScale, getClosestThumbIndex, hasMinStepsBetweenValues, ARROW_KEYS } from "../../../utils";
 import { ColorAreaContext, type ColorAreaContextValue } from "./ColorAreaRootContext";
 

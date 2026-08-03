@@ -35,11 +35,9 @@ describe("@urcolor/core exports", () => {
     }
   });
 
-  it("still exposes the geometry and space-config surface", () => {
+  it("still exposes the geometry surface", () => {
     for (const name of [
       "polarToCartesian",
-      "colorSpaces",
-      "getChannelConfig",
     ]) {
       expect(core).toHaveProperty(name);
     }

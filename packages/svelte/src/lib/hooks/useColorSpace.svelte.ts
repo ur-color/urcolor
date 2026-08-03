@@ -1,4 +1,5 @@
-import { colorSpaces, displayToNative, nativeToDisplay, type SpaceId } from "@urcolor/core";
+import type { SpaceId } from "@urcolor/core";
+import { colorSpaces, displayToNative, nativeToDisplay } from "@urcolor/shared";
 import { useColor, type ColorInput, type UseColorReturn } from "./useColor.svelte.js";
 
 /**

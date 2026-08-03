@@ -9,8 +9,8 @@ import {
   Injector,
   input,
 } from "@angular/core";
-import { type Color, getChannelConfig } from "@urcolor/core";
-import { CHECKERBOARD_BACKGROUND, DATA_DISABLED, renderToCanvas, sampleConicRing } from "@urcolor/shared";
+import type { Color } from "@urcolor/core";
+import { CHECKERBOARD_BACKGROUND, DATA_DISABLED, getChannelConfig, renderToCanvas, sampleConicRing } from "@urcolor/shared";
 import { ColorRingRoot } from "../root/color-ring-root";
 
 const SAMPLE_SIZE = 128;

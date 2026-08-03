@@ -1,4 +1,4 @@
-import { colorSpaces, displayToNative, nativeToDisplay } from "@urcolor/core";
+import { colorSpaces, displayToNative, nativeToDisplay } from "@urcolor/shared";
 import { useColor } from "./useColor.svelte.js";
 /**
  * Reactive colour state projected onto one colour space.

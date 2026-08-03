@@ -95,6 +95,7 @@ export default defineConfig({
     resolve: {
       alias: {
         "@urcolor/core": path.resolve(__dirname, "../../packages/core/src/index.ts"),
+        "@urcolor/shared": path.resolve(__dirname, "../../packages/shared/src/index.ts"),
         "@urcolor/vue": path.resolve(__dirname, "../../packages/vue/src/index.ts"),
         "@urcolor/react": path.resolve(__dirname, "../../packages/react/src/index.ts"),
         "@urcolor/i18n": path.resolve(__dirname, "../../packages/i18n/src/index.ts"),

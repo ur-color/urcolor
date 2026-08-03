@@ -37,9 +37,10 @@
 <script lang="ts">
   import { untrack } from "svelte";
   import { createAttachmentKey } from "svelte/attachments";
-    import { Color as ColorClass, colorSpaces } from "@urcolor/core";
+    import { Color as ColorClass } from "@urcolor/core";
   import {
     applyDisplayValues,
+    colorSpaces,
     colorToDisplayValue,
     createDragController,
     DATA_DISABLED,

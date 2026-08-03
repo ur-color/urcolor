@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { getChannelConfig } from "@urcolor/core";
+import { getChannelConfig } from "@urcolor/shared";
 import { ColorSlider, useColor } from "@urcolor/react";
 
 export default function ColorSliderSaturation() {

@@ -1,5 +1,6 @@
 import { computed, type Signal } from "@angular/core";
-import { colorSpaces, displayToNative, nativeToDisplay, type SpaceId } from "@urcolor/core";
+import type { SpaceId } from "@urcolor/core";
+import { colorSpaces, displayToNative, nativeToDisplay } from "@urcolor/shared";
 import { createColorStore, type ColorInput, type ColorStore } from "./color-store";
 
 /**
