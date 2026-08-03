@@ -7,8 +7,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Changed
+
+- **`Color` instances are no longer `Object.freeze`d.** Immutability is now
+  structural: `space` and `alpha` are `readonly`, the coordinate tuple lives in
+  a private field, and `coords` returns a copy. Every method still returns a new
+  `Color` and nothing mutates in place, so ordinary use is unaffected — but code
+  that relied on `Object.isFrozen(color)` being `true`, or on a write to
+  `color.space` throwing in strict mode, will notice. Freezing cost about 400 ns
+  per instance, more than the color math itself.
+
+  The class carries `markRaw`'s `__v_skip` flag on its prototype as a result:
+  freezing was also what kept Vue from wrapping instances in a reactive proxy,
+  and a private field cannot be read through one.
+
+### Performance
+
+- The grid samplers (`sampleChannelGrid`, `sampleTriangleGrid`,
+  `samplePolarGrid`, `sampleConicRing`, `sampleBilinearGrid`) hoist everything
+  loop-invariant out of the per-pixel path — patch objects, channel-name
+  lookups, `Color` allocations and a second conversion. Output is byte-for-byte
+  identical; a 128×128 bilinear plane went from ~35 ms to ~4.4 ms.
+- `parse` dispatches on the notation name instead of offering the input to ten
+  parsers in turn, each compiling a `RegExp` to decline it. Rejecting an
+  invalid string is ~5× faster.
+- `num()`, which every serializer calls three or four times, rounds by scaling
+  instead of `toFixed`/`parseFloat` — ~115 ns to ~3 ns — falling back to the
+  old path near rounding boundaries so results stay exactly equivalent.
+- Precomputed lookup tables for channel indices, color keywords and hex bytes.
+
 ### Added
 
+- A benchmark suite (`bun run --cwd packages/core bench`) measuring every
+  operation against culori, chroma-js, colorjs.io, colord, tinycolor2 and
+  @ctrl/tinycolor, with the results — wins and losses both — published at
+  <https://urcolor.vercel.app/guide/benchmarks>.
 - A vendored, zero-dependency CSS Color 4 library: `Color`, `parse`, `tryParse`,
   `serialize`, `convert`, `gamutMap`, `inGamut`, `interpolate`, `mix`, `deltaE`,
   `contrast`, the `manipulate` helpers, `NAMED_COLORS`, and the space registry.
