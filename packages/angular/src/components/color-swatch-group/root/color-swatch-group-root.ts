@@ -18,7 +18,7 @@ import {
   rovingIndexFromKey,
   rovingTabIndex,
   type ToggleGroupState,
-} from "@urcolor/primitives";
+} from "@urcolor/shared";
 
 /** Whether the group holds at most one selection or any number of them. */
 export type ColorSwatchGroupSelectionType = "single" | "multiple";

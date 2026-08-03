@@ -10,7 +10,7 @@ import {
   input,
 } from "@angular/core";
 import { Color, getChannelConfig, sampleTriangleGrid } from "@urcolor/core";
-import { CHECKERBOARD_BACKGROUND, DATA_DISABLED, renderToCanvas } from "@urcolor/primitives";
+import { CHECKERBOARD_BACKGROUND, DATA_DISABLED, renderToCanvas } from "@urcolor/shared";
 import { ColorTriangleRoot } from "../root/color-triangle-root";
 
 /** Both axes are sampled at this resolution and then smoothly upscaled. */

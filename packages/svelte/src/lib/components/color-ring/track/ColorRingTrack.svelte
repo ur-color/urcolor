@@ -10,7 +10,7 @@
 </script>
 
 <script lang="ts">
-  import { DATA_DISABLED, DATA_DRAGGING } from "@urcolor/primitives";
+  import { DATA_DISABLED, DATA_DRAGGING } from "@urcolor/shared";
   import type { ChildProps } from "../../../shared/child.js";
   import { colorRingContext } from "../root/context.svelte.js";
 

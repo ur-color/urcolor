@@ -19,7 +19,7 @@
 </script>
 
 <script lang="ts">
-  import { CHECKERBOARD_BACKGROUND, DATA_DISABLED, parseColor } from "@urcolor/primitives";
+  import { CHECKERBOARD_BACKGROUND, DATA_DISABLED, parseColor } from "@urcolor/shared";
   import type { ChildProps } from "../../../shared/child.js";
 
   /** The size `CHECKERBOARD_BACKGROUND` is already tiled at. */

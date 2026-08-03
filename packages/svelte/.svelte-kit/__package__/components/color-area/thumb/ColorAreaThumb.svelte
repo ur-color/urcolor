@@ -16,7 +16,7 @@
     DATA_DISABLED,
     DATA_DRAGGING,
     formatChannelValue,
-  } from "@urcolor/primitives";
+  } from "@urcolor/shared";
   import type { ChildProps } from "../../../shared/child.js";
   import { colorAreaContext } from "../root/context.svelte.js";
 

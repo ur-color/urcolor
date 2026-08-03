@@ -47,7 +47,7 @@
   },
   "dependencies": {
     "@urcolor/core": "workspace:*",
-    "@urcolor/primitives": "workspace:*"
+    "@urcolor/shared": "workspace:*"
   },
   "peerDependencies": {
     "svelte": "^5.29"

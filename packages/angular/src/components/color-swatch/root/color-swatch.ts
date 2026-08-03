@@ -21,7 +21,7 @@ import {
   isToggleActivationKey,
   parseColor,
   toggleAria,
-} from "@urcolor/primitives";
+} from "@urcolor/shared";
 
 /**
  * The transparency grid the swatch paints under its colour. The tile size is

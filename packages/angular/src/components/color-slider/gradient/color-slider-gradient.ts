@@ -16,7 +16,7 @@ import {
   interpolateStops,
   type SpaceId,
 } from "@urcolor/core";
-import { CHECKERBOARD_BACKGROUND } from "@urcolor/primitives";
+import { CHECKERBOARD_BACKGROUND } from "@urcolor/shared";
 import { ColorSliderRoot } from "../root/color-slider-root";
 
 const AUTO_STEPS = 12;

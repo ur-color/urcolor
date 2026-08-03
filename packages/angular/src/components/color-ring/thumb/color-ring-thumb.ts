@@ -4,7 +4,7 @@ import {
   DATA_DISABLED,
   DATA_DRAGGING,
   formatChannelValue,
-} from "@urcolor/primitives";
+} from "@urcolor/shared";
 import { ColorRingRoot } from "../root/color-ring-root";
 
 /**

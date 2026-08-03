@@ -36,7 +36,7 @@
       isToggleActivationKey,
       parseColor,
       toggleAria,
-    } from "@urcolor/primitives";
+    } from "@urcolor/shared";
   import type { ChildProps } from "../../shared/child.js";
 
   const CHECKER_PATTERN

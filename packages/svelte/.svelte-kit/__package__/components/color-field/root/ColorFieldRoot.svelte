@@ -48,7 +48,7 @@
     parseColor,
     resolveChannelConfig,
     snapToStep,
-  } from "@urcolor/primitives";
+  } from "@urcolor/shared";
   import type { ChildProps } from "../../../shared/child.js";
   // `ColorFieldFormat` is already in scope from the module block above.
   import { colorFieldContext } from "./context.svelte.js";

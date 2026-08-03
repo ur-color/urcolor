@@ -1,5 +1,5 @@
 import { forwardRef, useEffect, useMemo, useRef, type ComponentPropsWithoutRef } from "react";
-import { channelLabel, formatChannelValue } from "@urcolor/primitives";
+import { channelLabel, formatChannelValue } from "@urcolor/shared";
 import { useColorWheelContext } from "../root/ColorWheelRootContext";
 
 export interface ColorWheelThumbProps extends ComponentPropsWithoutRef<"span"> {}

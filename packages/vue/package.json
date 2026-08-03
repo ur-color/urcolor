@@ -59,7 +59,7 @@
   },
   "dependencies": {
     "@urcolor/core": "workspace:*",
-    "@urcolor/primitives": "workspace:*",
+    "@urcolor/shared": "workspace:*",
     "reka-ui": "^2.8.0"
   },
   "peerDependencies": {

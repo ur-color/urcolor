@@ -32,8 +32,8 @@ describe("workspaceRanges", () => {
   it("finds unresolved ranges across every dependency field", () => {
     expect(workspaceRanges({
       dependencies: { "@urcolor/core": "workspace:*", "reka-ui": "^2.8.0" },
-      peerDependencies: { "@urcolor/primitives": "workspace:^1.0.0" },
-    })).toEqual(["dependencies.@urcolor/core", "peerDependencies.@urcolor/primitives"]);
+      peerDependencies: { "@urcolor/shared": "workspace:^1.0.0" },
+    })).toEqual(["dependencies.@urcolor/core", "peerDependencies.@urcolor/shared"]);
   });
 
   it("passes a manifest whose ranges are all resolved", () => {

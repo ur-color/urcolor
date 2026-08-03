@@ -1,6 +1,6 @@
 import { computed, signal, type Signal, type WritableSignal } from "@angular/core";
 import { Color } from "@urcolor/core";
-import { parseColor } from "@urcolor/primitives";
+import { parseColor } from "@urcolor/shared";
 
 /** Anything accepted as the initial colour of a store. */
 export type ColorInput = Color | string | null | undefined;

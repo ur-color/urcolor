@@ -1,5 +1,5 @@
 import { Color } from "@urcolor/core";
-import { parseColor } from "@urcolor/primitives";
+import { parseColor } from "@urcolor/shared";
 
 /** Anything accepted as the initial colour of a hook. */
 export type ColorInput = Color | string | null | undefined;

@@ -25,7 +25,7 @@ import {
   resolveChannelConfig,
   snapToStep,
   stepMultiplier,
-} from "@urcolor/primitives";
+} from "@urcolor/shared";
 
 /** Whether the thumb straddles the edge (`"overflow"`) or is kept inside it. */
 export type ColorAreaThumbAlignment = "contain" | "overflow";

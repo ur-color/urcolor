@@ -17,7 +17,7 @@ import {
   sampleChannelGrid,
   type SpaceId,
 } from "@urcolor/core";
-import { CHECKERBOARD_BACKGROUND, renderToCanvas } from "@urcolor/primitives";
+import { CHECKERBOARD_BACKGROUND, renderToCanvas } from "@urcolor/shared";
 import { ColorAreaRoot } from "../root/color-area-root";
 
 /** Both axes are sampled at this resolution and then smoothly upscaled. */

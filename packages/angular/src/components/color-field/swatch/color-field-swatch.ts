@@ -1,6 +1,6 @@
 import { booleanAttribute, computed, Directive, HostAttributeToken, inject, input } from "@angular/core";
 import type { Color } from "@urcolor/core";
-import { CHECKERBOARD_BACKGROUND, DATA_DISABLED, parseColor } from "@urcolor/primitives";
+import { CHECKERBOARD_BACKGROUND, DATA_DISABLED, parseColor } from "@urcolor/shared";
 
 /** The size `CHECKERBOARD_BACKGROUND` is already tiled at. */
 const DEFAULT_CHECKER_SIZE = 16;

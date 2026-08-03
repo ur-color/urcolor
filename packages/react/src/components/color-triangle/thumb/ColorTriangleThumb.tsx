@@ -1,6 +1,6 @@
 import { forwardRef, useMemo, useEffect, type ComponentPropsWithoutRef } from "react";
 import { barycentricToCartesian } from "@urcolor/core";
-import { channelLabel, formatChannelValue } from "@urcolor/primitives";
+import { channelLabel, formatChannelValue } from "@urcolor/shared";
 import { useColorTriangleContext } from "../root/ColorTriangleRootContext";
 
 export interface ColorTriangleThumbProps extends ComponentPropsWithoutRef<"span"> {}

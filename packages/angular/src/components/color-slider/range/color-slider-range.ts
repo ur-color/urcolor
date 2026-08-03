@@ -1,5 +1,5 @@
 import { computed, Directive, inject } from "@angular/core";
-import { clamp, DATA_DISABLED, DATA_ORIENTATION, positionFromValue } from "@urcolor/primitives";
+import { clamp, DATA_DISABLED, DATA_ORIENTATION, positionFromValue } from "@urcolor/shared";
 import { ColorSliderRoot } from "../root/color-slider-root";
 
 /**

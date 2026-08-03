@@ -1,1 +1,1 @@
-export { channelLabel, formatChannelValue } from "@urcolor/primitives";
+export { channelLabel, formatChannelValue } from "@urcolor/shared";

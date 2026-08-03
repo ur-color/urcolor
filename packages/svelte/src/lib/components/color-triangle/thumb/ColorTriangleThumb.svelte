@@ -12,7 +12,7 @@
 <script lang="ts">
   import { createAttachmentKey } from "svelte/attachments";
   import { barycentricToCartesian } from "@urcolor/core";
-  import { channelLabel, DATA_DISABLED, DATA_DRAGGING, formatChannelValue } from "@urcolor/primitives";
+  import { channelLabel, DATA_DISABLED, DATA_DRAGGING, formatChannelValue } from "@urcolor/shared";
   import type { ChildProps } from "../../../shared/child.js";
   import { colorTriangleContext } from "../root/context.svelte.js";
 

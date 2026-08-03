@@ -35,7 +35,7 @@
       rovingIndexFromKey,
       rovingTabIndex,
       type ToggleGroupState,
-    } from "@urcolor/primitives";
+    } from "@urcolor/shared";
   import type { ChildProps } from "../../../shared/child.js";
   import { colorSwatchGroupContext, type ColorSwatchGroupItemHandle } from "./context.svelte.js";
 

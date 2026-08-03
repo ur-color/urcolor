@@ -23,7 +23,7 @@ import {
   FEEDBACK_EPSILON,
   resolveChannelConfig,
   snapToStep,
-} from "@urcolor/primitives";
+} from "@urcolor/shared";
 
 /**
  * How the field renders and parses its channel value. `"hex"` is never derived

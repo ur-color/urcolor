@@ -6,7 +6,7 @@ import {
   inject,
   signal,
 } from "@angular/core";
-import { DATA_DISABLED, DATA_PRESSED } from "@urcolor/primitives";
+import { DATA_DISABLED, DATA_PRESSED } from "@urcolor/shared";
 import { ColorFieldRoot } from "../root/color-field-root";
 
 /** Delay before a held button starts repeating, then the repeat interval. */

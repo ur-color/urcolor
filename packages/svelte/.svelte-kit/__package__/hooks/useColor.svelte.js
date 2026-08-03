@@ -1,5 +1,5 @@
 import { Color } from "@urcolor/core";
-import { parseColor } from "@urcolor/primitives";
+import { parseColor } from "@urcolor/shared";
 const FALLBACK = Color.parse("hsl(0, 0%, 0%)");
 /**
  * Reactive colour state.

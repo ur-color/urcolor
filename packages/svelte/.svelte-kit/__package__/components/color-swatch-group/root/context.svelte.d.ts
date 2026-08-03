@@ -1,4 +1,4 @@
-import type { ToggleGroupState } from "@urcolor/primitives";
+import type { ToggleGroupState } from "@urcolor/shared";
 /** Whether the group holds at most one selection or any number of them. */
 export type SelectionType = "single" | "multiple";
 /**

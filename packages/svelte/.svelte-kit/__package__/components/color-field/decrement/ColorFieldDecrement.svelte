@@ -11,7 +11,7 @@
 
 <script lang="ts">
   import { createAttachmentKey } from "svelte/attachments";
-  import { DATA_DISABLED, DATA_PRESSED } from "@urcolor/primitives";
+  import { DATA_DISABLED, DATA_PRESSED } from "@urcolor/shared";
   import type { ChildProps } from "../../../shared/child.js";
   import { colorFieldContext } from "../root/context.svelte.js";
 

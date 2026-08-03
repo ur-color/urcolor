@@ -36,7 +36,7 @@ import {
   resolveChannelConfig,
   snapToStep,
   stepMultiplier,
-} from "@urcolor/primitives";
+} from "@urcolor/shared";
 
 /** Whether the thumb straddles the outline or is kept inside it. */
 export type ColorTriangleThumbAlignment = "contain" | "overflow";

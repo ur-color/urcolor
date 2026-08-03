@@ -17,7 +17,7 @@
     DATA_ORIENTATION,
     formatChannelValue,
     sliderAria,
-  } from "@urcolor/primitives";
+  } from "@urcolor/shared";
   import type { ChildProps } from "../../../shared/child.js";
   import { colorSliderContext } from "../root/context.svelte.js";
 

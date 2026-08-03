@@ -1,5 +1,5 @@
 {
-  "name": "@urcolor/primitives",
+  "name": "@urcolor/shared",
   "version": "1.0.0",
   "license": "MIT",
   "type": "module",
@@ -39,7 +39,7 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/ur-color/urcolor",
-    "directory": "packages/primitives"
+    "directory": "packages/shared"
   },
   "bugs": {
     "url": "https://github.com/ur-color/urcolor/issues"

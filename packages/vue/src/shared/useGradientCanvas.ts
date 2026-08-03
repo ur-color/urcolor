@@ -52,11 +52,11 @@ export function applyChannelOverrides(
  * the boundary — two independently antialiased edges whose partial coverage
  * multiplies.
  *
- * The implementation lives in `@urcolor/primitives`, shared with the other
+ * The implementation lives in `@urcolor/shared`, shared with the other
  * framework packages; it is re-exported here because every gradient in this
  * package already imports it from this module.
  */
-export { renderToCanvas } from "@urcolor/primitives";
+export { renderToCanvas } from "@urcolor/shared";
 
 export interface UseGradientCanvasOptions {
   canvas: Ref<HTMLCanvasElement | null | undefined>;

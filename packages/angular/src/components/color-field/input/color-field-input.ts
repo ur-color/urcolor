@@ -1,5 +1,5 @@
 import { Directive, ElementRef, inject } from "@angular/core";
-import { DATA_DISABLED, DATA_READONLY } from "@urcolor/primitives";
+import { DATA_DISABLED, DATA_READONLY } from "@urcolor/shared";
 import { ColorFieldRoot } from "../root/color-field-root";
 
 /**

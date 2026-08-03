@@ -9,7 +9,7 @@ import {
   input,
 } from "@angular/core";
 import { Color, getChannelConfig, samplePolarGrid } from "@urcolor/core";
-import { CHECKERBOARD_BACKGROUND, DATA_DISABLED, renderToCanvas } from "@urcolor/primitives";
+import { CHECKERBOARD_BACKGROUND, DATA_DISABLED, renderToCanvas } from "@urcolor/shared";
 import { ColorWheelRoot } from "../root/color-wheel-root";
 
 /** Edge length of the sampled square the disc is cut from. */

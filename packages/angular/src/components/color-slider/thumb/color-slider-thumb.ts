@@ -6,7 +6,7 @@ import {
   DATA_ORIENTATION,
   formatChannelValue,
   sliderAria,
-} from "@urcolor/primitives";
+} from "@urcolor/shared";
 import { ColorSliderRoot } from "../root/color-slider-root";
 
 /**

@@ -1,5 +1,5 @@
 import { Directive, inject } from "@angular/core";
-import { DATA_DISABLED, DATA_ORIENTATION } from "@urcolor/primitives";
+import { DATA_DISABLED, DATA_ORIENTATION } from "@urcolor/shared";
 import { ColorSliderRoot } from "../root/color-slider-root";
 
 /**

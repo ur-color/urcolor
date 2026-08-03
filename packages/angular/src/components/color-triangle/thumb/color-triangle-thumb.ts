@@ -13,7 +13,7 @@ import {
   DATA_DISABLED,
   DATA_DRAGGING,
   formatChannelValue,
-} from "@urcolor/primitives";
+} from "@urcolor/shared";
 import { ColorTriangleRoot } from "../root/color-triangle-root";
 
 /**

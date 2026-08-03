@@ -1,5 +1,5 @@
 import { Directive, inject } from "@angular/core";
-import { DATA_DISABLED, DATA_DRAGGING } from "@urcolor/primitives";
+import { DATA_DISABLED, DATA_DRAGGING } from "@urcolor/shared";
 import { ColorRingRoot } from "../root/color-ring-root";
 
 /**

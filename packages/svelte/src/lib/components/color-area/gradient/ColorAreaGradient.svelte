@@ -38,7 +38,7 @@
     sampleBilinearGrid,
     sampleChannelGrid,
   } from "@urcolor/core";
-  import { CHECKERBOARD_BACKGROUND, DATA_DISABLED, renderToCanvas } from "@urcolor/primitives";
+  import { CHECKERBOARD_BACKGROUND, DATA_DISABLED, renderToCanvas } from "@urcolor/shared";
   import type { ChildProps } from "../../../shared/child.js";
   import { gradientAttachment } from "../../../shared/gradient.svelte.js";
   import { colorAreaContext } from "../root/context.svelte.js";

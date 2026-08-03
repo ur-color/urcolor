@@ -5,7 +5,7 @@ import {
   DATA_DISABLED,
   DATA_DRAGGING,
   formatChannelValue,
-} from "@urcolor/primitives";
+} from "@urcolor/shared";
 import { ColorAreaRoot } from "../root/color-area-root";
 
 /**

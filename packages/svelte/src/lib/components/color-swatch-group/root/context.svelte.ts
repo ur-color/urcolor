@@ -1,4 +1,4 @@
-import type { ToggleGroupState } from "@urcolor/primitives";
+import type { ToggleGroupState } from "@urcolor/shared";
 import { createContextPair } from "../../../shared/context.js";
 
 /** Whether the group holds at most one selection or any number of them. */

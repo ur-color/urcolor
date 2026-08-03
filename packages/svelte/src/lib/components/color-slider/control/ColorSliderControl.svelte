@@ -10,7 +10,7 @@
 </script>
 
 <script lang="ts">
-  import { DATA_DISABLED, DATA_ORIENTATION } from "@urcolor/primitives";
+  import { DATA_DISABLED, DATA_ORIENTATION } from "@urcolor/shared";
   import type { ChildProps } from "../../../shared/child.js";
   import { colorSliderContext } from "../root/context.svelte.js";
 

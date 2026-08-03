@@ -27,7 +27,7 @@ import {
   valueFromKey,
   valueFromPosition,
   type SliderState,
-} from "@urcolor/primitives";
+} from "@urcolor/shared";
 
 /** The axis a `ColorSlider` runs along. */
 export type ColorSliderOrientation = "horizontal" | "vertical";

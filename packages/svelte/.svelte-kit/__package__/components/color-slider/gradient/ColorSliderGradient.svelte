@@ -28,7 +28,7 @@
 <script lang="ts">
   import { createAttachmentKey } from "svelte/attachments";
   import { Color, drawLinearGradient, getChannelConfig, interpolateStops } from "@urcolor/core";
-  import { CHECKERBOARD_BACKGROUND } from "@urcolor/primitives";
+  import { CHECKERBOARD_BACKGROUND } from "@urcolor/shared";
   import type { ChildProps } from "../../../shared/child.js";
   import { gradientAttachment } from "../../../shared/gradient.svelte.js";
   import { colorSliderContext } from "../root/context.svelte.js";

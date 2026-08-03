@@ -65,10 +65,10 @@
     },
     "packages/angular": {
       "name": "@urcolor/angular",
-      "version": "0.0.1",
+      "version": "1.0.0",
       "dependencies": {
         "@urcolor/core": "workspace:*",
-        "@urcolor/primitives": "workspace:*",
+        "@urcolor/shared": "workspace:*",
         "tslib": "^2",
       },
       "devDependencies": {
@@ -88,7 +88,7 @@
     },
     "packages/core": {
       "name": "@urcolor/core",
-      "version": "0.0.4",
+      "version": "1.0.0",
       "devDependencies": {
         "@ctrl/tinycolor": "^4.2.0",
         "@types/chroma-js": "^3.1.2",
@@ -104,25 +104,18 @@
     },
     "packages/i18n": {
       "name": "@urcolor/i18n",
-      "version": "0.0.4",
-      "dependencies": {
-        "@urcolor/core": "workspace:*",
-      },
-    },
-    "packages/primitives": {
-      "name": "@urcolor/primitives",
-      "version": "0.0.1",
+      "version": "1.0.0",
       "dependencies": {
         "@urcolor/core": "workspace:*",
       },
     },
     "packages/react": {
       "name": "@urcolor/react",
-      "version": "0.0.1",
+      "version": "1.0.0",
       "dependencies": {
         "@base-ui-components/react": "^1.0.0-rc.0",
         "@urcolor/core": "workspace:*",
-        "@urcolor/primitives": "workspace:*",
+        "@urcolor/shared": "workspace:*",
       },
       "devDependencies": {
         "@storybook/addon-essentials": "^8.6.14",
@@ -146,17 +139,24 @@
     },
     "packages/relative": {
       "name": "@urcolor/relative",
-      "version": "0.0.4",
+      "version": "1.0.0",
+      "dependencies": {
+        "@urcolor/core": "workspace:*",
+      },
+    },
+    "packages/shared": {
+      "name": "@urcolor/shared",
+      "version": "1.0.0",
       "dependencies": {
         "@urcolor/core": "workspace:*",
       },
     },
     "packages/svelte": {
       "name": "@urcolor/svelte",
-      "version": "0.0.1",
+      "version": "1.0.0",
       "dependencies": {
         "@urcolor/core": "workspace:*",
-        "@urcolor/primitives": "workspace:*",
+        "@urcolor/shared": "workspace:*",
       },
       "devDependencies": {
         "@sveltejs/package": "^2",
@@ -171,17 +171,17 @@
     },
     "packages/urcolor": {
       "name": "urcolor",
-      "version": "0.0.4",
+      "version": "1.0.0",
       "dependencies": {
         "@urcolor/core": "workspace:*",
       },
     },
     "packages/vue": {
       "name": "@urcolor/vue",
-      "version": "0.1.0",
+      "version": "1.0.0",
       "dependencies": {
         "@urcolor/core": "workspace:*",
-        "@urcolor/primitives": "workspace:*",
+        "@urcolor/shared": "workspace:*",
         "reka-ui": "^2.8.0",
       },
       "devDependencies": {
@@ -927,11 +927,11 @@
 
     "@urcolor/i18n": ["@urcolor/i18n@workspace:packages/i18n"],
 
-    "@urcolor/primitives": ["@urcolor/primitives@workspace:packages/primitives"],
-
     "@urcolor/react": ["@urcolor/react@workspace:packages/react"],
 
     "@urcolor/relative": ["@urcolor/relative@workspace:packages/relative"],
+
+    "@urcolor/shared": ["@urcolor/shared@workspace:packages/shared"],
 
     "@urcolor/svelte": ["@urcolor/svelte@workspace:packages/svelte"],
 

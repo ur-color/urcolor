@@ -56,7 +56,7 @@
   },
   "dependencies": {
     "@urcolor/core": "workspace:*",
-    "@urcolor/primitives": "workspace:*",
+    "@urcolor/shared": "workspace:*",
     "@base-ui-components/react": "^1.0.0-rc.0"
   },
   "peerDependencies": {

@@ -8,7 +8,7 @@ export type ActiveDirection = "x" | "y";
 
 // --- Math utilities ---
 //
-// These live in `@urcolor/primitives` so the framework packages share one
+// These live in `@urcolor/shared` so the framework packages share one
 // implementation; they are re-exported here because every call site inside
 // this package already imports them from `shared/utils`.
 
@@ -23,7 +23,7 @@ export {
   linearScale,
   roundValue,
   snapToStep,
-} from "@urcolor/primitives";
+} from "@urcolor/shared";
 
 /**
  * Wrap a value cyclically into [min, max), used for angular channels such as hue

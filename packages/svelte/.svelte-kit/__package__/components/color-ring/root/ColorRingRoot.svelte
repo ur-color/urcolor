@@ -46,7 +46,7 @@
     snapToStep,
     stepMultiplier,
     type DragPoint,
-  } from "@urcolor/primitives";
+  } from "@urcolor/shared";
   import type { ChildProps } from "../../../shared/child.js";
   import { colorRingContext } from "./context.svelte.js";
 

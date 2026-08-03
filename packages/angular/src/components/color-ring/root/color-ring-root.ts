@@ -27,7 +27,7 @@ import {
   snapToStep,
   stepMultiplier,
   type DragPoint,
-} from "@urcolor/primitives";
+} from "@urcolor/shared";
 
 /** The colour a root falls back to when `[(value)]` is never bound. */
 export const COLOR_RING_DEFAULT_COLOR: Color = Color.parse("hsl(0, 100%, 50%)")!;

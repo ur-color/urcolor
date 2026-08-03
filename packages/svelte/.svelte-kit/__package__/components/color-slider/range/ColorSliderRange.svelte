@@ -10,7 +10,7 @@
 </script>
 
 <script lang="ts">
-  import { clamp, DATA_DISABLED, DATA_ORIENTATION, positionFromValue } from "@urcolor/primitives";
+  import { clamp, DATA_DISABLED, DATA_ORIENTATION, positionFromValue } from "@urcolor/shared";
   import type { ChildProps } from "../../../shared/child.js";
   import { colorSliderContext } from "../root/context.svelte.js";
 

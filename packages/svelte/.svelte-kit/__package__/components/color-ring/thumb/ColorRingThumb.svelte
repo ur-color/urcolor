@@ -10,7 +10,7 @@
 </script>
 
 <script lang="ts">
-  import { channelLabel, DATA_DISABLED, DATA_DRAGGING, formatChannelValue } from "@urcolor/primitives";
+  import { channelLabel, DATA_DISABLED, DATA_DRAGGING, formatChannelValue } from "@urcolor/shared";
   import type { ChildProps } from "../../../shared/child.js";
   import { colorRingContext } from "../root/context.svelte.js";
 

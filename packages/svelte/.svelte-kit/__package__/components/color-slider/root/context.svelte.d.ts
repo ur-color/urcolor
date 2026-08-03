@@ -1,5 +1,5 @@
 import type { Color, SpaceId } from "@urcolor/core";
-import type { SliderState } from "@urcolor/primitives";
+import type { SliderState } from "@urcolor/shared";
 /**
  * Everything a `ColorSlider` part needs from its root.
  *

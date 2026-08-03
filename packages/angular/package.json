@@ -39,7 +39,7 @@
   },
   "dependencies": {
     "@urcolor/core": "workspace:*",
-    "@urcolor/primitives": "workspace:*",
+    "@urcolor/shared": "workspace:*",
     "tslib": "^2"
   },
   "peerDependencies": {

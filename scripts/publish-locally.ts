@@ -35,7 +35,7 @@ import { resolveWorkspaceDeps } from "./resolve-workspace-deps";
 const ORDER = [
   { name: "core", dir: "packages/core" },
   { name: "urcolor", dir: "packages/urcolor" },
-  { name: "primitives", dir: "packages/primitives" },
+  { name: "shared", dir: "packages/shared" },
   { name: "relative", dir: "packages/relative" },
   { name: "i18n", dir: "packages/i18n" },
   { name: "vue", dir: "packages/vue" },

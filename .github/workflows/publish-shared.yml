@@ -1,10 +1,10 @@
-name: Publish @urcolor/primitives
+name: Publish @urcolor/shared
 
 on:
   push:
     branches: [main]
     paths:
-      - 'packages/primitives/package.json'
+      - 'packages/shared/package.json'
   # Manual re-release, for when a publish failed for reasons outside the
   # package and the version bump is already committed — a push can no longer
   # trigger it, because the version no longer differs from the last commit.
@@ -21,8 +21,8 @@ jobs:
       id-token: write
     uses: ./.github/workflows/publish.yml
     with:
-      package-dir: 'packages/primitives'
-      package-name: '@urcolor/primitives'
+      package-dir: 'packages/shared'
+      package-name: '@urcolor/shared'
       force: ${{ github.event_name == 'workflow_dispatch' }}
     secrets:
       NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

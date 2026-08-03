@@ -1,4 +1,4 @@
-import { PAGE_KEYS as PAGE_KEYS_LITERAL, ARROW_KEYS as ARROW_KEYS_LITERAL } from "@urcolor/primitives";
+import { PAGE_KEYS as PAGE_KEYS_LITERAL, ARROW_KEYS as ARROW_KEYS_LITERAL } from "@urcolor/shared";
 
 export {
   clamp,
@@ -10,7 +10,7 @@ export {
   getThumbInBoundsOffset,
   getClosestThumbIndex,
   hasMinStepsBetweenValues,
-} from "@urcolor/primitives";
+} from "@urcolor/shared";
 
 // Re-declared with a widened element type rather than re-exported directly:
 // the primitives originals are `as const`, so `ARROW_KEYS.includes(event.key)`
@@ -18,4 +18,4 @@ export {
 export const PAGE_KEYS: readonly string[] = PAGE_KEYS_LITERAL;
 export const ARROW_KEYS: readonly string[] = ARROW_KEYS_LITERAL;
 
-export { CHECKERBOARD_BACKGROUND, warnCheckerboardDeprecated } from "@urcolor/primitives";
+export { CHECKERBOARD_BACKGROUND, warnCheckerboardDeprecated } from "@urcolor/shared";
