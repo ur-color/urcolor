@@ -50,3 +50,5 @@ storybook-static
 **/graphify-out/.graphify_root
 # Optional: uncomment to keep the repo small at the cost of a full rebuild on checkout.
 # **/graphify-out/cache/
+# Claude Code personal overrides (project .claude/settings.json is shared)
+.claude/settings.local.json

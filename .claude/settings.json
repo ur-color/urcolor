@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "deny": [
+      "Read(./.npmrc)",
+      "Read(./.npmrc.*)",
+      "Read(./**/.npmrc)",
+      "Read(./.env)",
+      "Read(./.env.*)",
+      "Read(./**/.env)",
+      "Read(./**/.env.*)",
+      "Read(./**/*.pem)",
+      "Read(./**/*.key)",
+      "Read(./**/*.p12)",
+      "Read(./**/*.pfx)",
+      "Read(./**/id_rsa*)",
+      "Read(./**/id_ed25519*)",
+      "Read(./**/credentials.json)",
+      "Read(./**/service-account*.json)",
+      "Edit(./.npmrc)",
+      "Edit(./.npmrc.*)",
+      "Edit(./**/.env)",
+      "Edit(./**/.env.*)"
+    ]
+  },
+  "sandbox": {
+    "filesystem": {
+      "denyRead": [
+        "./.npmrc",
+        "./.npmrc.disabled-by-claude",
+        "./.env",
+        "./.env.local",
+        "./.env.production.local",
+        "./.env.development.local",
+        "./.env.test.local"
+      ]
+    }
+  }
+}
