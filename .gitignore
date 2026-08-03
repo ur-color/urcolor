@@ -36,8 +36,9 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 # Vitepress
 docs/.vitepress/cache
 
-# npmrc
-.npmrc
+# npmrc — holds the npm auth token. The glob also covers renamed variants
+# (.npmrc.disabled-by-claude and the like) so one can never be staged.
+.npmrc*
 
 # Storybook
 storybook-static
