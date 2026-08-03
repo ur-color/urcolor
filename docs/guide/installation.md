@@ -9,6 +9,7 @@
 
 | Package | Description |
 | --- | --- |
+| `urcolor` | The color engine on its own, under an unscoped name — re-exports `@urcolor/core` |
 | `@urcolor/core` | Core color logic, WebGL rendering, and accessibility utilities |
 | `@urcolor/primitives` | Framework-agnostic behavior shared by every binding |
 | `@urcolor/vue` | Vue 3 components and composables |
@@ -116,27 +117,38 @@ runtime dependencies.
 
 ### Core Only
 
-If you only need the color utilities without a framework binding:
+If you only need the color utilities without a framework binding, install
+`urcolor` — the unscoped name for the same engine:
 
 ::: code-group
 
 ```sh [bun]
-bun add @urcolor/core
+bun add urcolor
 ```
 
 ```sh [npm]
-npm install @urcolor/core
+npm install urcolor
 ```
 
 ```sh [pnpm]
-pnpm add @urcolor/core
+pnpm add urcolor
 ```
 
 ```sh [yarn]
-yarn add @urcolor/core
+yarn add urcolor
 ```
 
 :::
+
+```ts
+import { Color } from "urcolor";
+```
+
+`urcolor` holds no code of its own: it re-exports `@urcolor/core` and depends on
+it by the same range the framework packages use, so you get one copy of the
+engine and one `Color` class either way. Install whichever name you prefer —
+`@urcolor/core` is already present if you installed a framework binding, and
+mixing the two names in one project is safe.
 
 ### Optional packages
 

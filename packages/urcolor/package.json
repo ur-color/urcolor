@@ -1,0 +1,55 @@
+{
+  "name": "urcolor",
+  "version": "0.0.4",
+  "description": "Zero-dependency CSS Color 4 engine: parse, convert, mix, compare and serialize colors across 15 spaces. The unscoped alias for @urcolor/core.",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "bun": "./src/index.ts",
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "bun run build:js && bun run build:types",
+    "build:js": "bun build ./src/index.ts --outdir ./dist --format esm --packages external",
+    "build:types": "tsc --declaration --emitDeclarationOnly --outDir dist --project tsconfig.build.json"
+  },
+  "keywords": [
+    "color",
+    "color-picker",
+    "color-space",
+    "gradient",
+    "webgl",
+    "hsl",
+    "oklch",
+    "oklab",
+    "display-p3",
+    "color-conversion"
+  ],
+  "author": {
+    "name": "GrandMagus",
+    "url": "https://github.com/GrandMagus02"
+  },
+  "license": "MIT",
+  "homepage": "https://urcolor.vercel.app/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ur-color/urcolor",
+    "directory": "packages/urcolor"
+  },
+  "bugs": {
+    "url": "https://github.com/ur-color/urcolor/issues"
+  },
+  "dependencies": {
+    "@urcolor/core": "workspace:*"
+  }
+}
