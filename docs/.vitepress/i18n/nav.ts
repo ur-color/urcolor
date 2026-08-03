@@ -20,6 +20,7 @@ export interface NavLabels {
   colorClass: string;
   relativeColors: string;
   colorNaming: string;
+  benchmarks: string;
 
   areaPicker: string;
   channelSlider: string;
@@ -60,6 +61,7 @@ export const NAV_LABELS: Record<string, NavLabels> = {
     colorClass: "The Color Class",
     relativeColors: "Relative Colors",
     colorNaming: "Color Naming",
+    benchmarks: "Benchmarks",
     areaPicker: "Color Area Picker",
     channelSlider: "Color Channel Slider",
     fields: "Color Fields",
@@ -94,6 +96,7 @@ export const NAV_LABELS: Record<string, NavLabels> = {
     colorClass: "Color 类",
     relativeColors: "相对颜色",
     colorNaming: "颜色命名",
+    benchmarks: "性能基准",
     areaPicker: "颜色区域选择器",
     channelSlider: "颜色通道滑块",
     fields: "颜色输入框",
@@ -128,6 +131,7 @@ export const NAV_LABELS: Record<string, NavLabels> = {
     colorClass: "Color クラス",
     relativeColors: "相対カラー",
     colorNaming: "カラーネーミング",
+    benchmarks: "ベンチマーク",
     areaPicker: "カラーエリアピッカー",
     channelSlider: "カラーチャンネルスライダー",
     fields: "カラーフィールド",
@@ -162,6 +166,7 @@ export const NAV_LABELS: Record<string, NavLabels> = {
     colorClass: "La clase Color",
     relativeColors: "Colores relativos",
     colorNaming: "Nombres de color",
+    benchmarks: "Benchmarks",
     areaPicker: "Selector de área de color",
     channelSlider: "Deslizador de canal",
     fields: "Campos de color",
@@ -196,6 +201,7 @@ export const NAV_LABELS: Record<string, NavLabels> = {
     colorClass: "La classe Color",
     relativeColors: "Couleurs relatives",
     colorNaming: "Noms de couleurs",
+    benchmarks: "Benchmarks",
     areaPicker: "Sélecteur de zone de couleur",
     channelSlider: "Curseur de canal",
     fields: "Champs de couleur",
@@ -230,6 +236,7 @@ export const NAV_LABELS: Record<string, NavLabels> = {
     colorClass: "Die Color-Klasse",
     relativeColors: "Relative Farben",
     colorNaming: "Farbbenennung",
+    benchmarks: "Benchmarks",
     areaPicker: "Farbflächen-Picker",
     channelSlider: "Kanal-Slider",
     fields: "Farbfelder",
@@ -264,6 +271,7 @@ export const NAV_LABELS: Record<string, NavLabels> = {
     colorClass: "Класс Color",
     relativeColors: "Относительные цвета",
     colorNaming: "Названия цветов",
+    benchmarks: "Бенчмарки",
     areaPicker: "Пикер цветовой области",
     channelSlider: "Слайдер канала",
     fields: "Поля ввода цвета",
@@ -325,6 +333,20 @@ const REACT_COMPONENTS = [
   ["Color Ring", "color-ring"],
 ] as const;
 
+/** Svelte and Angular follow React's naming, so both use `color-swatch-group`. */
+const SVELTE_COMPONENTS = [
+  ["Color Area", "color-area"],
+  ["Color Slider", "color-slider"],
+  ["Color Field", "color-field"],
+  ["Color Swatch", "color-swatch"],
+  ["Color Swatch Group", "color-swatch-group"],
+  ["Color Wheel", "color-wheel"],
+  ["Color Triangle", "color-triangle"],
+  ["Color Ring", "color-ring"],
+] as const;
+
+const ANGULAR_COMPONENTS = SVELTE_COMPONENTS;
+
 export function labelsFor(lang: string): NavLabels {
   return NAV_LABELS[lang] ?? NAV_LABELS.en!;
 }
@@ -376,6 +398,7 @@ export function sidebarFor(lang: string, exists: PageExists = () => true) {
     { text: t.colorClass, link: `${p}/guide/color-class`, file: "guide/color-class.md" },
     { text: t.relativeColors, link: `${p}/guide/relative-colors`, file: "guide/relative-colors.md" },
     { text: t.colorNaming, link: `${p}/guide/color-naming`, file: "guide/color-naming.md" },
+    { text: t.benchmarks, link: `${p}/guide/benchmarks`, file: "guide/benchmarks.md" },
   ]);
 
   const howTo = keep(exists, lang, HOW_TO_PAGES.map(([key, slug]) => ({
@@ -402,6 +425,18 @@ export function sidebarFor(lang: string, exists: PageExists = () => true) {
     file: `components/react/${slug}.md`,
   })));
 
+  const svelte = keep(exists, lang, SVELTE_COMPONENTS.map(([text, slug]) => ({
+    text,
+    link: `${p}/components/svelte/${slug}`,
+    file: `components/svelte/${slug}.md`,
+  })));
+
+  const angular = keep(exists, lang, ANGULAR_COMPONENTS.map(([text, slug]) => ({
+    text,
+    link: `${p}/components/angular/${slug}`,
+    file: `components/angular/${slug}.md`,
+  })));
+
   const guideSidebar = [
     { text: t.gettingStarted, items: gettingStarted },
     { text: t.howTo, items: howTo },
@@ -411,6 +446,8 @@ export function sidebarFor(lang: string, exists: PageExists = () => true) {
     { text: t.components, items: componentsOverview },
     { text: "Vue", items: vue },
     { text: "React", items: react },
+    { text: "Svelte", items: svelte },
+    { text: "Angular", items: angular },
   ].filter(group => group.items.length > 0);
 
   return {

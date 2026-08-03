@@ -20,8 +20,12 @@ import ColorSwatchBasic from './demo/ColorSwatchBasic.tsx'
 
 ## Anatomy
 
+`ColorSwatch` is the whole family — a single component with no sub-parts, imported directly from `@urcolor/react`. There is no `ColorSwatch.*` namespace and no `ColorSwatch.Root`.
+
 ```tsx
-<ColorSwatch.Root />
+import { ColorSwatch } from "@urcolor/react";
+
+<ColorSwatch value="hsl(210, 80%, 50%)" />
 ```
 
 ## Examples
@@ -41,34 +45,71 @@ A set of color swatches, including one with alpha transparency.
 
 ## API Reference
 
-### ColorSwatch.Root
+### ColorSwatch
 
-Renders a color preview with an automatic checkerboard background.
+Renders a color preview with an automatic checkerboard background. Standalone it renders a `<div role="img">`; inside a [`ColorSwatchGroup`](./color-swatch-group.md) it renders a toggle `<button>` instead, and its `value` doubles as the group's selection key.
+
+Extends `Omit<ComponentPropsWithoutRef<"div">, "value">`.
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
-| `value` | `Color \| string \| null` | — | The color value to display. |
-| `alpha` | `boolean` | `false` | When true, reflects the color's alpha channel. When false, displays the color as fully opaque. |
+| `value` | `Color \| string \| null` | — | The color value to display. Inside a `ColorSwatchGroup` it is also the toggle selection key. |
 | `checkerSize` | `number` | `16` | The checkerboard tile size in pixels. |
+| `alpha` | `boolean` | `false` | When true, reflects the color's alpha channel. When false, displays the color as fully opaque. |
+| `disabled` | `boolean` | `false` | Prevents interaction with this swatch. Only meaningful inside a group; a standalone swatch is not interactive. |
+| `as` | `React.ElementType` | `'div'` | The element or component to render as. Ignored inside a group, where a `<button>` is always rendered. |
+| `className` | `string` | — | Class applied to the rendered element. |
+| `style` | `React.CSSProperties` | — | Inline styles merged over the generated `background` and custom properties. |
+| `children` | `React.ReactNode` | — | Rendered inside the swatch, e.g. a selection checkmark. |
+
+::: tip
+A swatch inside a group is disabled when either its own `disabled` prop or the group's `disabled` prop is set.
+:::
+
+### Data Attributes
+
+These are emitted only when the swatch sits inside a `ColorSwatchGroup`. A standalone swatch carries neither.
+
+| Attribute | Present when |
+|-----------|--------------|
+| `data-state` | Always, as `"on"` when the swatch is selected and `"off"` when it is not. |
+| `data-disabled` | The swatch or its group is disabled. |
 
 ### CSS Variables
 
-The component exposes CSS custom properties on the root element for advanced styling:
+The component exposes CSS custom properties on the rendered element for advanced styling:
 
 | Variable | Description |
 |----------|-------------|
-| `--swatch-color` | The resolved CSS color string (with or without alpha based on the `alpha` prop). |
-| `--swatch-color-opaque` | The color at full opacity. |
-| `--swatch-alpha` | The color's alpha value (0–1). |
-| `--swatch-checkerboard` | The checkerboard background gradient. |
+| `--swatch-color` | The resolved CSS color string, with or without alpha depending on the `alpha` prop. |
+| `--swatch-color-opaque` | The color at full opacity. Not emitted when `value` is absent or unparseable. |
+| `--swatch-alpha` | The color's alpha value (0–1). Not emitted when `value` is absent or unparseable. |
+| `--swatch-checkerboard` | The checkerboard background shorthand, already sized by `checkerSize`. |
 
 ## Accessibility
 
-ColorSwatch is a purely visual element that displays a color preview.
+A standalone `ColorSwatch` is a purely visual element: it carries `role="img"` but is not focusable and handles no keyboard input. Inside a `ColorSwatchGroup` the same component becomes a toggle button and joins the group's roving tab stop.
 
 ### ARIA Labels
 
 | Attribute | Description |
 |-----------|-------------|
-| `role="img"` | Identifies the swatch as a presentational image for screen readers. |
-| `aria-label` | Describes the displayed color value for assistive technologies. |
+| `role="img"` | Always applied, identifying the swatch as an image for screen readers. |
+| `aria-pressed` | Applied inside a group, reflecting the selection state. |
+| `aria-label` | **Not generated.** `role="img"` requires an accessible name, so pass your own `aria-label` describing the color. |
+
+::: warning Provide an accessible name
+The React swatch does not derive a label from the color. An element with `role="img"` and no accessible name is a WCAG failure, so supply `aria-label` — for example `aria-label="Blue"` or the CSS color string.
+:::
+
+### Keyboard Navigation
+
+A standalone swatch is not focusable. The keys below apply only inside a `ColorSwatchGroup`.
+
+| Key | Action |
+|-----|--------|
+| Tab | Move focus into the group, landing on the item that owns the tab stop |
+| Arrow Right / Arrow Left | Move between swatches in a horizontal group |
+| Arrow Down / Arrow Up | Move between swatches in a vertical group |
+| Home / End | Move to the first / last swatch |
+| Enter or Space | Toggle the focused swatch's selection |
