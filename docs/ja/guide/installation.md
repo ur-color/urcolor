@@ -9,8 +9,8 @@
 
 | パッケージ | 説明 |
 | --- | --- |
-| `@urcolor/core` | コアのカラーロジック、WebGL 描画、アクセシビリティユーティリティ |
-| `@urcolor/primitives` | すべてのバインディングが共有するフレームワーク非依存の振る舞い |
+| `@urcolor/core` | コアのカラーロジックとアクセシビリティユーティリティ |
+| `@urcolor/shared` | すべてのバインディングが共有するフレームワーク非依存の振る舞い、WebGL 描画、グリッドサンプラー |
 | `@urcolor/vue` | Vue 3 のコンポーネントとコンポーザブル |
 | `@urcolor/react` | React のコンポーネントとフック |
 | `@urcolor/svelte` | Svelte 5 のコンポーネントと rune ベースのフック |
@@ -108,7 +108,7 @@ yarn add @urcolor/angular
 
 :::
 
-どのフレームワーク用パッケージも `@urcolor/core` と `@urcolor/primitives` に依存しているため、両方が一緒にインストールされます。さらに Vue パッケージは [Reka UI](https://reka-ui.com/)、React パッケージは [Base UI](https://base-ui.com/) を取り込みます。Svelte と Angular のパッケージにはそれ以外のランタイム依存はありません。
+どのフレームワーク用パッケージも `@urcolor/core` と `@urcolor/shared` に依存しているため、両方が一緒にインストールされます。さらに Vue パッケージは [Reka UI](https://reka-ui.com/)、React パッケージは [Base UI](https://base-ui.com/) を取り込みます。Svelte と Angular のパッケージにはそれ以外のランタイム依存はありません。
 
 ### コアのみ
 

@@ -9,8 +9,8 @@
 
 | Paquet | Description |
 | --- | --- |
-| `@urcolor/core` | Logique de couleur, rendu WebGL et utilitaires d'accessibilité |
-| `@urcolor/primitives` | Comportement indépendant du framework, partagé par toutes les liaisons |
+| `@urcolor/core` | Logique de couleur et utilitaires d'accessibilité |
+| `@urcolor/shared` | Comportement indépendant du framework, rendu WebGL et échantillonneurs de grille, partagés par toutes les liaisons |
 | `@urcolor/vue` | Composants et composables Vue 3 |
 | `@urcolor/react` | Composants et hooks React |
 | `@urcolor/svelte` | Composants Svelte 5 et hooks à base de runes |
@@ -108,7 +108,7 @@ yarn add @urcolor/angular
 
 :::
 
-Chaque paquet de framework dépend de `@urcolor/core` et de `@urcolor/primitives`, tous deux installés avec lui. Le paquet Vue embarque en plus [Reka UI](https://reka-ui.com/) et le paquet React [Base UI](https://base-ui.com/) ; les paquets Svelte et Angular n'ont aucune autre dépendance d'exécution.
+Chaque paquet de framework dépend de `@urcolor/core` et de `@urcolor/shared`, tous deux installés avec lui. Le paquet Vue embarque en plus [Reka UI](https://reka-ui.com/) et le paquet React [Base UI](https://base-ui.com/) ; les paquets Svelte et Angular n'ont aucune autre dépendance d'exécution.
 
 ### Le cœur uniquement
 

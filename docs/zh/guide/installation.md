@@ -9,8 +9,8 @@
 
 | 软件包 | 说明 |
 | --- | --- |
-| `@urcolor/core` | 核心颜色逻辑、WebGL 渲染与无障碍工具 |
-| `@urcolor/primitives` | 所有绑定共用的、与框架无关的行为层 |
+| `@urcolor/core` | 核心颜色逻辑与无障碍工具 |
+| `@urcolor/shared` | 所有绑定共用的、与框架无关的行为层、WebGL 渲染与网格采样器 |
 | `@urcolor/vue` | Vue 3 组件与组合式函数 |
 | `@urcolor/react` | React 组件与 Hooks |
 | `@urcolor/svelte` | Svelte 5 组件与基于 rune 的 hooks |
@@ -108,7 +108,7 @@ yarn add @urcolor/angular
 
 :::
 
-每个框架包都依赖 `@urcolor/core` 与 `@urcolor/primitives`，安装时会一并带上。此外，Vue 包会引入 [Reka UI](https://reka-ui.com/)，React 包会引入 [Base UI](https://base-ui.com/)；Svelte 与 Angular 包没有其他运行时依赖。
+每个框架包都依赖 `@urcolor/core` 与 `@urcolor/shared`，安装时会一并带上。此外，Vue 包会引入 [Reka UI](https://reka-ui.com/)，React 包会引入 [Base UI](https://base-ui.com/)；Svelte 与 Angular 包没有其他运行时依赖。
 
 ### 仅核心库
 

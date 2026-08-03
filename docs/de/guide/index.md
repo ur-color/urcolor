@@ -4,8 +4,8 @@ UrColor ist eine universelle, headless Komponentenbibliothek für Farbwähler. S
 
 ## Pakete
 
-- `@urcolor/core` — Eine abhängigkeitsfreie CSS-Color-4-Bibliothek (parsen, konvertieren, serialisieren, Gamut-Mapping, interpolieren) samt WebGL-Canvas-Verlaufsgeneratoren für Farbflächen und Slider.
-- `@urcolor/primitives` — Die frameworkunabhängige Verhaltensschicht: Drag-Handling, Tastaturbelegungen, Kanalmodelle, Canvas-Anbindung und Data-Attribute, die alle Bindings teilen.
+- `@urcolor/core` — Eine abhängigkeitsfreie CSS-Color-4-Bibliothek (parsen, konvertieren, serialisieren, Gamut-Mapping, interpolieren).
+- `@urcolor/shared` — Die frameworkunabhängige Verhaltensschicht: Drag-Handling, Tastaturbelegungen, Kanalmodelle, WebGL-Canvas-Verlaufsgeneratoren für Farbflächen und Slider sowie Data-Attribute, die alle Bindings teilen.
 - `@urcolor/relative` — Optionale relative Farbsyntax aus CSS Color 5 (`rgb(from red r g b)`) für `@urcolor/core`. Siehe [Relative Farben](/guide/relative-colors).
 - `@urcolor/i18n` — Mehrsprachige Farbnamen und Kanalbezeichnungen. Siehe [Farbbenennung](/guide/color-naming).
 - `@urcolor/vue` — Headless Vue-3-Komponenten und Composables zum Bau von Farbwählern.

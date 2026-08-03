@@ -4,8 +4,8 @@ UrColor 是一个通用的 headless 颜色选择器组件库。它提供无样�
 
 ## 软件包
 
-- `@urcolor/core` — 零依赖的 CSS Color 4 库（解析、转换、序列化、色域映射、插值），并包含用于颜色区域和滑块的 WebGL 画布渐变生成器。
-- `@urcolor/primitives` — 与框架无关的行为层：拖拽处理、键盘映射、通道模型、画布接线与 data 属性，所有绑定共用同一套实现。
+- `@urcolor/core` — 零依赖的 CSS Color 4 库（解析、转换、序列化、色域映射、插值）。
+- `@urcolor/shared` — 与框架无关的行为层：拖拽处理、键盘映射、通道模型、用于颜色区域和滑块的 WebGL 画布渐变生成器，以及所有绑定共用的 data 属性。
 - `@urcolor/relative` — 为 `@urcolor/core` 提供可选的 CSS Color 5 相对颜色语法（`rgb(from red r g b)`）。参见[相对颜色](/guide/relative-colors)。
 - `@urcolor/i18n` — 多语言颜色名称与通道标签。参见[颜色命名](/guide/color-naming)。
 - `@urcolor/vue` — 用于构建颜色选择器的 headless Vue 3 组件与组合式函数。

@@ -24,8 +24,8 @@ Color.parse("#3b82f6")!.to("oklch").toString(); // "oklch(0.62308 0.18801 259.81
 | Package | Description |
 |---------|-------------|
 | [`urcolor`](./packages/urcolor) | The engine under an unscoped name — re-exports `@urcolor/core` |
-| [`@urcolor/core`](./packages/core) | Color parsing, conversion, mixing, gamut mapping, grid samplers, WebGL gradients |
-| [`@urcolor/primitives`](./packages/primitives) | Framework-agnostic behavior shared by every binding |
+| [`@urcolor/core`](./packages/core) | Color parsing, conversion, mixing, gamut mapping, contrast, delta-E |
+| [`@urcolor/shared`](./packages/shared) | Framework-agnostic picker behavior, grid samplers, WebGL gradients, geometry, channel configuration |
 | [`@urcolor/vue`](./packages/vue) | Vue 3 components and composables |
 | [`@urcolor/react`](./packages/react) | React components and hooks |
 | [`@urcolor/svelte`](./packages/svelte) | Svelte 5 components and rune hooks |
@@ -55,9 +55,9 @@ bun run docs:dev     # docs site with hot reload
 
 ```
 packages/
-  core/        # @urcolor/core — color engine, grid samplers, WebGL gradients
+  core/        # @urcolor/core — the color engine
   urcolor/     # urcolor — unscoped re-export of the core
-  primitives/  # @urcolor/primitives — shared framework-agnostic behavior
+  shared/      # @urcolor/shared — picker behavior, grid samplers, WebGL gradients
   vue/         # @urcolor/vue
   react/       # @urcolor/react
   svelte/      # @urcolor/svelte

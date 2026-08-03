@@ -295,8 +295,8 @@ model, one set of behaviours, exposed idiomatically per framework.
 - **Svelte 5** (v5.29+) — `@urcolor/svelte`, components with `bind:value`, `child` snippets, and rune-based hooks (`useColor`, `useOKLCh`, …).
 - **Angular** (v21.2+) — `@urcolor/angular`, standalone directives (`[urcColorAreaRoot]`) with `[(value)]` models, signal stores, and Signal Forms support via `[field]`.
 
-Drag handling, keyboard maps, channel models and data attributes live once in
-`@urcolor/primitives`; color conversion and WebGL rendering live once in
+Drag handling, keyboard maps, channel models, data attributes and WebGL
+rendering live once in `@urcolor/shared`; color conversion lives once in
 `@urcolor/core`. Each binding is a thin idiomatic layer over those two, so
 behaviour and accessibility are identical across all four. A Solid adapter is
 planned.

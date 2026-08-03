@@ -9,8 +9,8 @@
 
 | Пакет | Описание |
 | --- | --- |
-| `@urcolor/core` | Логика цвета, WebGL-рендеринг и утилиты доступности |
-| `@urcolor/primitives` | Независимое от фреймворка поведение, общее для всех биндингов |
+| `@urcolor/core` | Логика цвета и утилиты доступности |
+| `@urcolor/shared` | Независимое от фреймворка поведение, WebGL-рендеринг и генераторы сеток, общее для всех биндингов |
 | `@urcolor/vue` | Компоненты и composables для Vue 3 |
 | `@urcolor/react` | Компоненты и хуки для React |
 | `@urcolor/svelte` | Компоненты Svelte 5 и хуки на рунах |
@@ -108,7 +108,7 @@ yarn add @urcolor/angular
 
 :::
 
-Каждый фреймворк-пакет зависит от `@urcolor/core` и `@urcolor/primitives`, поэтому оба ставятся вместе с ним. Пакет для Vue дополнительно тянет [Reka UI](https://reka-ui.com/), пакет для React — [Base UI](https://base-ui.com/); у пакетов для Svelte и Angular других рантайм-зависимостей нет.
+Каждый фреймворк-пакет зависит от `@urcolor/core` и `@urcolor/shared`, поэтому оба ставятся вместе с ним. Пакет для Vue дополнительно тянет [Reka UI](https://reka-ui.com/), пакет для React — [Base UI](https://base-ui.com/); у пакетов для Svelte и Angular других рантайм-зависимостей нет.
 
 ### Только ядро
 

@@ -10,8 +10,8 @@
 | Package | Description |
 | --- | --- |
 | `urcolor` | The color engine on its own, under an unscoped name — re-exports `@urcolor/core` |
-| `@urcolor/core` | Core color logic, WebGL rendering, and accessibility utilities |
-| `@urcolor/primitives` | Framework-agnostic behavior shared by every binding |
+| `@urcolor/core` | Core color logic and accessibility utilities |
+| `@urcolor/shared` | Framework-agnostic picker behavior, WebGL rendering, and grid samplers shared by every binding |
 | `@urcolor/vue` | Vue 3 components and composables |
 | `@urcolor/react` | React components and hooks |
 | `@urcolor/svelte` | Svelte 5 components and rune hooks |
@@ -109,7 +109,7 @@ yarn add @urcolor/angular
 
 :::
 
-Every framework package depends on `@urcolor/core` and `@urcolor/primitives`, so both come along
+Every framework package depends on `@urcolor/core` and `@urcolor/shared`, so both come along
 with whichever binding you install. The Vue package also pulls in
 [Reka UI](https://reka-ui.com/) and the React package
 [Base UI](https://base-ui.com/); the Svelte and Angular packages have no other

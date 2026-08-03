@@ -4,8 +4,8 @@ UrColor est une bibliothèque universelle et headless de composants de sélectio
 
 ## Paquets
 
-- `@urcolor/core` — Une bibliothèque CSS Color 4 sans dépendances (analyse, conversion, sérialisation, mappage de gamut, interpolation) et des générateurs de dégradés WebGL sur canvas pour les zones et curseurs de couleur.
-- `@urcolor/primitives` — La couche de comportement indépendante du framework : glisser-déposer, raccourcis clavier, modèles de canaux, plomberie du canvas et attributs de données partagés par toutes les liaisons.
+- `@urcolor/core` — Une bibliothèque CSS Color 4 sans dépendances (analyse, conversion, sérialisation, mappage de gamut, interpolation).
+- `@urcolor/shared` — La couche de comportement indépendante du framework : glisser-déposer, raccourcis clavier, modèles de canaux, générateurs de dégradés WebGL sur canvas pour les zones et curseurs de couleur, et attributs de données partagés par toutes les liaisons.
 - `@urcolor/relative` — Syntaxe optionnelle des couleurs relatives CSS Color 5 (`rgb(from red r g b)`) pour `@urcolor/core`. Voir [Couleurs relatives](/guide/relative-colors).
 - `@urcolor/i18n` — Noms de couleurs et libellés de canaux multilingues. Voir [Noms de couleurs](/guide/color-naming).
 - `@urcolor/vue` — Composants et composables Vue 3 headless pour construire des sélecteurs de couleur.

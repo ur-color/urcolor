@@ -9,8 +9,8 @@
 
 | Paket | Beschreibung |
 | --- | --- |
-| `@urcolor/core` | Farblogik, WebGL-Rendering und Barrierefreiheits-Utilities |
-| `@urcolor/primitives` | Frameworkunabhängiges Verhalten, das alle Bindings teilen |
+| `@urcolor/core` | Farblogik und Barrierefreiheits-Utilities |
+| `@urcolor/shared` | Frameworkunabhängiges Verhalten, WebGL-Rendering und Grid-Sampler, die alle Bindings teilen |
 | `@urcolor/vue` | Vue-3-Komponenten und Composables |
 | `@urcolor/react` | React-Komponenten und Hooks |
 | `@urcolor/svelte` | Svelte-5-Komponenten und Rune-Hooks |
@@ -108,7 +108,7 @@ yarn add @urcolor/angular
 
 :::
 
-Jedes Framework-Paket hängt von `@urcolor/core` und `@urcolor/primitives` ab – beide werden also mitinstalliert. Das Vue-Paket zieht zusätzlich [Reka UI](https://reka-ui.com/) mit, das React-Paket [Base UI](https://base-ui.com/); die Svelte- und Angular-Pakete haben keine weiteren Laufzeitabhängigkeiten.
+Jedes Framework-Paket hängt von `@urcolor/core` und `@urcolor/shared` ab – beide werden also mitinstalliert. Das Vue-Paket zieht zusätzlich [Reka UI](https://reka-ui.com/) mit, das React-Paket [Base UI](https://base-ui.com/); die Svelte- und Angular-Pakete haben keine weiteren Laufzeitabhängigkeiten.
 
 ### Nur der Kern
 
