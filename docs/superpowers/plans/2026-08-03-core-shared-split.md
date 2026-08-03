@@ -18,17 +18,18 @@
 - `@urcolor/core` must never import `@urcolor/shared` in `dependencies`. The single permitted edge is a `devDependencies` entry used by `packages/core/bench/gradient.bench.ts`.
 - Every task ends on a green `bun test`. The tree is never committed broken.
 - **The verification gate is delta-based, not absolute.** `bun run lint` is red on this repo's base commit and is not run by CI: `eslint` crashes outright on `docs/how-to/demo/svelte/ColorFieldGuide.svelte` (typed-linting misconfiguration, `svelte-eslint-parser` does not forward `parserOptions.project`), and reports 230 pre-existing problems across `packages/` and `scripts/`. `vue-tsc --noEmit` reports 44 pre-existing errors at base `d2faaab`, mostly `@angular/core` resolution failures in `docs/how-to/demo/angular/`. Fixing those is out of scope.
-  Where a task says "run the gate", run:
+  Where a task says "run the gate", run — **`bun run build` first**, because the type-checkers resolve some declarations through `dist/`, and any task that deleted `dist/` will otherwise produce ~90 spurious errors:
 
   ```bash
+  bun run build
   bun test
   bun run --cwd packages/svelte check     # must be 0 errors — clean at base
   bun run --cwd packages/angular check    # must be 0 errors — clean at base
   bunx vue-tsc --noEmit 2>&1 | grep -c "error TS"   # must not exceed the baseline below
-  bun run build
   ```
 
-  Baselines measured at `d2faaab`: `vue-tsc` **44** errors, `eslint packages scripts` **230** problems. A task passes when `bun test` and `bun run build` are green, svelte-check and the Angular check report zero, and the `vue-tsc` count has not risen. Report the count in your task report either way. Do not attempt to make `bun run lint` exit zero.
+  Baselines: `eslint packages scripts` **230** problems at `d2faaab`. `vue-tsc` was **44** errors at `d2faaab` and **28** from `933d2d9` onward — use **28**. A task passes when `bun test` and `bun run build` are green, svelte-check and the Angular check report zero, and the `vue-tsc` count has not risen. Report the count in your task report either way. Do not attempt to make `bun run lint` exit zero.
+- **Module resolution note (added during Task 3).** The root `tsconfig.json` now sets `"customConditions": ["bun"]`, so TypeScript resolves `@urcolor/*` workspace packages through the `"bun"` condition in their `exports` maps — `src/index.ts` — the same way Bun resolves them at runtime. This eliminates the dual-package hazard where a `Color` from core's source is nominally distinct from a `Color` seen through core's `dist/*.d.ts`. If a later task hits that class of error, the resolution is already in place; do not add casts to work around type identity.
 - Package versions after the change: `@urcolor/core` **2.0.0**, `@urcolor/shared` **1.0.0**, `urcolor` **2.0.0**, `@urcolor/vue` **2.0.0**, `@urcolor/react` **2.0.0**, `@urcolor/svelte` **2.0.0**, `@urcolor/angular` **2.0.0**, `@urcolor/relative` **2.0.0**, `@urcolor/i18n` **2.0.0**.
 - Dependency ranges after the change: anything depending on core uses `"@urcolor/core": "^2.0.0"` when published, `"workspace:*"` in-repo. Framework packages add `"@urcolor/shared": "workspace:*"` in place of `"@urcolor/primitives": "workspace:*"`.
 - The npm deprecation of `@urcolor/primitives` is a release-time action and is **not** part of this plan.
@@ -164,7 +165,7 @@ Expected: no output.
 - [ ] **Step 7: Run the full gate**
 
 ```bash
-bun test && bun run lint && bun run build
+bun run build && bun test && bun run --cwd packages/svelte check && bun run --cwd packages/angular check
 ```
 
 Expected: all pass. Nothing moved between packages yet, so any failure here is a missed rename.
@@ -406,7 +407,7 @@ This devDependency is the one permitted core→shared edge. It never reaches the
 ```bash
 rm -rf packages/core/dist packages/shared/dist
 bun install
-bun test && bun run lint && bun run build
+bun run build && bun test && bun run --cwd packages/svelte check && bun run --cwd packages/angular check
 ```
 
 Expected: all pass. `bun install` resolves the new devDependency; bun handles the workspace cycle by symlink, so no install error is expected.
@@ -636,7 +637,7 @@ and to the `resolve.alias` block in `docs/.vitepress/config.ts`, alongside the e
 ```bash
 rm -rf packages/core/dist packages/shared/dist
 bun install
-bun test && bun run lint && bun run build
+bun run build && bun test && bun run --cwd packages/svelte check && bun run --cwd packages/angular check
 ```
 
 Expected: all pass.
@@ -794,7 +795,7 @@ import { cartesianToPolar, colorSpaces, normalizeAngle } from "@urcolor/shared";
 ```bash
 rm -rf packages/core/dist packages/shared/dist
 bun install
-bun test && bun run lint && bun run build
+bun run build && bun test && bun run --cwd packages/svelte check && bun run --cwd packages/angular check
 ```
 
 Expected: all pass, including the new negative assertion.
@@ -1006,7 +1007,32 @@ core → urcolor → shared → relative → i18n → vue → react → svelte �
 
 Task 1 Step 4 already renamed `packages/primitives` to `packages/shared` in place. Verify the resulting order matches the line above; the existing order already satisfies it.
 
-- [ ] **Step 6: Verify publishability**
+- [ ] **Step 6: Restore dist type-checking for shared**
+
+Task 3 added `"customConditions": ["bun"]` to the root `tsconfig.json`, which routes `@urcolor/*` type resolution to `src/`. `@urcolor/core` is still exercised through its published declarations because three build configs pin it explicitly:
+
+```json
+    "paths": {
+      "@urcolor/core": ["../core/dist/index.d.ts"]
+    }
+```
+
+That override exists in `packages/shared/tsconfig.build.json`, `packages/vue/tsconfig.build.json` and `packages/react/tsconfig.build.json`. No equivalent exists for `@urcolor/shared`, so a stale or broken `packages/shared/dist/index.d.ts` would pass every type-check in the repo.
+
+Add the matching entry to the `paths` block in `packages/vue/tsconfig.build.json` and `packages/react/tsconfig.build.json` — the two packages that consume shared and already pin core:
+
+```json
+    "paths": {
+      "@urcolor/core": ["../core/dist/index.d.ts"],
+      "@urcolor/shared": ["../shared/dist/index.d.ts"]
+    }
+```
+
+Do **not** add it to `packages/shared/tsconfig.build.json` — a package must not resolve itself through its own build output.
+
+Verify the pin bites: after `bun run build`, delete `packages/shared/dist/index.d.ts`, run `bun run --cwd packages/vue build:types`, and confirm it now fails. Restore it with `bun run build` before continuing.
+
+- [ ] **Step 7: Verify publishability**
 
 ```bash
 bun test scripts/check-publishable.test.ts
@@ -1015,15 +1041,11 @@ bun run scripts/check-publishable.ts
 
 Expected: PASS with no reported problems. This script checks every manifest for a license, a version, resolvable entry paths and no unresolved `workspace:` ranges.
 
-- [ ] **Step 7: Run the gate**
+- [ ] **Step 8: Run the gate**
 
-```bash
-bun test && bun run lint && bun run build
-```
+Run the delta-based gate from Global Constraints (build first, then tests and type-checks).
 
-Expected: all pass.
-
-- [ ] **Step 8: Commit**
+- [ ] **Step 9: Commit**
 
 ```bash
 git add -A
