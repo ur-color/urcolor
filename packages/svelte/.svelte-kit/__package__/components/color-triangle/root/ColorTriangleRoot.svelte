@@ -12,11 +12,11 @@
     /** The colour space mode (e.g. `"hsv"`, `"oklch"`). */
     colorSpace?: SpaceId;
     /** The channel mapped to the first vertex. Defaults to the space's second channel. */
-    channelX?: string;
+    xChannel?: string;
     /** The channel mapped to the second vertex. Defaults to the space's third channel. */
-    channelY?: string;
+    yChannel?: string;
     /** The channel mapped to the third vertex. Supplying it switches the triangle to a three-channel simplex. */
-    channelZ?: string;
+    zChannel?: string;
     /** Rotation of the triangle, in degrees. */
     rotation?: number;
     /** Swaps the second and third vertices, mirroring the triangle. */
@@ -84,9 +84,9 @@
     value = $bindable(),
     defaultValue,
     colorSpace = "hsv",
-    channelX,
-    channelY,
-    channelZ,
+    xChannel,
+    yChannel,
+    zChannel,
     rotation = 0,
     inverted = false,
     thumbAlignment = "overflow",
@@ -116,14 +116,14 @@
 
   const color = $derived(parseColor(value) ?? internalColor);
 
-  const xChannel = $derived(channelX ?? colorSpaces[colorSpace]?.channels[1]?.key ?? "s");
-  const yChannel = $derived(channelY ?? colorSpaces[colorSpace]?.channels[2]?.key ?? "v");
-  const zChannel = $derived(channelZ);
-  const isThreeChannel = $derived(zChannel !== undefined);
+  const xChannelKey = $derived(xChannel ?? colorSpaces[colorSpace]?.channels[1]?.key ?? "s");
+  const yChannelKey = $derived(yChannel ?? colorSpaces[colorSpace]?.channels[2]?.key ?? "v");
+  const zChannelKey = $derived(zChannel);
+  const isThreeChannel = $derived(zChannelKey !== undefined);
 
-  const xConfig = $derived(resolveChannelConfig(colorSpace, xChannel));
-  const yConfig = $derived(resolveChannelConfig(colorSpace, yChannel));
-  const zConfig = $derived(zChannel === undefined ? undefined : resolveChannelConfig(colorSpace, zChannel));
+  const xConfig = $derived(resolveChannelConfig(colorSpace, xChannelKey));
+  const yConfig = $derived(resolveChannelConfig(colorSpace, yChannelKey));
+  const zConfig = $derived(zChannelKey === undefined ? undefined : resolveChannelConfig(colorSpace, zChannelKey));
 
   const minX = $derived(xConfig?.min ?? 0);
   const maxX = $derived(xConfig?.max ?? 100);
@@ -135,9 +135,9 @@
   const maxZ = $derived(zConfig?.max ?? 100);
   const stepZ = $derived(zConfig?.step ?? 1);
 
-  const valueX = $derived(colorToDisplayValue(color, colorSpace, xChannel));
-  const valueY = $derived(colorToDisplayValue(color, colorSpace, yChannel));
-  const valueZ = $derived(zChannel === undefined ? minZ : colorToDisplayValue(color, colorSpace, zChannel));
+  const valueX = $derived(colorToDisplayValue(color, colorSpace, xChannelKey));
+  const valueY = $derived(colorToDisplayValue(color, colorSpace, yChannelKey));
+  const valueZ = $derived(zChannelKey === undefined ? minZ : colorToDisplayValue(color, colorSpace, zChannelKey));
 
   /** The three corners in normalised 0-1 space. `inverted` swaps the last two. */
   const vertices = $derived.by<[Point, Point, Point]>(() => {
@@ -177,9 +177,9 @@
     if (!moved) return;
 
     const nextColor
-      = isThreeChannel && zChannel !== undefined
-        ? applyDisplayValues(color, colorSpace, [xChannel, yChannel, zChannel], [nextX, nextY, nextZ ?? valueZ])
-        : applyDisplayValues(color, colorSpace, [xChannel, yChannel], [nextX, nextY]);
+      = isThreeChannel && zChannelKey !== undefined
+        ? applyDisplayValues(color, colorSpace, [xChannelKey, yChannelKey, zChannelKey], [nextX, nextY, nextZ ?? valueZ])
+        : applyDisplayValues(color, colorSpace, [xChannelKey, yChannelKey], [nextX, nextY]);
 
     internalColor = nextColor;
     value = nextColor;
@@ -433,14 +433,14 @@
     get colorSpace() {
       return colorSpace;
     },
-    get xChannel() {
-      return xChannel;
+    get xChannelKey() {
+      return xChannelKey;
     },
-    get yChannel() {
-      return yChannel;
+    get yChannelKey() {
+      return yChannelKey;
     },
-    get zChannel() {
-      return zChannel;
+    get zChannelKey() {
+      return zChannelKey;
     },
     get isThreeChannel() {
       return isThreeChannel;

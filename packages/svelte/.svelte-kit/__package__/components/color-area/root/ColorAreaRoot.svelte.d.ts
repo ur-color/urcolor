@@ -10,9 +10,9 @@ export interface ColorAreaRootProps extends HTMLAttributes<HTMLDivElement> {
     /** The colour space mode (e.g. `"hsl"`, `"oklch"`). */
     colorSpace?: SpaceId;
     /** Which channel maps to the horizontal axis. Defaults to the space's first channel. */
-    channelX?: string;
+    xChannel?: string;
     /** Which channel maps to the vertical axis. Defaults to the space's second channel. */
-    channelY?: string;
+    yChannel?: string;
     /** When true, prevents the user from interacting with the area. */
     disabled?: boolean;
     /** The reading direction. */

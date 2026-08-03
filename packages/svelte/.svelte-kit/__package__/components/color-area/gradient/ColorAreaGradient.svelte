@@ -62,8 +62,8 @@
 
   const context = colorAreaContext.get();
 
-  const xIsAlpha = $derived(context.xChannel === "alpha");
-  const yIsAlpha = $derived(context.yChannel === "alpha");
+  const xIsAlpha = $derived(context.xChannelKey === "alpha");
+  const yIsAlpha = $derived(context.yChannelKey === "alpha");
   /** One axis being alpha means the surface itself must be drawn with transparency. */
   const hasAlphaAxis = $derived(xIsAlpha || yIsAlpha);
   const hasCorners = $derived(
@@ -125,8 +125,8 @@
 
   /** Both axes carry a real channel: the core sampler covers it directly. */
   function paintChannelGrid(canvas: HTMLCanvasElement, base: Color): void {
-    const xCfg = getChannelConfig(context.colorSpace, context.xChannel);
-    const yCfg = getChannelConfig(context.colorSpace, context.yChannel);
+    const xCfg = getChannelConfig(context.colorSpace, context.xChannelKey);
+    const yCfg = getChannelConfig(context.colorSpace, context.yChannelKey);
     if (!xCfg || !yCfg) return;
 
     const xMin = xCfg.nativeMin ?? xCfg.min;
@@ -136,7 +136,7 @@
 
     const pixels = sampleChannelGrid(
       base, context.colorSpace,
-      context.xChannel, context.yChannel,
+      context.xChannelKey, context.yChannelKey,
       context.isSlidingFromLeft ? xMin : xMax, context.isSlidingFromLeft ? xMax : xMin,
       context.isSlidingFromTop ? yMin : yMax, context.isSlidingFromTop ? yMax : yMin,
       GRID, GRID, hasAlphaAxis,
@@ -196,7 +196,7 @@
       return;
     }
     // Both axes being alpha leaves no channel to sample, so nothing is painted.
-    const channelKey = xIsAlpha ? (yIsAlpha ? undefined : context.yChannel) : context.xChannel;
+    const channelKey = xIsAlpha ? (yIsAlpha ? undefined : context.yChannelKey) : context.xChannelKey;
     if (channelKey === undefined) return;
     paintAlphaAxisGrid(canvas, base, channelKey);
   }

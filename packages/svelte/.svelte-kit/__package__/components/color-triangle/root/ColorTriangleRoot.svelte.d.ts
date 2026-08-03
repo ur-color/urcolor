@@ -10,11 +10,11 @@ export interface ColorTriangleRootProps extends HTMLAttributes<HTMLDivElement> {
     /** The colour space mode (e.g. `"hsv"`, `"oklch"`). */
     colorSpace?: SpaceId;
     /** The channel mapped to the first vertex. Defaults to the space's second channel. */
-    channelX?: string;
+    xChannel?: string;
     /** The channel mapped to the second vertex. Defaults to the space's third channel. */
-    channelY?: string;
+    yChannel?: string;
     /** The channel mapped to the third vertex. Supplying it switches the triangle to a three-channel simplex. */
-    channelZ?: string;
+    zChannel?: string;
     /** Rotation of the triangle, in degrees. */
     rotation?: number;
     /** Swaps the second and third vertices, mirroring the triangle. */

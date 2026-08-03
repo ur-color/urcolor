@@ -28,11 +28,11 @@
   const percentY = $derived(convertValueToPercentage(context.valueY, context.minY, context.maxY));
 
   const label = $derived(
-    `${channelLabel(context.colorSpace, context.xChannel)} and ${channelLabel(context.colorSpace, context.yChannel)}`,
+    `${channelLabel(context.colorSpace, context.xChannelKey)} and ${channelLabel(context.colorSpace, context.yChannelKey)}`,
   );
   const valueText = $derived(
-    `${formatChannelValue(context.colorSpace, context.xChannel, context.valueX)}, `
-    + `${formatChannelValue(context.colorSpace, context.yChannel, context.valueY)}`,
+    `${formatChannelValue(context.colorSpace, context.xChannelKey, context.valueX)}, `
+    + `${formatChannelValue(context.colorSpace, context.yChannelKey, context.valueY)}`,
   );
 
   /**

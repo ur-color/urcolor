@@ -52,11 +52,11 @@
 
   /** The third entry is present only in three-channel mode. */
   const labels = $derived.by(() => ({
-    x: channelLabel(context.colorSpace, context.xChannel),
-    y: channelLabel(context.colorSpace, context.yChannel),
+    x: channelLabel(context.colorSpace, context.xChannelKey),
+    y: channelLabel(context.colorSpace, context.yChannelKey),
     z:
-      context.isThreeChannel && context.zChannel !== undefined
-        ? channelLabel(context.colorSpace, context.zChannel)
+      context.isThreeChannel && context.zChannelKey !== undefined
+        ? channelLabel(context.colorSpace, context.zChannelKey)
         : undefined,
   }));
 
@@ -64,11 +64,11 @@
 
   const valueText = $derived.by(() => {
     const parts = [
-      `${labels.x} ${formatChannelValue(context.colorSpace, context.xChannel, context.valueX)}`,
-      `${labels.y} ${formatChannelValue(context.colorSpace, context.yChannel, context.valueY)}`,
+      `${labels.x} ${formatChannelValue(context.colorSpace, context.xChannelKey, context.valueX)}`,
+      `${labels.y} ${formatChannelValue(context.colorSpace, context.yChannelKey, context.valueY)}`,
     ];
-    if (labels.z !== undefined && context.zChannel !== undefined) {
-      parts.push(`${labels.z} ${formatChannelValue(context.colorSpace, context.zChannel, context.valueZ)}`);
+    if (labels.z !== undefined && context.zChannelKey !== undefined) {
+      parts.push(`${labels.z} ${formatChannelValue(context.colorSpace, context.zChannelKey, context.valueZ)}`);
     }
     return parts.join(", ");
   });
