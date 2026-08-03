@@ -146,6 +146,19 @@ for (const pkg of selected) {
   }
   await $`rm -f ${tarball}`.quiet();
   console.log(`  published ${name}@${version}`);
+
+  // The publish workflow closes the changelog's Unreleased section after a
+  // release; publishing from here skips that workflow entirely, which is how
+  // @urcolor/shared@1.0.0 shipped with its notes still sitting under
+  // "Unreleased". Same rollover, run locally. The edit is left uncommitted on
+  // purpose — it belongs in the author's next commit, not in a surprise one.
+  const changelog = `${pkg.dir}/CHANGELOG.md`;
+  if (await Bun.file(changelog).exists()) {
+    const rolled = await $`bun run scripts/rollover-changelog.ts ${changelog} ${version}`.nothrow().quiet();
+    console.log(rolled.exitCode === 0
+      ? `  rolled its changelog over to [${version}] — commit that alongside your next change`
+      : `  could not roll the changelog over; do it by hand`);
+  }
 }
 
 console.log(`\nDone. Versions after this point publish through CI, with provenance.`);
