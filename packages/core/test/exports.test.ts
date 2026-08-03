@@ -35,11 +35,32 @@ describe("@urcolor/core exports", () => {
     }
   });
 
-  it("still exposes the geometry surface", () => {
+  it("no longer exposes the gradient, geometry or space-config surface", () => {
     for (const name of [
+      "drawGradient",
+      "drawLinearGradient",
+      "interpolateStops",
+      "sampleBilinearGrid",
+      "sampleChannelGrid",
+      "sampleTriangleGrid",
+      "samplePolarGrid",
+      "sampleConicRing",
       "polarToCartesian",
+      "cartesianToPolar",
+      "clampToCircle",
+      "normalizeAngle",
+      "triangleVertices",
+      "barycentricCoords",
+      "barycentricToCartesian",
+      "pointInTriangle",
+      "clampToTriangle",
+      "insetTriangle",
+      "colorSpaces",
+      "getChannelConfig",
+      "displayToNative",
+      "nativeToDisplay",
     ]) {
-      expect(core).toHaveProperty(name);
+      expect(core).not.toHaveProperty(name);
     }
   });
 

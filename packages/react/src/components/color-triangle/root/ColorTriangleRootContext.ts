@@ -1,6 +1,6 @@
 import { createContext, useContext } from "react";
 import type { Color, SpaceId } from "@urcolor/core";
-import type { Point } from "@urcolor/core";
+import type { Point } from "@urcolor/shared";
 
 export interface ColorTriangleContextValue {
   disabled: boolean;

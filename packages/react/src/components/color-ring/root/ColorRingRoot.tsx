@@ -1,7 +1,6 @@
 import { forwardRef, useCallback, useMemo, useRef, useState } from "react";
 import { Color, type SpaceId } from "@urcolor/core";
-import { cartesianToPolar, normalizeAngle } from "@urcolor/core";
-import { colorSpaces, getChannelConfig, displayToNative, nativeToDisplay, type ChannelConfig } from "@urcolor/shared";
+import { cartesianToPolar, colorSpaces, getChannelConfig, displayToNative, nativeToDisplay, normalizeAngle, type ChannelConfig } from "@urcolor/shared";
 import { ColorRingContext, type ColorRingContextValue } from "./ColorRingRootContext";
 
 export interface ColorRingRootProps {

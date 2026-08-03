@@ -14,18 +14,11 @@ import {
   signal,
 } from "@angular/core";
 import type { FormValueControl } from "@angular/forms/signals";
-import {
-  barycentricCoords,
-  clampToTriangle,
-  Color,
-  insetTriangle,
-  pointInTriangle,
-  triangleVertices,
-  type Point,
-  type SpaceId,
-} from "@urcolor/core";
+import { Color, type SpaceId } from "@urcolor/core";
 import {
   applyDisplayValues,
+  barycentricCoords,
+  clampToTriangle,
   colorSpaces,
   colorToDisplayValue,
   createDragController,
@@ -33,9 +26,13 @@ import {
   DATA_DISABLED,
   DATA_DRAGGING,
   FEEDBACK_EPSILON,
+  insetTriangle,
+  pointInTriangle,
   resolveChannelConfig,
   snapToStep,
   stepMultiplier,
+  triangleVertices,
+  type Point,
 } from "@urcolor/shared";
 
 /** Whether the thumb straddles the outline or is kept inside it. */

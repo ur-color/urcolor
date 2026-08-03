@@ -37,17 +37,11 @@
 <script lang="ts">
   import { untrack } from "svelte";
   import { createAttachmentKey } from "svelte/attachments";
-    import {
-      barycentricCoords,
-      clampToTriangle,
-      Color as ColorClass,
-      insetTriangle,
-      pointInTriangle,
-      triangleVertices,
-      type Point,
-    } from "@urcolor/core";
+    import { Color as ColorClass } from "@urcolor/core";
   import {
     applyDisplayValues,
+    barycentricCoords,
+    clampToTriangle,
     colorSpaces,
     colorToDisplayValue,
     createDragController,
@@ -55,10 +49,14 @@
     DATA_DISABLED,
     DATA_DRAGGING,
     FEEDBACK_EPSILON,
+    insetTriangle,
     parseColor,
+    pointInTriangle,
     resolveChannelConfig,
     snapToStep,
     stepMultiplier,
+    triangleVertices,
+    type Point,
   } from "@urcolor/shared";
   import type { ChildProps } from "../../../shared/child.js";
   import { colorTriangleContext } from "./context.svelte.js";

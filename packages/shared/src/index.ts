@@ -9,3 +9,4 @@ export * from "./slider";
 export * from "./toggle";
 export * from "./gradient";
 export * from "./color-spaces";
+export * from "./geometry";

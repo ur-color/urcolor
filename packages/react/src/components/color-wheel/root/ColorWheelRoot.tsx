@@ -1,7 +1,6 @@
 import { forwardRef, useCallback, useMemo, useRef, useState } from "react";
 import { Color, type SpaceId } from "@urcolor/core";
-import { cartesianToPolar, normalizeAngle, clampToCircle } from "@urcolor/core";
-import { colorSpaces, getChannelConfig, displayToNative, nativeToDisplay, type ChannelConfig } from "@urcolor/shared";
+import { cartesianToPolar, normalizeAngle, clampToCircle, colorSpaces, getChannelConfig, displayToNative, nativeToDisplay, type ChannelConfig } from "@urcolor/shared";
 import { ColorWheelContext, type ColorWheelContextValue } from "./ColorWheelRootContext";
 
 export interface ColorWheelRootProps {

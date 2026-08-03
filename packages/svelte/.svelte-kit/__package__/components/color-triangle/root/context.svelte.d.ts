@@ -1,4 +1,5 @@
-import type { Color, Point, SpaceId } from "@urcolor/core";
+import type { Color, SpaceId } from "@urcolor/core";
+import type { Point } from "@urcolor/shared";
 /**
  * Everything a `ColorTriangle` part needs from its root.
  *

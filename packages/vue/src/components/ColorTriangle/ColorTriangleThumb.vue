@@ -10,7 +10,7 @@ export interface ColorTriangleThumbProps extends /* @vue-ignore */ PrimitiveProp
 <script setup lang="ts">
 import { computed, onMounted } from "vue";
 import { Primitive, useForwardExpose } from "reka-ui";
-import { barycentricToCartesian, insetTriangle } from "@urcolor/core";
+import { barycentricToCartesian, insetTriangle } from "@urcolor/shared";
 import { channelLabel, formatChannelValue } from "../../shared/channel-labels";
 import { injectColorTriangleRootContext } from "./ColorTriangleRoot.vue";
 

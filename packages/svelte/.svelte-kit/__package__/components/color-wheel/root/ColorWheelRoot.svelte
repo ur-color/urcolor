@@ -31,21 +31,19 @@
 <script lang="ts">
   import { untrack } from "svelte";
   import { createAttachmentKey } from "svelte/attachments";
-    import {
-      cartesianToPolar,
-      clampToCircle,
-      Color as ColorClass,
-      normalizeAngle,
-    } from "@urcolor/core";
+    import { Color as ColorClass } from "@urcolor/core";
   import {
     applyDisplayValues,
+    cartesianToPolar,
     clamp,
+    clampToCircle,
     colorSpaces,
     colorToDisplayValue,
     createDragController,
     DATA_DISABLED,
     DATA_DRAGGING,
     FEEDBACK_EPSILON,
+    normalizeAngle,
     parseColor,
     resolveArrowKey,
     resolveChannelConfig,

@@ -1,7 +1,6 @@
 import { forwardRef, useCallback, useMemo, useRef, useState } from "react";
 import { Color, type SpaceId } from "@urcolor/core";
-import { triangleVertices, clampToTriangle, barycentricCoords, pointInTriangle, type Point } from "@urcolor/core";
-import { colorSpaces, getChannelConfig, displayToNative, nativeToDisplay, type ChannelConfig } from "@urcolor/shared";
+import { triangleVertices, clampToTriangle, barycentricCoords, pointInTriangle, type Point, colorSpaces, getChannelConfig, displayToNative, nativeToDisplay, type ChannelConfig } from "@urcolor/shared";
 import { ColorTriangleContext, type ColorTriangleContextValue } from "./ColorTriangleRootContext";
 
 export interface ColorTriangleRootProps {

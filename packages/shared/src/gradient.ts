@@ -1,4 +1,5 @@
-import { barycentricCoords, channelIndexOf, Color, convert, interpolate, type ColorObject, type Coords, type Point, type SpaceId } from "@urcolor/core";
+import { channelIndexOf, Color, convert, interpolate, type ColorObject, type Coords, type SpaceId } from "@urcolor/core";
+import { barycentricCoords, type Point } from "./geometry";
 
 /**
  * Shared inner loop for the grid samplers.

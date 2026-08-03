@@ -7,8 +7,8 @@ import {
   HostAttributeToken,
   inject,
 } from "@angular/core";
-import { barycentricToCartesian } from "@urcolor/core";
 import {
+  barycentricToCartesian,
   channelLabel,
   DATA_DISABLED,
   DATA_DRAGGING,
