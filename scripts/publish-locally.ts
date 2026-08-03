@@ -89,6 +89,18 @@ for (const pkg of selected) {
   const { name, version } = await Bun.file(manifestPath).json();
   console.log(`\n=== ${name}@${version} (from ${publishDir})`);
 
+  // Skip what is already up. A release run that dies halfway — a rejected
+  // second factor, a dropped connection — should be safe to just run again;
+  // without this, the retry stops on the first package with a 403 for
+  // republishing a version that already exists.
+  if (!dryRun) {
+    const existing = await $`npm view ${`${name}@${version}`} version`.nothrow().quiet();
+    if (existing.exitCode === 0 && existing.text().trim() === version) {
+      console.log(`  already on npm — skipping`);
+      continue;
+    }
+  }
+
   // Resolve, verify and pack; then put the manifest back whatever happens, so
   // a failure here never leaves `^1.0.0` where `workspace:*` belongs.
   let tarball: string;
@@ -115,29 +127,22 @@ for (const pkg of selected) {
     continue;
   }
 
-  // One code per publish, asked for at the moment it is needed. npm treats each
-  // publish as a separate write, so a single code cannot cover six of them, and
-  // npm 11 does not prompt on its own — it fails with EOTP and tells you to
-  // pass --otp. A code entered up front would also have expired by the time the
-  // later packages are reached.
-  let published = false;
-  for (let attempt = 1; attempt <= 3 && !published; attempt++) {
-    const code = otp ?? prompt(`  one-time password for ${name}@${version}:`)?.trim();
-    const otpArgs = code ? ["--otp", code] : [];
-    const result = await $`npm publish ${tarball} --access public ${otpArgs}`.nothrow();
+  // npm runs with the terminal, not through a captured pipe. Second factors are
+  // interactive: a passkey or security key makes npm print a URL and wait for
+  // the browser, and an authenticator app makes it prompt. Capturing its output
+  // hides the URL and swallows the prompt, so the publish appears to hang and
+  // then times out. `--otp` stays available for whoever does use a code.
+  console.log(`  handing over to npm — approve the publish if it asks you to`);
+  const proc = Bun.spawn(["npm", "publish", tarball, "--access", "public", ...(otp ? ["--otp", otp] : [])], {
+    stdio: ["inherit", "inherit", "inherit"],
+  });
+  const exitCode = await proc.exited;
 
-    if (result.exitCode === 0) {
-      published = true;
-      break;
-    }
-    // A wrong or expired code is worth another try; anything else is not.
-    const expired = result.stderr.toString().includes("EOTP");
-    if (!expired || otp || attempt === 3) {
-      console.error(`  publish failed for ${name}. Later packages were not attempted.`);
-      console.error(`  the packed tarball is kept at ${tarball}`);
-      process.exit(result.exitCode);
-    }
-    console.error(`  that code was rejected or had expired — try the next one.`);
+  if (exitCode !== 0) {
+    console.error(`  publish failed for ${name}. Later packages were not attempted.`);
+    console.error(`  the packed tarball is kept at ${tarball}`);
+    console.error(`  re-running is safe: anything already on npm is skipped.`);
+    process.exit(exitCode);
   }
   await $`rm -f ${tarball}`.quiet();
   console.log(`  published ${name}@${version}`);
