@@ -38,7 +38,17 @@ Indicator, Thumb), `Toggle` and `ToggleGroup`, built on `@urcolor/shared` and
 structured after the Svelte slider root. Swap the 7 import sites. Drop the
 `@base-ui-components/react` dependency.
 
-React's 33 existing tests are the safety net and must pass unchanged.
+React's 33 existing test files are not a safety net: 25 of them assert only
+`expect(X).toBeDefined()`. The behaviour tests covering keyboard stepping, thumb
+positioning, toggle state and roving focus are written before the primitives
+they guard, and the 8 tests that do render must pass unchanged.
+
+Two documented attributes constrain the work. `ColorSwatch` emits
+`data-state="on" | "off"` inside a group, documented at
+`docs/components/react/color-swatch.md:75`, and it must survive the move. The
+`dir` and `inverted` props on `ColorSlider.Root` are currently accepted and
+never forwarded to base-ui; the internal primitive honours them, which is a
+behaviour fix.
 
 This is a prerequisite, not an optional cleanup: it is what reduces the React
 source to core hooks plus `forwardRef`, which is what makes a preact/compat
