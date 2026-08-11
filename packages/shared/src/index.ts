@@ -3,6 +3,7 @@ export * from "./keys";
 export * from "./labels";
 export * from "./data-attributes";
 export * from "./canvas";
+export * from "./swatch";
 export * from "./channel-model";
 export * from "./drag";
 export * from "./slider";

@@ -1,6 +1,55 @@
-/** CSS `background` value that paints the transparency checkerboard. */
+/**
+ * The custom properties that restyle the transparency grid. A component never
+ * writes them inline unless a prop asks for it, so a rule at any level of the
+ * cascade wins and each one falls back to the default check.
+ */
+export const CHECKERBOARD_VARS = {
+  dark: "--urcolor-checkerboard-dark",
+  light: "--urcolor-checkerboard-light",
+  size: "--urcolor-checkerboard-size",
+} as const;
+
+/** The tile size `CHECKERBOARD_BACKGROUND` falls back to. */
+export const DEFAULT_CHECKER_SIZE = 16;
+
+/**
+ * CSS `background` value that paints the transparency checkerboard.
+ *
+ * Every part of the recipe reads from {@link CHECKERBOARD_VARS}, so setting one
+ * of those properties anywhere above the element retiles or recolours the grid
+ * without the component re-rendering. An invalid override makes the whole
+ * `background` invalid at computed-value time rather than only its own layer.
+ */
 export const CHECKERBOARD_BACKGROUND
-  = "repeating-conic-gradient(rgb(230, 230, 230) 0% 25%, white 0% 50%) 0% 50% / 16px 16px";
+  = "repeating-conic-gradient("
+    + `var(${CHECKERBOARD_VARS.dark}, rgb(230, 230, 230)) 0% 25%, `
+    + `var(${CHECKERBOARD_VARS.light}, white) 0% 50%`
+    + ") 0% 50% / "
+    + `var(${CHECKERBOARD_VARS.size}, ${DEFAULT_CHECKER_SIZE}px) `
+    + `var(${CHECKERBOARD_VARS.size}, ${DEFAULT_CHECKER_SIZE}px)`;
+
+/** The property {@link CHECKERBOARD_BACKGROUND} is parked in. */
+export const CHECKERBOARD_VAR = "--urcolor-checkerboard";
+
+/**
+ * Every declaration that paints the transparency grid.
+ *
+ * The recipe goes into a custom property and `background` only references it.
+ * That is invisible in a browser, but it keeps the declaration intact under the
+ * partial CSSOM implementations test environments ship: happy-dom and jsdom
+ * both mis-parse a multi-layer `background` shorthand once a `var()` appears in
+ * its position/size slot, whereas a custom property is stored verbatim.
+ */
+export const CHECKERBOARD_STYLE: Readonly<Record<string, string>> = {
+  [CHECKERBOARD_VAR]: CHECKERBOARD_BACKGROUND,
+  background: `var(${CHECKERBOARD_VAR})`,
+};
+
+/** What a `background` referencing {@link CHECKERBOARD_VAR} holds. */
+export const CHECKERBOARD_REF = `var(${CHECKERBOARD_VAR})`;
+
+/** {@link CHECKERBOARD_STYLE} as an inline `style` string. */
+export const CHECKERBOARD_CSS = `${CHECKERBOARD_VAR}:${CHECKERBOARD_BACKGROUND};background:${CHECKERBOARD_REF};`;
 
 export interface RenderToCanvasOptions {
   canvas: HTMLCanvasElement;
