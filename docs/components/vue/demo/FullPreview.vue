@@ -666,7 +666,7 @@ button[data-state="closed"]:focus-visible {
   content: "";
   position: absolute;
   inset: 0;
-  background: var(--swatch-color-opaque);
+  background: var(--urcolor-swatch-color-opaque);
   clip-path: polygon(0 0, 100% 0, 0 100%);
 }
 </style>

@@ -187,7 +187,7 @@ A read-only preview of a color. Delegates to `ColorSwatchRoot` with `as="span"`,
 
 `ColorFieldSwatch` re-declares only the five props above. Any other `ColorSwatchRoot` prop — `label`, which sets the accessible name and otherwise falls back to the resolved color string, then `"transparent"` — reaches `ColorSwatchRoot` as a fallthrough attribute rather than a declared prop.
 
-The default slot is forwarded to `ColorSwatchRoot`, which exposes `{ color, alpha }` as slot props. The swatch publishes `--swatch-color`, `--swatch-color-opaque`, `--swatch-alpha` and `--swatch-checkerboard` as custom properties for callers styling their own overlays.
+The default slot is forwarded to `ColorSwatchRoot`, which exposes `{ color, alpha }` as slot props. The swatch publishes `--urcolor-swatch-color`, `--urcolor-swatch-color-opaque`, `--urcolor-swatch-alpha` and `--urcolor-swatch-checkerboard` as custom properties for callers styling their own overlays.
 
 ### Data Attributes
 

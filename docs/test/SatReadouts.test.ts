@@ -79,6 +79,6 @@ describe("SatSwatches", () => {
     await wrapper.vm.$nextTick();
     const current = wrapper.find(".sat-swatch-current");
     expect(current.attributes("data-swatch-index")).toBeUndefined();
-    expect(current.attributes("style")).toContain("--swatch-color: rgb(0 255 0)");
+    expect(current.attributes("style")).toContain("--urcolor-swatch-color: rgb(0 255 0)");
   });
 });

@@ -219,6 +219,21 @@ Reka UI applies these to the parts it renders.
 
 `ColorSliderGradient` and `ColorSliderCheckerboard` are plain elements and carry no state attributes; style them from an ancestor's.
 
+### CSS Variables
+
+The transparency grid reads three custom properties and no component writes
+them, so a rule anywhere above the element wins:
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `--urcolor-checkerboard-dark` | `rgb(230, 230, 230)` | The darker of the two checks. |
+| `--urcolor-checkerboard-light` | `white` | The lighter of the two checks. |
+| `--urcolor-checkerboard-size` | `16px` | The tile size, applied to both axes. |
+
+The grid is a single `background` shorthand, so an invalid value invalidates
+the whole declaration rather than its own layer. Keep overrides to a `<color>`
+and a `<length>`.
+
 ## Accessibility
 
 ColorSlider provides a standard slider interface built on top of Reka UI's slider primitives, ensuring robust screen reader support.

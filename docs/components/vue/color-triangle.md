@@ -191,6 +191,21 @@ The thumb registers itself with the root so the `"contain"` inset can be measure
 | `data-color-triangle-root` | Root | Always. Marks the root for descendants and for styling. |
 | `data-disabled` | Root, Gradient, Thumb | The root is disabled. |
 
+### CSS Variables
+
+The transparency grid reads three custom properties and no component writes
+them, so a rule anywhere above the element wins:
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `--urcolor-checkerboard-dark` | `rgb(230, 230, 230)` | The darker of the two checks. |
+| `--urcolor-checkerboard-light` | `white` | The lighter of the two checks. |
+| `--urcolor-checkerboard-size` | `16px` | The tile size, applied to both axes. |
+
+The grid is a single `background` shorthand, so an invalid value invalidates
+the whole declaration rather than its own layer. Keep overrides to a `<color>`
+and a `<length>`.
+
 ## Accessibility
 
 ColorTriangle exposes a single focusable thumb that drives both triangle axes — and the third channel too, in barycentric mode. Keyboard events are handled on the root, which sees them bubble up from the focused thumb.

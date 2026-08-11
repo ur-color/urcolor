@@ -224,7 +224,7 @@ A read-only preview of a color. The color is painted as a flat `linear-gradient`
 | `checkerSize` | `input<number>` | `16` | The checkerboard square size, in pixels. |
 | `alpha` | `input<boolean>` | `false` | When true, reflects the color's alpha; when false, paints it opaque. Coerced with `booleanAttribute`, so the bare `alpha` attribute works. |
 
-Every paint layer is a host **style** binding, which leaves your own `style` attribute — a template-level binding — winning the cascade. The swatch publishes `--swatch-color`, `--swatch-color-opaque`, `--swatch-alpha` and `--swatch-checkerboard` for callers styling their own overlays.
+Every paint layer is a host **style** binding, which leaves your own `style` attribute, a template-level binding, winning the cascade. The swatch publishes `--urcolor-swatch-color`, `--urcolor-swatch-color-opaque`, `--urcolor-swatch-alpha` and `--urcolor-swatch-checkerboard` for callers styling their own overlays.
 
 A swatch is inert, so its `disabled` is read once from the static host attribute rather than tracked live; it only sets `data-disabled`. A static `aria-label` wins over the default `"Colour swatch"`.
 

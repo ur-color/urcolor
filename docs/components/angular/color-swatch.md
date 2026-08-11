@@ -53,7 +53,7 @@ A single directive with no sub-parts. Its selector is `[urcColorSwatch]`, which 
 
 ### Tile size
 
-`checkerSize` is a `numberAttribute` input, so the static form works too. It is the transparency grid's tile size in pixels, and feeds straight into `--swatch-checkerboard`.
+`checkerSize` is a `numberAttribute` input, so the static form works too. It is the transparency grid's tile size in pixels, and writes `--urcolor-checkerboard-size`. Left unset, that property is free for a stylesheet to own and falls back to `16px`.
 
 ```html
 <div urcColorSwatch [value]="color()" alpha checkerSize="8" class="size-10 rounded-lg"></div>
@@ -163,12 +163,26 @@ Readable signals, for `exportAs` template references and for `inject(ColorSwatch
 
 | Variable | Description |
 |----------|-------------|
-| `--swatch-color` | The resolved CSS color string, with or without alpha depending on the `alpha` input. |
-| `--swatch-color-opaque` | The color at full opacity. |
-| `--swatch-alpha` | The color's alpha value (0–1). |
-| `--swatch-checkerboard` | The checkerboard background shorthand, already sized by `checkerSize`. |
+| `--urcolor-swatch-color` | The painted color, honouring `alpha`. `transparent` when there is no color. |
+| `--urcolor-swatch-color-opaque` | The same color forced to alpha 1. |
+| `--urcolor-swatch-alpha` | The color's alpha channel, `1` when there is no color. |
+| `--urcolor-swatch-checkerboard` | The transparency grid painted under the color. |
+| `--urcolor-swatch-background` | The composited `background`, built from the four above. |
 
-All four are always emitted, including for an absent or unparseable value, so your styling never has to guard for a missing variable. The color itself is painted as a flat `linear-gradient` rather than a `background-color`, so it composites over the checkerboard in a single `background` declaration.
+All five are always emitted, including when the value is absent or
+unparseable, so your styling never has to guard for a missing variable. The
+unprefixed `--swatch-color`, `--swatch-color-opaque`, `--swatch-alpha` and
+`--swatch-checkerboard` are still emitted as aliases of their replacements and
+are deprecated.
+
+The grid itself reads three further properties, and no component writes them,
+so a rule anywhere above the element wins:
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `--urcolor-checkerboard-dark` | `rgb(230, 230, 230)` | The darker of the two checks. |
+| `--urcolor-checkerboard-light` | `white` | The lighter of the two checks. |
+| `--urcolor-checkerboard-size` | `16px` | The tile size. `checkerSize` writes it inline, which beats a stylesheet. |
 
 ## Accessibility
 

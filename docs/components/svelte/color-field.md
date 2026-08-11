@@ -244,7 +244,7 @@ Extends `Omit<HTMLAttributes<HTMLSpanElement>, "value">`.
 | `class` | `string` | — | Class applied to the rendered element. |
 | `child` | `Snippet<[ChildSnippetArgs]>` | — | Replaces the default element; receives the props it would have received. |
 
-The swatch publishes `--swatch-color`, `--swatch-color-opaque`, `--swatch-alpha` and `--swatch-checkerboard` as custom properties for callers styling their own overlays. Your own `style` string is appended last, so it wins the cascade.
+The swatch publishes `--urcolor-swatch-color`, `--urcolor-swatch-color-opaque`, `--urcolor-swatch-alpha` and `--urcolor-swatch-checkerboard` as custom properties for callers styling their own overlays. Your own `style` string is appended last, so it wins the cascade.
 
 ### Data Attributes
 

@@ -235,6 +235,21 @@ An `aria-label` passed as a plain attribute wins over the generated channel-pair
 |-----------|------|--------------|
 | `data-disabled` | Root, Area, Gradient, Thumb | The root is disabled. |
 
+### CSS Variables
+
+The transparency grid reads three custom properties and no component writes
+them, so a rule anywhere above the element wins:
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `--urcolor-checkerboard-dark` | `rgb(230, 230, 230)` | The darker of the two checks. |
+| `--urcolor-checkerboard-light` | `white` | The lighter of the two checks. |
+| `--urcolor-checkerboard-size` | `16px` | The tile size, applied to both axes. |
+
+The grid is a single `background` shorthand, so an invalid value invalidates
+the whole declaration rather than its own layer. Keep overrides to a `<color>`
+and a `<length>`.
+
 ## Accessibility
 
 ColorArea exposes a single focusable thumb inside an application-role surface, with keyboard access to both axes.

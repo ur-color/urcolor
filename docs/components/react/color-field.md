@@ -164,7 +164,7 @@ Extends `ColorSwatchProps`, which is `Omit<ComponentPropsWithoutRef<"div">, "val
 | `disabled` | `boolean` | `false` | Only meaningful inside a `ColorSwatchGroup`; a field swatch has no interaction of its own. |
 | `as` | `React.ElementType` | `'span'` | The element or component to render as. |
 
-The swatch publishes `--swatch-color`, `--swatch-color-opaque`, `--swatch-alpha` and `--swatch-checkerboard` as custom properties for callers styling their own overlays. Your own `style` object is merged last, so it wins.
+The swatch publishes `--urcolor-swatch-color`, `--urcolor-swatch-color-opaque`, `--urcolor-swatch-alpha` and `--urcolor-swatch-checkerboard` as custom properties for callers styling their own overlays. Your own `style` object is merged last, so it wins.
 
 ### Data Attributes
 

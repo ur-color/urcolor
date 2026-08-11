@@ -81,10 +81,26 @@ The component exposes CSS custom properties on the rendered element for advanced
 
 | Variable | Description |
 |----------|-------------|
-| `--swatch-color` | The resolved CSS color string, with or without alpha depending on the `alpha` prop. |
-| `--swatch-color-opaque` | The color at full opacity. Not emitted when `value` is absent or unparseable. |
-| `--swatch-alpha` | The color's alpha value (0–1). Not emitted when `value` is absent or unparseable. |
-| `--swatch-checkerboard` | The checkerboard background shorthand, already sized by `checkerSize`. |
+| `--urcolor-swatch-color` | The painted color, honouring `alpha`. `transparent` when there is no color. |
+| `--urcolor-swatch-color-opaque` | The same color forced to alpha 1. |
+| `--urcolor-swatch-alpha` | The color's alpha channel, `1` when there is no color. |
+| `--urcolor-swatch-checkerboard` | The transparency grid painted under the color. |
+| `--urcolor-swatch-background` | The composited `background`, built from the four above. |
+
+All five are always emitted, including when the value is absent or
+unparseable, so your styling never has to guard for a missing variable. The
+unprefixed `--swatch-color`, `--swatch-color-opaque`, `--swatch-alpha` and
+`--swatch-checkerboard` are still emitted as aliases of their replacements and
+are deprecated.
+
+The grid itself reads three further properties, and no component writes them,
+so a rule anywhere above the element wins:
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `--urcolor-checkerboard-dark` | `rgb(230, 230, 230)` | The darker of the two checks. |
+| `--urcolor-checkerboard-light` | `white` | The lighter of the two checks. |
+| `--urcolor-checkerboard-size` | `16px` | The tile size. `checkerSize` writes it inline, which beats a stylesheet. |
 
 ## Accessibility
 
