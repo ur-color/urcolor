@@ -1,6 +1,6 @@
 import { computed, signal, type Signal, type WritableSignal } from "@angular/core";
-import { Color } from "@urcolor/core";
-import { parseColor } from "@urcolor/shared";
+import { Color, type SpaceId } from "@urcolor/core";
+import { channelsOf, parseColor, type ChannelConfig } from "@urcolor/shared";
 
 /** Anything accepted as the initial colour of a store. */
 export type ColorInput = Color | string | null | undefined;
@@ -27,6 +27,11 @@ export interface ColorStore {
   readonly alpha: Signal<number>;
   /** Sets the alpha from a percentage in `0..100`. */
   setAlpha(next: number): void;
+  /**
+   * The channels of the colour's own space, ready to render one field per
+   * channel. Pass `space` to `createColorStore` to pin them instead.
+   */
+  readonly channels: Signal<readonly ChannelConfig[]>;
 }
 
 /**
@@ -37,6 +42,12 @@ export interface ColorStore {
  * there is no resync effect: the caller owns the input and can push a new
  * colour with `store.color.set(...)`, which keeps an in-flight edit from being
  * overwritten.
+ *
+ * `space` decides what `channels` describes. Left out, it follows the colour's
+ * own space, which is what a single-space editor wants. A picker that mixes
+ * spaces should pass one: writing through a control converts the colour into
+ * that control's space, so an HSV area would otherwise renumber a set of HSL
+ * fields under the user mid-drag.
  *
  * Nothing here touches the DOM or the injector, so it may be called from a
  * field initializer, a constructor, a service, or plain module scope.
@@ -50,10 +61,11 @@ export interface ColorStore {
  * }
  * ```
  */
-export function createColorStore(input?: ColorInput): ColorStore {
+export function createColorStore(input?: ColorInput, space?: SpaceId): ColorStore {
   const color = signal<Color>(parseColor(input) ?? COLOR_STORE_FALLBACK);
   const hex = computed(() => color().toString("hex"));
   const alpha = computed(() => Math.round(color().alpha * 100));
+  const channels = computed(() => channelsOf(space ?? color().space));
 
   return {
     color,
@@ -66,5 +78,6 @@ export function createColorStore(input?: ColorInput): ColorStore {
     setAlpha(next: number): void {
       color.update(prev => prev.withAlpha(next / 100));
     },
+    channels,
   };
 }

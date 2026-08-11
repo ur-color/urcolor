@@ -66,7 +66,7 @@ function roundTo(value: number, decimals: number): number {
 }
 
 export const colorSpaces: Partial<Record<SpaceId, ColorSpaceConfig>> = {
-  hsl: {
+  "hsl": {
     space: "hsl",
     label: "HSL",
     channels: [
@@ -75,7 +75,7 @@ export const colorSpaces: Partial<Record<SpaceId, ColorSpaceConfig>> = {
       { key: "l", label: "Lightness", min: 0, max: 100, step: 1, format: "percentage", nativeMin: 0, nativeMax: 1 },
     ],
   },
-  hsv: {
+  "hsv": {
     space: "hsv",
     label: "HSV",
     channels: [
@@ -84,7 +84,7 @@ export const colorSpaces: Partial<Record<SpaceId, ColorSpaceConfig>> = {
       { key: "v", label: "Brightness", min: 0, max: 100, step: 1, format: "percentage", nativeMin: 0, nativeMax: 1 },
     ],
   },
-  hwb: {
+  "hwb": {
     space: "hwb",
     label: "HWB",
     channels: [
@@ -93,7 +93,7 @@ export const colorSpaces: Partial<Record<SpaceId, ColorSpaceConfig>> = {
       { key: "b", label: "Blackness", min: 0, max: 100, step: 1, format: "percentage", nativeMin: 0, nativeMax: 1 },
     ],
   },
-  oklch: {
+  "oklch": {
     space: "oklch",
     label: "OKLCh",
     channels: [
@@ -102,7 +102,7 @@ export const colorSpaces: Partial<Record<SpaceId, ColorSpaceConfig>> = {
       { key: "h", label: "Hue", min: 0, max: 360, step: 1, format: "degree" },
     ],
   },
-  oklab: {
+  "oklab": {
     space: "oklab",
     label: "OKLab",
     channels: [
@@ -111,7 +111,7 @@ export const colorSpaces: Partial<Record<SpaceId, ColorSpaceConfig>> = {
       { key: "b", label: "b", min: -0.4, max: 0.4, step: 0.01, format: "number" },
     ],
   },
-  lch: {
+  "lch": {
     space: "lch",
     label: "LCh",
     channels: [
@@ -120,7 +120,7 @@ export const colorSpaces: Partial<Record<SpaceId, ColorSpaceConfig>> = {
       { key: "h", label: "Hue", min: 0, max: 360, step: 1, format: "degree" },
     ],
   },
-  lab: {
+  "lab": {
     space: "lab",
     label: "Lab",
     channels: [
@@ -129,7 +129,7 @@ export const colorSpaces: Partial<Record<SpaceId, ColorSpaceConfig>> = {
       { key: "b", label: "b", min: -125, max: 125, step: 1, format: "number" },
     ],
   },
-  srgb: {
+  "srgb": {
     space: "srgb",
     label: "RGB",
     channels: [
@@ -165,7 +165,7 @@ export const colorSpaces: Partial<Record<SpaceId, ColorSpaceConfig>> = {
       { key: "b", label: "Blue", min: 0, max: 1, step: 0.01, format: "number" },
     ],
   },
-  rec2020: {
+  "rec2020": {
     space: "rec2020",
     label: "Rec. 2020",
     channels: [
@@ -181,4 +181,18 @@ export const colorSpaces: Partial<Record<SpaceId, ColorSpaceConfig>> = {
  */
 export function getChannelConfig(colorSpace: SpaceId, channel: string): ChannelConfig | undefined {
   return colorSpaces[colorSpace]?.channels.find(c => c.key === channel);
+}
+
+/** Every space with a channel configuration, hence every space a field can edit. */
+const NO_CHANNELS: readonly ChannelConfig[] = Object.freeze([]);
+
+/**
+ * The channels of a color space, or an empty list for a space with no channel
+ * configuration (`xyz-d50`, say, which nothing edits directly).
+ *
+ * The result is the array `colorSpaces` already holds, so it is stable between
+ * calls for the same space and safe to use as a dependency or a `v-for` source.
+ */
+export function channelsOf(colorSpace: SpaceId): readonly ChannelConfig[] {
+  return colorSpaces[colorSpace]?.channels ?? NO_CHANNELS;
 }

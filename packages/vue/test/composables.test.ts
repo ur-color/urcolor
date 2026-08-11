@@ -44,6 +44,34 @@ describe("useColor", () => {
     expect(result.color.value).toBeInstanceOf(Color);
   });
 
+  it("exposes the channels of the color's own space", () => {
+    const [result] = withSetup(() => useColor("hsl(210, 80%, 50%)"));
+    expect(result.channels.value.map(c => c.key)).toEqual(["h", "s", "l"]);
+  });
+
+  it("follows the color into a new space", async () => {
+    const [result] = withSetup(() => useColor("hsl(210, 80%, 50%)"));
+    result.color.value = result.color.value.to("oklch");
+    await nextTick();
+    expect(result.channels.value.map(c => c.key)).toEqual(["l", "c", "h"]);
+  });
+
+  it("pins the channels to an explicit space", async () => {
+    const [result] = withSetup(() => useColor("hsl(210, 80%, 50%)", "hsl"));
+    result.color.value = result.color.value.to("oklch");
+    await nextTick();
+    expect(result.channels.value.map(c => c.key)).toEqual(["h", "s", "l"]);
+  });
+
+  it("tracks a reactive space", async () => {
+    const space = ref<"hsl" | "oklch">("hsl");
+    const [result] = withSetup(() => useColor("hsl(210, 80%, 50%)", space));
+    expect(result.channels.value.map(c => c.key)).toEqual(["h", "s", "l"]);
+    space.value = "oklch";
+    await nextTick();
+    expect(result.channels.value.map(c => c.key)).toEqual(["l", "c", "h"]);
+  });
+
   it("falls back to black for null/undefined", () => {
     const [result] = withSetup(() => useColor(null));
     expect(result.hex.value).toBe("#000000");

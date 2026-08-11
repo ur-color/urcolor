@@ -1,5 +1,6 @@
 import { describe, expect, it } from "bun:test";
 import {
+  channelsOf,
   colorSpaces,
   getChannelConfig,
   displayToNative,
@@ -112,5 +113,22 @@ describe("nativeToDisplay", () => {
     const native = displayToNative(config, display);
     const back = nativeToDisplay(config, native);
     expect(back).toBe(128);
+  });
+});
+
+describe("channelsOf", () => {
+  it("returns a space's channels", () => {
+    expect(channelsOf("hsl").map(c => c.key)).toEqual(["h", "s", "l"]);
+    expect(channelsOf("oklch").map(c => c.key)).toEqual(["l", "c", "h"]);
+  });
+
+  it("returns the same array every call, so it is safe as a dependency", () => {
+    expect(channelsOf("hsl")).toBe(channelsOf("hsl"));
+    expect(channelsOf("hsl")).toBe(colorSpaces.hsl!.channels);
+  });
+
+  it("returns an empty list for a space with no channel configuration", () => {
+    expect(channelsOf("xyz-d50")).toEqual([]);
+    expect(channelsOf("xyz-d50")).toBe(channelsOf("srgb-linear"));
   });
 });

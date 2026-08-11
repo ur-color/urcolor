@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Color } from "@urcolor/core";
+import { Color, type SpaceId } from "@urcolor/core";
+import { channelsOf, type ChannelConfig } from "@urcolor/shared";
 
 export type ColorInput = Color | string | null | undefined;
 
@@ -10,6 +11,11 @@ export interface UseColorReturn {
   setHex: (hex: string) => void;
   alpha: number;
   setAlpha: (alpha: number) => void;
+  /**
+   * The channels of the color's own space, ready to render one field per
+   * channel. Pass `space` to `useColor` to pin them instead.
+   */
+  channels: readonly ChannelConfig[];
 }
 
 const FALLBACK = Color.parse("hsl(0, 0%, 0%)")!;
@@ -20,7 +26,16 @@ export function parseColor(input: ColorInput): Color {
   return FALLBACK;
 }
 
-export function useColor(input: ColorInput): UseColorReturn {
+/**
+ * Reactive color state.
+ *
+ * `space` decides what `channels` describes. Left out, it follows the color's
+ * own space, which is what a single-space editor wants. A picker that mixes
+ * spaces should pass one: writing through a control converts the color into
+ * that control's space, so an HSV area would otherwise renumber a set of HSL
+ * fields under the user mid-drag.
+ */
+export function useColor(input: ColorInput, space?: SpaceId): UseColorReturn {
   const [color, setColor] = useState<Color>(() => parseColor(input));
 
   // Resync when `input` changes, mirroring Vue's `watch(() => toValue(input), ...)`.
@@ -48,5 +63,7 @@ export function useColor(input: ColorInput): UseColorReturn {
     setColor(prev => prev.withAlpha(v / 100));
   }, []);
 
-  return { color, setColor, hex, setHex, alpha, setAlpha };
+  const channels = useMemo(() => channelsOf(space ?? color.space), [space, color]);
+
+  return { color, setColor, hex, setHex, alpha, setAlpha, channels };
 }

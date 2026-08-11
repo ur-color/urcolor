@@ -1,10 +1,12 @@
-import { Color } from "@urcolor/core";
+import { Color, type SpaceId } from "@urcolor/core";
+import { channelsOf, type ChannelConfig } from "@urcolor/shared";
 import {
   shallowRef,
   computed,
   watch,
   toValue,
   markRaw,
+  type ComputedRef,
   type MaybeRefOrGetter,
   type ShallowRef,
   type WritableComputedRef,
@@ -16,9 +18,26 @@ export interface UseColorReturn {
   color: ShallowRef<Color>;
   hex: WritableComputedRef<string>;
   alpha: WritableComputedRef<number>;
+  /**
+   * The channels of the color's own space, ready to render one field per
+   * channel. Pass `space` to `useColor` to pin them instead.
+   */
+  channels: ComputedRef<readonly ChannelConfig[]>;
 }
 
-export function useColor(input: MaybeRefOrGetter<ColorInput>): UseColorReturn {
+/**
+ * Reactive color state.
+ *
+ * `space` decides what `channels` describes. Left out, it follows the color's
+ * own space, which is what a single-space editor wants. A picker that mixes
+ * spaces should pass one: writing through a control converts the color into
+ * that control's space, so an HSV area would otherwise renumber a set of HSL
+ * fields under the user mid-drag.
+ */
+export function useColor(
+  input: MaybeRefOrGetter<ColorInput>,
+  space?: MaybeRefOrGetter<SpaceId | undefined>,
+): UseColorReturn {
   const color: ShallowRef<Color> = shallowRef(parseColor(toValue(input)));
 
   watch(
@@ -43,7 +62,9 @@ export function useColor(input: MaybeRefOrGetter<ColorInput>): UseColorReturn {
     },
   });
 
-  return { color, hex, alpha };
+  const channels = computed(() => channelsOf(toValue(space) ?? color.value.space));
+
+  return { color, hex, alpha, channels };
 }
 
 const FALLBACK = Color.parse("hsl(0, 0%, 0%)")!;
