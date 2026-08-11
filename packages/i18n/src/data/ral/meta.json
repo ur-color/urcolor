@@ -1,0 +1,12 @@
+{
+  "source": "ral",
+  "retrievedAt": "2026-08-11T21:20:00.193Z",
+  "itemCount": 215,
+  "languages": {
+    "und": {
+      "model": "palette",
+      "terms": 215,
+      "coverage": 1
+    }
+  }
+}

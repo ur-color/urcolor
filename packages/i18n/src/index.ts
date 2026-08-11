@@ -10,13 +10,20 @@ import { uwdataSource } from "./sources/uwdata/source";
 import { uwdataChunks } from "./sources/uwdata/chunks";
 import { wikidataSource } from "./sources/wikidata/source";
 import { wikidataChunks } from "./sources/wikidata/chunks";
+import { ralSource } from "./sources/ral/source";
+import { ralChunks } from "./sources/ral/chunks";
 
 registerSource(uwdataSource, uwdataChunks);
 registerSource(wikidataSource, wikidataChunks);
+registerSource(ralSource, ralChunks);
 
-// uwdata answers the 20 locales it covers; wikidata answers the other 278.
-// Order matters and lives here rather than in the lookup layer, which never
-// names a dataset. Adding a third source later is a one-line change.
+// uwdata answers the locales it covers; wikidata answers the rest. Order
+// matters and lives here rather than in the lookup layer, which never names a
+// dataset.
+//
+// The catalogue sources are registered but deliberately absent from this
+// chain: their names are industrial codes, so a plain resolve() must answer
+// with a word, never with "ral 6018". Callers opt in with { source: "ral" }.
 setDefaultSources(["uwdata", "wikidata"]);
 
 export { listSources, getSource, getDefaultSources } from "./engine/registry";

@@ -20,7 +20,9 @@
     "build:js": "bun build ./src/index.ts --outdir ./dist --format esm --splitting",
     "build:types": "tsc --declaration --emitDeclarationOnly --outDir dist --project tsconfig.build.json",
     "sync:uwdata": "bun run scripts/sync-uwdata/main.ts",
-    "sync:wikidata": "bun run scripts/sync-wikidata/main.ts"
+    "sync:wikidata": "bun run scripts/sync-wikidata/main.ts",
+    "sync:pantone": "bun run scripts/sync-pantone/main.ts",
+    "sync:ral": "bun run scripts/sync-ral/main.ts"
   },
   "keywords": [
     "color",
