@@ -9,6 +9,7 @@
 
 | パッケージ | 説明 |
 | --- | --- |
+| `urcolor` | カラーエンジン単体。スコープなしの名前で `@urcolor/core` を再エクスポートします |
 | `@urcolor/core` | コアのカラーロジックとアクセシビリティユーティリティ |
 | `@urcolor/shared` | すべてのバインディングが共有するフレームワーク非依存の振る舞い、WebGL 描画、グリッドサンプラー |
 | `@urcolor/vue` | Vue 3 のコンポーネントとコンポーザブル |
@@ -112,27 +113,33 @@ yarn add @urcolor/angular
 
 ### コアのみ
 
-フレームワークバインディングなしでカラーユーティリティだけが必要な場合:
+フレームワークバインディングなしでカラーユーティリティだけが必要なら、同じエンジンのスコープなし名 `urcolor` をインストールします。
 
 ::: code-group
 
 ```sh [bun]
-bun add @urcolor/core
+bun add urcolor
 ```
 
 ```sh [npm]
-npm install @urcolor/core
+npm install urcolor
 ```
 
 ```sh [pnpm]
-pnpm add @urcolor/core
+pnpm add urcolor
 ```
 
 ```sh [yarn]
-yarn add @urcolor/core
+yarn add urcolor
 ```
 
 :::
+
+```ts
+import { Color } from "urcolor";
+```
+
+`urcolor` 自体にコードはありません。`@urcolor/core` を再エクスポートし、フレームワークパッケージと同じバージョン範囲で依存しているため、どちらを選んでもエンジンと `Color` クラスは 1 つだけです。好きな名前を使ってください。フレームワークバインディングを入れていれば `@urcolor/core` はすでに存在し、1 つのプロジェクトで両方の名前を混ぜても問題ありません。
 
 ### オプションのパッケージ
 

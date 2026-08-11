@@ -1,6 +1,6 @@
 # How to Build a Color Ring
 
-Let's build a circular hue ring step by step.
+A color ring maps one channel onto a circle.
 
 <script setup>
 import ColorRingGuide from './demo/vue/ColorRingGuide.vue'
@@ -24,9 +24,18 @@ Here's what we'll end up with:
 
 </details>
 
+The parts, and how they nest:
+
+```mermaid
+flowchart TD
+  R["ColorRing Root<br/>colorSpace, channel, innerRadius"] --> K["Track<br/>pointer target"]
+  K --> G["Gradient<br/>paints the ring"]
+  K --> T["Thumb"]
+```
+
 ## Step 1: Set up state
 
-Start by importing the color model and creating a reactive color value.
+Import the color model and create a reactive color value.
 
 ::: code-group
 
@@ -69,11 +78,11 @@ export class MyRing {
 
 :::
 
-`useColor()` creates color state from any CSS color string. Vue returns a `{ color }` shallow ref; React returns `{ color, setColor }`. Svelte returns a rune-backed object whose `color`, `hex` and `alpha` are **getters** — keep the object (`colorState.color`) rather than destructuring it, or you lose reactivity. Angular has no hook: a plain `signal<Color>()` is the state, and `[(value)]` binds to it directly. (`createColorStore()` from `@urcolor/angular` is available too when you also want `hex` / `alpha` projections.)
+`useColor()` creates color state from any CSS color string. Vue returns a `{ color }` shallow ref and React returns `{ color, setColor }`. Svelte returns a rune-backed object whose `color`, `hex` and `alpha` are getters, so keep the object and read `colorState.color` rather than destructuring it, or reactivity is lost. Angular has no hook: a plain `signal<Color>()` is the state, and `[(value)]` binds to it directly. `createColorStore()` from `@urcolor/angular` is there too, for `hex` and `alpha` projections.
 
 ## Step 2: Add the root
 
-The root manages all the state and interactions. Tell it which color space and channel to control.
+The root owns the state and the interactions. Tell it which color space to work in and which channel to control.
 
 ::: code-group
 
@@ -164,17 +173,17 @@ export class MyRing {
 
 :::
 
-Vue's `v-model` and Angular's `[(value)]` are true two-way bindings. React is one-way plus `onValueChange`. Svelte's `value` is `$bindable`, but `useColor` exposes getters, so bind it with Svelte 5's function form — `bind:value={() => colorState.color, colorState.setColor}` — which is exactly `v-model` for a getter/setter pair.
+Vue's `v-model` and Angular's `[(value)]` are true two-way bindings. React is one-way plus `onValueChange`. Svelte's `value` is `$bindable`, but `useColor` exposes getters, so bind it with Svelte 5's function form, `bind:value={() => colorState.color, colorState.setColor}`, which is `v-model` for a getter/setter pair.
 
-Angular ships every part of a family as a `COLOR_*_DIRECTIVES` array, so one entry in `imports` brings in the whole set.
+Angular ships each family as a `COLOR_*_DIRECTIVES` array, so one entry in `imports` brings in the whole set.
 
-- `color-space` / `colorSpace` — the color space to work in (`hsl`, `oklch`, `hsv`, etc.)
-- `channel` — the channel this ring controls (`h`, `s`, `l`, `c`, etc.)
-- `inner-radius` / `innerRadius` — the inner radius as a fraction of the outer radius (`0`–`1`), controls ring thickness
+- `color-space` / `colorSpace`: the color space to work in (`hsl`, `oklch`, `hsv`, etc.)
+- `channel`: the channel this ring controls (`h`, `s`, `l`, `c`, etc.)
+- `inner-radius` / `innerRadius`: the inner radius as a fraction of the outer radius (`0`–`1`), controls ring thickness
 
 ## Step 3: Add the track and gradient
 
-The track is the interactive area that handles pointer events. The gradient renders the circular gradient on a canvas. In Angular the gradient's selector is `canvas[urcColorRingGradient]`, so it goes on a `<canvas>` element you own; the other three render their own canvas for you.
+The track takes the pointer events, and the gradient paints the ring on a canvas. In Angular the gradient's selector is `canvas[urcColorRingGradient]`, so it goes on a `<canvas>` element you own; the other three render their own canvas for you.
 
 ::: code-group
 
@@ -286,11 +295,11 @@ export class MyRing {
 
 :::
 
-The root needs `container-type: inline-size` so the component can calculate dimensions correctly.
+The root needs `container-type: inline-size` for the component to measure itself.
 
 ## Step 4: Add the thumb
 
-The thumb is the draggable handle. It's positioned automatically along the ring.
+The thumb is the draggable handle. The component positions it along the ring.
 
 ::: code-group
 
@@ -437,12 +446,12 @@ export class MyRing {
 :::
 
 ::: tip
-All components are completely unstyled — the classes above are just an example using Tailwind CSS. Use any styling approach you prefer.
+The components ship unstyled. The classes above are one example, written with Tailwind CSS; any styling approach works.
 :::
 
 ## Adjusting ring thickness
 
-Use the inner-radius prop to control the ring thickness. The value is a fraction of the outer radius — `0` gives a full circle, `0.9` gives a thin ring:
+The inner-radius prop sets the ring thickness as a fraction of the outer radius. `0` gives a full circle and `0.9` a thin ring:
 
 ::: code-group
 
@@ -498,7 +507,7 @@ Use the inner-radius prop to control the ring thickness. The value is a fraction
 
 ## Changing start angle
 
-Use the start-angle prop to rotate where the ring gradient begins (in degrees):
+The start-angle prop rotates where the ring gradient begins, in degrees:
 
 ::: code-group
 
@@ -554,7 +563,7 @@ Use the start-angle prop to rotate where the ring gradient begins (in degrees):
 
 ## Different channels
 
-Switch the `channel` prop to control different color properties. For example, a saturation ring:
+Switching the `channel` prop controls a different property. A saturation ring:
 
 ::: code-group
 
@@ -606,7 +615,7 @@ Switch the `channel` prop to control different color properties. For example, a 
 
 ## Listening to changes
 
-Vue emits `@update:model-value` while dragging and `@change-end` on release; React calls `onValueChange` while dragging and `onValueCommit` on release. Svelte uses the same pair as React — `onValueChange` while dragging, `onValueCommit` on release; Angular emits `(valueChange)` while dragging and `(valueCommit)` on release. Angular's `(valueChange)` is the output half of `[(value)]`, so when you listen to it explicitly you bind the input one-way as `[value]="color()"` and write the signal yourself.
+Vue emits `@update:model-value` while dragging and `@change-end` on release; React calls `onValueChange` while dragging and `onValueCommit` on release. Svelte uses the same pair as React, `onValueChange` while dragging and `onValueCommit` on release; Angular emits `(valueChange)` while dragging and `(valueCommit)` on release. Angular's `(valueChange)` is the output half of `[(value)]`, so when you listen to it explicitly you bind the input one-way as `[value]="color()"` and write the signal yourself.
 
 ::: code-group
 

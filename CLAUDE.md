@@ -42,6 +42,39 @@ Component pages follow this structure:
 - `/guide/` — "Getting Started" + "Vue Tutorials"
 - `/components/` — "Components" + "Vue"
 
+### Prose
+
+- Laconic and formal. No em dashes in English prose: use a comma, a colon or a
+  new sentence. Em dashes stay where they are punctuation of the language (the
+  translated pages) or a table's "not applicable" marker.
+- Describe the thing, not the act of documenting it. Skip "Let's build", "Here's
+  what you need to know" and similar signposting.
+- Prefer a diagram to a paragraph for architecture, composition or a decision
+  tree. Each how-to page opens with a mermaid tree of the parts.
+
+### Diagrams
+
+Mermaid is wired up through `vitepress-plugin-mermaid` (`withMermaid` in
+`docs/.vitepress/config.ts`); write a ```mermaid fence and it renders. Notes:
+
+- mermaid measures a label off-document, so `config.ts` pins a concrete
+  `fontFamily` and a single `fontSize`, and `theme/custom.css` resets the prose
+  margins VitePress would otherwise apply inside a label.
+- `mermaid` is in `optimizeDeps.include`; without it the dev server fails on
+  dayjs's UMD build.
+- xychart colors a whole series at once. The benchmark charts work around it
+  with `--bench-N` custom properties on a `.bench-chart` wrapper.
+
+### Benchmarks
+
+`docs/guide/benchmarks.md` is generated. Edit `packages/core/bench/page.ts`
+(prose, charts, tables) or `report.ts` (data collection), never the markdown.
+
+- `bun run --cwd packages/core bench:report` re-runs every suite, which needs a
+  quiet machine.
+- `bun run packages/core/bench/report.ts --from-json` re-renders the page from
+  the stored `docs/public/benchmarks.json`, for prose or layout changes.
+
 ### Tooling
 
 - Use `bun run docs:build` to verify docs build without errors

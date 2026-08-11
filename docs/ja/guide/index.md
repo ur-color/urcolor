@@ -4,6 +4,25 @@ UrColor は、あらゆる環境で使えるヘッドレスなカラーピッカ
 
 ## パッケージ
 
+```mermaid
+flowchart TD
+  core["@urcolor/core<br/>パース・変換・ミックス・ガマット"]
+  shared["@urcolor/shared<br/>ドラッグ・キーボード・チャンネル・WebGL"]
+  relative["@urcolor/relative<br/>CSS Color 5 相対構文"]
+  i18n["@urcolor/i18n<br/>カラー名とチャンネル名"]
+
+  core --> shared
+  core -.-> relative
+  core -.-> i18n
+
+  shared --> vue["@urcolor/vue"]
+  shared --> react["@urcolor/react"]
+  shared --> svelte["@urcolor/svelte"]
+  shared --> angular["@urcolor/angular"]
+```
+
+実線は必須、点線はオプトインです。
+
 - `@urcolor/core` — 依存ゼロの CSS Color 4 ライブラリ（パース、変換、シリアライズ、ガマットマッピング、補間）。
 - `@urcolor/shared` — フレームワークに依存しない振る舞いの層。ドラッグ処理、キーボードマップ、チャンネルモデル、カラーエリアやスライダー向けの WebGL キャンバスグラデーション生成器、データ属性をすべてのバインディングで共有します。
 - `@urcolor/relative` — `@urcolor/core` 向けのオプトイン型 CSS Color 5 相対カラー構文（`rgb(from red r g b)`）。[相対カラー](/guide/relative-colors)を参照。

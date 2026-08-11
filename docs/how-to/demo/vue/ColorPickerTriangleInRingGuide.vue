@@ -51,9 +51,8 @@ const { color } = useColor("hsl(210, 80%, 50%)");
       y-channel="v"
       as="div"
       orientation="horizontal"
-      :rotation="90"
       inverted
-      class="absolute inset-[8%]"
+      class="absolute inset-[8%] rotate-90"
     >
       <ColorTriangleGradient
         as="div"

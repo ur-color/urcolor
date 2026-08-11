@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { computed } from "vue";
-import { colorSpaces } from "@urcolor/shared";
 import { Label } from "reka-ui";
 import {
   ColorFieldRoot,
@@ -10,8 +8,7 @@ import {
   useColor,
 } from "@urcolor/vue";
 
-const { color } = useColor("hsl(210, 80%, 50%)");
-const channels = computed(() => colorSpaces["hsl"]?.channels ?? []);
+const { color, channels } = useColor("hsl(210, 80%, 50%)", "hsl");
 </script>
 
 <template>
@@ -20,7 +17,7 @@ const channels = computed(() => colorSpaces["hsl"]?.channels ?? []);
       <div
         v-for="ch in channels"
         :key="ch.key"
-        class="flex min-w-[80px] flex-1 flex-col gap-1"
+        class="flex min-w-20 flex-1 flex-col gap-1"
       >
         <Label
           :for="`field-${ch.key}`"

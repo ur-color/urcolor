@@ -1,6 +1,6 @@
 # How to Build a Color Area Picker
 
-Let's build a 2D color area picker step by step.
+A color area maps two channels onto a plane, so one drag sets both at once.
 
 <script setup>
 import ColorAreaGuide from './demo/vue/ColorAreaGuide.vue'
@@ -24,9 +24,18 @@ Here's what we'll end up with:
 
 </details>
 
+The parts, and how they nest:
+
+```mermaid
+flowchart TD
+  R["ColorArea Root<br/>colorSpace, xChannel, yChannel"] --> A["Area (Vue only)<br/>pointer and keyboard target"]
+  A --> G["Gradient<br/>paints the plane"]
+  A --> T["Thumb<br/>role=slider, focusable"]
+```
+
 ## Step 1: Set up state
 
-Start by importing the color model and creating color state.
+Import the color model and create the color state.
 
 ::: code-group
 
@@ -69,11 +78,11 @@ export class MyArea {
 
 :::
 
-`useColor()` creates color state from any CSS color string. Vue returns a `{ color }` shallow ref; React returns `{ color, setColor }`; Svelte returns a rune-backed object whose `color`, `hex` and `alpha` are **getters** — keep the object (`colorState.color`) rather than destructuring it, or you lose reactivity. Angular has no hook: a plain `signal<Color>()` is the state, and `[(value)]` binds to it directly.
+`useColor()` creates color state from any CSS color string. Vue returns a `{ color }` shallow ref and React returns `{ color, setColor }`. Svelte returns a rune-backed object whose `color`, `hex` and `alpha` are getters, so keep the object and read `colorState.color` rather than destructuring it, or reactivity is lost. Angular has no hook: a plain `signal<Color>()` is the state, and `[(value)]` binds to it directly.
 
 ## Step 2: Add the root
 
-The root manages all the state and interactions. Tell it which color space and channels to use for each axis.
+The root owns the state and the interactions. Tell it which color space to work in and which channel goes on each axis.
 
 ::: code-group
 
@@ -165,18 +174,18 @@ export class MyArea {
 
 :::
 
-Vue's `v-model` and Angular's `[(value)]` are true two-way bindings. React is one-way plus `onValueChange`. Svelte's `value` is `$bindable`, but `useColor` exposes getters, so bind it with Svelte 5's function form — `bind:value={() => colorState.color, colorState.setColor}` — which is exactly `v-model` for a getter/setter pair.
+Vue's `v-model` and Angular's `[(value)]` are true two-way bindings. React is one-way plus `onValueChange`. Svelte's `value` is `$bindable`, but `useColor` exposes getters, so bind it with Svelte 5's function form, `bind:value={() => colorState.color, colorState.setColor}`, which is `v-model` for a getter/setter pair.
 
-Angular ships every part of a family as a `COLOR_*_DIRECTIVES` array, so one entry in `imports` brings in the whole set.
+Angular ships each family as a `COLOR_*_DIRECTIVES` array, so one entry in `imports` brings in the whole set.
 
-- `color-space` / `colorSpace` — the color space to work in (`hsl`, `oklch`, `hsv`, etc.)
-- `x-channel` / `xChannel` — the channel mapped to the horizontal axis
-- `y-channel` / `yChannel` — the channel mapped to the vertical axis
+- `color-space` / `colorSpace`: the color space to work in (`hsl`, `oklch`, `hsv`, etc.)
+- `x-channel` / `xChannel`: the channel mapped to the horizontal axis
+- `y-channel` / `yChannel`: the channel mapped to the vertical axis
 
 ## Step 3: Add the interaction surface
 
 In Vue, `ColorAreaArea` is the interaction surface: the root owns the state and the
-value maths, but every pointer and keyboard listener lives here — and this is the
+value maths, but every pointer and keyboard listener lives here, and this is the
 element the pointer coordinates are measured against. Everything else goes inside
 it. React has no separate element; its root is the interaction surface, so the
 sizing classes go straight on the root. Svelte and Angular behave like React —
@@ -291,16 +300,16 @@ export class MyArea {
 
 :::
 
-The picker needs a fixed height and `position: relative` so the thumb can be positioned inside it. `touch-none` prevents scroll interference on mobile.
+The picker needs a fixed height and `position: relative` so the thumb can be placed inside it. `touch-none` keeps a drag from scrolling the page on mobile.
 
 ::: warning Vue only
 Without `ColorAreaArea` the picker still renders, but it will not respond to
-clicks, drags or arrow keys — the root attaches no handlers of its own.
+clicks, drags or arrow keys, because the root attaches no handlers of its own.
 :::
 
 ## Step 4: Add the gradient
 
-The gradient renders the 2D gradient on a canvas.
+The gradient part paints the plane on a canvas.
 
 ::: code-group
 
@@ -414,8 +423,8 @@ export class MyArea {
 
 In Angular the gradient's selector is `canvas[urcColorAreaGradient]`, so it goes
 on a `<canvas>` element you own; the other three render their own canvas for you.
-There is no separate `Checkerboard` part in any of the four — the gradient paints
-the transparency checkerboard behind itself.
+None of the four ships a separate `Checkerboard` part: the gradient paints the
+transparency checkerboard behind itself.
 
 ## Step 5: Add the thumb
 
@@ -572,12 +581,12 @@ positions itself. Svelte and Angular are like React: their thumbs read that same
 variable from the root's own style, so you only need the visual classes.
 
 ::: tip
-All components are completely unstyled — the classes above are just an example using Tailwind CSS. Use any styling approach you prefer.
+The components ship unstyled. The classes above are one example, written with Tailwind CSS; any styling approach works.
 :::
 
 ## Switching color spaces
 
-You can change the color space and channel mapping to get completely different picker behavior. For example, switch from HSL to OKLCh:
+Changing the color space and the channel mapping changes what the picker does. Switching from HSL to OKLCh:
 
 ::: code-group
 
@@ -658,7 +667,7 @@ export class MyArea {
 
 :::
 
-Or map different HSL channels to create a saturation × lightness picker:
+Mapping different HSL channels gives a saturation × lightness picker:
 
 ::: code-group
 
@@ -714,7 +723,7 @@ Or map different HSL channels to create a saturation × lightness picker:
 
 ## Inverting axis direction
 
-Reverse the direction of the horizontal or vertical axis to map from right-to-left (for x) or bottom-to-top (for y) instead of the default direction.
+Reversing an axis maps x from right to left, or y from bottom to top.
 
 ::: code-group
 

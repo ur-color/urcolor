@@ -1,6 +1,6 @@
 # How to Build a Material UI Color Picker
 
-Let's build a Material-style color picker with a color area, hue slider, alpha slider, and channel input fields.
+A Material-style picker: a color area, a hue slider, an alpha slider and one field per channel.
 
 <script setup>
 import MaterialColorPickerGuide from './demo/vue/MaterialColorPickerGuide.vue'
@@ -25,9 +25,23 @@ Here's what we'll end up with:
 
 </details>
 
+The parts, and how they nest:
+
+```mermaid
+flowchart TD
+  C["card"] --> A["ColorArea<br/>saturation and value"]
+  C --> H["ColorSlider<br/>hue"]
+  C --> AL["ColorSlider<br/>alpha"]
+  C --> F["ColorField per HSL channel"]
+  S["one shared color state"] -.-> A
+  S -.-> H
+  S -.-> AL
+  S -.-> F
+```
+
 ## Step 1: Set up shared state
 
-All components will share the same color ref.
+Every component reads and writes one color ref.
 
 ::: code-group
 
@@ -70,11 +84,11 @@ export class MaterialColorPicker {
 
 :::
 
-`useColor()` creates color state from any CSS color string. Vue returns a `{ color }` shallow ref; React returns `{ color, setColor }`; Svelte returns a rune-backed object whose `color`, `hex` and `alpha` are **getters** — keep the object (`colorState.color`) rather than destructuring it, or you lose reactivity. Angular has no hook: a plain `signal<Color>()` is the state, and `[(value)]` binds to it directly. Every part below binds to that same one piece of state, which is what keeps the area, the sliders and the fields in sync.
+`useColor()` creates color state from any CSS color string. Vue returns a `{ color }` shallow ref and React returns `{ color, setColor }`. Svelte returns a rune-backed object whose `color`, `hex` and `alpha` are getters, so keep the object and read `colorState.color` rather than destructuring it, or reactivity is lost. Angular has no hook: a plain `signal<Color>()` is the state, and `[(value)]` binds to it directly. Every part below binds to that same one piece of state, which is what keeps the area, the sliders and the fields in sync.
 
 ## Step 2: Add the color area
 
-The `ColorArea` provides a 2D gradient for picking saturation and value in HSV space.
+`ColorArea` is the plane for picking saturation and value in HSV.
 
 ::: code-group
 
@@ -220,15 +234,15 @@ export class MaterialColorPicker {
 
 :::
 
-Vue's `v-model` and Angular's `[(value)]` are true two-way bindings. React is one-way plus `onValueChange`. Svelte's `value` is `$bindable`, but `useColor` exposes getters, so bind it with Svelte 5's function form — `bind:value={() => colorState.color, colorState.setColor}` — which is exactly `v-model` for a getter/setter pair.
+Vue's `v-model` and Angular's `[(value)]` are true two-way bindings. React is one-way plus `onValueChange`. Svelte's `value` is `$bindable`, but `useColor` exposes getters, so bind it with Svelte 5's function form, `bind:value={() => colorState.color, colorState.setColor}`, which is `v-model` for a getter/setter pair.
 
-Angular ships every part of a family as a `COLOR_*_DIRECTIVES` array, so one entry in `imports` brings in the whole set. This recipe composes three families, so it ends up with three entries.
+Angular ships each family as a `COLOR_*_DIRECTIVES` array, so one entry in `imports` brings in the whole set. This recipe composes three families, so it ends up with three entries.
 
-Two structural differences are worth calling out. Vue nests the gradient and thumb inside a `ColorAreaArea` element; React, Svelte and Angular have no `Area` part — `Gradient` and `Thumb` are direct children of `Root`. And the axis props are named `x-channel` / `y-channel` / `:y-inverted` in Vue but `xChannel` / `yChannel` / `yInverted` in React, Svelte and Angular. In Angular the gradient's selector is `canvas[urcColorAreaGradient]`, so it goes on a `<canvas>` element you own; Vue, React and Svelte render their own canvas for you. The thumb positions itself in all four, so you never set `top`/`left` yourself.
+Two structural differences are worth calling out. Vue nests the gradient and thumb inside a `ColorAreaArea` element; React, Svelte and Angular have no `Area` part, so `Gradient` and `Thumb` are direct children of `Root`. And the axis props are named `x-channel` / `y-channel` / `:y-inverted` in Vue but `xChannel` / `yChannel` / `yInverted` in React, Svelte and Angular. In Angular the gradient's selector is `canvas[urcColorAreaGradient]`, so it goes on a `<canvas>` element you own; Vue, React and Svelte render their own canvas for you. The thumb positions itself in all four, so you never set `top`/`left` yourself.
 
 ## Step 3: Add the hue slider
 
-Add a `ColorSlider` below the area to control the hue channel.
+A `ColorSlider` below the area controls hue.
 
 ::: code-group
 
@@ -467,7 +481,7 @@ The slider binds to the same color as the area, so dragging either one updates t
 
 ## Step 4: Add the alpha slider
 
-Add another `ColorSlider` for the alpha (opacity) channel. `ColorSliderGradient` paints the checkerboard behind the canvas automatically, so transparency shows without a separate element.
+Another `ColorSlider` controls alpha. `ColorSliderGradient` paints the checkerboard behind its own canvas, so transparency shows without a separate element.
 
 ::: code-group
 
@@ -618,18 +632,16 @@ export class MaterialColorPicker {
 
 :::
 
-`ColorSliderGradient` renders the checkerboard behind the canvas itself, so transparency is visible with no extra element. That holds in Vue, React, Svelte and Angular alike — none of them need a separate `Checkerboard` part, because the gradient already paints one. Dropping the `colors` prop is what makes the gradient derive its stops from the channel, which for `alpha` means fully transparent to fully opaque in the current color.
+`ColorSliderGradient` renders the checkerboard behind the canvas itself, so transparency is visible with no extra element. That holds in Vue, React, Svelte and Angular alike. None of them need a separate `Checkerboard` part, because the gradient already paints one. Dropping the `colors` prop is what makes the gradient derive its stops from the channel, which for `alpha` means fully transparent to fully opaque in the current color.
 
 ## Step 5: Add color field inputs
 
-Add `ColorField` inputs for each HSL channel so users can type precise values.
+A `ColorField` per HSL channel lets people type exact values.
 
 ::: code-group
 
 ```vue [Vue]
 <script setup lang="ts">
-import { computed } from "vue"; // [!code ++]
-import { colorSpaces } from "@urcolor/core"; // [!code ++]
 import { Label } from "reka-ui"; // [!code ++]
 import {
   useColor,
@@ -647,8 +659,7 @@ import {
   ColorFieldDecrement, // [!code ++]
 } from "@urcolor/vue";
 
-const { color } = useColor("hsl(210, 80%, 50%)");
-const channels = computed(() => colorSpaces["hsl"]?.channels ?? []); // [!code ++]
+const { color, channels } = useColor("hsl(210, 80%, 50%)"); // [!code ++]
 </script>
 
 <template>
@@ -694,12 +705,10 @@ const channels = computed(() => colorSpaces["hsl"]?.channels ?? []); // [!code +
 ```
 
 ```tsx [React]
-import { colorSpaces } from "@urcolor/core"; // [!code ++]
 import { useColor, ColorArea, ColorField, ColorSlider } from "@urcolor/react"; // [!code ++]
 
 function MaterialColorPicker() {
-  const { color, setColor } = useColor("hsl(210, 80%, 50%)");
-  const channels = colorSpaces["hsl"]?.channels ?? []; // [!code ++]
+  const { color, setColor, channels } = useColor("hsl(210, 80%, 50%)", "hsl"); // [!code ++]
 
   return (
     <div className="flex w-full max-w-xs flex-col gap-3 rounded-xl p-3">
@@ -747,11 +756,9 @@ function MaterialColorPicker() {
 
 ```svelte [Svelte]
 <script lang="ts">
-  import { colorSpaces } from "@urcolor/core"; // [!code ++]
   import { ColorArea, ColorField, ColorSlider, useColor } from "@urcolor/svelte"; // [!code ++]
 
-  const colorState = useColor("hsl(210, 80%, 50%)");
-  const channels = colorSpaces["hsl"]?.channels ?? []; // [!code ++]
+  const colorState = useColor("hsl(210, 80%, 50%)", "hsl"); // [!code ++]
 </script>
 
 <div class="flex w-full max-w-xs flex-col gap-3 rounded-xl p-3">
@@ -759,7 +766,7 @@ function MaterialColorPicker() {
 
   <!-- [!code ++:31] -->
   <div class="flex flex-1 flex-wrap gap-2">
-    {#each channels as ch (ch.key)}
+    {#each colorState.channels as ch (ch.key)}
       <div class="flex min-w-[60px] flex-1 flex-col gap-1">
         <label
           for={`material-field-${ch.key}`}
@@ -794,7 +801,8 @@ function MaterialColorPicker() {
 
 ```ts [Angular]
 import { Component, signal } from "@angular/core";
-import { Color, colorSpaces } from "@urcolor/core"; // [!code ++]
+import { Color } from "@urcolor/core";
+import { channelsOf } from "@urcolor/shared"; // [!code ++]
 import { // [!code ++]
   COLOR_AREA_DIRECTIVES, // [!code ++]
   COLOR_FIELD_DIRECTIVES, // [!code ++]
@@ -851,16 +859,16 @@ import { // [!code ++]
 })
 export class MaterialColorPicker {
   protected readonly color = signal<Color>(Color.parse("hsl(210, 80%, 50%)")!);
-  protected readonly channels = colorSpaces["hsl"]?.channels ?? [];
+  protected readonly channels = channelsOf("hsl");
 }
 ```
 
 :::
 
-The `colorSpaces["hsl"].channels` array gives us channel metadata (key and label) so we can dynamically render a field for each HSL channel. Vue wraps that list in a `computed`, React reads it straight in the component body (no `useMemo` needed — `colorSpaces` is a static import), Svelte reads it once at module scope because `colorSpaces` never changes, and Angular keeps it as a plain readonly field on the component.
+`useColor` already knows the channels: each one carries a key and a label, which is all a field needs. The second argument pins them to `hsl`, so dragging the HSV area cannot renumber the fields underneath. Angular has no `useColor`, so its component reads the same list from `channelsOf`; `createColorStore` exposes it as a `channels` signal for anyone using the store.
 
 Angular's field parts are element-scoped: the selectors are `input[urcColorFieldInput]`, `button[urcColorFieldIncrement]` and `button[urcColorFieldDecrement]`, so you write the `<input>` and the two `<button type="button">` elements yourself. Vue, React and Svelte render those elements for you.
 
 ::: tip
-All components are completely unstyled — the classes above are just an example using Tailwind CSS. You can style the card, inputs, and sliders however you like.
+The components ship unstyled. The classes above are one example, written with Tailwind CSS. You can style the card, inputs, and sliders however you like.
 :::

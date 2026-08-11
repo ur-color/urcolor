@@ -20,7 +20,7 @@ import ColorSwatchBasic from './demo/ColorSwatchBasic.tsx'
 
 ## Anatomy
 
-`ColorSwatch` is the whole family — a single component with no sub-parts, imported directly from `@urcolor/react`. There is no `ColorSwatch.*` namespace and no `ColorSwatch.Root`.
+`ColorSwatch` is the whole family, a single component with no sub-parts, imported directly from `@urcolor/react`. There is no `ColorSwatch.*` namespace and no `ColorSwatch.Root`.
 
 ```tsx
 import { ColorSwatch } from "@urcolor/react";
@@ -115,7 +115,7 @@ A standalone `ColorSwatch` is a purely visual element: it carries `role="img"` b
 | `aria-label` | **Not generated.** `role="img"` requires an accessible name, so pass your own `aria-label` describing the color. |
 
 ::: warning Provide an accessible name
-The React swatch does not derive a label from the color. An element with `role="img"` and no accessible name is a WCAG failure, so supply `aria-label` — for example `aria-label="Blue"` or the CSS color string.
+The React swatch does not derive a label from the color. An element with `role="img"` and no accessible name is a WCAG failure, so supply `aria-label`, for example `aria-label="Blue"` or the CSS color string.
 :::
 
 ### Keyboard Navigation

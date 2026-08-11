@@ -1,6 +1,6 @@
 # How to Build a Color Swatch Picker
 
-Let's build a keyboard-navigable picker for selecting colors from a palette.
+A swatch picker is a keyboard-navigable palette: one tab stop, arrow keys inside.
 
 <script setup>
 import ColorSwatchPickerGuide from './demo/vue/ColorSwatchPickerGuide.vue'
@@ -11,7 +11,7 @@ Here's what we'll end up with:
 <ColorSwatchPickerGuide />
 
 ::: info Different names, same idea
-Vue ships this as `ColorSwatchPicker` — a listbox of `ColorSwatchPickerItem`s.
+Vue ships this as `ColorSwatchPicker`, a listbox of `ColorSwatchPickerItem`s.
 React ships it as `ColorSwatchGroup`, whose items are ordinary `ColorSwatch`
 components that pick the group up from context. The selection model differs too:
 Vue's `v-model` is a string (or an array of strings with `multiple`), React's
@@ -39,9 +39,19 @@ together with `pressed` plus `onPressedChange` (Svelte) or `(pressedChange)`
 
 </details>
 
+The parts, and how they nest:
+
+```mermaid
+flowchart TD
+  R["Root<br/>ColorSwatchPicker (Vue)<br/>ColorSwatchGroup (others)"] --> I["Item (Vue only)<br/>role=option"]
+  I --> S["Item Swatch (Vue only)"]
+  I --> N["Item Indicator (Vue only)<br/>shows while selected"]
+  R --> B["ColorSwatch + pressed<br/>React, Svelte, Angular"]
+```
+
 ## Step 1: Set up state
 
-Define your color palette and the selection state.
+Define the palette and the selection state.
 
 ::: code-group
 
@@ -112,13 +122,13 @@ export class MyGroup {
 
 In Vue the selection is a single string, and only becomes an array of strings when
 you opt into `multiple`. In React it is always an array, even in single-select mode.
-Svelte and Angular match React — `string[]` in both modes. Svelte needs no import
+Svelte and Angular match React with `string[]` in both modes. Svelte needs no import
 at all here, since `$state` is a rune rather than a function; Angular has no hook,
 so a plain `signal<string[]>()` is the state and `[(value)]` binds to it directly.
 
 ## Step 2: Add the root
 
-The root owns the selection state and moves the highlight with the arrow keys.
+The root owns the selection state and moves the highlight under the arrow keys.
 
 ::: code-group
 
@@ -237,11 +247,11 @@ export class MyGroup {
 Vue's root renders `role="listbox"` and is single-select and horizontal by default.
 React's takes `type="single"` or `type="multiple"` to say how many colors can be
 selected at once. Svelte and Angular take the same `type` prop, and both render
-`role="group"` rather than a listbox — the swatches inside are toggle buttons.
+`role="group"` rather than a listbox, because the swatches inside are toggle buttons.
 
 Vue's `v-model` and Angular's `[(value)]` are true two-way bindings. React is
 one-way plus `onValueChange`. Svelte's `value` is `$bindable`, so a plain
-`bind:value={selected}` over a `$state` array is exactly `v-model` here — the
+`bind:value={selected}` over a `$state` array is `v-model` here. The
 getter/setter form the other guides use is only needed when the state comes from
 a `useColor` hook.
 
@@ -413,13 +423,13 @@ export class MyGroup {
 :::
 
 Vue's items render `role="option"` with `data-state="checked"` or `"unchecked"`,
-plus `data-highlighted` on the item the keyboard is currently on — style against
+plus `data-highlighted` on the item the keyboard is currently on. Style against
 those attributes.
 
 Svelte and Angular have no item wrapper: the swatch *is* the item. Binding
 `pressed` is what turns a `ColorSwatch` from a static `role="img"` sample into a
 toggle button, and the group finds those buttons in the DOM to run roving focus
-over them — which is why in Angular the swatch goes on a `<button>` you own.
+over them, which is why in Angular the swatch goes on a `<button>` you own.
 Both mark the selected swatch with `aria-pressed` and `data-pressed`, so style
 against those instead of `data-state`. And neither ships a checkerboard part:
 the swatch paints the transparency grid itself, under the color.
@@ -428,7 +438,7 @@ the swatch paints the transparency grid itself, under the color.
 
 Vue's `ColorSwatchPickerItemIndicator` renders its children only while its item is
 selected, so a checkmark appears on exactly the chosen swatches without any state
-juggling in your template. React has no indicator part — render your own marker
+juggling in your template. React has no indicator part, so render your own marker
 against the selection state. Svelte and Angular have no indicator part either, so
 they do the same with `{#if}` and `@if`.
 
@@ -586,7 +596,7 @@ export class MyGroup {
 :::
 
 ::: tip
-All components are completely unstyled — the classes above are just an example using Tailwind CSS. Use any styling approach you prefer.
+The components ship unstyled. The classes above are one example, written with Tailwind CSS; any styling approach works.
 :::
 
 ## Multiple selection
@@ -648,7 +658,7 @@ const selected = ref<string[]>([]);
 :::
 
 Because the swatch owns its own pressed state in Svelte and Angular, `type` alone
-does not make a multi-select picker work — the handler has to add and remove too.
+does not make a multi-select picker work: the handler has to add and remove too.
 Swap `onPressedChange={() => (selected = [color])}` for one that toggles the value
 in and out of the array, and likewise for Angular's `(pressedChange)`.
 
@@ -670,12 +680,12 @@ replaces the rest of the selection instead:
 
 ## Keyboard navigation
 
-The picker is a single tab stop; once focus is inside, the arrow keys move the highlight:
+The picker is one tab stop. Once focus is inside, the arrow keys move the highlight:
 
-- **Arrow keys** — move the highlight (left/right when horizontal, up/down when vertical)
-- **Home / End** — jump to the first or last swatch
-- **Space / Enter** — select the highlighted swatch
-- **Ctrl/Cmd + A** — select every swatch, when multiple selection is on (Vue)
+- **Arrow keys**: move the highlight (left/right when horizontal, up/down when vertical)
+- **Home / End**: jump to the first or last swatch
+- **Space / Enter**: select the highlighted swatch
+- **Ctrl/Cmd + A**: select every swatch, when multiple selection is on (Vue)
 
 In Vue, set `orientation="vertical"` to swap which arrow keys navigate:
 
@@ -694,13 +704,13 @@ In Vue, set `orientation="vertical"` to swap which arrow keys navigate:
 
 ::: warning
 Typeahead does not work here. The underlying listbox resolves an option's search
-text from its `textValue` or `textContent`, and a swatch has neither — so typing a
-color name or hex just highlights the first swatch.
+text from its `textValue` or `textContent`, and a swatch has neither, so typing a
+color name or hex only highlights the first swatch.
 :::
 
 ## Disabled items
 
-Disable individual swatches or the entire picker:
+Individual swatches, or the whole picker, can be disabled:
 
 ```vue{4,8}
 <template>
@@ -806,7 +816,7 @@ Svelte calls `onValueChange` and Angular emits `(valueChange)`; both hand you th
 whole selection array, exactly like React. Angular's `(valueChange)` is the output
 half of `[(value)]`, so when you listen to it explicitly you bind the input one-way
 as `[value]="selected()"` and write the signal yourself. Neither family has a
-commit event — a selection has no drag to release.
+commit event, because a selection has no drag to release.
 
 Vue's root also emits `@highlight` when the keyboard highlight moves, `@entry-focus`
 when focus enters the picker, and `@leave` when the pointer leaves it.

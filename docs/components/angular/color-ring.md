@@ -108,7 +108,7 @@ The same ring driving saturation instead. The channel's range and step come from
 
 ### Alpha in the gradient
 
-`channelOverrides` defaults to `{ alpha: 1 }`, which paints the ramp fully opaque. Bind `false` to let the current color's alpha through — the checkerboard the gradient already paints is what makes it readable.
+`channelOverrides` defaults to `{ alpha: 1 }`, which paints the ramp fully opaque. Bind `false` to let the current color's alpha through. The checkerboard the gradient already paints is what makes it readable.
 
 ```html
 <div urcColorRingRoot [(value)]="color">
@@ -121,7 +121,7 @@ The same ring driving saturation instead. The channel's range and step come from
 
 ### Commit and disabled
 
-`disabled` is the **native attribute**, not an input — set it on the element and the root picks it up. `(valueCommit)` fires once at the end of an interaction, never mid-drag.
+`disabled` is the **native attribute**, not an input: set it on the element and the root picks it up. `(valueCommit)` fires once at the end of an interaction, never mid-drag.
 
 ```html
 <div urcColorRingRoot [(value)]="color" (valueCommit)="onCommit($event)" disabled>
@@ -182,7 +182,7 @@ The root of the ring. Owns the color, the pointer and keyboard interaction, and 
 | `valueCommit` | `output<Color>` | — | Emitted once at the end of an interaction, never mid-drag. |
 
 ::: warning `disabled` is not an input
-`disabled` is the native DOM attribute. The static attribute is read at construction — which works under SSR — and a `MutationObserver` keeps it live afterwards. The readable signal is named **`isDisabled`**, not `disabled`, because `FormUiControl` reserves the member name `disabled` for its own `InputSignal<boolean>`.
+`disabled` is the native DOM attribute. The static attribute is read at construction, which works under SSR, and a `MutationObserver` keeps it live afterwards. The readable signal is named **`isDisabled`**, not `disabled`, because `FormUiControl` reserves the member name `disabled` for its own `InputSignal<boolean>`.
 :::
 
 Readable signals, for `exportAs` template references and for `inject(ColorRingRoot)`:
@@ -204,7 +204,7 @@ They are `channelMin`, `channelMax` and `channelStep` because `FormUiControl` re
 `channel`, `startAngle` and `innerRadius` are spelled identically in React, Vue, Svelte and Angular. Unlike `ColorWheel`, `ColorRing` has no per-framework prop-name divergence.
 :::
 
-Pointer input is only accepted inside the annulus — a press in the hole at the centre, or outside the outer edge, is ignored. The hole's size follows `innerRadius`.
+Pointer input is only accepted inside the annulus. A press in the hole at the centre, or outside the outer edge, is ignored. The hole's size follows `innerRadius`.
 
 ### ColorRingTrack
 
@@ -217,7 +217,7 @@ The directive takes no inputs.
 
 ### ColorRingGradient
 
-Paints the ring's conic color ramp onto a `<canvas>` you supply, sampled from the root's color space and channel. The directive sets its own `position`, `inset`, `width`, `height` and `pointer-events`, so the canvas fills the track without extra styling. The transparency checkerboard is this canvas's CSS background, masked to the annulus together with the bitmap — one rasterisation cuts both the hole and the corners, and there is no `Checkerboard` part in this package.
+Paints the ring's conic color ramp onto a `<canvas>` you supply, sampled from the root's color space and channel. The directive sets its own `position`, `inset`, `width`, `height` and `pointer-events`, so the canvas fills the track without extra styling. The transparency checkerboard is this canvas's CSS background, masked to the annulus together with the bitmap, one rasterisation cuts both the hole and the corners, and there is no `Checkerboard` part in this package.
 
 - Selector: `canvas[urcColorRingGradient]`
 - Export as: `urcColorRingGradient`
@@ -232,7 +232,7 @@ Paints the ring's conic color ramp onto a `<canvas>` you supply, sampled from th
 
 The handle, and the ring's only focusable element. It sets `role="slider"`, takes `tabindex="0"` unless the root is disabled, and orbits in `cqmin` units at the middle of the annulus, rotated to the channel's current position.
 
-The thumb is only a focus target and an ARIA surface; every value change is owned by the root, whose `keydown` listener sees the events that bubble up from here. There is no `aria-orientation` — a ring is neither horizontal nor vertical.
+The thumb is only a focus target and an ARIA surface; every value change is owned by the root, whose `keydown` listener sees the events that bubble up from here. There is no `aria-orientation`. A ring is neither horizontal nor vertical.
 
 - Selector: `[urcColorRingThumb]`
 - Export as: `urcColorRingThumb`

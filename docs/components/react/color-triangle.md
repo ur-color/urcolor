@@ -72,7 +72,7 @@ Three-channel RGB triangle using barycentric coordinates.
 
 ## API Reference
 
-Every part is also exported unnamespaced — `ColorTriangleRoot`, `ColorTriangleGradient`, `ColorTriangleThumb` — alongside the `ColorTriangle.*` namespace. Unlike `ColorWheel`, this family does not export its context hook; the root's state is reachable only through its own parts.
+Every part is also exported unnamespaced, `ColorTriangleRoot`, `ColorTriangleGradient`, `ColorTriangleThumb`, alongside the `ColorTriangle.*` namespace. Unlike `ColorWheel`, this family does not export its context hook; the root's state is reachable only through its own parts.
 
 ### ColorTriangle.Root
 
@@ -86,7 +86,6 @@ The root container that manages triangle state and color channel binding. Render
 | `xChannel` | `string` | Auto | The channel mapped to the first vertex. Defaults to the color space's second channel. |
 | `yChannel` | `string` | Auto | The channel mapped to the second vertex. Defaults to the color space's third channel. |
 | `zChannel` | `string` | — | The channel mapped to the third vertex. Supplying it switches the triangle to a three-channel barycentric simplex. |
-| `rotation` | `number` | `0` | Rotation of the triangle, in degrees. |
 | `inverted` | `boolean` | `false` | Swaps the second and third vertices, mirroring the triangle. |
 | `thumbAlignment` | `'contain' \| 'overflow'` | `'overflow'` | Whether the thumb is centred on the edge or kept inside it. |
 | `disabled` | `boolean` | `false` | Disables interaction. |
@@ -99,11 +98,11 @@ The root container that manages triangle state and color channel binding. Render
 ::: tip
 :::
 
-The root's props are an explicit list, not a DOM prop spread — it does not extend `ComponentPropsWithoutRef<"div">`. A pointer press that lands outside the outline is ignored: the root's box is a full square and the clip path hides the corners without stopping the event, so the root hit-tests every `pointerdown` against the triangle itself.
+The root's props are an explicit list, not a DOM prop spread. It does not extend `ComponentPropsWithoutRef<"div">`. A pointer press that lands outside the outline is ignored: the root's box is a full square and the clip path hides the corners without stopping the event, so the root hit-tests every `pointerdown` against the triangle itself.
 
 ### ColorTriangle.Gradient
 
-Renders the triangle's color surface as a `<canvas>` inside a wrapper `<span>`, sampled from the root's color space and channel configuration — including the third channel when one is set. The transparency checkerboard is the wrapper's own CSS background, which the canvas composites over, so no separate part is needed for it.
+Renders the triangle's color surface as a `<canvas>` inside a wrapper `<span>`, sampled from the root's color space and channel configuration, including the third channel when one is set. The transparency checkerboard is the wrapper's own CSS background, which the canvas composites over, so no separate part is needed for it.
 
 Extends `ComponentPropsWithoutRef<"span">`.
 
@@ -127,7 +126,7 @@ Renders a checkerboard pattern behind the gradient to visualize alpha transparen
 
 The single combined handle, and the triangle's only focusable element. One thumb drives **every** axis: it renders `role="slider"`, takes `tabIndex={0}` unless the root is disabled, and is positioned from the barycentric coordinates of the channel values.
 
-Because one handle serves two channels — or three, in barycentric mode — it announces all of them: `aria-label` names the channel set and `aria-valuetext` carries every formatted value. There is no separate thumb per axis — the per-axis thumbs this family used to ship have been removed. The thumb is only a focus target and an ARIA surface; every value change is owned by the root, whose `keydown` handler sees the events that bubble up from here.
+Because one handle serves two channels, or three in barycentric mode, it announces all of them: `aria-label` names the channel set and `aria-valuetext` carries every formatted value. There is no separate thumb per axis, the per-axis thumbs this family used to ship have been removed. The thumb is only a focus target and an ARIA surface; every value change is owned by the root, whose `keydown` handler sees the events that bubble up from here.
 
 Extends `ComponentPropsWithoutRef<"span">`.
 
@@ -161,14 +160,14 @@ and a `<length>`.
 
 ## Accessibility
 
-ColorTriangle exposes a single focusable thumb that drives both triangle axes — and the third channel too, in barycentric mode. Keyboard events are handled on the root, which sees them bubble up from the focused thumb.
+ColorTriangle exposes a single focusable thumb that drives both triangle axes, and the third channel too, in barycentric mode. Keyboard events are handled on the root, which sees them bubble up from the focused thumb.
 
 ### ARIA Labels
 
 | Attribute | Description |
 |-----------|-------------|
 | `role="slider"` | Applied to `ColorTriangle.Thumb`, with `aria-roledescription="Color thumb"`. |
-| `aria-label` | Defaults to the channel labels in order, e.g. `"Saturation, Brightness"` — three entries when `zChannel` is set. Pass your own `aria-label` on the thumb to override. |
+| `aria-label` | Defaults to the channel labels in order, e.g. `"Saturation, Brightness"`. Three entries when `zChannel` is set. Pass your own `aria-label` on the thumb to override. |
 | `aria-valuemin` / `aria-valuemax` | The first channel's range. |
 | `aria-valuenow` | The current first-channel value. Only one number can be carried here, so the `xChannel` axis owns it. |
 | `aria-valuetext` | Every active channel formatted, e.g. `"Saturation 80%, Brightness 50%"`. |
@@ -201,6 +200,6 @@ With `zChannel` set, the keys move the barycentric weight of the `xChannel` axis
 | Shift + Arrow | Move by 20% |
 | Page Up / Page Down | Increase / decrease by 20% (unaffected by Shift) |
 | Home | Jump to the first channel's vertex |
-| End | Jump to the centre — equal weight on all three |
+| End | Jump to the centre, equal weight on all three |
 
 Every write is renormalized onto the simplex (`u + v + w === 1`), so a color that starts off it is pulled onto it by the first keypress. `onValueCommit` fires on each keypress rather than once on release.

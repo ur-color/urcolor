@@ -158,10 +158,11 @@ onUnmounted(() => document.removeEventListener("click", onDocumentClick));
 </template>
 
 <style scoped>
+/* Spacing belongs to `.page-title-row`, which owns the row this sits in. */
 .copy-page {
   display: flex;
+  flex: none;
   gap: 8px;
-  margin: 16px 0 24px;
 }
 
 .copy-page-menu {

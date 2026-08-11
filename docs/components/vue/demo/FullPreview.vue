@@ -45,10 +45,7 @@ const colorSpace = ref<SpaceId>("hsv");
 const xInverted = ref(false);
 const yInverted = ref(false);
 
-const { color } = useColor("hsl(0, 100%, 50%)");
-
-const spaceConfig = computed(() => colorSpaces[colorSpace.value]);
-const channels = computed(() => spaceConfig.value?.channels ?? []);
+const { color, channels } = useColor("hsl(0, 100%, 50%)", colorSpace);
 
 const alphaChannel = { key: "alpha", label: "Alpha" };
 const channelsWithAlpha = computed(() => [...channels.value, alphaChannel]);

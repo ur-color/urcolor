@@ -26,7 +26,7 @@ A 1D slider component for adjusting a single color channel, with a gradient trac
 </ColorSlider.Root>
 ```
 
-`useColor` returns an object whose `color`, `hex` and `alpha` members are **getters**, not refs. Keep the object rather than destructuring it, and bind with Svelte 5's function form — `bind:value={() => colorState.color, colorState.setColor}` — which pairs the getter with the setter.
+`useColor` returns an object whose `color`, `hex` and `alpha` members are **getters**, not refs. Keep the object rather than destructuring it, and bind with Svelte 5's function form, `bind:value={() => colorState.color, colorState.setColor}`, which pairs the getter with the setter.
 
 ## Anatomy
 
@@ -160,7 +160,7 @@ Every part accepts a `child` snippet that replaces the element it would have ren
 
 ## API Reference
 
-Every part is also exported unnamespaced — `ColorSliderRoot`, `ColorSliderControl`, `ColorSliderTrack`, `ColorSliderRange`, `ColorSliderThumb`, `ColorSliderGradient` — alongside the `ColorSlider.*` namespace. The root's context is readable with `colorSliderContext.get()`.
+Every part is also exported unnamespaced, `ColorSliderRoot`, `ColorSliderControl`, `ColorSliderTrack`, `ColorSliderRange`, `ColorSliderThumb`, `ColorSliderGradient`, alongside the `ColorSlider.*` namespace. The root's context is readable with `colorSliderContext.get()`.
 
 ### ColorSlider.Root
 
@@ -183,7 +183,7 @@ Extends `HTMLAttributes<HTMLDivElement>`.
 | `class` | `string` | — | Class applied to the rendered element. |
 | `child` | `Snippet<[ChildSnippetArgs]>` | — | Replaces the default element; receives the props it would have received. |
 
-The stepping interval is not a prop — it comes from the channel's own config, resolved from `colorSpace` and `channel`.
+The stepping interval is not a prop. It comes from the channel's own config, resolved from `colorSpace` and `channel`.
 
 ### ColorSlider.Control
 
@@ -220,7 +220,7 @@ Extends `HTMLAttributes<HTMLDivElement>`.
 
 ### ColorSlider.Gradient
 
-Renders the slider's color ramp as a `<canvas>` inside a `<span>` wrapper. The transparency checkerboard is the wrapper's own CSS background, which the canvas composites over — there is no `Checkerboard` part in this package.
+Renders the slider's color ramp as a `<canvas>` inside a `<span>` wrapper. The transparency checkerboard is the wrapper's own CSS background, which the canvas composites over. There is no `Checkerboard` part in this package.
 
 Extends `HTMLAttributes<HTMLSpanElement>`.
 
@@ -299,4 +299,4 @@ ColorSlider exposes a single focusable thumb for the channel it controls. Keyboa
 | Home | Move to the channel minimum |
 | End | Move to the channel maximum |
 
-Both arrow axes are live whatever the orientation — the axis only matters for 2D controls. `dir="rtl"` mirrors the horizontal arrows and `inverted` flips the direction on top of that, while Home and End address value bounds rather than visual ends, so neither modifier applies to them. `onValueCommit` fires once on key release, not on every repeat.
+Both arrow axes are live whatever the orientation. The axis only matters for 2D controls. `dir="rtl"` mirrors the horizontal arrows and `inverted` flips the direction on top of that, while Home and End address value bounds rather than visual ends, so neither modifier applies to them. `onValueCommit` fires once on key release, not on every repeat.

@@ -1,6 +1,6 @@
 # ColorTriangle
 
-A triangular 2D area component for adjusting two color channels — or three, as barycentric coordinates on a simplex.
+A triangular 2D area component for adjusting two color channels, or three, as barycentric coordinates on a simplex.
 
 ## Preview
 
@@ -108,15 +108,15 @@ In three-channel mode the three values are barycentric coordinates: only the rat
 between them is meaningful, so the root renormalizes them onto the simplex
 (`u + v + w === 1`) on every write. An `srgb` color that starts off the simplex is
 rewritten onto it by the first arrow press. This is inherent to the geometry, not a
-bug — afterwards the values stay on the simplex and step smoothly.
+bug, afterwards the values stay on the simplex and step smoothly.
 :::
 
 ### Rotation and mirroring
 
-`rotation` is a `numberAttribute` input and `inverted` a `booleanAttribute` one, so the static forms work.
+`inverted` is a `booleanAttribute` input, so the static form works. Rotate the triangle with a CSS `transform` on the root. The root maps pointer positions back through its own transform, so dragging still follows the corner each vertex points at.
 
 ```html
-<div urcColorTriangleRoot [(value)]="color" rotation="180" inverted>
+<div urcColorTriangleRoot [(value)]="color" inverted style="transform: rotate(180deg)">
   <canvas urcColorTriangleGradient></canvas>
   <div urcColorTriangleThumb></div>
 </div>
@@ -124,7 +124,7 @@ bug — afterwards the values stay on the simplex and step smoothly.
 
 ### Commit and disabled
 
-`disabled` is the **native attribute**, not an input — set it on the element and the root picks it up. `(valueCommit)` fires once at the end of an interaction, never mid-drag.
+`disabled` is the **native attribute**, not an input: set it on the element and the root picks it up. `(valueCommit)` fires once at the end of an interaction, never mid-drag.
 
 ```html
 <div urcColorTriangleRoot [(value)]="color" (valueCommit)="onCommit($event)" disabled>
@@ -187,7 +187,6 @@ The root of the triangle. Owns the color, the pointer and keyboard interaction, 
 | `xChannel` | `input<string \| undefined>` | Auto | The channel mapped to the first vertex. Defaults to the color space's second channel. |
 | `yChannel` | `input<string \| undefined>` | Auto | The channel mapped to the second vertex. Defaults to the color space's third channel. |
 | `zChannel` | `input<string \| undefined>` | — | The channel mapped to the third vertex. Supplying it selects the three-channel simplex. |
-| `rotation` | `input<number>` | `0` | Rotation of the triangle, in degrees. Coerced with `numberAttribute`. |
 | `inverted` | `input<boolean>` | `false` | Swaps the second and third vertices, mirroring the triangle. Coerced with `booleanAttribute`. |
 | `thumbAlignment` | `input<ColorTriangleThumbAlignment>` | `'overflow'` | Whether the thumb is centred on the edge or kept inside it. |
 | `valueCommit` | `output<Color>` | — | Emitted once at the end of an interaction, never mid-drag. |
@@ -195,7 +194,7 @@ The root of the triangle. Owns the color, the pointer and keyboard interaction, 
 `ColorTriangleThumbAlignment` is `"contain" | "overflow"`.
 
 ::: warning `disabled` is not an input
-`disabled` is the native DOM attribute. The static attribute is read at construction — which works under SSR — and a `MutationObserver` keeps it live afterwards. The readable signal is named **`isDisabled`**, not `disabled`, because `FormUiControl` reserves the member name `disabled` for its own `InputSignal<boolean>`.
+`disabled` is the native DOM attribute. The static attribute is read at construction, which works under SSR, and a `MutationObserver` keeps it live afterwards. The readable signal is named **`isDisabled`**, not `disabled`, because `FormUiControl` reserves the member name `disabled` for its own `InputSignal<boolean>`.
 :::
 
 Readable signals, for `exportAs` template references and for `inject(ColorTriangleRoot)`:
@@ -212,7 +211,7 @@ Readable signals, for `exportAs` template references and for `inject(ColorTriang
 | `minY` / `maxY` | `Signal<number>` | Bounds of the second channel, in display units. |
 | `minZ` / `maxZ` | `Signal<number>` | Bounds of the third channel. Inert in two-channel mode. |
 | `vertices` | `Signal<[Point, Point, Point]>` | The three corners in normalised 0-1 space; what the outline is clipped to. |
-| `positionVertices` | `Signal<[Point, Point, Point]>` | The corners the thumb is positioned against — identical to `vertices` unless `thumbAlignment` is `"contain"`. |
+| `positionVertices` | `Signal<[Point, Point, Point]>` | The corners the thumb is positioned against. Identical to `vertices` unless `thumbAlignment` is `"contain"`. |
 
 ::: tip
 :::
@@ -221,7 +220,7 @@ A pointer press that lands outside the outline is ignored: the host's box is a f
 
 ### ColorTriangleGradient
 
-Paints the triangle's color surface onto a `<canvas>` you supply, sampled from the root's color space and channel configuration — including the third channel when one is set. The transparency checkerboard is this element's CSS background, which the canvas bitmap composites over — there is no `Checkerboard` part in this package.
+Paints the triangle's color surface onto a `<canvas>` you supply, sampled from the root's color space and channel configuration, including the third channel when one is set. The transparency checkerboard is this element's CSS background, which the canvas bitmap composites over, there is no `Checkerboard` part in this package.
 
 - Selector: `canvas[urcColorTriangleGradient]`
 - Export as: `urcColorTriangleGradient`
@@ -238,7 +237,7 @@ The directive sets its own `position`, `inset`, `width`, `height`, `pointer-even
 
 The single combined handle, and the triangle's only focusable element. One thumb drives **every** axis: it sets `role="slider"`, takes `tabindex="0"` unless the root is disabled, and is positioned from the barycentric coordinates of the channel values.
 
-Because one handle serves two channels — or three, in barycentric mode — it announces all of them: `aria-label` names the channel set and `aria-valuetext` carries every formatted value. There is no separate thumb per axis. The thumb is only a focus target and an ARIA surface; every value change is owned by the root, whose `keydown` listener sees the events that bubble up from here.
+Because one handle serves two channels, or three in barycentric mode, it announces all of them: `aria-label` names the channel set and `aria-valuetext` carries every formatted value. There is no separate thumb per axis. The thumb is only a focus target and an ARIA surface; every value change is owned by the root, whose `keydown` listener sees the events that bubble up from here.
 
 - Selector: `[urcColorTriangleThumb]`
 - Export as: `urcColorTriangleThumb`
@@ -270,14 +269,14 @@ and a `<length>`.
 
 ## Accessibility
 
-ColorTriangle exposes a single focusable thumb that drives both triangle axes — and the third channel too, in barycentric mode. Keyboard events are handled on the root, which sees them bubble up from the focused thumb.
+ColorTriangle exposes a single focusable thumb that drives both triangle axes, and the third channel too, in barycentric mode. Keyboard events are handled on the root, which sees them bubble up from the focused thumb.
 
 ### ARIA Labels
 
 | Attribute | Description |
 |-----------|-------------|
 | `role="slider"` | Applied to `urcColorTriangleThumb`, with `aria-roledescription="Color thumb"`. |
-| `aria-label` | Defaults to the channel labels in order, e.g. `"Saturation, Brightness"` — three entries when `zChannel` is set. Set your own `aria-label` on the thumb element to override. |
+| `aria-label` | Defaults to the channel labels in order, e.g. `"Saturation, Brightness"`. Three entries when `zChannel` is set. Set your own `aria-label` on the thumb element to override. |
 | `aria-valuemin` / `aria-valuemax` | The first channel's range. |
 | `aria-valuenow` | The current first-channel value. Only one number can be carried here, so the `xChannel` axis owns it. |
 | `aria-valuetext` | Every active channel formatted, e.g. `"Saturation 80%, Brightness 50%"`. |

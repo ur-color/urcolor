@@ -117,7 +117,7 @@ The default slot receives the current color as `modelValue`.
 
 The root must declare `container-type: inline-size` (or `size`): the thumb orbits in `cqmin` units, so it tracks the ring's size without measuring it.
 
-Pointer input is only accepted inside the ring's annulus — a press in the hole at the centre, or outside the outer edge, is ignored. The hole's size follows the `inner-radius` prop.
+Pointer input is only accepted inside the ring's annulus. A press in the hole at the centre, or outside the outer edge, is ignored. The hole's size follows the `inner-radius` prop.
 
 ### ColorRingTrack
 
@@ -152,7 +152,7 @@ Renders a checkerboard pattern behind the gradient to visualize alpha transparen
 
 The handle, and the ring's only focusable element. It renders `role="slider"`, takes `tabindex="0"` unless the root is disabled, and orbits in `cqmin` units at the middle of the annulus, rotated to the channel's current position.
 
-The thumb is only a focus target and an ARIA surface; every value change is owned by the root, whose `keydown` listener sees the events that bubble up from here. There is no `aria-orientation` — a ring is neither horizontal nor vertical.
+The thumb is only a focus target and an ARIA surface; every value change is owned by the root, whose `keydown` listener sees the events that bubble up from here. There is no `aria-orientation`. A ring is neither horizontal nor vertical.
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|

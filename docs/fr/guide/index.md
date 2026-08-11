@@ -4,6 +4,25 @@ UrColor est une bibliothèque universelle et headless de composants de sélectio
 
 ## Paquets
 
+```mermaid
+flowchart TD
+  core["@urcolor/core<br/>parser, convertir, mélanger, mapper au gamut"]
+  shared["@urcolor/shared<br/>glisser, clavier, canaux, WebGL"]
+  relative["@urcolor/relative<br/>syntaxe relative CSS Color 5"]
+  i18n["@urcolor/i18n<br/>noms de couleurs et de canaux"]
+
+  core --> shared
+  core -.-> relative
+  core -.-> i18n
+
+  shared --> vue["@urcolor/vue"]
+  shared --> react["@urcolor/react"]
+  shared --> svelte["@urcolor/svelte"]
+  shared --> angular["@urcolor/angular"]
+```
+
+Les flèches pleines sont obligatoires, les pointillées facultatives.
+
 - `@urcolor/core` — Une bibliothèque CSS Color 4 sans dépendances (analyse, conversion, sérialisation, mappage de gamut, interpolation).
 - `@urcolor/shared` — La couche de comportement indépendante du framework : glisser-déposer, raccourcis clavier, modèles de canaux, générateurs de dégradés WebGL sur canvas pour les zones et curseurs de couleur, et attributs de données partagés par toutes les liaisons.
 - `@urcolor/relative` — Syntaxe optionnelle des couleurs relatives CSS Color 5 (`rgb(from red r g b)`) pour `@urcolor/core`. Voir [Couleurs relatives](/guide/relative-colors).

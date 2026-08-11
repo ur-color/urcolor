@@ -1,6 +1,6 @@
 import { Component, signal } from "@angular/core";
 import { Color } from "@urcolor/core";
-import { colorSpaces } from "@urcolor/shared";
+import { channelsOf } from "@urcolor/shared";
 import {
   COLOR_AREA_DIRECTIVES,
   COLOR_FIELD_DIRECTIVES,
@@ -137,5 +137,5 @@ import {
 })
 export class MaterialColorPickerGuide {
   protected readonly color = signal<Color>(Color.parse("hsl(210, 80%, 50%)")!);
-  protected readonly channels = colorSpaces["hsl"]?.channels ?? [];
+  protected readonly channels = channelsOf("hsl");
 }

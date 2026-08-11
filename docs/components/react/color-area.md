@@ -60,7 +60,7 @@ OKLCh color area with Chroma on X and Lightness on Y.
 
 ## API Reference
 
-Every part is also exported unnamespaced — `ColorAreaRoot`, `ColorAreaGradient`, `ColorAreaThumb` — alongside the `ColorArea.*` namespace. The root's context is readable with `useColorAreaContext()`.
+Every part is also exported unnamespaced, `ColorAreaRoot`, `ColorAreaGradient`, `ColorAreaThumb`, alongside the `ColorArea.*` namespace. The root's context is readable with `useColorAreaContext()`.
 
 ### ColorArea.Root
 
@@ -88,7 +88,7 @@ The root container that manages area state and color channel binding. Renders a 
 :::
 
 ::: warning
-`ColorAreaRootProps` does not extend `ComponentPropsWithoutRef<"div">`. Only the props above are forwarded — arbitrary DOM attributes passed to the root are dropped, so put an `aria-label` on `ColorArea.Thumb` rather than on the root.
+`ColorAreaRootProps` does not extend `ComponentPropsWithoutRef<"div">`. Only the props above are forwarded, arbitrary DOM attributes passed to the root are dropped, so put an `aria-label` on `ColorArea.Thumb` rather than on the root.
 :::
 
 The root publishes `--reka-slider-area-thumb-transform` in its own `style`, which is the centring transform the thumb consumes. `dir` and `xInverted` each mirror the X axis, so setting both cancels out.
@@ -129,7 +129,7 @@ Extends `ComponentPropsWithoutRef<"span">`.
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
 | `index` | `number` | `0` | Which entry of the root's value list this thumb reads. The area drives a single thumb, so the default is the only useful value. |
-| `aria-label` | `string` | — | Labels the handle. Not generated — pass one, or the control is announced without a name. |
+| `aria-label` | `string` | — | Labels the handle. Not generated. Pass one, or the control is announced without a name. |
 | `className` | `string` | — | Class applied to the rendered element. |
 | `style` | `React.CSSProperties` | — | Inline styles merged over the computed absolute position. |
 

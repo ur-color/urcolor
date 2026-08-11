@@ -23,7 +23,7 @@ A color preview element that displays a color with a checkerboard background for
 </div>
 ```
 
-`ColorSwatch` decides once, at creation, whether it is a static sample or a toggle button: it becomes a toggle when `pressed` or `onPressedChange` is supplied, and stays a `role="img"` element otherwise. That inference is deliberately untracked — `pressed` becomes defined the moment a swatch is toggled, so reading it reactively would flip a static swatch into a button mid-life. Pass `toggle` explicitly when you want to decide yourself.
+`ColorSwatch` decides once, at creation, whether it is a static sample or a toggle button: it becomes a toggle when `pressed` or `onPressedChange` is supplied, and stays a `role="img"` element otherwise. That inference is deliberately untracked, `pressed` becomes defined the moment a swatch is toggled, so reading it reactively would flip a static swatch into a button mid-life. Pass `toggle` explicitly when you want to decide yourself.
 
 ## Anatomy
 
@@ -112,11 +112,11 @@ The `child` snippet replaces the element the swatch would have rendered. The sni
 </ColorSwatch>
 ```
 
-The toggle behaviour rides along under a `Symbol` key inside `props`, so it survives the spread onto your own element — or onto another component.
+The toggle behaviour rides along under a `Symbol` key inside `props`, so it survives the spread onto your own element, or onto another component.
 
 ## API Reference
 
-`ColorSwatch` is the whole family — a single component exported directly from `@urcolor/svelte`. There is no `ColorSwatch.*` namespace, no sub-part, and no context to read.
+`ColorSwatch` is the whole family, a single component exported directly from `@urcolor/svelte`. There is no `ColorSwatch.*` namespace, no sub-part, and no context to read.
 
 ### ColorSwatch
 
@@ -139,7 +139,7 @@ Extends `HTMLAttributes<HTMLElement>`.
 | `child` | `Snippet<[ChildSnippetArgs]>` | — | Replaces the default element; receives the props it would have received. |
 
 ::: tip
-The swatch is not coupled to `ColorSwatchGroup`. The group finds its items by DOM shape — a native button, an explicit `role="button"`, or anything carrying a tab stop — so a toggle swatch works identically inside and outside one.
+The swatch is not coupled to `ColorSwatchGroup`. The group finds its items by DOM shape, a native button, an explicit `role="button"`, or anything carrying a tab stop, so a toggle swatch works identically inside and outside one.
 :::
 
 ### Data Attributes
@@ -176,7 +176,7 @@ so a rule anywhere above the element wins:
 
 ## Accessibility
 
-A static swatch is a purely visual element with `role="img"` — not focusable, no keyboard behaviour. A toggle swatch is a real `<button type="button">` carrying `aria-pressed`, so it is announced and operated as a toggle.
+A static swatch is a purely visual element with `role="img"`, not focusable, no keyboard behaviour. A toggle swatch is a real `<button type="button">` carrying `aria-pressed`, so it is announced and operated as a toggle.
 
 ### ARIA Labels
 
@@ -190,7 +190,7 @@ A static swatch is a purely visual element with `role="img"` — not focusable, 
 | `aria-label` | **Not generated.** Both `role="img"` and a button need an accessible name, so pass your own `aria-label`, or render text inside the swatch. |
 
 ::: warning Provide an accessible name
-The Svelte swatch does not derive a label from the color. Supply `aria-label` — for example `aria-label="Blue"` or the CSS color string — or the swatch has no accessible name.
+The Svelte swatch does not derive a label from the color. Supply `aria-label`, for example `aria-label="Blue"` or the CSS color string, or the swatch has no accessible name.
 :::
 
 ### Keyboard Navigation
@@ -203,4 +203,4 @@ Only an interactive swatch takes keyboard input. Arrow-key movement between swat
 | Enter | Toggle the pressed state |
 | Space | Toggle the pressed state |
 
-Enter and Space call `preventDefault`, which suppresses the click a native button would otherwise synthesise — without it every keyboard activation would toggle twice.
+Enter and Space call `preventDefault`, which suppresses the click a native button would otherwise synthesise. Without it every keyboard activation would toggle twice.

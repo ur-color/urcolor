@@ -15,12 +15,14 @@
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "4",
     "lucide-vue-next": "^0.564.0",
+    "mermaid": "^11",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "shiki": "^3.22.0",
     "tailwindcss": "^4.1.18",
     "vitepress": "^1",
     "vitepress-plugin-llms": "^1.13.4",
+    "vitepress-plugin-mermaid": "^2",
     "vue": "^3"
   },
   "dependencies": {

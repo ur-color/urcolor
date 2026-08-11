@@ -1,6 +1,6 @@
 # How to Build Color Fields
 
-Let's build numeric input fields for editing individual color channels step by step.
+Color fields are numeric inputs, one per channel, for typing exact values.
 
 <script setup>
 import ColorFieldGuide from './demo/vue/ColorFieldGuide.vue'
@@ -24,9 +24,18 @@ Here's what we'll end up with:
 
 </details>
 
+The parts, and how they nest:
+
+```mermaid
+flowchart TD
+  R["ColorField Root<br/>colorSpace, channel"] --> I["Input<br/>formats and parses the value"]
+  R --> P["Increment"]
+  R --> M["Decrement"]
+```
+
 ## Step 1: Set up state
 
-Start by importing the color model and creating color state.
+Import the color model and create the color state.
 
 ::: code-group
 
@@ -69,11 +78,11 @@ export class MyField {
 
 :::
 
-`useColor()` creates color state from any CSS color string. Vue returns a `{ color }` shallow ref; React returns `{ color, setColor }`; Svelte returns a rune-backed object whose `color`, `hex` and `alpha` are **getters** — keep the object (`colorState.color`) rather than destructuring it, or you lose reactivity. Angular has no hook: a plain `signal<Color>()` is the state, and `[(value)]` binds to it directly.
+`useColor()` creates color state from any CSS color string. Vue returns a `{ color }` shallow ref and React returns `{ color, setColor }`. Svelte returns a rune-backed object whose `color`, `hex` and `alpha` are getters, so keep the object and read `colorState.color` rather than destructuring it, or reactivity is lost. Angular has no hook: a plain `signal<Color>()` is the state, and `[(value)]` binds to it directly.
 
 ## Step 2: Add the root
 
-The root manages the state for a single channel input. Tell it which color space and channel to control.
+The root manages the state for a single channel input. Tell it which color space to work in and which channel to control.
 
 ::: code-group
 
@@ -160,16 +169,16 @@ export class MyField {
 
 :::
 
-Vue's `v-model` and Angular's `[(value)]` are true two-way bindings. React is one-way plus `onValueChange`. Svelte's `value` is `$bindable`, but `useColor` exposes getters, so bind it with Svelte 5's function form — `bind:value={() => colorState.color, colorState.setColor}` — which is exactly `v-model` for a getter/setter pair.
+Vue's `v-model` and Angular's `[(value)]` are true two-way bindings. React is one-way plus `onValueChange`. Svelte's `value` is `$bindable`, but `useColor` exposes getters, so bind it with Svelte 5's function form, `bind:value={() => colorState.color, colorState.setColor}`, which is `v-model` for a getter/setter pair.
 
-Angular ships every part of a family as a `COLOR_*_DIRECTIVES` array, so one entry in `imports` brings in the whole set.
+Angular ships each family as a `COLOR_*_DIRECTIVES` array, so one entry in `imports` brings in the whole set.
 
-- `color-space` / `colorSpace` — the color space to work in (`hsl`, `oklch`, `hsv`, etc.)
-- `channel` — the channel this field controls (`h`, `s`, `l`, etc.)
+- `color-space` / `colorSpace`: the color space to work in (`hsl`, `oklch`, `hsv`, etc.)
+- `channel`: the channel this field controls (`h`, `s`, `l`, etc.)
 
 ## Step 3: Add the input
 
-The input renders the numeric field. It automatically formats the value based on the channel (degrees, percentages, etc.).
+The input renders the numeric field and formats the value for its channel, in degrees or percentages as appropriate.
 
 ::: code-group
 
@@ -299,11 +308,11 @@ export class MyField {
 
 In Angular the input's selector is `input[urcColorFieldInput]`, so the directive goes on an `<input>` element you own; the other three render their own input for you.
 
-The input supports keyboard interactions — arrow keys increment and decrement the value, and typing a number updates the color directly.
+The input takes keyboard input: arrow keys step the value, and typing a number updates the color directly.
 
 ## Step 4: Add increment and decrement buttons
 
-The increment and decrement parts provide stepper buttons for fine-tuning the value.
+The increment and decrement parts are stepper buttons for fine adjustment.
 
 ::: code-group
 
@@ -461,22 +470,22 @@ export class MyField {
 
 :::
 
-Angular scopes the steppers to buttons — the selectors are `button[urcColorFieldIncrement]` and `button[urcColorFieldDecrement]` — so they go on `<button>` elements you own, and the directive drives the press-and-hold repeat and the `disabled` state for you.
+Angular scopes the steppers to buttons. The selectors are `button[urcColorFieldIncrement]` and `button[urcColorFieldDecrement]`, so they go on `<button>` elements you own, and the directive drives the press-and-hold repeat and the `disabled` state.
 
 ::: tip
-All components are completely unstyled — the classes above are just an example using Tailwind CSS. Use any styling approach you prefer.
+The components ship unstyled. The classes above are one example, written with Tailwind CSS; any styling approach works.
 :::
 
 ## Multiple channels
 
-To build a full channel editor, loop over the channels in a color space using the `colorSpaces` helper from `@urcolor/core`:
+A full channel editor loops over the channels `useColor` already exposes. The
+second argument pins them to a space, so a control working in another space
+cannot renumber the fields underneath:
 
 ::: code-group
 
-```vue{3,13,18-24} [Vue]
+```vue{10,15-21} [Vue]
 <script setup lang="ts">
-import { computed } from "vue";
-import { colorSpaces } from "@urcolor/core";
 import {
   useColor,
   ColorFieldRoot,
@@ -485,8 +494,7 @@ import {
   ColorFieldDecrement,
 } from "@urcolor/vue";
 
-const { color } = useColor("hsl(210, 80%, 50%)");
-const channels = computed(() => colorSpaces["hsl"]?.channels ?? []);
+const { color, channels } = useColor("hsl(210, 80%, 50%)");
 </script>
 
 <template>
@@ -503,13 +511,11 @@ const channels = computed(() => colorSpaces["hsl"]?.channels ?? []);
 </template>
 ```
 
-```tsx{1,6,10-19} [React]
-import { colorSpaces } from "@urcolor/core";
+```tsx{4,8-17} [React]
 import { useColor, ColorField } from "@urcolor/react";
 
 function MyFields() {
-  const { color, setColor } = useColor("hsl(210, 80%, 50%)");
-  const channels = colorSpaces["hsl"]?.channels ?? [];
+  const { color, setColor, channels } = useColor("hsl(210, 80%, 50%)", "hsl");
 
   return (
     <div className="flex gap-2">
@@ -528,17 +534,15 @@ function MyFields() {
 }
 ```
 
-```svelte{2,6,10-23} [Svelte]
+```svelte{4,8-21} [Svelte]
 <script lang="ts">
-  import { colorSpaces } from "@urcolor/core";
   import { ColorField, useColor } from "@urcolor/svelte";
 
-  const colorState = useColor("hsl(210, 80%, 50%)");
-  const channels = colorSpaces["hsl"]?.channels ?? [];
+  const colorState = useColor("hsl(210, 80%, 50%)", "hsl");
 </script>
 
 <div class="flex gap-2">
-  {#each channels as ch (ch.key)}
+  {#each colorState.channels as ch (ch.key)}
     <div class="flex flex-col gap-1">
       <label class="text-xs font-semibold">{ch.label}</label>
       <ColorField.Root
@@ -555,9 +559,10 @@ function MyFields() {
 </div>
 ```
 
-```ts{2,10-19,25} [Angular]
+```ts{3,11-20,26} [Angular]
 import { Component, signal } from "@angular/core";
-import { Color, colorSpaces } from "@urcolor/core";
+import { Color } from "@urcolor/core";
+import { channelsOf } from "@urcolor/shared";
 import { COLOR_FIELD_DIRECTIVES } from "@urcolor/angular";
 
 @Component({
@@ -580,19 +585,23 @@ import { COLOR_FIELD_DIRECTIVES } from "@urcolor/angular";
 })
 export class MyFields {
   protected readonly color = signal<Color>(Color.parse("hsl(210, 80%, 50%)")!);
-  protected readonly channels = colorSpaces["hsl"]?.channels ?? [];
+  protected readonly channels = channelsOf("hsl");
 }
 ```
 
 :::
 
-Svelte loops with `{#each}` and Angular with `@for`; the `channel` value is dynamic in every framework, so it takes a binding — `:channel` in Vue, `channel={ch.key}` in React and Svelte, `[channel]` in Angular.
+Angular has no `useColor`, so its component reads the same list from
+`channelsOf` in `@urcolor/shared`. `createColorStore` exposes it as a `channels`
+signal for anyone already using the store.
 
-Every field shares the same color state — updating one channel automatically keeps the others in sync.
+Svelte loops with `{#each}` and Angular with `@for`. The `channel` value is dynamic in every framework, so it takes a binding: `:channel` in Vue, `channel={ch.key}` in React and Svelte, `[channel]` in Angular.
+
+Every field shares one color state, so updating one channel keeps the others in sync.
 
 ## Hex format
 
-Set `channel` to `"hex"` and `format` to `"hex"` for a hex color input:
+`channel` and `format` both set to `"hex"` give a hex input:
 
 ::: code-group
 
@@ -649,7 +658,7 @@ Set `channel` to `"hex"` and `format` to `"hex"` for a hex color input:
 ## Listening to changes
 
 Vue fires `@update:model-value` on every keystroke that parses and `@change-end` for
-the settled value — blur, Enter, arrow keys, the wheel, or the stepper buttons.
+the settled value on blur, Enter, an arrow key, the wheel or a stepper button.
 React and Svelte call `onValueChange` and `onValueCommit` respectively; Angular emits
 `(valueChange)` and `(valueCommit)`. Angular's `(valueChange)` is the output half of
 `[(value)]`, so when you listen to it explicitly you bind the input one-way as

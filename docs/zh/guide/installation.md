@@ -9,6 +9,7 @@
 
 | 软件包 | 说明 |
 | --- | --- |
+| `urcolor` | 仅颜色引擎，使用无作用域名称，重新导出 `@urcolor/core` |
 | `@urcolor/core` | 核心颜色逻辑与无障碍工具 |
 | `@urcolor/shared` | 所有绑定共用的、与框架无关的行为层、WebGL 渲染与网格采样器 |
 | `@urcolor/vue` | Vue 3 组件与组合式函数 |
@@ -112,27 +113,33 @@ yarn add @urcolor/angular
 
 ### 仅核心库
 
-如果你只需要颜色工具，不需要框架绑定：
+如果只需要颜色工具而不需要框架绑定，请安装 `urcolor`，它是同一引擎的无作用域名称：
 
 ::: code-group
 
 ```sh [bun]
-bun add @urcolor/core
+bun add urcolor
 ```
 
 ```sh [npm]
-npm install @urcolor/core
+npm install urcolor
 ```
 
 ```sh [pnpm]
-pnpm add @urcolor/core
+pnpm add urcolor
 ```
 
 ```sh [yarn]
-yarn add @urcolor/core
+yarn add urcolor
 ```
 
 :::
+
+```ts
+import { Color } from "urcolor";
+```
+
+`urcolor` 本身没有代码：它重新导出 `@urcolor/core`，并以与框架包相同的版本范围依赖它，所以无论用哪个名称，引擎和 `Color` 类都只有一份。用你喜欢的名称即可：安装框架绑定时 `@urcolor/core` 已经存在，在一个项目里混用两个名称也是安全的。
 
 ### 可选包
 

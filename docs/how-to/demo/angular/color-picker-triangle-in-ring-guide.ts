@@ -40,9 +40,8 @@ import { COLOR_RING_DIRECTIVES, COLOR_TRIANGLE_DIRECTIVES } from "@urcolor/angul
         colorSpace="hsv"
         xChannel="s"
         yChannel="v"
-        rotation="90"
         inverted
-        class="absolute inset-[8%]"
+        class="absolute inset-[8%] rotate-90"
       >
         <canvas urcColorTriangleGradient class="absolute inset-0 block"></canvas>
         <div

@@ -1,17 +1,43 @@
 # Introduction
 
-UrColor is a universal, headless color picker component library. It provides unstyled, composable primitives that give you full control over styling and behavior.
+UrColor is a universal, headless color picker library. It ships unstyled,
+composable primitives and leaves styling and behavior to you.
 
 ## Packages
 
-- `@urcolor/core` — A zero-dependency CSS Color 4 library: parse, convert, serialize, gamut-map, interpolate.
-- `@urcolor/shared` — The framework-agnostic behavior layer: drag handling, keyboard maps, channel models, WebGL canvas gradient generators for color area sliders, and data attributes shared by every binding.
-- `@urcolor/relative` — Opt-in CSS Color 5 relative color syntax (`rgb(from red r g b)`) for `@urcolor/core`. See [Relative Colors](/guide/relative-colors).
-- `@urcolor/i18n` — Multilingual color naming and channel labels. See [Color Naming](/guide/color-naming).
-- `@urcolor/vue` — Headless Vue 3 components and composables for building color pickers.
-- `@urcolor/react` — The same primitives for React.
-- `@urcolor/svelte` — The same primitives for Svelte 5, as components plus rune-based hooks.
-- `@urcolor/angular` — The same primitives for Angular, as directives plus signal stores.
+```mermaid
+flowchart TD
+  core["@urcolor/core<br/>parse, convert, mix, gamut-map"]
+  shared["@urcolor/shared<br/>drag, keyboard, channels, WebGL"]
+  relative["@urcolor/relative<br/>CSS Color 5 relative syntax"]
+  i18n["@urcolor/i18n<br/>color and channel names"]
+
+  core --> shared
+  core -.-> relative
+  core -.-> i18n
+
+  shared --> vue["@urcolor/vue"]
+  shared --> react["@urcolor/react"]
+  shared --> svelte["@urcolor/svelte"]
+  shared --> angular["@urcolor/angular"]
+```
+
+Solid arrows are required, dotted ones opt in.
+
+- `@urcolor/core` is a zero-dependency CSS Color 4 library: parse, convert,
+  serialize, gamut-map, interpolate.
+- `@urcolor/shared` is the framework-agnostic behavior layer: drag handling,
+  keyboard maps, channel models, WebGL canvas gradient generators for color area
+  sliders, and the data attributes every binding shares.
+- `@urcolor/relative` adds CSS Color 5 relative color syntax
+  (`rgb(from red r g b)`) to `@urcolor/core`. See
+  [Relative Colors](/guide/relative-colors).
+- `@urcolor/i18n` covers multilingual color naming and channel labels. See
+  [Color Naming](/guide/color-naming).
+- `@urcolor/vue` holds headless Vue 3 components and composables.
+- `@urcolor/react`, `@urcolor/svelte` and `@urcolor/angular` expose the same
+  primitives, as components for React, components plus rune-based hooks for
+  Svelte 5, and directives plus signal stores for Angular.
 
 All four bindings ship the same eight component families. Every recipe under
 [How to](/how-to/build-color-area-picker) shows Vue, React, Svelte and Angular
@@ -19,4 +45,7 @@ side by side, so pick the tab that matches your stack.
 
 ## Philosophy
 
-Inspired by Radix UI, Reka UI, and React Spectrum, UrColor provides the logic and accessibility while you bring the styles. The color area component supports arbitrary two-channel combinations (e.g. Hue+Saturation, Hue+Chroma in LCH) rendered via WebGL for smooth, GPU-accelerated gradients.
+Following Radix UI, Reka UI and React Spectrum, UrColor supplies the logic and
+the accessibility while you bring the styles. The color area component takes
+arbitrary two-channel combinations, such as hue with saturation, or hue with
+chroma in LCH, and renders them through WebGL.

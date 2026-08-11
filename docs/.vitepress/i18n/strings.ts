@@ -22,7 +22,7 @@ export interface HeroStrings {
 export const HERO_STRINGS: Record<string, HeroStrings> = {
   en: {
     tagline: "Universal color picker component library",
-    lede: "Headless, accessible primitives for every color space — sRGB, HSL, LCH, OKLCH — in any framework, with no runtime dependencies.",
+    lede: "Headless, accessible primitives for every color space, from sRGB and HSL to LCH and OKLCH, in any framework and with no runtime dependencies.",
     getStarted: "Get Started",
     components: "Components",
     labelName: "Name",
@@ -142,11 +142,11 @@ export const FEATURE_ICONS = [
  */
 export const FEATURE_STRINGS: Record<string, FeatureStrings[]> = {
   en: [
-    { anchor: "unstyled", title: "Headless primitives", details: "Eight component families — area, slider, field, swatch, swatch picker, wheel, triangle, ring — with no styles of their own." },
+    { anchor: "unstyled", title: "Headless primitives", details: "Eight component families: area, slider, field, swatch, swatch picker, wheel, triangle and ring, with no styles of their own." },
     { anchor: "color-spaces", title: "Any color space", details: "sRGB, HSL, HSV, Lab, LCH, OKLab, OKLCH, Display P3 and more, through a zero-dependency CSS Color 4 engine." },
     { anchor: "accessible", title: "Accessible", details: "The WAI-ARIA color picker pattern: keyboard control, screen reader announcements, managed focus." },
-    { anchor: "fast", title: "WebGL gradients", details: "Every pixel is computed on the GPU, so Lab and OKLCH ramps stay accurate where CSS gradients cannot." },
-    { anchor: "multi-framework", title: "Vue and React", details: "The same primitives in both, over one shared core. Svelte, Angular and more are planned." },
+    { anchor: "fast", title: "WebGL gradients", details: "Every pixel is computed on the GPU, so Lab and OKLCH ramps stay accurate where a CSS gradient cannot." },
+    { anchor: "multi-framework", title: "Four frameworks", details: "The same primitives in Vue, React, Svelte and Angular, over one shared core." },
     { anchor: "languages", title: "Multilingual naming", details: "Optional @urcolor/i18n: channel labels in 77 languages and color names in 298." },
   ],
   zh: [
@@ -154,7 +154,7 @@ export const FEATURE_STRINGS: Record<string, FeatureStrings[]> = {
     { anchor: "color-spaces", title: "任意色彩空间", details: "通过零依赖的 CSS Color 4 引擎支持 sRGB、HSL、HSV、Lab、LCH、OKLab、OKLCH、Display P3 等。" },
     { anchor: "accessible", title: "无障碍", details: "遵循 WAI-ARIA 颜色选择器模式：键盘操作、屏幕阅读器播报、焦点管理。" },
     { anchor: "fast", title: "WebGL 渐变", details: "逐像素在 GPU 上计算，因此 Lab 与 OKLCH 渐变在 CSS 无能为力的地方依然准确。" },
-    { anchor: "multi-framework", title: "Vue 与 React", details: "两个框架共享同一内核、同一套基础组件。Svelte、Angular 等正在规划中。" },
+    { anchor: "multi-framework", title: "四个框架", details: "Vue、React、Svelte 与 Angular 共享同一内核，提供同一套基础组件。" },
     { anchor: "languages", title: "多语言命名", details: "可选的 @urcolor/i18n：77 种语言的通道标签，298 种语言的颜色名称。" },
   ],
   ja: [
@@ -162,7 +162,7 @@ export const FEATURE_STRINGS: Record<string, FeatureStrings[]> = {
     { anchor: "color-spaces", title: "あらゆる色空間", details: "依存ゼロの CSS Color 4 エンジンで sRGB、HSL、HSV、Lab、LCH、OKLab、OKLCH、Display P3 などに対応。" },
     { anchor: "accessible", title: "アクセシブル", details: "WAI-ARIA のカラーピッカーパターン: キーボード操作、スクリーンリーダーへの通知、フォーカス管理。" },
     { anchor: "fast", title: "WebGL グラデーション", details: "GPU で 1 ピクセルずつ計算するため、CSS では表現できない Lab や OKLCH のグラデーションも正確です。" },
-    { anchor: "multi-framework", title: "Vue と React", details: "共通のコアの上に、同じプリミティブを両方で提供。Svelte や Angular なども予定しています。" },
+    { anchor: "multi-framework", title: "4 つのフレームワーク", details: "共通のコアの上に、Vue、React、Svelte、Angular へ同じプリミティブを提供します。" },
     { anchor: "languages", title: "多言語のネーミング", details: "オプションの @urcolor/i18n: チャンネルラベルは 77 言語、カラー名は 298 言語。" },
   ],
   es: [
@@ -170,7 +170,7 @@ export const FEATURE_STRINGS: Record<string, FeatureStrings[]> = {
     { anchor: "color-spaces", title: "Cualquier espacio de color", details: "sRGB, HSL, HSV, Lab, LCH, OKLab, OKLCH, Display P3 y más, mediante un motor CSS Color 4 sin dependencias." },
     { anchor: "accessible", title: "Accesible", details: "El patrón WAI-ARIA de selector de color: control por teclado, anuncios para lectores de pantalla y gestión del foco." },
     { anchor: "fast", title: "Degradados WebGL", details: "Cada píxel se calcula en la GPU, así que los degradados Lab y OKLCH son exactos donde CSS no llega." },
-    { anchor: "multi-framework", title: "Vue y React", details: "Las mismas primitivas en ambos, sobre un núcleo compartido. Svelte, Angular y más están en camino." },
+    { anchor: "multi-framework", title: "Cuatro frameworks", details: "Las mismas primitivas en Vue, React, Svelte y Angular, sobre un núcleo compartido." },
     { anchor: "languages", title: "Nombres multilingües", details: "@urcolor/i18n opcional: etiquetas de canal en 77 idiomas y nombres de color en 298." },
   ],
   fr: [
@@ -178,7 +178,7 @@ export const FEATURE_STRINGS: Record<string, FeatureStrings[]> = {
     { anchor: "color-spaces", title: "Tous les espaces colorimétriques", details: "sRGB, HSL, HSV, Lab, LCH, OKLab, OKLCH, Display P3 et plus, via un moteur CSS Color 4 sans dépendances." },
     { anchor: "accessible", title: "Accessible", details: "Le modèle WAI-ARIA de sélecteur de couleur : contrôle clavier, annonces pour lecteurs d'écran, gestion du focus." },
     { anchor: "fast", title: "Dégradés WebGL", details: "Chaque pixel est calculé sur le GPU : les dégradés Lab et OKLCH restent exacts là où CSS échoue." },
-    { anchor: "multi-framework", title: "Vue et React", details: "Les mêmes primitives des deux côtés, sur un cœur commun. Svelte, Angular et d'autres sont prévus." },
+    { anchor: "multi-framework", title: "Quatre frameworks", details: "Les mêmes primitives dans Vue, React, Svelte et Angular, sur un cœur commun." },
     { anchor: "languages", title: "Nommage multilingue", details: "@urcolor/i18n en option : libellés de canaux en 77 langues et noms de couleurs en 298." },
   ],
   de: [
@@ -186,7 +186,7 @@ export const FEATURE_STRINGS: Record<string, FeatureStrings[]> = {
     { anchor: "color-spaces", title: "Jeder Farbraum", details: "sRGB, HSL, HSV, Lab, LCH, OKLab, OKLCH, Display P3 und mehr über eine abhängigkeitsfreie CSS-Color-4-Engine." },
     { anchor: "accessible", title: "Barrierefrei", details: "Das WAI-ARIA-Muster für Farbwähler: Tastatursteuerung, Screenreader-Ansagen, Fokusverwaltung." },
     { anchor: "fast", title: "WebGL-Verläufe", details: "Jedes Pixel wird auf der GPU berechnet – Lab- und OKLCH-Verläufe bleiben korrekt, wo CSS scheitert." },
-    { anchor: "multi-framework", title: "Vue und React", details: "Dieselben Primitive in beiden, auf einem gemeinsamen Kern. Svelte, Angular und weitere sind geplant." },
+    { anchor: "multi-framework", title: "Vier Frameworks", details: "Dieselben Primitive in Vue, React, Svelte und Angular, auf einem gemeinsamen Kern." },
     { anchor: "languages", title: "Mehrsprachige Benennung", details: "Optionales @urcolor/i18n: Kanalbezeichnungen in 77 Sprachen, Farbnamen in 298." },
   ],
   ru: [
@@ -194,7 +194,7 @@ export const FEATURE_STRINGS: Record<string, FeatureStrings[]> = {
     { anchor: "color-spaces", title: "Любое цветовое пространство", details: "sRGB, HSL, HSV, Lab, LCH, OKLab, OKLCH, Display P3 и другие — через движок CSS Color 4 без зависимостей." },
     { anchor: "accessible", title: "Доступность", details: "Паттерн WAI-ARIA для выбора цвета: управление с клавиатуры, объявления для скринридеров, управление фокусом." },
     { anchor: "fast", title: "WebGL-градиенты", details: "Каждый пиксель считается на GPU, поэтому градиенты Lab и OKLCH точны там, где CSS не справляется." },
-    { anchor: "multi-framework", title: "Vue и React", details: "Одни и те же примитивы в обоих, поверх общего ядра. Svelte, Angular и другие — в планах." },
+    { anchor: "multi-framework", title: "Четыре фреймворка", details: "Одни и те же примитивы в Vue, React, Svelte и Angular поверх общего ядра." },
     { anchor: "languages", title: "Названия на многих языках", details: "Опциональный @urcolor/i18n: подписи каналов на 77 языках и названия цветов на 298." },
   ],
 };

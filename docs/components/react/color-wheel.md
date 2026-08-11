@@ -72,7 +72,7 @@ OKLCh color wheel with Hue mapped to angle and Chroma to radius.
 
 ## API Reference
 
-Every part is also exported unnamespaced — `ColorWheelRoot`, `ColorWheelGradient`, `ColorWheelThumb` — alongside the `ColorWheel.*` namespace. The root's context is readable with `useColorWheelContext()`.
+Every part is also exported unnamespaced, `ColorWheelRoot`, `ColorWheelGradient`, `ColorWheelThumb`, alongside the `ColorWheel.*` namespace. The root's context is readable with `useColorWheelContext()`.
 
 ### ColorWheel.Root
 
@@ -121,7 +121,7 @@ Renders a checkerboard pattern behind the gradient to visualize alpha transparen
 
 The single combined handle, and the wheel's only focusable element. One thumb drives **both** axes: it renders `role="slider"`, takes `tabIndex={0}` unless the root is disabled, and is positioned in polar coordinates from the angle and radius channel values.
 
-Because one handle serves two channels, it announces both — `aria-label` names the channel pair and `aria-valuetext` carries both formatted values. There is no separate thumb per axis.
+Because one handle serves two channels, it announces both: `aria-label` names the channel pair and `aria-valuetext` carries both formatted values. There is no separate thumb per axis.
 
 Extends `ComponentPropsWithoutRef<"span">`.
 

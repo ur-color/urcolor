@@ -17,13 +17,18 @@ import {
 const color = useHeroColor();
 
 /**
- * `triangleVertices` places vertex 0 at `rotation` degrees, measured from top
- * and clockwise — the same convention `ColorRingThumb` uses to place itself at
- * `value * 360 + startAngle`. With the ring's default `startAngle` of 0, that
- * makes `rotation = hue` point vertex 0 straight at the thumb. Vertex 0 is the
- * corner where the triangle resolves to `xMax, yMax` — full saturation, full
- * value — so the pure-color corner tracks the hue the ring is pointing at.
+ * `triangleVertices` places vertex 0 at the top, and `ColorRingThumb` places
+ * itself at `value * 360 + startAngle`, measured from the same origin. With the
+ * ring's default `startAngle` of 0, rotating the triangle by the hue points
+ * vertex 0 straight at the thumb. Vertex 0 is the corner where the triangle
+ * resolves to `xMax, yMax` — full saturation, full value — so the pure-colour
+ * corner tracks the hue the ring is pointing at.
+ *
+ * The rotation is a CSS transform rather than a prop: the triangle's geometry
+ * is fixed, and the components map pointer positions back through whatever
+ * transform the element carries.
  */
+const rotation = computed(() => `rotate(${hue.value}deg)`);
 const hue = computed(() => color.value.to("hsv").get("h") as number);
 
 /**
@@ -32,19 +37,16 @@ const hue = computed(() => color.value.to("hsv").get("h") as number);
  * Clipping the element to the triangle itself fixes it: a clipped-out region
  * is not hit-tested, so those corners fall through to the ring underneath.
  *
- * The polygon mirrors `triangleVertices` exactly — vertices at `rotation`,
- * `rotation + 120` and `rotation + 240`, measured from top and clockwise, on a
- * circle of half the box. The box is square, so its `min(w, h) / 2` is 50%.
+ * The polygon mirrors `triangleVertices` exactly — vertices at 0, 120 and 240
+ * degrees, measured from top and clockwise, on a circle of half the box. The
+ * box is square, so its `min(w, h) / 2` is 50%. It needs no hue term: the clip
+ * path is in the element's own coordinates, so the transform above turns it
+ * along with everything else it clips.
  */
-const clipPath = computed(() => {
-  const points = [0, 120, 240].map((offset) => {
-    const rad = ((offset + hue.value) - 90) * Math.PI / 180;
-    const x = 50 + 50 * Math.cos(rad);
-    const y = 50 + 50 * Math.sin(rad);
-    return `${x.toFixed(3)}% ${y.toFixed(3)}%`;
-  });
-  return `polygon(${points.join(", ")})`;
-});
+const clipPath = `polygon(${[0, 120, 240].map((offset) => {
+  const rad = (offset - 90) * Math.PI / 180;
+  return `${(50 + 50 * Math.cos(rad)).toFixed(3)}% ${(50 + 50 * Math.sin(rad)).toFixed(3)}%`;
+}).join(", ")})`;
 
 function onUpdate(next: Color | undefined) {
   setHeroColor(color, next);
@@ -97,11 +99,10 @@ function onUpdate(next: Color | undefined) {
         color-space="hsv"
         x-channel="s"
         y-channel="v"
-        :rotation="hue"
         thumb-alignment="contain"
         as="div"
         class="hero-core-layer"
-        :style="{ clipPath }"
+        :style="{ clipPath, transform: rotation }"
         @update:model-value="onUpdate"
       >
         <ColorTriangleGradient

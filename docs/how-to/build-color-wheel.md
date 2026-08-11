@@ -1,6 +1,6 @@
 # How to Build a Color Wheel
 
-Let's build a 2D color wheel step by step.
+A color wheel maps one channel onto the angle and another onto the radius.
 
 <script setup>
 import ColorWheelGuide from './demo/vue/ColorWheelGuide.vue'
@@ -24,9 +24,17 @@ Here's what we'll end up with:
 
 </details>
 
+The parts, and how they nest:
+
+```mermaid
+flowchart TD
+  R["ColorWheel Root<br/>angleChannel, radiusChannel"] --> G["Gradient<br/>paints the disc"]
+  R --> T["Thumb<br/>one handle, both axes"]
+```
+
 ## Step 1: Set up state
 
-Start by importing the color model and creating color state.
+Import the color model and create the color state.
 
 ::: code-group
 
@@ -69,11 +77,11 @@ export class MyWheel {
 
 :::
 
-`useColor()` creates color state from any CSS color string. Vue returns a `{ color }` shallow ref; React returns `{ color, setColor }`; Svelte returns a rune-backed object whose `color`, `hex` and `alpha` are **getters** — keep the object (`colorState.color`) rather than destructuring it, or you lose reactivity. Angular has no hook: a plain `signal<Color>()` is the state, and `[(value)]` binds to it directly.
+`useColor()` creates color state from any CSS color string. Vue returns a `{ color }` shallow ref and React returns `{ color, setColor }`. Svelte returns a rune-backed object whose `color`, `hex` and `alpha` are getters, so keep the object and read `colorState.color` rather than destructuring it, or reactivity is lost. Angular has no hook: a plain `signal<Color>()` is the state, and `[(value)]` binds to it directly.
 
 ## Step 2: Add the root
 
-The root manages all the state and interactions. Tell it which color space and channels to map to the angle and radius.
+The root owns the state and the interactions. Tell it which color space to work in and which channels map to the angle and the radius.
 
 ::: code-group
 
@@ -164,19 +172,19 @@ export class MyWheel {
 
 :::
 
-Vue's `v-model` and Angular's `[(value)]` are true two-way bindings. React is one-way plus `onValueChange`. Svelte's `value` is `$bindable`, but `useColor` exposes getters, so bind it with Svelte 5's function form — `bind:value={() => colorState.color, colorState.setColor}` — which is exactly `v-model` for a getter/setter pair.
+Vue's `v-model` and Angular's `[(value)]` are true two-way bindings. React is one-way plus `onValueChange`. Svelte's `value` is `$bindable`, but `useColor` exposes getters, so bind it with Svelte 5's function form, `bind:value={() => colorState.color, colorState.setColor}`, which is `v-model` for a getter/setter pair.
 
-Angular ships every part of a family as a `COLOR_*_DIRECTIVES` array, so one entry in `imports` brings in the whole set.
+Angular ships each family as a `COLOR_*_DIRECTIVES` array, so one entry in `imports` brings in the whole set.
 
-- `color-space` / `colorSpace` — the color space to work in (`hsl`, `oklch`, etc.)
-- `angle-channel` / `channelAngle` / `angleChannel` — the channel mapped to the angular axis (rotation)
-- `radius-channel` / `channelRadius` / `radiusChannel` — the channel mapped to the radial axis (distance from center)
+- `color-space` / `colorSpace`: the color space to work in (`hsl`, `oklch`, etc.)
+- `angle-channel` / `channelAngle` / `angleChannel`: the channel mapped to the angular axis (rotation)
+- `radius-channel` / `channelRadius` / `radiusChannel`: the channel mapped to the radial axis (distance from center)
 
 React names these two props `channelAngle` / `channelRadius`; Vue, Svelte, and Angular all name them `angleChannel` / `radiusChannel` (kebab-cased in Vue templates).
 
 ## Step 3: Add the gradient
 
-The gradient renders the 2D circular gradient on a canvas. In Angular the gradient's selector is `canvas[urcColorWheelGradient]`, so it goes on a `<canvas>` element you own; the other three render their own canvas for you.
+The gradient paints the disc on a canvas. In Angular the gradient's selector is `canvas[urcColorWheelGradient]`, so it goes on a `<canvas>` element you own; the other three render their own canvas for you.
 
 ::: code-group
 
@@ -276,11 +284,11 @@ export class MyWheel {
 
 :::
 
-The root needs `overflow-hidden rounded-full` to clip the gradient to a circle, and `container-type: inline-size` so the component can calculate dimensions correctly.
+The root needs `overflow-hidden rounded-full` to clip the gradient to a circle, and `container-type: inline-size` for the component to measure itself.
 
 ## Step 4: Add the thumb
 
-The thumb is the draggable handle. It's positioned automatically within the wheel.
+The thumb is the draggable handle. The component positions it inside the wheel.
 
 ::: code-group
 
@@ -417,15 +425,15 @@ export class MyWheel {
 
 :::
 
-All four bindings ship a **single combined** `Thumb` for the wheel: one handle drives both axes, so there is no separate thumb per channel.
+All four bindings ship one combined `Thumb` for the wheel: a single handle drives both axes, with no thumb per channel.
 
 ::: tip
-All components are completely unstyled — the classes above are just an example using Tailwind CSS. Use any styling approach you prefer.
+The components ship unstyled. The classes above are one example, written with Tailwind CSS; any styling approach works.
 :::
 
 ## Start angle offset
 
-Rotate where the wheel gradient begins (in degrees):
+Rotating where the wheel gradient begins, in degrees:
 
 ::: code-group
 
@@ -485,7 +493,7 @@ Rotate where the wheel gradient begins (in degrees):
 
 ## Different color spaces
 
-Switch the color space and channel mapping for different wheel behaviors. For example, OKLCh:
+Switching the color space and the channel mapping changes what the wheel does. In OKLCh:
 
 ::: code-group
 

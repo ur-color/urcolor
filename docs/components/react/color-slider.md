@@ -35,7 +35,7 @@ import ColorSliderVertical from './demo/ColorSliderVertical.tsx'
 </ColorSlider.Root>
 ```
 
-`ColorSlider.Range` is optional — add it only when you want a filled portion of the track.
+`ColorSlider.Range` is optional. Add it only when you want a filled portion of the track.
 
 ::: tip
 `ColorSlider.Control` is React-only in the sense that Base UI requires it: `Slider.Control`, which this part renders, is where the pointer interaction lives, so `Track` has to be nested inside it. Vue has no `Control` part at all, and the Svelte and Angular packages ship one that is a pure styling hook because their roots own the pointer handling.
@@ -89,7 +89,7 @@ import ColorSliderVertical from './demo/ColorSliderVertical.tsx'
 
 ## API Reference
 
-Every part is also exported unnamespaced — `ColorSliderRoot`, `ColorSliderControl`, `ColorSliderTrack`, `ColorSliderRange`, `ColorSliderThumb`, `ColorSliderGradient` — alongside the `ColorSlider.*` namespace. The root's context is readable with `useColorSliderContext()`.
+Every part is also exported unnamespaced, `ColorSliderRoot`, `ColorSliderControl`, `ColorSliderTrack`, `ColorSliderRange`, `ColorSliderThumb`, `ColorSliderGradient`, alongside the `ColorSlider.*` namespace. The root's context is readable with `useColorSliderContext()`.
 
 ### ColorSlider.Root
 
@@ -102,7 +102,7 @@ The root container that manages slider state and color channel binding. Renders 
 | `colorSpace` | `SpaceId` | `'hsl'` | Color space (e.g. `'hsl'`, `'oklch'`). |
 | `channel` | `string` | `'h'` | Channel to control (e.g. `'h'`, `'s'`, `'l'`, `'alpha'`). |
 | `disabled` | `boolean` | `false` | Disables interaction. |
-| `dir` | `'ltr' \| 'rtl'` | — | Reading direction. Read from context by the parts, but not forwarded to the underlying Base UI slider — wrap the tree in Base UI's `DirectionProvider` to change the slider's own direction. |
+| `dir` | `'ltr' \| 'rtl'` | — | Reading direction. Read from context by the parts, but not forwarded to the underlying Base UI slider, wrap the tree in Base UI's `DirectionProvider` to change the slider's own direction. |
 | `inverted` | `boolean` | `false` | Mirrors the gradient's color ramp. Only `ColorSlider.Gradient` reads it; the track, range and thumb positions are Base UI's and are unaffected. |
 | `orientation` | `'horizontal' \| 'vertical'` | `'horizontal'` | Slider orientation. |
 | `onValueChange` | `(color: Color) => void` | — | Called on every value change, including mid-drag. |
@@ -111,7 +111,7 @@ The root container that manages slider state and color channel binding. Renders 
 | `style` | `React.CSSProperties` | — | Inline styles applied to the rendered element. |
 | `children` | `React.ReactNode` | — | The slider's parts. |
 
-The stepping interval is not a prop — it comes from the channel's own config, resolved from `colorSpace` and `channel`. The `alpha` channel is handled separately and ranges over `0`–`100`.
+The stepping interval is not a prop. It comes from the channel's own config, resolved from `colorSpace` and `channel`. The `alpha` channel is handled separately and ranges over `0`–`100`.
 
 ### ColorSlider.Control
 
@@ -161,7 +161,7 @@ The draggable handle, rendering Base UI's `Slider.Thumb`: a `<div>` with a neste
 Extends `ComponentPropsWithoutRef<"div">`; it declares no props of its own. `aria-label` passes through to the nested input.
 
 ::: tip
-Unlike the Vue, Svelte and Angular packages, the React thumb does **not** generate an `aria-label` from the channel name. Pass one yourself — `<ColorSlider.Thumb aria-label="Hue" />` — or the input is announced with Base UI's default value text alone.
+Unlike the Vue, Svelte and Angular packages, the React thumb does **not** generate an `aria-label` from the channel name. Pass one yourself, `<ColorSlider.Thumb aria-label="Hue" />`, or the input is announced with Base UI's default value text alone.
 :::
 
 ### Data Attributes

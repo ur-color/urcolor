@@ -34,7 +34,7 @@ import ColorSliderVertical from './demo/ColorSliderVertical.vue'
 </template>
 ```
 
-`ColorSliderRange` is optional — add it only when you want a filled portion of the track.
+`ColorSliderRange` is optional. Add it only when you want a filled portion of the track.
 
 ::: tip
 The Vue package has no `Control` part. React needs one because Base UI handles pointer interaction on `Slider.Control`; Reka UI's slider does not, and Svelte and Angular ship an optional `Control` that is a pure styling hook.
@@ -168,14 +168,14 @@ The track area that contains the gradient and thumb. Renders Reka UI's `SliderTr
 
 ### ColorSliderGradient
 
-Renders the slider's color ramp inside a wrapper element. A one-dimensional ramp has an exact CSS equivalent in every color space, so by default this paints a `linear-gradient` and renders no `<canvas>` at all — it appears in server-rendered HTML and costs no WebGL context. The transparency checkerboard is the wrapper's own CSS background, which the gradient composites over, so no separate part is needed for it.
+Renders the slider's color ramp inside a wrapper element. A one-dimensional ramp has an exact CSS equivalent in every color space, so by default this paints a `linear-gradient` and renders no `<canvas>` at all, it appears in server-rendered HTML and costs no WebGL context. The transparency checkerboard is the wrapper's own CSS background, which the gradient composites over, so no separate part is needed for it.
 
 Setting `interpolationSpace` does not change that: the stops are computed in the requested space and emitted densely, so the CSS path stays exact.
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
 | `renderer` | `'auto' \| 'css' \| 'canvas'` | `'auto'` | Which painter to use. `'auto'` paints with stacked CSS gradients when an exact recipe exists for the color space and channels, and falls back to the canvas otherwise. `'css'` forces the CSS path and warns in development if no recipe exists. `'canvas'` always paints into a `<canvas>`. |
-| `colors` | `string[]` | Auto | Array of color stops. Computed from the slider's channel and current color when omitted — 36 stops across a cyclic channel such as hue, 16 otherwise, or 12 on the canvas path, which the shader's uniform slots cap. At least two valid stops are required, or nothing is painted. |
+| `colors` | `string[]` | Auto | Array of color stops. Computed from the slider's channel and current color when omitted: 36 stops across a cyclic channel such as hue, 16 otherwise, or 12 on the canvas path, which the shader's uniform slots cap. At least two valid stops are required, or nothing is painted. |
 | `angle` | `number` | Auto | Gradient rotation in degrees (`0` = left-to-right, `90` = top-to-bottom). Normalized to 0–360; defaults to `90` when the slider is vertical, `0` otherwise. |
 | `interpolationSpace` | `SpaceId` | — | Color space for perceptual interpolation (e.g. `'oklch'`). |
 | `channelOverrides` | `Record<string, number> \| false` | `{ alpha: 1 }` | Lock specific channels to fixed values in the gradient. Set to `false` to reflect all channels from current color including alpha. E.g. `{ s: 1, v: 1, alpha: 1 }` for an immutable hue gradient in HSV. |

@@ -9,6 +9,7 @@
 
 | Paket | Beschreibung |
 | --- | --- |
+| `urcolor` | Die Farb-Engine allein, unter unskopiertem Namen. Re-exportiert `@urcolor/core` |
 | `@urcolor/core` | Farblogik und Barrierefreiheits-Utilities |
 | `@urcolor/shared` | Frameworkunabhängiges Verhalten, WebGL-Rendering und Grid-Sampler, die alle Bindings teilen |
 | `@urcolor/vue` | Vue-3-Komponenten und Composables |
@@ -112,27 +113,33 @@ Jedes Framework-Paket hängt von `@urcolor/core` und `@urcolor/shared` ab – be
 
 ### Nur der Kern
 
-Wenn du nur die Farb-Utilities ohne Framework-Bindung brauchst:
+Wenn du nur die Farb-Utilities ohne Framework-Binding brauchst, installiere `urcolor`, den unskopierten Namen derselben Engine:
 
 ::: code-group
 
 ```sh [bun]
-bun add @urcolor/core
+bun add urcolor
 ```
 
 ```sh [npm]
-npm install @urcolor/core
+npm install urcolor
 ```
 
 ```sh [pnpm]
-pnpm add @urcolor/core
+pnpm add urcolor
 ```
 
 ```sh [yarn]
-yarn add @urcolor/core
+yarn add urcolor
 ```
 
 :::
+
+```ts
+import { Color } from "urcolor";
+```
+
+`urcolor` enthält keinen eigenen Code. Es re-exportiert `@urcolor/core` und hängt in derselben Version davon ab wie die Framework-Pakete, du bekommst also so oder so eine Kopie der Engine und eine `Color`-Klasse. Nimm den Namen, der dir lieber ist: `@urcolor/core` ist ohnehin da, wenn du ein Framework-Binding installiert hast, und beide Namen in einem Projekt zu mischen ist unbedenklich.
 
 ### Optionale Pakete
 

@@ -1,6 +1,6 @@
 # How to Build a Color Picker (Triangle in Ring)
 
-Let's combine a color ring and color triangle into a Photoshop-style HSV color picker.
+A hue ring with a triangle inscribed in it, the arrangement Photoshop uses.
 
 <script setup>
 import ColorPickerGuide from './demo/vue/ColorPickerTriangleInRingGuide.vue'
@@ -25,9 +25,23 @@ Here's what we'll end up with:
 
 </details>
 
+The parts, and how they nest:
+
+```mermaid
+flowchart TD
+  C["relative container"] --> R["ColorRing Root<br/>hue"]
+  C --> T["ColorTriangle Root<br/>saturation, value<br/>inset 8%"]
+  R --> RG["Gradient"]
+  R --> RT["Thumb"]
+  T --> TG["Gradient"]
+  T --> TT["Thumb"]
+  S["one shared color state"] -.-> R
+  S -.-> T
+```
+
 ## Step 1: Set up shared state
 
-Both components will share the same color ref. Start with a single reactive color value.
+Both components read and write one color ref, so start with a single reactive value.
 
 ::: code-group
 
@@ -70,11 +84,11 @@ export class MyPicker {
 
 :::
 
-`useColor()` creates color state from any CSS color string. Vue returns a `{ color }` shallow ref; React returns `{ color, setColor }`; Svelte returns a rune-backed object whose `color`, `hex` and `alpha` are **getters** — keep the object (`colorState.color`) rather than destructuring it, or you lose reactivity. Angular has no hook: a plain `signal<Color>()` is the state, and `[(value)]` binds to it directly.
+`useColor()` creates color state from any CSS color string. Vue returns a `{ color }` shallow ref and React returns `{ color, setColor }`. Svelte returns a rune-backed object whose `color`, `hex` and `alpha` are getters, so keep the object and read `colorState.color` rather than destructuring it, or reactivity is lost. Angular has no hook: a plain `signal<Color>()` is the state, and `[(value)]` binds to it directly.
 
 ## Step 2: Add the outer hue ring
 
-The `ColorRing` handles hue selection. We use a relative container to position the ring and triangle together.
+`ColorRing` handles hue selection. A relative container positions the ring and the triangle together.
 
 ::: code-group
 
@@ -241,11 +255,11 @@ export class MyPicker {
 
 :::
 
-The outer `div` acts as the layout container. The ring is absolutely positioned to fill it.
+The outer `div` is the layout container, and the ring is absolutely positioned to fill it.
 
-Vue's `v-model` and Angular's `[(value)]` are true two-way bindings. React is one-way plus `onValueChange`. Svelte's `value` is `$bindable`, but `useColor` exposes getters, so bind it with Svelte 5's function form — `bind:value={() => colorState.color, colorState.setColor}` — which is exactly `v-model` for a getter/setter pair.
+Vue's `v-model` and Angular's `[(value)]` are true two-way bindings. React is one-way plus `onValueChange`. Svelte's `value` is `$bindable`, but `useColor` exposes getters, so bind it with Svelte 5's function form, `bind:value={() => colorState.color, colorState.setColor}`, which is `v-model` for a getter/setter pair.
 
-Angular ships every part of a family as a `COLOR_*_DIRECTIVES` array, so one entry in `imports` brings in the whole set.
+Angular ships each family as a `COLOR_*_DIRECTIVES` array, so one entry in `imports` brings in the whole set.
 
 ## Step 3: Add the inner color triangle
 
@@ -494,14 +508,14 @@ export class MyPicker {
 
 :::
 
-The key is `inset-[8%]` — this positions the triangle so its vertices touch the ring's inner edge. Both components share the same `v-model="color"`, so dragging the hue ring updates the triangle's gradient, and dragging the triangle updates the color while keeping the hue ring in sync.
+`inset-[8%]` is the number that matters: it places the triangle so its vertices touch the ring's inner edge. Both components share the same `v-model="color"`, so dragging the hue ring updates the triangle's gradient, and dragging the triangle updates the color while keeping the hue ring in sync.
 
-React passes the same `color` / `setColor` pair to both roots, Svelte binds the same `colorState` on both roots, and Angular binds the same `color` signal with `[(value)]` twice, which gives the identical shared-state wiring. Two naming details differ: Vue spells the triangle's axes `x-channel` / `y-channel`, while React, Svelte and Angular spell them `xChannel` / `yChannel`; and in Angular both gradients are `<canvas>` elements you own — the selectors are `canvas[urcColorRingGradient]` and `canvas[urcColorTriangleGradient]` — whereas Vue, React and Svelte render the canvas for you inside a wrapper element.
+React passes the same `color` / `setColor` pair to both roots, Svelte binds the same `colorState` on both roots, and Angular binds the same `color` signal with `[(value)]` twice, which gives the identical shared-state wiring. Two naming details differ: Vue spells the triangle's axes `x-channel` / `y-channel`, while React, Svelte and Angular spell them `xChannel` / `yChannel`; and in Angular both gradients are `<canvas>` elements you own, under the selectors `canvas[urcColorRingGradient]` and `canvas[urcColorTriangleGradient]`, whereas Vue, React and Svelte render the canvas for you inside a wrapper element.
 
-The triangle ships a single combined thumb — `<ColorTriangle.Thumb />` in React and Svelte, `ColorTriangleThumb` in Vue, `urcColorTriangleThumb` in Angular. There are no separate per-axis thumbs: one focusable handle moves across both channels.
+The triangle ships one combined thumb: `<ColorTriangle.Thumb />` in React and Svelte, `ColorTriangleThumb` in Vue, `urcColorTriangleThumb` in Angular. There are no separate per-axis thumbs: one focusable handle moves across both channels.
 
-The full demo at the top of this page also passes `rotation` and `inverted` to the triangle so it points the same way in every framework. Vue additionally accepts an `orientation` prop that React, Svelte and Angular do not ship; it does not affect the geometry, which comes from `rotation` and `inverted` alone.
+The full demo at the top of this page rotates the triangle with a CSS `transform` and passes `inverted`, so it points the same way in every framework. Vue additionally accepts an `orientation` prop that React, Svelte and Angular do not ship; it does not affect the geometry, which comes from `inverted` and the transform alone.
 
 ::: tip
-All components are completely unstyled — the classes above are just an example using Tailwind CSS. Adjust the `inset` value based on your ring's `inner-radius` to fit the triangle snugly inside.
+The components ship unstyled. The classes above are one example, written with Tailwind CSS. Adjust the `inset` value based on your ring's `inner-radius` to fit the triangle snugly inside.
 :::

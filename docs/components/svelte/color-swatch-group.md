@@ -46,7 +46,7 @@ modes, and the ordinary `ColorSwatch` is the item.
 
 Selection is keyed by the **serialized color string**, never by `Color` identity.
 `Color` is immutable, so two equal colors are still two different objects and
-reference equality would never match — `value`, `isSelected()` and `toggle()`
+reference equality would never match, `value`, `isSelected()` and `toggle()`
 therefore all speak in `string`.
 
 `value` is `$bindable`, so a plain `bind:value={selected}` over a `$state` array
@@ -64,7 +64,7 @@ state comes from a `useColor` hook, which this family does not use.
 </ColorSwatchGroup.Root>
 ```
 
-There is no `Item`, `ItemSwatch` or `Indicator` part — the swatch *is* the item.
+There is no `Item`, `ItemSwatch` or `Indicator` part. The swatch *is* the item.
 The root never renders the swatches itself; it finds them in the DOM by shape,
 matching `button, [role='button'], [tabindex]`, and skipping anything nested
 inside another match. Binding `pressed` (or `onPressedChange`, or `toggle`) is
@@ -94,7 +94,7 @@ own pressed state, the handler is what actually writes the selection.
 
 ### Multiple selection
 
-`type="multiple"` alone does not make a multi-select picker work — the handler
+`type="multiple"` alone does not make a multi-select picker work: the handler
 has to add and remove too.
 
 ```svelte
@@ -147,7 +147,7 @@ against the selection state.
 ### Disabled
 
 `disabled` on the root refuses both `toggle()` and arrow-key navigation, and sets
-`data-disabled`. It is not forwarded to the swatches — disable those
+`data-disabled`. It is not forwarded to the swatches, disable those
 individually, which is what removes their `tabindex`.
 
 ```svelte
@@ -159,7 +159,7 @@ individually, which is what removes their `tabindex`.
 ### Listening to changes
 
 `onValueChange` fires alongside the binding and hands you the whole selection
-array. There is no commit event — a selection has no drag to release.
+array. There is no commit event. A selection has no drag to release.
 
 ```svelte
 <ColorSwatchGroup.Root
@@ -266,7 +266,7 @@ Extends `HTMLAttributes<HTMLElement>`.
 
 A toggle swatch renders a `<button type="button">`.
 A static one renders a `<div role="img">`.
-There is no `Checkerboard` part in this package — the swatch paints the
+There is no `Checkerboard` part in this package. The swatch paints the
 transparency grid itself, under the color.
 
 ### CSS Variables
@@ -305,7 +305,7 @@ so a rule anywhere above the element wins:
 | `data-disabled` | Root, ColorSwatch | That element is disabled. |
 | `data-pressed` | ColorSwatch | A toggle swatch is selected. |
 
-There is no `data-state` and no `data-highlighted` here — those are the Vue
+There is no `data-state` and no `data-highlighted` here. Those are the Vue
 listbox's attributes. Style against `data-pressed` instead.
 
 ## Accessibility
@@ -323,11 +323,11 @@ group and stays usable standalone.
 | `role="img"` | Applied to a static, non-toggle swatch. |
 | `aria-pressed` | Applied to a toggle swatch, reflecting its pressed state. |
 | `aria-disabled` | Applied to a swatch when its `disabled` prop is set. |
-| `aria-label` | **Not generated.** Pass your own on each swatch — a colored button has no text content to name it. |
+| `aria-label` | **Not generated.** Pass your own on each swatch. A colored button has no text content to name it. |
 
 ::: warning Every toggle swatch is its own tab stop
-The group computes a roving tab stop — `activeIndex`, `tabIndexFor(index)` and
-`register()` are all public — but `ColorSwatch` does not consume it. A toggle
+The group computes a roving tab stop, `activeIndex`, `tabIndexFor(index)` and
+`register()` are all public. But `ColorSwatch` does not consume it. A toggle
 swatch always renders `tabindex="0"`, and none at all when disabled, so out of
 the box Tab steps through every swatch and the arrow keys move focus on top of
 that. For a true single tab stop, read `tabIndexFor` from the context and apply
@@ -346,5 +346,5 @@ it yourself through the swatch's `child` snippet.
 
 Arrow navigation wraps at the ends while `loopFocus` is true, and clamps when it
 is false. In `rtl`, only the horizontal arrows are mirrored. `Home` and `End`
-work in both orientations. There is no typeahead and no `Ctrl/Cmd + A` — those
+work in both orientations. There is no typeahead and no `Ctrl/Cmd + A`, those
 belong to Vue's listbox-based picker.

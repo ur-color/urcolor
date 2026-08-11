@@ -113,7 +113,7 @@ Supplying any of `topLeft`, `topRight`, `bottomLeft` or `bottomRight` switches t
 
 ### Commit, disabled and direction
 
-`disabled` and `dir` are **native attributes**, not inputs — set them on the element and the root picks them up. `(valueCommit)` fires once at the end of an interaction, never mid-drag.
+`disabled` and `dir` are **native attributes**, not inputs: set them on the element and the root picks them up. `(valueCommit)` fires once at the end of an interaction, never mid-drag.
 
 ```html
 <div urcColorAreaRoot [(value)]="color" (valueCommit)="onCommit($event)" dir="rtl" disabled>
@@ -183,7 +183,7 @@ The root of the area. Owns the color, the pointer and keyboard interaction, and 
 `ColorAreaThumbAlignment` is `"contain" | "overflow"`.
 
 ::: warning `disabled` is not an input
-`disabled` is the native DOM attribute. The static attribute is read at construction — which works under SSR — and a `MutationObserver` keeps it live afterwards. The readable signal is named **`isDisabled`**, not `disabled`, because `FormUiControl` reserves the member name `disabled` for its own `InputSignal<boolean>`.
+`disabled` is the native DOM attribute. The static attribute is read at construction, which works under SSR, and a `MutationObserver` keeps it live afterwards. The readable signal is named **`isDisabled`**, not `disabled`, because `FormUiControl` reserves the member name `disabled` for its own `InputSignal<boolean>`.
 :::
 
 `dir` is DOM state too, and is read by the same observer. The resolved value comes from `getComputedStyle(...).direction` rather than the host attribute alone, so an inherited `<html dir="rtl">` is honoured. It is published as the `dir` signal. RTL and `xInverted` each mirror the horizontal axis, so setting both cancels out.
@@ -210,7 +210,7 @@ The root publishes `--reka-slider-area-thumb-transform` on its own style, which 
 
 ### ColorAreaGradient
 
-Paints the area's two-dimensional color surface onto a `<canvas>` you supply. The transparency checkerboard is this element's CSS background, which the canvas bitmap composites over — there is no `Checkerboard` part in this package.
+Paints the area's two-dimensional color surface onto a `<canvas>` you supply. The transparency checkerboard is this element's CSS background, which the canvas bitmap composites over. There is no `Checkerboard` part in this package.
 
 - Selector: `canvas[urcColorAreaGradient]`
 - Export as: `urcColorAreaGradient`
@@ -230,7 +230,7 @@ Paints the area's two-dimensional color surface onto a `<canvas>` you supply. Th
 
 The single combined handle, and the area's only focusable element. One thumb drives **both** axes: it sets `role="slider"`, takes `tabindex="0"` unless the root is disabled, and is positioned from the horizontal and vertical channel values.
 
-Because one handle serves two channels, it announces both — `aria-label` names the channel pair and `aria-valuetext` carries both formatted values. There is no separate thumb per axis. The thumb is only a focus target and an ARIA surface; every value change is owned by the root, whose `keydown` listener sees the events that bubble up from here.
+Because one handle serves two channels, it announces both: `aria-label` names the channel pair and `aria-valuetext` carries both formatted values. There is no separate thumb per axis. The thumb is only a focus target and an ARIA surface; every value change is owned by the root, whose `keydown` listener sees the events that bubble up from here.
 
 - Selector: `[urcColorAreaThumb]`
 - Export as: `urcColorAreaThumb`

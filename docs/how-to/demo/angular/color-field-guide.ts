@@ -1,6 +1,6 @@
 import { Component, signal } from "@angular/core";
 import { Color } from "@urcolor/core";
-import { colorSpaces } from "@urcolor/shared";
+import { channelsOf } from "@urcolor/shared";
 import { COLOR_FIELD_DIRECTIVES } from "@urcolor/angular";
 
 @Component({
@@ -68,5 +68,5 @@ import { COLOR_FIELD_DIRECTIVES } from "@urcolor/angular";
 })
 export class ColorFieldGuide {
   protected readonly color = signal<Color>(Color.parse("hsl(210, 80%, 50%)")!);
-  protected readonly channels = colorSpaces["hsl"]?.channels ?? [];
+  protected readonly channels = channelsOf("hsl");
 }

@@ -19,7 +19,7 @@ import ColorSwatchBasic from './demo/ColorSwatchBasic.vue'
 
 ## Anatomy
 
-`ColorSwatchRoot` is the whole family — a single component with no sub-parts.
+`ColorSwatchRoot` is the whole family, a single component with no sub-parts.
 
 ```vue
 <script setup lang="ts">
@@ -52,7 +52,7 @@ A set of color swatches, including one with alpha transparency.
 
 Renders a color preview with an automatic checkerboard background. Extends reka-ui's `PrimitiveProps`.
 
-The Vue swatch is presentational only — it has no pressed state and no toggle behaviour. Selection lives in [`ColorSwatchPicker`](./color-swatch-picker.md), whose `ColorSwatchPickerItemSwatch` wraps this component and feeds it the item's color.
+The Vue swatch is presentational only. It has no pressed state and no toggle behaviour. Selection lives in [`ColorSwatchPicker`](./color-swatch-picker.md), whose `ColorSwatchPickerItemSwatch` wraps this component and feeds it the item's color.
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
@@ -64,7 +64,7 @@ The Vue swatch is presentational only — it has no pressed state and no toggle 
 | `asChild` | `boolean` | `false` | Merge props onto the single child instead of rendering an element. |
 
 ::: tip
-`modelValue` is a plain prop, not a two-way binding — the swatch never writes back, so `:model-value="color"` is the idiomatic form and `v-model` would have nothing to update.
+`modelValue` is a plain prop, not a two-way binding. The swatch never writes back, so `:model-value="color"` is the idiomatic form and `v-model` would have nothing to update.
 :::
 
 ### Slots
@@ -120,7 +120,7 @@ ColorSwatch is a purely visual element that displays a color preview. It is not 
 
 ### Keyboard Navigation
 
-The swatch has no keyboard behaviour of its own — it is not a tab stop and handles no keys. For a keyboard-navigable set of selectable swatches, use [`ColorSwatchPicker`](./color-swatch-picker.md), which owns roving focus and selection.
+The swatch has no keyboard behaviour of its own. It is not a tab stop and handles no keys. For a keyboard-navigable set of selectable swatches, use [`ColorSwatchPicker`](./color-swatch-picker.md), which owns roving focus and selection.
 
 | Key | Action |
 |-----|--------|

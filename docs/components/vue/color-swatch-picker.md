@@ -1,6 +1,6 @@
 # ColorSwatchPicker
 
-A listbox of color swatches for picking one — or several — colors from a palette.
+A listbox of color swatches for picking one, or several, colors from a palette.
 
 ## Preview
 
@@ -23,7 +23,7 @@ Vue is the odd one out here. React, Svelte and Angular ship this family as
 `ColorSwatchGroup`: a plain `role="group"` whose items are ordinary `ColorSwatch`
 toggle buttons, with no item, item-swatch or indicator part, and a `value` that
 is always a `string[]` in both selection modes. Vue's picker is a Reka UI
-listbox instead — it has all four parts, and its `v-model` is a single string
+listbox instead. It has all four parts, and its `v-model` is a single string
 until you set `multiple`.
 :::
 
@@ -46,7 +46,7 @@ The picker is built on Reka UI's Listbox: the root renders `role="listbox"` and 
 
 ### Single Selection
 
-Click a swatch to select it. Clicking the selected swatch deselects it again — that is the default `selection-behavior="toggle"`.
+Click a swatch to select it. Clicking the selected swatch deselects it again. That is the default `selection-behavior="toggle"`.
 
 <ColorSwatchPickerBasic />
 
@@ -196,7 +196,7 @@ underlying `ListboxItem`. The event is cancellable: calling `preventDefault()` o
 it stops the selection.
 
 `injectColorSwatchPickerItemContext()` is exported too, and returns
-`{ color: Ref<string> }` — the raw `value` of the enclosing item. That is how you
+`{ color: Ref<string> }`, the raw `value` of the enclosing item. That is how you
 build your own part that needs the item's color.
 
 ### ColorSwatchPickerItemSwatch
@@ -211,13 +211,13 @@ Renders the item's color, using `ColorSwatchRoot` internally. It reads the color
 | `as` | `string` | `'div'` | The element or component to render as. |
 | `asChild` | `boolean` | `false` | Merge props onto the single child instead of rendering an element. |
 
-Its default slot receives `{ color, alpha }` — the resolved sRGB color string and
+Its default slot receives `{ color, alpha }`, the resolved sRGB color string and
 the alpha channel as a number. There is no `Checkerboard` part in this family:
 the swatch paints the transparency grid itself, under the color.
 
 ### ColorSwatchPickerItemIndicator
 
-Renders its children only while the enclosing item is selected — use it for a checkmark or similar affordance.
+Renders its children only while the enclosing item is selected, use it for a checkmark or similar affordance.
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
@@ -279,8 +279,8 @@ ColorSwatchPicker uses listbox semantics: a single tab stop, with the highlighte
 
 ::: warning No typeahead
 Listbox typeahead resolves an option's search text from its `textValue` or its
-`textContent`. Swatch items carry neither — a swatch is a colored box, not text —
-so every search key resolves against an empty string and simply highlights the
+`textContent`. Swatch items carry neither. A swatch is a colored box, not text,
+so every search key resolves against an empty string and highlights the
 first option. Do not rely on typing a color to jump to it.
 :::
 
@@ -295,9 +295,9 @@ first option. Do not rely on typing a color to jump to it.
 | End | Highlight the last swatch |
 | Space | Select the highlighted swatch |
 | Enter | Select the highlighted swatch |
-| Ctrl/Cmd + A | Select every swatch — `multiple` only |
+| Ctrl/Cmd + A | Select every swatch: `multiple` only |
 
 Only the arrow keys for the current `orientation` are handled; the other pair is
-ignored. `Page Up` and `Page Down` are **not** bound — the listbox registers
+ignored. `Page Up` and `Page Down` are **not** bound: the listbox registers
 navigation for the arrow keys, `Home` and `End` only. In `rtl`, the horizontal
 arrows are mirrored.

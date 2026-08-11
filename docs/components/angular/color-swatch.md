@@ -38,7 +38,7 @@ export class MySwatches {
 <div urcColorSwatch></div>
 ```
 
-A single directive with no sub-parts. Its selector is `[urcColorSwatch]`, which is element-agnostic — put it on a `<div>` for a static sample, or on a `<button>` when you want a toggle.
+A single directive with no sub-parts. Its selector is `[urcColorSwatch]`, which is element-agnostic, put it on a `<div>` for a static sample, or on a `<button>` when you want a toggle.
 
 ## Examples
 
@@ -80,7 +80,7 @@ Binding `[(pressed)]` turns the swatch into a self-contained toggle. Put it on a
 
 ### Disabled
 
-`disabled` is the **native attribute**, not an input — set it on the element and the swatch picks it up. It refuses both the click and the Enter/Space activation, and drops the tab stop.
+`disabled` is the **native attribute**, not an input: set it on the element and the swatch picks it up. It refuses both the click and the Enter/Space activation, and drops the tab stop.
 
 ```html
 <button urcColorSwatch [value]="color()" [(pressed)]="selected" disabled></button>
@@ -132,7 +132,7 @@ A single color sample. Standalone it is a static `role="img"` element; as a togg
 | `pressed` | `model<boolean \| undefined>` | `undefined` | Whether the swatch is selected, two-way bindable as `[(pressed)]`. Emits `(pressedChange)`. |
 
 ::: warning `disabled` is not an input
-`disabled` is the native DOM attribute. The static attribute is read at construction — which works under SSR — and a `MutationObserver` keeps it live afterwards. The readable signal is named **`isDisabled`**, not `disabled`, matching the family roots, where `FormUiControl` reserves the member name `disabled` for its own `InputSignal<boolean>`.
+`disabled` is the native DOM attribute. The static attribute is read at construction, which works under SSR, and a `MutationObserver` keeps it live afterwards. The readable signal is named **`isDisabled`**, not `disabled`, matching the family roots, where `FormUiControl` reserves the member name `disabled` for its own `InputSignal<boolean>`.
 :::
 
 ::: tip Toggle inference is resolved once
@@ -186,7 +186,7 @@ so a rule anywhere above the element wins:
 
 ## Accessibility
 
-A static swatch is a purely visual element with `role="img"` — not focusable, no keyboard behaviour. A toggle swatch carries `aria-pressed` and a tab stop, so it is announced and operated as a toggle. Inside a `ColorSwatchGroup` the group owns roving focus: it listens for `keydown` and `focusin` bubbling from its items, so the swatch needs no coupling to it and stays usable on its own.
+A static swatch is a purely visual element with `role="img"`, not focusable, no keyboard behaviour. A toggle swatch carries `aria-pressed` and a tab stop, so it is announced and operated as a toggle. Inside a `ColorSwatchGroup` the group owns roving focus: it listens for `keydown` and `focusin` bubbling from its items, so the swatch needs no coupling to it and stays usable on its own.
 
 ### ARIA Labels
 
@@ -201,7 +201,7 @@ A static swatch is a purely visual element with `role="img"` — not focusable, 
 | `aria-label` | **Not generated.** Both `role="img"` and a button need an accessible name, so set your own `aria-label`, or render text inside the element. |
 
 ::: warning Provide an accessible name
-The Angular swatch does not derive a label from the color. Set `aria-label` — for example `aria-label="Blue"` or the CSS color string — or the element has no accessible name.
+The Angular swatch does not derive a label from the color. Set `aria-label`, for example `aria-label="Blue"` or the CSS color string, or the element has no accessible name.
 :::
 
 ### Keyboard Navigation
@@ -214,4 +214,4 @@ Only an interactive swatch takes keyboard input. Arrow-key movement between swat
 | Enter | Toggle the pressed state |
 | Space | Toggle the pressed state |
 
-Enter and Space call `preventDefault`, which suppresses the click a native button would otherwise synthesise — without it every keyboard activation would toggle twice.
+Enter and Space call `preventDefault`, which suppresses the click a native button would otherwise synthesise. Without it every keyboard activation would toggle twice.

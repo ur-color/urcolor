@@ -1,13 +1,11 @@
 <script lang="ts">
-  import { colorSpaces } from "@urcolor/shared";
   import { ColorField, useColor } from "@urcolor/svelte";
 
-  const colorState = useColor("hsl(210, 80%, 50%)");
-  const channels = colorSpaces["hsl"]?.channels ?? [];
+  const colorState = useColor("hsl(210, 80%, 50%)", "hsl");
 </script>
 
 <div class="flex flex-1 flex-wrap gap-2">
-  {#each channels as ch (ch.key)}
+  {#each colorState.channels as ch (ch.key)}
     <div class="flex min-w-[80px] flex-1 flex-col gap-1">
       <label
         for={`guide-field-${ch.key}`}

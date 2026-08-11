@@ -34,9 +34,8 @@
     colorSpace="hsv"
     xChannel="s"
     yChannel="v"
-    rotation={90}
     inverted
-    class="absolute inset-[8%]"
+    class="absolute inset-[8%] rotate-90"
   >
     <ColorTriangle.Gradient class="absolute inset-0 block" />
     <ColorTriangle.Thumb

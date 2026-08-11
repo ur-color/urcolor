@@ -1,6 +1,6 @@
 # How to Build a Color Channel Slider
 
-Let's build a 1D color slider step by step.
+A color slider maps one channel onto a track.
 
 <script setup>
 import ColorSliderGuide from './demo/vue/ColorSliderGuide.vue'
@@ -24,9 +24,19 @@ Here's what we'll end up with:
 
 </details>
 
+The parts, and how they nest:
+
+```mermaid
+flowchart TD
+  R["ColorSlider Root<br/>colorSpace, channel"] --> C["Control<br/>required in React only"]
+  C --> K["Track<br/>pointer target"]
+  K --> G["Gradient<br/>paints the ramp"]
+  K --> T["Thumb"]
+```
+
 ## Step 1: Set up state
 
-Start by importing the color model and creating color state.
+Import the color model and create the color state.
 
 ::: code-group
 
@@ -69,11 +79,11 @@ export class MySlider {
 
 :::
 
-`useColor()` creates color state from any CSS color string. Vue returns a `{ color }` shallow ref; React returns `{ color, setColor }`; Svelte returns a rune-backed object whose `color`, `hex` and `alpha` are **getters** — keep the object (`colorState.color`) rather than destructuring it, or you lose reactivity. Angular has no hook: a plain `signal<Color>()` is the state, and `[(value)]` binds to it directly. (`createColorStore()` from `@urcolor/angular` is available too when you also want `hex` / `alpha` projections.)
+`useColor()` creates color state from any CSS color string. Vue returns a `{ color }` shallow ref and React returns `{ color, setColor }`. Svelte returns a rune-backed object whose `color`, `hex` and `alpha` are getters, so keep the object and read `colorState.color` rather than destructuring it, or reactivity is lost. Angular has no hook: a plain `signal<Color>()` is the state, and `[(value)]` binds to it directly. `createColorStore()` from `@urcolor/angular` is there too, for `hex` and `alpha` projections.
 
 ## Step 2: Add the root
 
-The root manages all the state and interactions. Tell it which color space and channel to control.
+The root owns the state and the interactions. Tell it which color space to work in and which channel to control.
 
 ::: code-group
 
@@ -160,16 +170,16 @@ export class MySlider {
 
 :::
 
-Vue's `v-model` and Angular's `[(value)]` are true two-way bindings. React is one-way plus `onValueChange`. Svelte's `value` is `$bindable`, but `useColor` exposes getters, so bind it with Svelte 5's function form — `bind:value={() => colorState.color, colorState.setColor}` — which is exactly `v-model` for a getter/setter pair.
+Vue's `v-model` and Angular's `[(value)]` are true two-way bindings. React is one-way plus `onValueChange`. Svelte's `value` is `$bindable`, but `useColor` exposes getters, so bind it with Svelte 5's function form, `bind:value={() => colorState.color, colorState.setColor}`, which is `v-model` for a getter/setter pair.
 
-Angular ships every part of a family as a `COLOR_*_DIRECTIVES` array, so one entry in `imports` brings in the whole set.
+Angular ships each family as a `COLOR_*_DIRECTIVES` array, so one entry in `imports` brings in the whole set.
 
-- `color-space` / `colorSpace` — the color space to work in (`hsl`, `oklch`, `hsv`, etc.)
-- `channel` — the channel this slider controls (`h`, `s`, `l`, `c`, `alpha`, etc.)
+- `color-space` / `colorSpace`: the color space to work in (`hsl`, `oklch`, `hsv`, etc.)
+- `channel`: the channel this slider controls (`h`, `s`, `l`, `c`, `alpha`, etc.)
 
 ## Step 3: Add the track and gradient
 
-The track is the interactive area that handles pointer events, and the gradient renders the 1D gradient on a canvas. React additionally wraps the track in a `ColorSlider.Control` element, because Base UI's slider requires it. Vue, Svelte, and Angular go straight from the root to the track — they ship a `Control` part too, but only as an optional styling hook. In Angular the gradient's selector is `canvas[urcColorSliderGradient]`, so it goes on a `<canvas>` element you own; the other three render their own canvas for you.
+The track is the interactive area that handles pointer events, and the gradient renders the 1D gradient on a canvas. React additionally wraps the track in a `ColorSlider.Control` element, because Base UI's slider requires it. Vue, Svelte and Angular go straight from the root to the track. They ship a `Control` part too, but only as an optional styling hook. In Angular the gradient's selector is `canvas[urcColorSliderGradient]`, so it goes on a `<canvas>` element you own; the other three render their own canvas for you.
 
 ::: code-group
 
@@ -288,11 +298,11 @@ export class MySlider {
 
 :::
 
-The `colors` prop defines the gradient stops. For a hue slider, use the full spectrum. For other channels, you can use fewer stops — the gradient will interpolate between them.
+The `colors` prop sets the gradient stops. A hue slider wants the full spectrum; other channels need fewer, because the gradient interpolates between them.
 
 ## Step 4: Add the thumb
 
-The thumb is the draggable handle. It's positioned automatically by the component.
+The thumb is the draggable handle. The component positions it.
 
 ::: code-group
 
@@ -444,12 +454,12 @@ export class MySlider {
 :::
 
 ::: tip
-All components are completely unstyled — the classes above are just an example using Tailwind CSS. Use any styling approach you prefer.
+The components ship unstyled. The classes above are one example, written with Tailwind CSS; any styling approach works.
 :::
 
 ## Vertical orientation
 
-Set `orientation="vertical"` to render a vertical slider:
+`orientation="vertical"` renders a vertical slider:
 
 ::: code-group
 
@@ -505,7 +515,7 @@ Set `orientation="vertical"` to render a vertical slider:
 
 ## Inverting direction
 
-Use `inverted` to reverse the slider direction:
+`inverted` reverses the slider direction:
 
 ::: code-group
 
@@ -561,7 +571,7 @@ Use `inverted` to reverse the slider direction:
 
 ## Different channels
 
-Switch the `channel` prop to control different color properties. For example, a lightness slider:
+Switching the `channel` prop controls a different property. A lightness slider:
 
 ::: code-group
 

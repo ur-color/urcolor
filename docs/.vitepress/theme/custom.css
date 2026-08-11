@@ -155,3 +155,150 @@
   background: color-mix(in srgb, var(--vp-c-bg) 70%, transparent) !important;
   backdrop-filter: blur(16px);
 }
+
+/*
+ * Page title row
+ *
+ * `plugins/pageTitleRow.ts` wraps each page's first `<h1>` together with the
+ * copy/download control, so the two share a line instead of the control
+ * dropping onto its own. The row wraps on narrow viewports, which is why the
+ * gap has a vertical component.
+ */
+.vp-doc .page-title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 24px;
+  margin-bottom: 24px;
+}
+
+/* The row owns the spacing now; the heading's own bottom margin would push the
+   control off-centre relative to it. */
+.vp-doc .page-title-row > h1 {
+  margin: 0;
+}
+
+/*
+ * Mermaid figures
+ *
+ * `vitepress-plugin-mermaid` renders each ```mermaid fence into a `.mermaid`
+ * div holding a fixed-size SVG. The width attribute mermaid writes is a
+ * drawing size, not a layout size, so it has to be overridden or a chart
+ * overflows the prose column on a narrow window.
+ */
+.vp-doc .mermaid {
+  display: flex;
+  justify-content: center;
+  margin: 24px 0;
+}
+
+.vp-doc .mermaid svg {
+  max-width: 100%;
+  height: auto;
+}
+
+/*
+ * mermaid renders a node label as a `<p>` inside a `foreignObject`, and sizes
+ * the box by measuring that markup in a throwaway container attached to
+ * `<body>`. Inside `.vp-doc` the same `<p>` picks up the prose margins and line
+ * height, comes out taller than the box measured for it, and loses its last
+ * line under the border. Resetting both makes the rendered label match the
+ * measured one.
+ */
+.vp-doc .mermaid p {
+  margin: 0;
+  line-height: 1.5;
+}
+
+/*
+ * Benchmark chart color key
+ *
+ * Emitted by `packages/core/bench/page.ts`, which owns the colors themselves:
+ * the swatch background is written inline so the key can never disagree with
+ * the charts it explains.
+ */
+.vp-doc .bench-key {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+}
+
+.bench-key-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--vp-c-text-2);
+  white-space: nowrap;
+}
+
+.bench-key-dot {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+}
+
+/*
+ * Benchmark charts
+ *
+ * mermaid paints a whole bar series in one color, so the per-library colors
+ * come from here instead. `packages/core/bench/page.ts` wraps each chart in a
+ * `.bench-chart` element carrying one `--bench-N` custom property per row, in
+ * the same order the bars are declared, and owns the color values themselves.
+ *
+ * The data labels are pinned to the axis text size as well, because mermaid
+ * scales them per bar and no two charts would otherwise agree.
+ */
+.bench-chart g.plot > g.bar-plot-0 > text {
+  font-size: 14px;
+}
+
+.bench-chart g.plot > g.bar-plot-0 > rect:nth-of-type(1) {
+  fill: var(--bench-1);
+}
+
+.bench-chart g.plot > g.bar-plot-0 > rect:nth-of-type(2) {
+  fill: var(--bench-2);
+}
+
+.bench-chart g.plot > g.bar-plot-0 > rect:nth-of-type(3) {
+  fill: var(--bench-3);
+}
+
+.bench-chart g.plot > g.bar-plot-0 > rect:nth-of-type(4) {
+  fill: var(--bench-4);
+}
+
+.bench-chart g.plot > g.bar-plot-0 > rect:nth-of-type(5) {
+  fill: var(--bench-5);
+}
+
+.bench-chart g.plot > g.bar-plot-0 > rect:nth-of-type(6) {
+  fill: var(--bench-6);
+}
+
+.bench-chart g.plot > g.bar-plot-0 > rect:nth-of-type(7) {
+  fill: var(--bench-7);
+}
+
+.bench-chart g.plot > g.bar-plot-0 > rect:nth-of-type(8) {
+  fill: var(--bench-8);
+}
+
+.bench-chart g.plot > g.bar-plot-0 > rect:nth-of-type(9) {
+  fill: var(--bench-9);
+}
+
+.bench-chart g.plot > g.bar-plot-0 > rect:nth-of-type(10) {
+  fill: var(--bench-10);
+}
+
+.bench-chart g.plot > g.bar-plot-0 > rect:nth-of-type(11) {
+  fill: var(--bench-11);
+}
+
+.bench-chart g.plot > g.bar-plot-0 > rect:nth-of-type(12) {
+  fill: var(--bench-12);
+}

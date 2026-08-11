@@ -1,9 +1,7 @@
-import { colorSpaces } from "@urcolor/shared";
 import { ColorField, useColor } from "@urcolor/react";
 
 export default function ColorFieldGuide() {
-  const { color, setColor } = useColor("hsl(210, 80%, 50%)");
-  const channels = colorSpaces["hsl"]?.channels ?? [];
+  const { color, setColor, channels } = useColor("hsl(210, 80%, 50%)", "hsl");
 
   return (
     <div className="flex flex-1 flex-wrap gap-2">

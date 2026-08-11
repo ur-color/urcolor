@@ -1,6 +1,6 @@
 # ColorTriangle
 
-A triangular 2D area component for adjusting two color channels — or three, as barycentric coordinates on a simplex.
+A triangular 2D area component for adjusting two color channels, or three, as barycentric coordinates on a simplex.
 
 ## Preview
 
@@ -24,7 +24,7 @@ A triangular 2D area component for adjusting two color channels — or three, as
 </ColorTriangle.Root>
 ```
 
-`useColor` returns an object whose `color`, `hex` and `alpha` members are **getters**, not refs. Keep the object rather than destructuring it, and bind with Svelte 5's function form — `bind:value={() => colorState.color, colorState.setColor}` — which pairs the getter with the setter.
+`useColor` returns an object whose `color`, `hex` and `alpha` members are **getters**, not refs. Keep the object rather than destructuring it, and bind with Svelte 5's function form, `bind:value={() => colorState.color, colorState.setColor}`, which pairs the getter with the setter.
 
 ## Anatomy
 
@@ -103,17 +103,17 @@ In three-channel mode the three values are barycentric coordinates: only the rat
 between them is meaningful, so the root renormalizes them onto the simplex
 (`u + v + w === 1`) on every write. An `srgb` color that starts off the simplex is
 rewritten onto it by the first arrow press. This is inherent to the geometry, not a
-bug — afterwards the values stay on the simplex and step smoothly.
+bug, afterwards the values stay on the simplex and step smoothly.
 :::
 
 ### Rotation and mirroring
 
-`rotation` turns the outline; `inverted` swaps the second and third vertices, mirroring it.
+`inverted` swaps the second and third vertices, mirroring the outline. Rotate the triangle with a CSS `transform` on the root. The root maps pointer positions back through its own transform, so dragging still follows the corner each vertex points at.
 
 ```svelte
 <ColorTriangle.Root
   bind:value={() => colorState.color, colorState.setColor}
-  rotation={180}
+  style="transform: rotate(180deg)"
   inverted
   class="relative block size-64"
 >
@@ -158,7 +158,7 @@ Every part accepts a `child` snippet that replaces the element it would have ren
 
 ## API Reference
 
-Every part is also exported unnamespaced — `ColorTriangleRoot`, `ColorTriangleGradient`, `ColorTriangleThumb` — alongside the `ColorTriangle.*` namespace. The root's context is readable with `colorTriangleContext.get()`.
+Every part is also exported unnamespaced, `ColorTriangleRoot`, `ColorTriangleGradient`, `ColorTriangleThumb`, alongside the `ColorTriangle.*` namespace. The root's context is readable with `colorTriangleContext.get()`.
 
 ### ColorTriangle.Root
 
@@ -174,7 +174,6 @@ Extends `HTMLAttributes<HTMLDivElement>`.
 | `xChannel` | `string` | Auto | The channel mapped to the first vertex. Defaults to the color space's second channel. |
 | `yChannel` | `string` | Auto | The channel mapped to the second vertex. Defaults to the color space's third channel. |
 | `zChannel` | `string` | — | The channel mapped to the third vertex. Supplying it switches the triangle to a three-channel simplex. |
-| `rotation` | `number` | `0` | Rotation of the triangle, in degrees. |
 | `inverted` | `boolean` | `false` | Swaps the second and third vertices, mirroring the triangle. |
 | `thumbAlignment` | `'contain' \| 'overflow'` | `'overflow'` | Whether the thumb is centred on the edge or kept inside it. |
 | `disabled` | `boolean` | `false` | Prevents the user from interacting with the triangle. |
@@ -190,7 +189,7 @@ A pointer press that lands outside the outline is ignored: the root's box is a f
 
 ### ColorTriangle.Gradient
 
-Renders the triangle's color surface as a `<canvas>` inside a wrapper `<span>`, sampled from the root's color space and channel configuration — including the third channel when one is set. The transparency checkerboard is the wrapper's own CSS background, which the canvas composites over — there is no `Checkerboard` part in this package.
+Renders the triangle's color surface as a `<canvas>` inside a wrapper `<span>`, sampled from the root's color space and channel configuration, including the third channel when one is set. The transparency checkerboard is the wrapper's own CSS background, which the canvas composites over, there is no `Checkerboard` part in this package.
 
 Extends `HTMLAttributes<HTMLSpanElement>`.
 
@@ -206,7 +205,7 @@ Painting is skipped while a drag is in flight: a drag only moves the channels th
 
 The single combined handle, and the triangle's only focusable element. One thumb drives **every** axis: it renders `role="slider"`, takes `tabindex="0"` unless the root is disabled, and is positioned from the barycentric coordinates of the channel values.
 
-Because one handle serves two channels — or three, in barycentric mode — it announces all of them: `aria-label` names the channel set and `aria-valuetext` carries every formatted value. There is no separate thumb per axis. The thumb is only a focus target and an ARIA surface; every value change is owned by the root, whose `keydown` listener sees the events that bubble up from here.
+Because one handle serves two channels, or three in barycentric mode, it announces all of them: `aria-label` names the channel set and `aria-valuetext` carries every formatted value. There is no separate thumb per axis. The thumb is only a focus target and an ARIA surface; every value change is owned by the root, whose `keydown` listener sees the events that bubble up from here.
 
 Extends `HTMLAttributes<HTMLSpanElement>`.
 
@@ -243,14 +242,14 @@ and a `<length>`.
 
 ## Accessibility
 
-ColorTriangle exposes a single focusable thumb that drives both triangle axes — and the third channel too, in barycentric mode. Keyboard events are handled on the root, which sees them bubble up from the focused thumb.
+ColorTriangle exposes a single focusable thumb that drives both triangle axes, and the third channel too, in barycentric mode. Keyboard events are handled on the root, which sees them bubble up from the focused thumb.
 
 ### ARIA Labels
 
 | Attribute | Description |
 |-----------|-------------|
 | `role="slider"` | Applied to `ColorTriangle.Thumb`, with `aria-roledescription="Color thumb"`. |
-| `aria-label` | Defaults to the channel labels in order, e.g. `"Saturation, Brightness"` — three entries when `zChannel` is set. Pass your own `aria-label` on the thumb to override. |
+| `aria-label` | Defaults to the channel labels in order, e.g. `"Saturation, Brightness"`. Three entries when `zChannel` is set. Pass your own `aria-label` on the thumb to override. |
 | `aria-valuemin` / `aria-valuemax` | The first channel's range. |
 | `aria-valuenow` | The current first-channel value. Only one number can be carried here, so the `xChannel` axis owns it. |
 | `aria-valuetext` | Every active channel formatted, e.g. `"Saturation 80%, Brightness 50%"`. |

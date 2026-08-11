@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { computed } from "vue";
-import { colorSpaces } from "@urcolor/shared";
 import { Label } from "reka-ui";
 import {
   useColor,
@@ -10,8 +8,7 @@ import {
   ColorFieldDecrement,
 } from "@urcolor/vue";
 
-const { color } = useColor("hsl(210, 80%, 50%)");
-const channels = computed(() => colorSpaces["hsl"]?.channels ?? []);
+const { color, channels } = useColor("hsl(210, 80%, 50%)", "hsl");
 </script>
 
 <template>

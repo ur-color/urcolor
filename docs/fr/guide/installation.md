@@ -9,6 +9,7 @@
 
 | Paquet | Description |
 | --- | --- |
+| `urcolor` | Le moteur de couleur seul, sous un nom non scopé. Réexporte `@urcolor/core` |
 | `@urcolor/core` | Logique de couleur et utilitaires d'accessibilité |
 | `@urcolor/shared` | Comportement indépendant du framework, rendu WebGL et échantillonneurs de grille, partagés par toutes les liaisons |
 | `@urcolor/vue` | Composants et composables Vue 3 |
@@ -112,27 +113,33 @@ Chaque paquet de framework dépend de `@urcolor/core` et de `@urcolor/shared`, t
 
 ### Le cœur uniquement
 
-Si vous n'avez besoin que des utilitaires de couleur, sans liaison à un framework :
+Pour les utilitaires de couleur seuls, sans binding de framework, installez `urcolor`, le nom non scopé du même moteur :
 
 ::: code-group
 
 ```sh [bun]
-bun add @urcolor/core
+bun add urcolor
 ```
 
 ```sh [npm]
-npm install @urcolor/core
+npm install urcolor
 ```
 
 ```sh [pnpm]
-pnpm add @urcolor/core
+pnpm add urcolor
 ```
 
 ```sh [yarn]
-yarn add @urcolor/core
+yarn add urcolor
 ```
 
 :::
+
+```ts
+import { Color } from "urcolor";
+```
+
+`urcolor` ne contient aucun code propre : il réexporte `@urcolor/core` et en dépend avec la même plage de versions que les paquets de framework, vous obtenez donc une seule copie du moteur et une seule classe `Color`. Choisissez le nom que vous préférez : `@urcolor/core` est déjà là si vous avez installé un binding, et mélanger les deux noms dans un projet ne pose aucun problème.
 
 ### Paquets optionnels
 

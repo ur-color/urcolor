@@ -30,7 +30,7 @@ import ColorFieldHSL from './demo/ColorFieldHSL.tsx'
 </ColorField.Root>
 ```
 
-`ColorField.Swatch` takes its own `value` and reads nothing from the root's context, so it can sit anywhere in the tree — inside the root, or beside it.
+`ColorField.Swatch` takes its own `value` and reads nothing from the root's context, so it can sit anywhere in the tree, inside the root, or beside it.
 
 ## Examples
 
@@ -62,7 +62,7 @@ HSL channel inputs with stepper buttons. One root per channel, all fed the same 
 
 ### Alpha Channel
 
-`channel="alpha"` edits opacity. It is not a channel of any color space — the root special-cases it and presents it as a `0–100` percentage.
+`channel="alpha"` edits opacity. It is not a channel of any color space: the root special-cases it and presents it as a `0–100` percentage.
 
 ```tsx
 <ColorField.Root value={color} onValueChange={setColor} channel="alpha">
@@ -93,7 +93,7 @@ HSL channel inputs with stepper buttons. One root per channel, all fed the same 
 
 ## API Reference
 
-Every part is also exported unnamespaced — `ColorFieldRoot`, `ColorFieldInput`, `ColorFieldIncrement`, `ColorFieldDecrement`, `ColorFieldSwatch` — alongside the `ColorField.*` namespace. The root's context is readable with `useColorFieldContext()`.
+Every part is also exported unnamespaced, `ColorFieldRoot`, `ColorFieldInput`, `ColorFieldIncrement`, `ColorFieldDecrement`, `ColorFieldSwatch`, alongside the `ColorField.*` namespace. The root's context is readable with `useColorFieldContext()`.
 
 ### ColorField.Root
 
@@ -119,7 +119,7 @@ The root container. Owns the color, the field's own numeric and text state, and 
 | `children` | `React.ReactNode` | — | The field's parts. |
 
 ::: warning
-Neither `colorSpace` nor `channel` accepts `'hex'` as a color space — `SpaceId` has no such member. Hex editing is `format="hex"`.
+Neither `colorSpace` nor `channel` accepts `'hex'` as a color space: `SpaceId` has no such member. Hex editing is `format="hex"`.
 :::
 
 With neither `value` nor `defaultValue`, the root holds no color: the input renders empty, and edits have nothing to rebuild from, so nothing is emitted. Give it at least a `defaultValue`.
@@ -128,7 +128,7 @@ With neither `value` nor `defaultValue`, the root holds no color: the input rend
 
 The editable text surface. Renders an `<input type="text" role="spinbutton">` and owns the keyboard map, the blur/Enter commit, and the select-on-focus behaviour.
 
-It is a `spinbutton` rather than `type="number"` because the field renders suffixed text — `210°`, `50%`, `#ff8800` — that a numeric input would reject.
+It is a `spinbutton` rather than `type="number"` because the field renders suffixed text, `210°`, `50%`, `#ff8800`, that a numeric input would reject.
 
 Extends `ComponentPropsWithoutRef<"input">`; it declares no props of its own.
 
@@ -136,13 +136,13 @@ The part sets `value`, `disabled`, `readOnly`, `autoComplete="off"`, `autoCorrec
 
 ### ColorField.Increment
 
-Steps the value up by `step`. Renders a `<button type="button">` with `tabIndex={-1}` — the input owns the field's tab stop, so the steppers are pointer affordances only.
+Steps the value up by `step`. Renders a `<button type="button">` with `tabIndex={-1}`. The input owns the field's tab stop, so the steppers are pointer affordances only.
 
 Holding the button repeats: one step immediately, a `400`ms pause, then a step every `60`ms. The release listeners live on `window`, so a pointer that leaves the button before lifting still ends the hold.
 
 Extends `ComponentPropsWithoutRef<"button">`; it declares no props of its own.
 
-The button computes `disabled` as "the root is disabled or read-only, or the value already sits at `max`", and defaults `aria-label` to `"Increase"`. Both are written before your props are spread, so passing your own overrides the rendered attribute — though the internal pointer guard still refuses to step past `max`.
+The button computes `disabled` as "the root is disabled or read-only, or the value already sits at `max`", and defaults `aria-label` to `"Increase"`. Both are written before your props are spread, so passing your own overrides the rendered attribute, though the internal pointer guard still refuses to step past `max`.
 
 ### ColorField.Decrement
 
@@ -185,7 +185,7 @@ ColorField exposes the input as the single tab stop. The steppers carry `tabInde
 |-----------|-------------|
 | `role="spinbutton"` | Applied to `ColorField.Input`. |
 | `aria-valuenow` | The current value in display units. Absent while the field is empty. |
-| `aria-label` | Not generated for the input — supply your own. Defaults to `"Increase"` / `"Decrease"` on the steppers. |
+| `aria-label` | Not generated for the input. Supply your own. Defaults to `"Increase"` / `"Decrease"` on the steppers. |
 | `role="img"` | Applied to `ColorField.Swatch`. |
 | `disabled` / `readOnly` | Native properties, mirrored onto the input from the root. |
 

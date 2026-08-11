@@ -26,7 +26,7 @@ An annular component whose angle maps to a single color channel.
 </ColorRing.Root>
 ```
 
-`useColor` returns an object whose `color`, `hex` and `alpha` members are **getters**, not refs. Keep the object rather than destructuring it, and bind with Svelte 5's function form — `bind:value={() => colorState.color, colorState.setColor}` — which pairs the getter with the setter.
+`useColor` returns an object whose `color`, `hex` and `alpha` members are **getters**, not refs. Keep the object rather than destructuring it, and bind with Svelte 5's function form, `bind:value={() => colorState.color, colorState.setColor}`, which pairs the getter with the setter.
 
 The root must declare `container-type: inline-size` (or `size`): the thumb orbits in `cqmin` units, so it tracks the ring's size without measuring it.
 
@@ -119,7 +119,7 @@ The same ring driving saturation instead. The channel's range and step come from
 
 ### Alpha in the gradient
 
-`channelOverrides` defaults to `{ alpha: 1 }`, which paints the ramp fully opaque. Pass `false` to let the current color's alpha through — the checkerboard the gradient already paints is what makes it readable.
+`channelOverrides` defaults to `{ alpha: 1 }`, which paints the ramp fully opaque. Pass `false` to let the current color's alpha through. The checkerboard the gradient already paints is what makes it readable.
 
 ```svelte
 <ColorRing.Root
@@ -157,7 +157,7 @@ Every part accepts a `child` snippet that replaces the element it would have ren
 
 ## API Reference
 
-Every part is also exported unnamespaced — `ColorRingRoot`, `ColorRingTrack`, `ColorRingGradient`, `ColorRingThumb` — alongside the `ColorRing.*` namespace. The root's context is readable with `colorRingContext.get()`.
+Every part is also exported unnamespaced, `ColorRingRoot`, `ColorRingTrack`, `ColorRingGradient`, `ColorRingThumb`, alongside the `ColorRing.*` namespace. The root's context is readable with `colorRingContext.get()`.
 
 ### ColorRing.Root
 
@@ -183,7 +183,7 @@ Extends `HTMLAttributes<HTMLDivElement>`.
 `channel`, `startAngle` and `innerRadius` are spelled identically in React, Vue, Svelte and Angular. Unlike `ColorWheel`, `ColorRing` has no per-framework prop-name divergence.
 :::
 
-Pointer input is only accepted inside the annulus — a press in the hole at the centre, or outside the outer edge, is ignored. The hole's size follows `innerRadius`.
+Pointer input is only accepted inside the annulus. A press in the hole at the centre, or outside the outer edge, is ignored. The hole's size follows `innerRadius`.
 
 ### ColorRing.Track
 
@@ -198,7 +198,7 @@ Extends `HTMLAttributes<HTMLDivElement>`.
 
 ### ColorRing.Gradient
 
-Paints the ring's conic color ramp, sampled from the root's color space and channel. Renders a `<span>` wrapper with a `<canvas>` inside; the wrapper carries the annulus mask, which applies to it and to every descendant, so one rasterisation cuts both the hole and the corners. The transparency checkerboard is this element's CSS background, which the canvas bitmap composites over — there is no `Checkerboard` part in this package.
+Paints the ring's conic color ramp, sampled from the root's color space and channel. Renders a `<span>` wrapper with a `<canvas>` inside; the wrapper carries the annulus mask, which applies to it and to every descendant, so one rasterisation cuts both the hole and the corners. The transparency checkerboard is this element's CSS background, which the canvas bitmap composites over. There is no `Checkerboard` part in this package.
 
 Extends `HTMLAttributes<HTMLSpanElement>`.
 
@@ -212,7 +212,7 @@ Extends `HTMLAttributes<HTMLSpanElement>`.
 
 The handle, and the ring's only focusable element. It renders `role="slider"`, takes `tabindex="0"` unless the root is disabled, and orbits in `cqmin` units at the middle of the annulus, rotated to the channel's current position.
 
-The thumb is only a focus target and an ARIA surface; every value change is owned by the root, whose `keydown` listener sees the events that bubble up from here. There is no `aria-orientation` — a ring is neither horizontal nor vertical.
+The thumb is only a focus target and an ARIA surface; every value change is owned by the root, whose `keydown` listener sees the events that bubble up from here. There is no `aria-orientation`. A ring is neither horizontal nor vertical.
 
 Extends `HTMLAttributes<HTMLSpanElement>`.
 

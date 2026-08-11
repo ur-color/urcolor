@@ -31,7 +31,7 @@ import ColorFieldHSL from './demo/ColorFieldHSL.vue'
 </template>
 ```
 
-`ColorFieldSwatch` takes its own `modelValue` and reads nothing from the root's context, so it can sit anywhere in the tree — inside the root, or beside it.
+`ColorFieldSwatch` takes its own `modelValue` and reads nothing from the root's context, so it can sit anywhere in the tree, inside the root, or beside it.
 
 ## Examples
 
@@ -63,7 +63,7 @@ HSL channel inputs with stepper buttons. One root per channel, all bound to the 
 
 ### Alpha Channel
 
-`channel="alpha"` edits opacity. It is not a channel of any color space — the root special-cases it and presents it as a `0–100` percentage.
+`channel="alpha"` edits opacity. It is not a channel of any color space: the root special-cases it and presents it as a `0–100` percentage.
 
 ```vue
 <template>
@@ -115,7 +115,7 @@ The root container. Owns the color, the field's own numeric and text state, and 
 | `readonly` | `boolean` | `false` | Shows the value but refuses edits. |
 | `placeholder` | `string` | — | Placeholder text shown on the input when it has no value. |
 | `disableWheelChange` | `boolean` | `false` | Disables stepping the value with the mouse wheel. |
-| `locale` | `string` | — | Currently ignored — accepted but not read anywhere in the parse/format path. |
+| `locale` | `string` | — | Currently ignored, accepted but not read anywhere in the parse/format path. |
 | `name` | `string` | — | Hidden input name for form submission. |
 | `required` | `boolean` | `false` | Marks the hidden input as required for form submission. |
 | `as` | `string` | `'div'` | The element or component to render as. |
@@ -129,7 +129,7 @@ The root container. Owns the color, the field's own numeric and text state, and 
 | `changeEnd` | `Color` | Emitted when the value settles: blur, Enter, arrow keys, wheel, or a stepper press. |
 
 ::: warning
-Neither `color-space` nor `channel` accepts `'hex'` as a color space — `SpaceId` has no such member. Hex editing is `format="hex"`.
+Neither `color-space` nor `channel` accepts `'hex'` as a color space: `SpaceId` has no such member. Hex editing is `format="hex"`.
 :::
 
 ::: tip
@@ -140,18 +140,18 @@ Vue is the only package whose field steps on the mouse wheel, and the only one t
 
 The editable text surface. Renders an `<input type="text" role="spinbutton">` and owns the keyboard map, the wheel handler, the blur/Enter commit, and the select-on-focus behaviour.
 
-It is a `spinbutton` rather than `type="number"` because the field renders suffixed text — `210°`, `50%`, `#ff8800` — that a numeric input would reject. Outside hex mode a `beforeinput` guard rejects any keystroke that would leave the text unparseable as a number.
+It is a `spinbutton` rather than `type="number"` because the field renders suffixed text, `210°`, `50%`, `#ff8800`, that a numeric input would reject. Outside hex mode a `beforeinput` guard rejects any keystroke that would leave the text unparseable as a number.
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
 | `as` | `string` | `'input'` | The element or component to render as. |
 | `asChild` | `boolean` | `false` | Merge props onto the single child instead of rendering an element. |
 
-The part sets `value`, `placeholder`, `disabled`, `readonly`, `autocomplete="off"`, `autocorrect="off"`, `spellcheck="false"` and `inputmode` (`'text'` in hex mode, `'numeric'` otherwise) from the root. Its `aria-label` falls back to the resolved channel's label — `"Hue"`, `"Saturation"`, `"Alpha"` — so pass your own only to override.
+The part sets `value`, `placeholder`, `disabled`, `readonly`, `autocomplete="off"`, `autocorrect="off"`, `spellcheck="false"` and `inputmode` (`'text'` in hex mode, `'numeric'` otherwise) from the root. Its `aria-label` falls back to the resolved channel's label, `"Hue"`, `"Saturation"`, `"Alpha"`, so pass your own only to override.
 
 ### ColorFieldIncrement
 
-Steps the value up by `step`. Renders a `<button>` with `tabindex="-1"` — the input owns the field's tab stop, so the steppers are pointer affordances only.
+Steps the value up by `step`. Renders a `<button>` with `tabindex="-1"`. The input owns the field's tab stop, so the steppers are pointer affordances only.
 
 Holding the button repeats: one step immediately, a `400`ms pause, then a step every `60`ms. The release listeners live on `window`, so a pointer that leaves the button before lifting still ends the hold.
 
@@ -185,7 +185,7 @@ A read-only preview of a color. Delegates to `ColorSwatchRoot` with `as="span"`,
 | `as` | `string` | `'span'` | The element or component to render as. |
 | `asChild` | `boolean` | `false` | Merge props onto the single child instead of rendering an element. |
 
-`ColorFieldSwatch` re-declares only the five props above. Any other `ColorSwatchRoot` prop — `label`, which sets the accessible name and otherwise falls back to the resolved color string, then `"transparent"` — reaches `ColorSwatchRoot` as a fallthrough attribute rather than a declared prop.
+`ColorFieldSwatch` re-declares only the five props above. Any other `ColorSwatchRoot` prop, `label`, which sets the accessible name and otherwise falls back to the resolved color string, then `"transparent"`, reaches `ColorSwatchRoot` as a fallthrough attribute rather than a declared prop.
 
 The default slot is forwarded to `ColorSwatchRoot`, which exposes `{ color, alpha }` as slot props. The swatch publishes `--urcolor-swatch-color`, `--urcolor-swatch-color-opaque`, `--urcolor-swatch-alpha` and `--urcolor-swatch-checkerboard` as custom properties for callers styling their own overlays.
 
@@ -209,7 +209,7 @@ ColorField exposes the input as the single tab stop. The steppers carry `tabinde
 |-----------|-------------|
 | `role="group"` | Applied to `ColorFieldRoot`. |
 | `role="spinbutton"` | Applied to `ColorFieldInput`. |
-| `aria-label` | On the input, the resolved channel's label — `"Hue"`, `"Saturation"`, `"Alpha"`. `"Increase"` / `"Decrease"` on the steppers. |
+| `aria-label` | On the input, the resolved channel's label, `"Hue"`, `"Saturation"`, `"Alpha"`. `"Increase"` / `"Decrease"` on the steppers. |
 | `aria-valuemin` / `aria-valuemax` | The field's effective range, in display units. |
 | `aria-valuenow` | The current value in display units. Absent while the field is empty. |
 | `aria-valuetext` | The formatted text the input shows, e.g. `"210°"`. |

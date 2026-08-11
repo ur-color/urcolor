@@ -104,7 +104,7 @@ between them is meaningful, so the component renormalizes them onto the simplex
 (`u + v + w === 1`) on every write. An `srgb` color sitting at `r/g/b 50 / 50 / 180`
 is rewritten to `46 / 45 / 163` the first time you press Arrow Right (which steps
 red by one and, as a side effect of the renormalization, pulls all three channels
-onto the simplex). This is inherent to the geometry, not a bug — after the first
+onto the simplex). This is inherent to the geometry, not a bug. After the first
 write the values stay on the simplex and step smoothly.
 :::
 
@@ -124,8 +124,7 @@ The root container that manages triangle state and color channel binding. Clips 
 | `xChannel` | `string` | Auto | The channel mapped to the first vertex. Defaults to the color space's second channel. |
 | `yChannel` | `string` | Auto | The channel mapped to the second vertex. Defaults to the color space's third channel. |
 | `zChannel` | `string` | — | The channel mapped to the third vertex. Setting it switches the triangle into barycentric three-channel mode. |
-| `rotation` | `number` | `0` | Rotation of the triangle, in degrees. |
-| `orientation` | `'vertical' \| 'horizontal'` | `'vertical'` | Published on the root context for descendants. The geometry itself is driven by `rotation` and `inverted`. |
+| `orientation` | `'vertical' \| 'horizontal'` | `'vertical'` | Published on the root context for descendants. The geometry itself is driven by `inverted` alone. |
 | `inverted` | `boolean` | `false` | Swap the second and third vertices, mirroring the triangle. |
 | `thumbAlignment` | `'contain' \| 'overflow'` | `'overflow'` | Whether the thumb is kept inside the triangle's edges. |
 | `disabled` | `boolean` | `false` | Disables interaction. |
@@ -151,7 +150,7 @@ When `name` is set on a form control, the root also renders a visually hidden `<
 
 ### ColorTriangleGradient
 
-Renders the triangle's color surface as a `<canvas>` inside a wrapper element, sampled from the root's color space and channel configuration — including the third channel when one is set. A barycentric sweep has no CSS equivalent, so unlike the other gradients this always paints into a canvas and does not appear in server-rendered HTML. The transparency checkerboard is the wrapper's own CSS background, which the canvas composites over, so no separate part is needed for it.
+Renders the triangle's color surface as a `<canvas>` inside a wrapper element, sampled from the root's color space and channel configuration, including the third channel when one is set. A barycentric sweep has no CSS equivalent, so unlike the other gradients this always paints into a canvas and does not appear in server-rendered HTML. The transparency checkerboard is the wrapper's own CSS background, which the canvas composites over, so no separate part is needed for it.
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
@@ -174,7 +173,7 @@ Renders a checkerboard pattern behind the gradient to visualize alpha transparen
 
 The single combined handle, and the triangle's only focusable element. One thumb drives **every** axis: it renders `role="slider"`, takes `tabindex="0"` unless the root is disabled, and is positioned from the barycentric coordinates of the channel values.
 
-Because one handle serves two channels — or three, in barycentric mode — it announces all of them: `aria-label` names the channel set and `aria-valuetext` carries every formatted value. There is no separate thumb per axis. The thumb is only a focus target and an ARIA surface; every value change is owned by the root, whose `keydown` handler sees the events that bubble up from here.
+Because one handle serves two channels, or three in barycentric mode, it announces all of them: `aria-label` names the channel set and `aria-valuetext` carries every formatted value. There is no separate thumb per axis. The thumb is only a focus target and an ARIA surface; every value change is owned by the root, whose `keydown` handler sees the events that bubble up from here.
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
@@ -208,14 +207,14 @@ and a `<length>`.
 
 ## Accessibility
 
-ColorTriangle exposes a single focusable thumb that drives both triangle axes — and the third channel too, in barycentric mode. Keyboard events are handled on the root, which sees them bubble up from the focused thumb.
+ColorTriangle exposes a single focusable thumb that drives both triangle axes, and the third channel too, in barycentric mode. Keyboard events are handled on the root, which sees them bubble up from the focused thumb.
 
 ### ARIA Labels
 
 | Attribute | Description |
 |-----------|-------------|
 | `role="slider"` | Applied to `ColorTriangleThumb`, with `aria-roledescription="Color thumb"`. |
-| `aria-label` | Defaults to the channel labels in order, e.g. `"Saturation, Brightness"` — three entries when `zChannel` is set. Pass your own `aria-label` on the thumb to override. |
+| `aria-label` | Defaults to the channel labels in order, e.g. `"Saturation, Brightness"`. Three entries when `zChannel` is set. Pass your own `aria-label` on the thumb to override. |
 | `aria-valuemin` / `aria-valuemax` | The X channel's range. |
 | `aria-valuenow` | The current X channel value. Only one number can be carried here, so the `xChannel` axis owns it. |
 | `aria-valuetext` | Every active channel formatted, e.g. `"Saturation 80%, Brightness 50%"`. |
@@ -229,18 +228,18 @@ Arrow keys map to the X and Y axes, matching `ColorArea`.
 |-----|--------|
 | Arrow Left / Arrow Right | Decrease / increase the X channel by one step |
 | Arrow Down / Arrow Up | Decrease / increase the Y channel by one step |
-| Page Down / Page Up | Decrease / increase the Z channel by one step — three-channel mode only |
+| Page Down / Page Up | Decrease / increase the Z channel by one step. Three-channel mode only |
 | Shift + Arrow, Shift + Page | Move by 10 steps |
 | Home | Jump to the X channel's minimum |
 | End | Jump to the X channel's maximum |
 
 In two-channel mode the reachable region is the half-simplex, so a step that would
 push the point past the hypotenuse gives way on the axis you did not drive. In
-three-channel mode every write is renormalized onto the simplex — see
+three-channel mode every write is renormalized onto the simplex, see
 [Three-Channel Mode](#three-channel-mode) for what that means for the first keypress.
 
 ::: warning Vue's page keys differ
 Vue is the only package where `Page Up` / `Page Down` drive the Z channel. React, Svelte
-and Angular have no third-axis key at all — the Z value falls out of the barycentric
+and Angular have no third-axis key at all. The Z value falls out of the barycentric
 renormalization of the other two.
 :::

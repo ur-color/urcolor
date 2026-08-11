@@ -59,7 +59,7 @@ modes, and the ordinary `ColorSwatch` is the item.
 
 Selection is keyed by the **serialized color string**, never by `Color` identity.
 `Color` is immutable, so two equal colors are still two different objects and
-reference equality would never match — `value`, `isSelected()` and `toggle()`
+reference equality would never match, `value`, `isSelected()` and `toggle()`
 therefore all speak in `string`.
 
 ## Anatomy
@@ -72,8 +72,8 @@ therefore all speak in `string`.
 </div>
 ```
 
-Both selectors are element-agnostic — `[urcColorSwatchGroupRoot]` and
-`[urcColorSwatch]` — but the swatch belongs on a `<button>` here. There is no
+Both selectors are element-agnostic, `[urcColorSwatchGroupRoot]` and
+`[urcColorSwatch]`, but the swatch belongs on a `<button>` here. There is no
 `Item`, `ItemSwatch` or `Indicator` directive: the swatch *is* the item. The root
 never renders the swatches; it finds them in the DOM by shape, matching
 `button, [role='button'], [tabindex]`, and skipping anything nested inside
@@ -104,7 +104,7 @@ its own pressed state, the handler is what actually writes the selection.
 
 ### Multiple selection
 
-`type="multiple"` alone does not make a multi-select picker work — the handler
+`type="multiple"` alone does not make a multi-select picker work: the handler
 has to add and remove too.
 
 ```html
@@ -158,7 +158,7 @@ against the selection state.
 
 ### Disabled and direction
 
-`disabled` and `dir` are **native attributes**, not inputs — set them on the
+`disabled` and `dir` are **native attributes**, not inputs, set them on the
 element and the directive picks them up. `dir` is resolved through
 `getComputedStyle`, so an inherited `<html dir="rtl">` counts too.
 
@@ -168,14 +168,14 @@ element and the directive picks them up. `dir` is resolved through
 </div>
 ```
 
-The group's `disabled` is not forwarded to the swatches — disable those
+The group's `disabled` is not forwarded to the swatches, disable those
 individually, which is what removes their `tabindex`.
 
 ### Listening to changes
 
 `(valueChange)` is the output half of `[(value)]` and hands you the whole
 selection array. When you listen to it explicitly, bind the input one-way and
-write the signal yourself. There is no commit event — a selection has no drag to
+write the signal yourself. There is no commit event. A selection has no drag to
 release.
 
 ```html
@@ -192,7 +192,7 @@ release.
 ### Template reference
 
 Every directive sets `exportAs`, so the group's state is readable from the
-template — and `isSelected` / `toggle` are callable from it.
+template. And `isSelected` / `toggle` are callable from it.
 
 ```html
 <div urcColorSwatchGroupRoot #group="urcColorSwatchGroupRoot" [(value)]="selected">
@@ -227,7 +227,7 @@ straight to a signal form field.
 
 ## API Reference
 
-`COLOR_SWATCH_GROUP_DIRECTIVES` is the array of every part below — which is just
+`COLOR_SWATCH_GROUP_DIRECTIVES` is the array of every part below. Which is just
 the root. Items come from `COLOR_SWATCH_DIRECTIVES`.
 
 ### ColorSwatchGroupRoot
@@ -251,8 +251,8 @@ static `role` themselves.
 `ColorSwatchGroupOrientation` is `'horizontal' | 'vertical'`.
 
 ::: warning `disabled` and `dir` are not inputs
-Both are native DOM attributes. The static attributes are read at construction —
-which works under SSR — and a `MutationObserver` keeps them live afterwards. The
+Both are native DOM attributes. The static attributes are read at construction,
+which works under SSR. And a `MutationObserver` keeps them live afterwards. The
 readable signal is named **`isDisabled`**, not `disabled`, because `FormUiControl`
 reserves the member name `disabled` for its own `InputSignal<boolean>`. `dir` is
 resolved with `getComputedStyle`, since direction inherits from any ancestor and
@@ -282,8 +282,8 @@ And its methods:
 
 `ColorSwatchGroupItemHandle` exposes `index`, `tabIndex`, `active`, `activate()`
 and `dispose()`, each recomputed live from registration order. Nothing in this
-package registers today — a `ColorSwatch` is driven by the bubbling listeners on
-the root — but your own item directive can inject the root and take a seat to get
+package registers today. A `ColorSwatch` is driven by the bubbling listeners on
+the root. But your own item directive can inject the root and take a seat to get
 its index and tab stop.
 
 ### ColorSwatch
@@ -306,7 +306,7 @@ full API.
 `disabled` is the native attribute here too; the readable signal is `isDisabled`.
 `interactive` and `isPressed` are the other two readable signals, and
 `togglePressed()` is the public method. There is no `Checkerboard` directive in
-this package — the swatch paints the transparency grid itself, under the color.
+this package. The swatch paints the transparency grid itself, under the color.
 
 ### CSS Variables
 
@@ -344,7 +344,7 @@ so a rule anywhere above the element wins:
 | `data-disabled` | Root, ColorSwatch | That element carries the native `disabled` attribute. |
 | `data-pressed` | ColorSwatch | A toggle swatch is selected. |
 
-There is no `data-state` and no `data-highlighted` here — those are the Vue
+There is no `data-state` and no `data-highlighted` here. Those are the Vue
 listbox's attributes. Style against `data-pressed` instead.
 
 ## Accessibility
@@ -363,11 +363,11 @@ group and stays usable standalone.
 | `role="button"` | Set on an interactive swatch that is not already a native `<button>`. |
 | `aria-pressed` | Set on a toggle swatch, reflecting its pressed state. |
 | `aria-disabled` | Set on a swatch carrying the native `disabled` attribute. |
-| `aria-label` | **Not generated.** Set your own on each swatch — a colored button has no text content to name it. |
+| `aria-label` | **Not generated.** Set your own on each swatch. A colored button has no text content to name it. |
 
 ::: warning Every toggle swatch is its own tab stop
-The group computes a roving tab stop — `activeIndex`, `tabIndexFor(index)` and
-`register()` are all public — but `ColorSwatch` does not consume it. A toggle
+The group computes a roving tab stop, `activeIndex`, `tabIndexFor(index)` and
+`register()` are all public. But `ColorSwatch` does not consume it. A toggle
 swatch sets `tabindex="0"`, and none at all when disabled, so out of the box Tab
 steps through every swatch and the arrow keys move focus on top of that. For a
 true single tab stop, inject `ColorSwatchGroupRoot` from your own item directive
@@ -387,5 +387,5 @@ swatch also wins over the directive's, but it will not move.
 
 Arrow navigation wraps at the ends while `loopFocus` is true, and clamps when it
 is false. In `rtl`, only the horizontal arrows are mirrored. `Home` and `End`
-work in both orientations. There is no typeahead and no `Ctrl/Cmd + A` — those
+work in both orientations. There is no typeahead and no `Ctrl/Cmd + A`, those
 belong to Vue's listbox-based picker.

@@ -36,9 +36,8 @@ export default function ColorPickerTriangleInRingGuide() {
         colorSpace="hsv"
         xChannel="s"
         yChannel="v"
-        rotation={90}
         inverted
-        className="absolute inset-[8%]"
+        className="absolute inset-[8%] rotate-90"
       >
         <ColorTriangle.Gradient className="absolute inset-0 block" />
         <ColorTriangle.Thumb

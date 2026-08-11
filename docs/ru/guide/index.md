@@ -4,6 +4,25 @@ UrColor — универсальная headless-библиотека компо�
 
 ## Пакеты
 
+```mermaid
+flowchart TD
+  core["@urcolor/core<br/>разбор, конвертация, смешивание, гамут"]
+  shared["@urcolor/shared<br/>перетаскивание, клавиши, каналы, WebGL"]
+  relative["@urcolor/relative<br/>относительный синтаксис CSS Color 5"]
+  i18n["@urcolor/i18n<br/>названия цветов и каналов"]
+
+  core --> shared
+  core -.-> relative
+  core -.-> i18n
+
+  shared --> vue["@urcolor/vue"]
+  shared --> react["@urcolor/react"]
+  shared --> svelte["@urcolor/svelte"]
+  shared --> angular["@urcolor/angular"]
+```
+
+Сплошные стрелки — обязательные зависимости, пунктирные — подключаемые.
+
 - `@urcolor/core` — библиотека CSS Color 4 без зависимостей (разбор, конвертация, сериализация, гамут-маппинг, интерполяция).
 - `@urcolor/shared` — слой поведения, не зависящий от фреймворка: перетаскивание, раскладки клавиш, модели каналов, WebGL-генераторы градиентов на canvas для цветовых областей и слайдеров, а также data-атрибуты, общие для всех биндингов.
 - `@urcolor/relative` — подключаемый синтаксис относительных цветов CSS Color 5 (`rgb(from red r g b)`) для `@urcolor/core`. См. [Относительные цвета](/guide/relative-colors).

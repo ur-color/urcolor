@@ -107,7 +107,7 @@ The default slot receives the current color as `modelValue`.
 
 ### ColorWheelGradient
 
-Renders the wheel's polar gradient, sampled from the root's color space and channel configuration. A hue × saturation wheel in `hsv` or `hsl` has an exact CSS equivalent — a `conic-gradient` under a `radial-gradient` — so those render no `<canvas>` at all. Any other space or channel pair keeps the canvas. The transparency checkerboard is this element's own CSS background, so no separate part is needed for it.
+Renders the wheel's polar gradient, sampled from the root's color space and channel configuration. A hue × saturation wheel in `hsv` or `hsl` has an exact CSS equivalent, a `conic-gradient` under a `radial-gradient`, so those render no `<canvas>` at all. Any other space or channel pair keeps the canvas. The transparency checkerboard is this element's own CSS background, so no separate part is needed for it.
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
@@ -133,7 +133,7 @@ Renders a checkerboard pattern behind the gradient to visualize alpha transparen
 
 The single combined handle, and the wheel's only focusable element. One thumb drives **both** axes: it renders `role="slider"`, takes `tabindex="0"` unless the root is disabled, and is positioned from the angle and radius channel values in polar coordinates.
 
-Because one handle serves two channels, it announces both — `aria-label` names the channel pair and `aria-valuetext` carries both formatted values. There is no separate thumb per axis.
+Because one handle serves two channels, it announces both: `aria-label` names the channel pair and `aria-valuetext` carries both formatted values. There is no separate thumb per axis.
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|

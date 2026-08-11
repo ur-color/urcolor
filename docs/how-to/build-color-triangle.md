@@ -1,6 +1,6 @@
 # How to Build a Color Triangle
 
-Let's build a triangular color picker step by step.
+A color triangle maps two channels onto a triangular gradient, or three in barycentric mode.
 
 <script setup>
 import ColorTriangleGuide from './demo/vue/ColorTriangleGuide.vue'
@@ -24,9 +24,17 @@ Here's what we'll end up with:
 
 </details>
 
+The parts, and how they nest:
+
+```mermaid
+flowchart TD
+  R["ColorTriangle Root<br/>xChannel, yChannel, zChannel"] --> G["Gradient<br/>paints the triangle"]
+  R --> T["Thumb<br/>one handle, both axes"]
+```
+
 ## Step 1: Set up state
 
-Start by importing the color model and creating color state.
+Import the color model and create the color state.
 
 ::: code-group
 
@@ -69,11 +77,11 @@ export class MyTriangle {
 
 :::
 
-`useColor()` creates color state from any CSS color string. Vue returns a `{ color }` shallow ref; React returns `{ color, setColor }`; Svelte returns a rune-backed object whose `color`, `hex` and `alpha` are **getters** — keep the object (`colorState.color`) rather than destructuring it, or you lose reactivity. Angular has no hook: a plain `signal<Color>()` is the state, and `[(value)]` binds to it directly. (`createColorStore()` from `@urcolor/angular` is available too when you also want `hex` / `alpha` projections.)
+`useColor()` creates color state from any CSS color string. Vue returns a `{ color }` shallow ref and React returns `{ color, setColor }`. Svelte returns a rune-backed object whose `color`, `hex` and `alpha` are getters, so keep the object and read `colorState.color` rather than destructuring it, or reactivity is lost. Angular has no hook: a plain `signal<Color>()` is the state, and `[(value)]` binds to it directly. `createColorStore()` from `@urcolor/angular` is there too, for `hex` and `alpha` projections.
 
 ## Step 2: Add the root
 
-The root manages all the state and interactions. Tell it which color space and channels to map to the triangle axes.
+The root owns the state and the interactions. Tell it which color space to work in and which channels map to the triangle's axes.
 
 ::: code-group
 
@@ -164,17 +172,17 @@ export class MyTriangle {
 
 :::
 
-Vue's `v-model` and Angular's `[(value)]` are true two-way bindings. React is one-way plus `onValueChange`. Svelte's `value` is `$bindable`, but `useColor` exposes getters, so bind it with Svelte 5's function form — `bind:value={() => colorState.color, colorState.setColor}` — which is exactly `v-model` for a getter/setter pair.
+Vue's `v-model` and Angular's `[(value)]` are true two-way bindings. React is one-way plus `onValueChange`. Svelte's `value` is `$bindable`, but `useColor` exposes getters, so bind it with Svelte 5's function form, `bind:value={() => colorState.color, colorState.setColor}`, which is `v-model` for a getter/setter pair.
 
-Angular ships every part of a family as a `COLOR_*_DIRECTIVES` array, so one entry in `imports` brings in the whole set.
+Angular ships each family as a `COLOR_*_DIRECTIVES` array, so one entry in `imports` brings in the whole set.
 
-- `color-space` / `colorSpace` — the color space to work in (`hsv`, `hsl`, `srgb`, etc.)
-- `x-channel` / `xChannel` — the channel mapped to the horizontal axis
-- `y-channel` / `yChannel` — the channel mapped to the vertical axis
+- `color-space` / `colorSpace`: the color space to work in (`hsv`, `hsl`, `srgb`, etc.)
+- `x-channel` / `xChannel`: the channel mapped to the horizontal axis
+- `y-channel` / `yChannel`: the channel mapped to the vertical axis
 
 ## Step 3: Add the gradient
 
-The gradient renders the 2D gradient inside the triangular shape. In Angular the gradient's selector is `canvas[urcColorTriangleGradient]`, so it goes on a `<canvas>` element you own; the other three render their own canvas for you.
+The gradient paints the plane inside the triangle. In Angular the gradient's selector is `canvas[urcColorTriangleGradient]`, so it goes on a `<canvas>` element you own; the other three render their own canvas for you.
 
 ::: code-group
 
@@ -272,7 +280,7 @@ export class MyTriangle {
 
 ## Step 4: Add the thumb
 
-The thumb is the draggable handle. It's positioned automatically within the triangle.
+The thumb is the draggable handle. The component positions it inside the triangle.
 
 ::: code-group
 
@@ -406,62 +414,64 @@ export class MyTriangle {
 :::
 
 ::: tip
-All components are completely unstyled — the classes above are just an example using Tailwind CSS. Use any styling approach you prefer.
+The components ship unstyled. The classes above are one example, written with Tailwind CSS; any styling approach works.
 :::
 
 ## Rotation
 
-Use the `rotation` prop to rotate the triangle (in degrees):
+Rotate the root with CSS. The geometry is fixed, and the root maps pointer
+positions back through whatever transform it carries, so dragging keeps
+following the corner it points at:
 
 ::: code-group
 
-```vue{5} [Vue]
+```vue{6} [Vue]
 <template>
   <ColorTriangleRoot
     v-model="color"
     color-space="hsv"
-    :rotation="180"
     x-channel="s"
     y-channel="v"
+    style="transform: rotate(180deg)"
   >
     <!-- ... -->
   </ColorTriangleRoot>
 </template>
 ```
 
-```tsx{5} [React]
+```tsx{6} [React]
 <ColorTriangle.Root
   value={color}
   onValueChange={setColor}
   colorSpace="hsv"
-  rotation={180}
   xChannel="s"
   yChannel="v"
+  style={{ transform: "rotate(180deg)" }}
 >
   {/* ... */}
 </ColorTriangle.Root>
 ```
 
-```svelte{4} [Svelte]
+```svelte{5} [Svelte]
 <ColorTriangle.Root
   bind:value={() => colorState.color, colorState.setColor}
   colorSpace="hsv"
-  rotation={180}
   xChannel="s"
   yChannel="v"
+  style="transform: rotate(180deg)"
 >
   <!-- ... -->
 </ColorTriangle.Root>
 ```
 
-```html{5} [Angular]
+```html{6} [Angular]
 <div
   urcColorTriangleRoot
   [(value)]="color"
   colorSpace="hsv"
-  [rotation]="180"
   xChannel="s"
   yChannel="v"
+  style="transform: rotate(180deg)"
 >
   <!-- ... -->
 </div>
@@ -469,9 +479,13 @@ Use the `rotation` prop to rotate the triangle (in degrees):
 
 :::
 
+Any transform works, not only rotation: scale, skew and their combinations are
+all undone before a pointer position is read. A transform on an *ancestor* is
+not, so keep it on the root itself.
+
 ## Three-channel mode
 
-Add a Z channel to enable barycentric three-channel mode. This maps all three channels to the triangle's vertices — useful for RGB color mixing:
+A Z channel turns on barycentric three-channel mode, mapping all three channels to the triangle's vertices. It suits RGB mixing:
 
 ::: code-group
 
@@ -530,8 +544,8 @@ Add a Z channel to enable barycentric three-channel mode. This maps all three ch
 :::
 
 ::: info The first keypress "jumps"
-In three-channel mode the values are barycentric coordinates — only the ratio
-between them is meaningful — so every write is renormalized back onto the simplex.
+In three-channel mode the values are barycentric coordinates, where only the ratio
+between them means anything, so every write is renormalized back onto the simplex.
 An `srgb` color at `r/g/b 50 / 50 / 180` becomes `46 / 45 / 163` the first time you
 press Arrow Right (which steps red by one and, as a side effect of the
 renormalization, redistributes all three channels onto the simplex). That is
@@ -539,7 +553,7 @@ inherent to the geometry, not a bug; from then on the values move smoothly.
 :::
 
 Keyboard control follows the same axes as the color area: Arrow Left/Right step X,
-Arrow Up/Down step Y, and — in three-channel mode only — Page Up/Page Down step Z.
+Arrow Up/Down step Y, and in three-channel mode only, Page Up/Page Down step Z.
 Hold Shift for ten steps at a time.
 
 ## Listening to changes

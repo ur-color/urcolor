@@ -18,7 +18,7 @@ import { Icon } from "@iconify/vue";
 const props = defineProps<{
   color: Color;
   colorSpace: SpaceId;
-  channels: { key: string; label: string }[];
+  channels: readonly { key: string; label: string }[];
   areaOverrides: Record<string, number>;
   sliderOverrides: Record<string, Record<string, number>>;
   alphaSliderOverrides: Record<string, number>;

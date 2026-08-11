@@ -121,7 +121,7 @@ With `[colors]` omitted, the gradient samples the saturation axis from the curre
 
 ### Commit and disabled
 
-`disabled` is the **native attribute**, not an input — set it on the element and the root picks it up. `(valueCommit)` fires once at the end of an interaction, never mid-drag.
+`disabled` is the **native attribute**, not an input: set it on the element and the root picks it up. `(valueCommit)` fires once at the end of an interaction, never mid-drag.
 
 ```html
 <div urcColorSliderRoot [(value)]="color" (valueCommit)="onCommit($event)" disabled>
@@ -162,7 +162,7 @@ Every directive sets `exportAs`, so the root's state is readable from the templa
 
 ## API Reference
 
-`COLOR_SLIDER_DIRECTIVES` is the array of every part below. `COLOR_SLIDER_DEFAULT_COLOR` is the `Color` a root falls back to when `[(value)]` is never bound — `hsl(210, 80%, 50%)`.
+`COLOR_SLIDER_DIRECTIVES` is the array of every part below. `COLOR_SLIDER_DEFAULT_COLOR` is the `Color` a root falls back to when `[(value)]` is never bound, `hsl(210, 80%, 50%)`.
 
 ### ColorSliderRoot
 
@@ -182,12 +182,12 @@ The root of the slider. Owns the color, the pointer and keyboard interaction, an
 | `valueCommit` | `output<Color>` | — | Emitted once at the end of an interaction, never mid-drag. |
 
 ::: warning `disabled` is not an input
-`disabled` is the native DOM attribute. The static attribute is read at construction — which works under SSR — and a `MutationObserver` keeps it live afterwards. The readable signal is named **`isDisabled`**, not `disabled`, because `FormUiControl` reserves the member name `disabled` for its own `InputSignal<boolean>`.
+`disabled` is the native DOM attribute. The static attribute is read at construction, which works under SSR, and a `MutationObserver` keeps it live afterwards. The readable signal is named **`isDisabled`**, not `disabled`, because `FormUiControl` reserves the member name `disabled` for its own `InputSignal<boolean>`.
 
 `dir` is handled the same way, and is not an input either. It is resolved with `getComputedStyle` rather than by reading the host attribute, so an inherited `<html dir="rtl">` counts.
 :::
 
-The stepping interval is not an input — it comes from the channel's own config, resolved from `colorSpace()` and `channel()`.
+The stepping interval is not an input. It comes from the channel's own config, resolved from `colorSpace()` and `channel()`.
 
 Readable signals, for `exportAs` template references and for `inject(ColorSliderRoot)`:
 
@@ -196,7 +196,7 @@ Readable signals, for `exportAs` template references and for `inject(ColorSlider
 | `isDisabled` | `Signal<boolean>` | Whether interaction is refused. |
 | `dir` | `Signal<'ltr' \| 'rtl'>` | The resolved reading direction. |
 | `dragging` | `Signal<boolean>` | True while a pointer drag is in flight. |
-| `sliderState` | `Signal<SliderState>` | The channel in display units — `value`, `min`, `max`, `step` — plus `orientation`, `dir`, `inverted` and `disabled`. |
+| `sliderState` | `Signal<SliderState>` | The channel in display units, `value`, `min`, `max`, `step`, plus `orientation`, `dir`, `inverted` and `disabled`. |
 | `position` | `Signal<number>` | 0–1 offset of the thumb from the track's CSS start edge. |
 
 ### ColorSliderControl
@@ -228,7 +228,7 @@ The directive takes no inputs.
 
 ### ColorSliderGradient
 
-Paints the slider's color ramp onto a `<canvas>` you supply. The transparency checkerboard is this element's CSS background, which the canvas bitmap composites over — there is no `Checkerboard` part in this package.
+Paints the slider's color ramp onto a `<canvas>` you supply. The transparency checkerboard is this element's CSS background, which the canvas bitmap composites over. There is no `Checkerboard` part in this package.
 
 - Selector: `canvas[urcColorSliderGradient]`
 - Export as: `urcColorSliderGradient`
@@ -305,4 +305,4 @@ ColorSlider exposes a single focusable thumb for the channel it controls. Keyboa
 | Home | Move to the channel minimum |
 | End | Move to the channel maximum |
 
-Both arrow axes are live whatever the orientation — the axis only matters for 2D controls. `dir="rtl"` mirrors the horizontal arrows and `inverted` flips the direction on top of that, while Home and End address value bounds rather than visual ends, so neither modifier applies to them. `(valueCommit)` fires once on key release, not on every repeat.
+Both arrow axes are live whatever the orientation. The axis only matters for 2D controls. `dir="rtl"` mirrors the horizontal arrows and `inverted` flips the direction on top of that, while Home and End address value bounds rather than visual ends, so neither modifier applies to them. `(valueCommit)` fires once on key release, not on every repeat.

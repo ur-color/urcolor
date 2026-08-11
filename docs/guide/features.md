@@ -2,10 +2,14 @@
 
 ## Unstyled {#unstyled}
 
-Every component is headless and renderless — zero default styles are included. The component design follows the patterns established by [Reka UI](https://reka-ui.com/) (Vue) and [Base UI](https://base-ui.com/) (React): low-level primitives that expose all state and behavior through props, slots, and data attributes while leaving visual design entirely to you.
+Every component is headless and renderless, with no default styles at all. The
+design follows [Reka UI](https://reka-ui.com/) (Vue) and
+[Base UI](https://base-ui.com/) (React): low-level primitives that expose state
+and behavior through props, slots and data attributes, and leave the visual
+design to you.
 
-Eight component families ship today in every binding — Vue, React, Svelte and
-Angular — each split into parts you compose yourself:
+Eight component families ship in every binding, each split into parts you
+compose yourself:
 
 | Family | Parts |
 | --- | --- |
@@ -18,14 +22,16 @@ Angular — each split into parts you compose yourself:
 | Color Triangle | Root, Gradient, Checkerboard (Vue, React), Thumb |
 | Color Ring | Root, Track, Gradient, Checkerboard (Vue, React), Thumb |
 
-This means UrColor fits into any UI, whether you use Tailwind, plain CSS, a component library, or a completely custom design system.
+The parts take whatever the surrounding UI is built with: Tailwind, plain CSS, a
+component library, a house design system.
 
-## Any Color Space {#color-spaces}
+## Any color space {#color-spaces}
 
-Under the hood, UrColor uses its own zero-dependency, spec-accurate CSS Color 4 implementation for color conversion and manipulation. It supports a wide range of color spaces, identified with their CSS Color 4 ids:
+Conversion and manipulation run on urcolor's own zero-dependency, spec-accurate
+CSS Color 4 implementation. Spaces are identified by their CSS Color 4 ids:
 
 <details>
-<summary>Supported Color Spaces</summary>
+<summary>Supported color spaces</summary>
 
 | Color Space | Id |
 | --- | --- |
@@ -49,21 +55,30 @@ Under the hood, UrColor uses its own zero-dependency, spec-accurate CSS Color 4 
 
 ## Accessible {#accessible}
 
-Accessibility is a first-class concern. UrColor's accessibility implementation is inspired by [React Spectrum](https://react-spectrum.adobe.com/react-aria/ColorArea.html) from Adobe — the industry reference for accessible color picker components.
+The accessibility work is modelled on
+[React Spectrum](https://react-spectrum.adobe.com/react-aria/ColorArea.html),
+Adobe's reference implementation of accessible color pickers.
 
-Every component follows the WAI-ARIA color picker pattern with:
+Every component follows the WAI-ARIA color picker pattern:
 
-- Full keyboard navigation (arrow keys, Page Up/Down, Home/End)
-- Screen reader announcements for color value changes
-- Proper ARIA roles, labels, and live regions
-- Focus management and visible focus indicators
+- Keyboard navigation with arrow keys, Page Up/Down and Home/End
+- Screen reader announcements when the color value changes
+- ARIA roles, labels and live regions
+- Focus management with visible focus indicators
 
-## Server Rendered {#ssr}
+## Server rendered {#ssr}
 
-Gradients paint with stacked CSS gradients wherever an exact recipe exists, so
-they appear in server-rendered HTML and on first paint — no `<canvas>` element,
-no WebGL context, no post-hydration repaint. In a VitePress, Nuxt, Next or
-SvelteKit page a picker is simply *there* in the markup.
+Where an exact recipe exists, a gradient paints as stacked CSS gradients. It
+then appears in server-rendered HTML and on first paint, with no `<canvas>`
+element, no WebGL context and no repaint after hydration. In a VitePress, Nuxt,
+Next or SvelteKit page the picker is already in the markup.
+
+```mermaid
+flowchart TD
+  G["Gradient part"] --> Q{"Exact CSS recipe<br/>for this surface?"}
+  Q -- yes --> CSS["Stacked CSS gradients<br/>server-rendered, no canvas"]
+  Q -- no --> GPU["WebGL canvas<br/>drawn after hydration"]
+```
 
 What that covers:
 
@@ -76,31 +91,32 @@ What that covers:
 | Color Triangle | — | always |
 
 The stops themselves are computed with `Color`, which runs on a server perfectly
-well, so a perceptual space is no obstacle to a one-dimensional ramp — only the
-*interpolation between* stops has to be something CSS can express. That is why a
-slider is CSS in `oklch` while a two-channel `oklch` area is not.
+well, so a perceptual space is no obstacle to a one-dimensional ramp. Only the
+interpolation *between* stops has to be something CSS can express, which is why
+a slider is CSS in `oklch` while a two-channel `oklch` area is not.
 
-Each recipe is an exact algebraic equivalent of the sampler it replaces, not an
-approximation, with one deliberate exception: an axis bound to hue is 36 stops
-lerped in sRGB rather than a per-pixel sweep, the same trade the slider and ring
-have always made.
+Each recipe is an exact algebraic equivalent of the sampler it replaces rather
+than an approximation. One exception is deliberate: an axis bound to hue is 36
+stops lerped in sRGB rather than a per-pixel sweep, the same trade the slider and
+ring have always made.
 
-Every `Gradient` part takes a `renderer` prop — `'auto'` (the default), `'css'`
-or `'canvas'` — if you need to pin the behaviour.
+Every `Gradient` part takes a `renderer` prop, `'auto'` (the default), `'css'`
+or `'canvas'`, for pinning the behaviour.
 
 The Angular bindings are directives *on* your `<canvas>`, so there is no element
-to drop; the recipe becomes that canvas' own CSS background instead, and no
-drawing context is acquired. The two recipes that need a `mask-image` on their
-own layer — corner-mode areas and areas with an `alpha` axis — fall back to the
-canvas there.
+to drop. The recipe becomes that canvas' own CSS background and no drawing
+context is acquired. The two recipes that need a `mask-image` on their own
+layer, corner-mode areas and areas with an `alpha` axis, fall back to the canvas
+there.
 
 ## Fast {#fast}
 
-Gradients that CSS cannot express — a two-channel plane in OKLab, Lab, LCH or
-OKLCH, where every pixel has to be evaluated in the correct color space — are
-rendered on the GPU through **WebGL**, at full resolution and jank-free.
+Gradients CSS cannot express, such as a two-channel plane in OKLab, Lab, LCH or
+OKLCH where every pixel has to be evaluated in the correct color space, render
+on the GPU through WebGL at full resolution.
 
-The runtime has zero external dependencies beyond the core color math, keeping bundle size small.
+The runtime has no external dependencies beyond the core color math, which keeps
+the bundle small.
 
 ### The color engine
 
@@ -123,18 +139,18 @@ selection, measured on an Apple M1 under Bun:
 | Serialize to `oklch()` | **62 ns** | culori, 69 ns | 1.1× |
 
 The [`Color`](./color-class) class costs about one allocation over the bare
-functions — `Color.parse()` and `parse()` both run in 137 ns, and `.mix()` costs
-335 ns against `mix()`'s 283 ns — so the ergonomic API is not the slow one. Use
+functions. `Color.parse()` and `parse()` both run in 137 ns, and `.mix()` costs
+335 ns against `mix()`'s 283 ns, so the ergonomic API is not the slow one. Use
 the functions in per-pixel loops and the class everywhere else.
 
-urcolor does **not** win everything; the [comparison](#comparison) section lists
-where it loses and why. The full picture, group by group, is on the
-[benchmarks page](./benchmarks).
+urcolor does not win everything. The [comparison](#comparison) section lists
+where it loses and why, and the [benchmarks page](./benchmarks) has the full
+picture, group by group.
 
 ### Canvas gradient rendering
 
 Component gradients go through WebGL, but the same surfaces can be rasterized on
-the CPU — `sampleBilinearGrid`, `sampleChannelGrid`, `samplePolarGrid`,
+the CPU. `sampleBilinearGrid`, `sampleChannelGrid`, `samplePolarGrid`,
 `sampleConicRing` and `interpolateStops` each return an `Uint8ClampedArray` of
 RGBA bytes ready for `putImageData`. No other color library ships a grid
 sampler, so the comparisons below hand-roll the same loop with that library's
@@ -147,22 +163,22 @@ interpolator:
 | 128×128 HSV S/V plane → RGBA | 2.2 ms | **1.2 ms** | 31.0 ms | — |
 | 128×128 OKLCH hue ring → RGBA | 4.1 ms | **3.3 ms** | — | — |
 
-Interpolation is where urcolor is furthest ahead — 3.8× faster than culori and
+Interpolation is where urcolor is furthest ahead: 3.8× faster than culori and
 102× faster than chroma-js on a 64-stop OKLab ramp, and 8× faster than culori on
 the bilinear plane, whose cost is dominated by mixing rather than conversion.
 
-The per-pixel channel samplers are the other way round: the HSV plane and hue
+The per-pixel channel samplers run the other way round. The HSV plane and hue
 ring evaluate a fresh color at all 16 384 pixels, so they are paced by
-single-conversion throughput, where culori's direct converter chain stays 1.2×
-to 1.8× ahead of urcolor's XYZ-hub routing. That gap is why the surfaces that
-still need a canvas go through WebGL where they can, since the shader does the
-same work in one draw call regardless of surface size — and why the ones with an
-exact CSS recipe now skip the sampling entirely.
+single-conversion throughput, where culori's direct converter chain stays 1.2× to
+1.8× ahead of urcolor's XYZ-hub routing. That gap is why the surfaces that still
+need a canvas go through WebGL where they can, since the shader does the same
+work in one draw call whatever the surface size, and why the ones with an exact
+CSS recipe skip the sampling entirely.
 
 ## Comparison {#comparison}
 
 How `@urcolor/core` stacks up against the color libraries it is benchmarked
-against. Every capability below was **executed**, not read off a README — a
+against. Every capability below was executed rather than read off a README. A
 feature counts only if the call returns a usable, finite result, because a
 library that parses `oklch()` into `NaN` is not one you can build a picker on.
 
@@ -200,22 +216,22 @@ dependencies, so that is not a differentiator.
 Two rows need their footnotes read, because the ✅ hides a difference in kind:
 
 - **Reverse color naming.** tinycolor2, @ctrl/tinycolor and colord's `names`
-  plugin all answer with the nearest **English CSS keyword** (`royalblue`).
-  `@urcolor/i18n` answers in up to **298 languages**, and separately translates
+  plugin all answer with the nearest English CSS keyword (`royalblue`).
+  `@urcolor/i18n` answers in up to 298 languages, and separately translates
   channel labels into 77. See [Color Naming](/guide/color-naming).
 - **Convert to CIE Lab / LCh.** colord reaches Lab and LCh through its `lab` /
-  `lch` plugins as *object* conversions — it still cannot parse or emit the CSS
+  `lch` plugins as *object* conversions. It still cannot parse or emit the CSS
   `lab()` string, which is the row above it.
 
-The bottom four rows are the picker-specific ones, and they are the reason
-urcolor exists rather than being a wrapper: no general-purpose color library
-ships a grid sampler, a GPU renderer, or accessible components, because none of
-them are trying to draw a color picker.
+The bottom four rows are the picker-specific ones, and they are why urcolor
+exists rather than being a wrapper. No general-purpose color library ships a
+grid sampler, a GPU renderer or accessible components, because none of them are
+trying to draw a color picker.
 
 ### Speed
 
 Apple M1, Bun 1.3, mitata. Fastest per row in **bold**. `—` means the library
-cannot express that operation at all — never "too slow to measure". Full
+cannot express that operation at all, never "too slow to measure". Full
 methodology and all 59 groups are on the [benchmarks page](./benchmarks).
 
 | Operation | urcolor | culori | colorjs.io | chroma-js | colord | tinycolor2 | @ctrl/tinycolor |
@@ -238,101 +254,114 @@ methodology and all 59 groups are on the [benchmarks page](./benchmarks).
 
 ### Where urcolor loses
 
-Publishing only the wins would make this table worthless, so:
+Publishing only the wins would make the table worthless, so:
 
-- **culori is faster converting *out* of OKLCH** (101 ns vs 165 ns) and at
-  gamut mapping (116 ns vs 209 ns). urcolor routes every conversion through an
-  XYZ-D65 hub so that 15 spaces need 15 bridges rather than 210 direct paths;
-  culori composes `oklch → oklab → linear sRGB` directly and allocates less.
-  It also edges the hex → OKLCH → hex round trip, which is that same leg.
-- **culori is faster on the per-pixel channel samplers** — the HSV S/V plane by
-  1.8× (1.2 ms vs 2.2 ms) and the OKLCH hue ring by 1.2× (3.3 ms vs 4.1 ms) —
-  for the same reason, compounded 16 384 times. urcolor wins the bilinear plane
-  by 8× because that surface's cost is interpolation rather than conversion.
-- **colord is faster at manipulation** (`lighten` 323 ns vs 394 ns) because it
-  adjusts in HSL. urcolor adjusts in OKLCH, which is perceptually even but more
-  arithmetic; against chroma-js, the other library doing it perceptually,
+- **culori is faster converting *out* of OKLCH** (101 ns against 165 ns) and at
+  gamut mapping (116 ns against 209 ns). urcolor routes every conversion through
+  an XYZ-D65 hub, so 15 spaces need 15 bridges rather than 210 direct paths.
+  culori composes `oklch → oklab → linear sRGB` directly and allocates less. It
+  also edges the hex → OKLCH → hex round trip, which is that same leg.
+- **culori is faster on the per-pixel channel samplers**, the HSV S/V plane by
+  1.8× (1.2 ms against 2.2 ms) and the OKLCH hue ring by 1.2× (3.3 ms against
+  4.1 ms), for the same reason compounded 16 384 times. urcolor wins the
+  bilinear plane by 8×, because that surface's cost is interpolation rather than
+  conversion.
+- **colord is faster at manipulation** (`lighten` 323 ns against 394 ns) because
+  it adjusts in HSL. urcolor adjusts in OKLCH, which is perceptually even but
+  more arithmetic. Against chroma-js, the other library doing it perceptually,
   urcolor is 2.2× faster.
-- **colord and tinycolor2 serialize `hsl()` faster** (63 ns and 102 ns vs
+- **colord and tinycolor2 serialize `hsl()` faster** (63 ns and 102 ns against
   119 ns), since HSL is their native storage and urcolor converts first.
 
-If your app only ever touches sRGB and HSL, colord is smaller and quicker at
-the handful of things it does. urcolor's case is that a color picker does not
-stay in sRGB.
+```mermaid
+flowchart LR
+  subgraph U["urcolor: one hub, 15 bridges"]
+    direction LR
+    u1["oklch"] --> u2["XYZ D65"] --> u3["sRGB"]
+  end
+  subgraph C["culori: direct chain"]
+    direction LR
+    c1["oklch"] --> c2["oklab"] --> c3["linear sRGB"] --> c4["sRGB"]
+  end
+```
+
+If your app only ever touches sRGB and HSL, colord is smaller and quicker at the
+handful of things it does. urcolor's case is that a color picker does not stay
+in sRGB.
 
 ### Picker component libraries
 
-The libraries above are color *engines*. These are the ones that actually draw a
-picker — the direct alternatives to `@urcolor/vue`, `/react`, `/svelte` and
-`/angular`. Facts below come from each package's shipped source and type
-declarations, not its README.
+The libraries above are color *engines*. These are the ones that draw a picker,
+the direct alternatives to `@urcolor/vue`, `/react`, `/svelte` and `/angular`.
+Facts below come from each package's shipped source and type declarations rather
+than its README.
 
 | Library | Frameworks | Color models | Component families | Runtime deps | Ships CSS |
 | --- | --- | --- | --- | :-: | :-: |
-| **urcolor** | Vue, React, Svelte, Angular | **15** incl. OKLCH, OKLab, Lab, LCh, HWB, P3, Rec. 2020, XYZ | area, slider, field, swatch, swatch picker, wheel, triangle, ring | 0 | no |
-| [React Aria Components](https://react-spectrum.adobe.com/react-aria/ColorPicker.html) | React | 3 — sRGB, HSL, HSB | area, slider, field, swatch, swatch picker, wheel, thumb | 7 | no |
-| [Reka UI](https://reka-ui.com/) | Vue | 3 — sRGB, HSL, HSB | area, slider, field, swatch, swatch picker | 10 | no |
-| [Ark UI](https://ark-ui.com/docs/components/color-picker) | React, Vue, Svelte, Solid | 3 — sRGB, HSL, HSB | area, channel slider, channel input, swatch, swatch group, eyedropper, format select | 67 | no |
-| [Zag.js](https://zagjs.com/components/react/color-picker) | React, Vue, Svelte, Solid | 3 — sRGB, HSL, HSB | state machine only — you supply the markup | 8 | no |
-| [@uiw/react-color](https://uiwjs.github.io/react-color/) | React | 3 — HSV, HSL, RGB | area, sliders, wheel, field, swatch, eyedropper | 20 | no |
-| [react-color](https://casesandberg.github.io/react-color/) | React | 3 — HSV, HSL, RGB | area, field, swatches | 7 | no |
-| [react-colorful](https://github.com/omgovich/react-colorful) | React | 3 — HSV, HSL, RGB | area + hue slider | 0 | no |
-| [@rc-component/color-picker](https://github.com/react-component/color-picker) | React | 3 — HSV, HSL, RGB | area + sliders (antd internals) | 3 | 2 KB |
-| [vue-color](https://github.com/xiaokaike/vue-color) | Vue | 3 — HSV, HSL, RGB | area, slider, field, swatch | 2 | 42 KB |
-| [vue3-colorpicker](https://github.com/aesoper101/vue3-colorpicker) | Vue | 3 — HSV, HSL, RGB | packaged picker | 7 | 35 KB |
-| [svelte-awesome-color-picker](https://github.com/Ennoriel/svelte-awesome-color-picker) | Svelte | 2 — HSV, RGB | packaged picker + swatch | 2 | no |
-| [ngx-colors](https://github.com/luchsamapparat/ngx-colors) | Angular | 3 — HSV, HSL, RGB | packaged picker, eyedropper | 1 | no |
-| [iro.js](https://iro.js.org/) | Vanilla | 3 — HSV, HSL, RGB | wheel, box, sliders | 2 | no |
-| [Pickr](https://github.com/simonwep/pickr) | Vanilla | 3 — HSV, HSL, RGB | packaged picker, swatches | 0 | 26 KB |
-| [vanilla-picker](https://github.com/Sphinxxxx/vanilla-picker) | Vanilla | 2 — HSL, RGB | packaged picker | 1 | 4 KB |
+| **urcolor** | Vue, React, Svelte, Angular | **15** including OKLCH, OKLab, Lab, LCh, HWB, P3, Rec. 2020, XYZ | area, slider, field, swatch, swatch picker, wheel, triangle, ring | 0 | no |
+| [React Aria Components](https://react-spectrum.adobe.com/react-aria/ColorPicker.html) | React | 3: sRGB, HSL, HSB | area, slider, field, swatch, swatch picker, wheel, thumb | 7 | no |
+| [Reka UI](https://reka-ui.com/) | Vue | 3: sRGB, HSL, HSB | area, slider, field, swatch, swatch picker | 10 | no |
+| [Ark UI](https://ark-ui.com/docs/components/color-picker) | React, Vue, Svelte, Solid | 3: sRGB, HSL, HSB | area, channel slider, channel input, swatch, swatch group, eyedropper, format select | 67 | no |
+| [Zag.js](https://zagjs.com/components/react/color-picker) | React, Vue, Svelte, Solid | 3: sRGB, HSL, HSB | state machine only, you supply the markup | 8 | no |
+| [@uiw/react-color](https://uiwjs.github.io/react-color/) | React | 3: HSV, HSL, RGB | area, sliders, wheel, field, swatch, eyedropper | 20 | no |
+| [react-color](https://casesandberg.github.io/react-color/) | React | 3: HSV, HSL, RGB | area, field, swatches | 7 | no |
+| [react-colorful](https://github.com/omgovich/react-colorful) | React | 3: HSV, HSL, RGB | area + hue slider | 0 | no |
+| [@rc-component/color-picker](https://github.com/react-component/color-picker) | React | 3: HSV, HSL, RGB | area + sliders (antd internals) | 3 | 2 KB |
+| [vue-color](https://github.com/xiaokaike/vue-color) | Vue | 3: HSV, HSL, RGB | area, slider, field, swatch | 2 | 42 KB |
+| [vue3-colorpicker](https://github.com/aesoper101/vue3-colorpicker) | Vue | 3: HSV, HSL, RGB | packaged picker | 7 | 35 KB |
+| [svelte-awesome-color-picker](https://github.com/Ennoriel/svelte-awesome-color-picker) | Svelte | 2: HSV, RGB | packaged picker + swatch | 2 | no |
+| [ngx-colors](https://github.com/luchsamapparat/ngx-colors) | Angular | 3: HSV, HSL, RGB | packaged picker, eyedropper | 1 | no |
+| [iro.js](https://iro.js.org/) | Vanilla | 3: HSV, HSL, RGB | wheel, box, sliders | 2 | no |
+| [Pickr](https://github.com/simonwep/pickr) | Vanilla | 3: HSV, HSL, RGB | packaged picker, swatches | 0 | 26 KB |
+| [vanilla-picker](https://github.com/Sphinxxxx/vanilla-picker) | Vanilla | 2: HSL, RGB | packaged picker | 1 | 4 KB |
 
-**Not one of them models a perceptual or wide-gamut space.** React Aria and
-Reka UI both declare the identical public type — `ColorSpace = 'rgb' | 'hsl' |
-'hsb'` — and Ark UI and Zag.js share those same three through
-`@zag-js/color-utils`. Every other package on the list stores HSV or RGB and
-converts on the way out. That is the gap urcolor is built for: an OKLCH area, an
-Lab slider or a P3 gamut boundary cannot be expressed by any of them, which is
-also why none of them need a GPU renderer.
+Not one of them models a perceptual or wide-gamut space. React Aria and Reka UI
+both declare the identical public type, `ColorSpace = 'rgb' | 'hsl' | 'hsb'`, and
+Ark UI and Zag.js share those same three through `@zag-js/color-utils`. Every
+other package on the list stores HSV or RGB and converts on the way out. That is
+the gap urcolor is built for: an OKLCH area, an Lab slider or a P3 gamut boundary
+cannot be expressed by any of them, which is also why none of them need a GPU
+renderer.
 
 Read the rest honestly, though:
 
 - **React Aria Components is the closest thing to a peer** and the reference
-  urcolor's own accessibility is modelled on. It ships the same family split —
-  area, slider, wheel, field, swatch, swatch picker — with genuine
+  urcolor's own accessibility is modelled on. It ships the same family split
+  (area, slider, wheel, field, swatch, swatch picker) with genuine
   `aria-valuetext` announcements, and it is React-only. If you are on React and
-  sRGB/HSL/HSB is enough, it is an excellent, far more battle-tested choice.
+  sRGB/HSL/HSB is enough, it is an excellent and far more battle-tested choice.
 - **Reka UI added color primitives in 2.9.0** (March 2026): `ColorArea`,
   `ColorSlider`, `ColorField`, `ColorSwatch` and `ColorSwatchPicker`, with
-  `aria-valuetext` on the interactive parts. It is worth calling out that
-  `@urcolor/vue` is *built on* Reka UI, so on Vue the two now overlap — if you
-  already depend on Reka and only need an sRGB/HSL/HSB picker, its own
-  primitives are one fewer dependency and follow conventions you know. urcolor
-  adds the perceptual and wide-gamut spaces, the GPU renderer, the wheel,
-  triangle and ring families, and the same API on React, Svelte and Angular.
-  Note this repo currently pins `reka-ui` at `^2.8.0`, which predates them.
-- **Ark UI covers four frameworks** like urcolor does, and adds an eyedropper
+  `aria-valuetext` on the interactive parts. `@urcolor/vue` is *built on* Reka
+  UI, so on Vue the two now overlap. If you already depend on Reka and only need
+  an sRGB/HSL/HSB picker, its own primitives are one fewer dependency and follow
+  conventions you know. urcolor adds the perceptual and wide-gamut spaces, the
+  GPU renderer, the wheel, triangle and ring families, and the same API on
+  React, Svelte and Angular. Note this repo currently pins `reka-ui` at
+  `^2.8.0`, which predates them.
+- **Ark UI covers four frameworks** as urcolor does, and adds an eyedropper
   trigger and format select that urcolor has no equivalent for. 66 of its 67
   dependencies are its own `@zag-js/*` packages rather than third-party weight
   (the exception is `@internationalized/date`), and installing the color picker
   does not pull in the other components' machines.
-- **Zag.js is not a component library** — it is the state machine underneath Ark
-  UI. Listed because it is a genuine alternative if you intend to write all the
+- **Zag.js is not a component library.** It is the state machine underneath Ark
+  UI, listed because it is a genuine alternative if you intend to write all the
   markup yourself.
 - **react-colorful is 70 KB with zero dependencies** and will beat urcolor on
   bundle size for a plain sRGB swatch picker every time.
-- Nothing here ships a **color wheel, triangle and ring** together; only
-  urcolor, React Aria (wheel), @uiw/react-color (wheel) and iro.js (wheel) offer
-  a wheel at all.
+- Nothing here ships a color wheel, triangle and ring together. Only urcolor,
+  React Aria (wheel), @uiw/react-color (wheel) and iro.js (wheel) offer a wheel
+  at all.
 
-## Multi-Framework {#multi-framework}
+## Multi-framework {#multi-framework}
 
-UrColor is a universal color picker library: one shared core, one component
-model, one set of behaviours, exposed idiomatically per framework.
+One shared core, one component model, one set of behaviours, exposed idiomatically
+per framework.
 
-- **Vue 3** (v3.4+) — `@urcolor/vue`, built on [Reka UI](https://reka-ui.com/) primitives, with `v-model` and slot props.
-- **React** (v18+) — `@urcolor/react`, namespaced components (`ColorArea.Root`) with `value` / `onValueChange`.
-- **Svelte 5** (v5.29+) — `@urcolor/svelte`, components with `bind:value`, `child` snippets, and rune-based hooks (`useColor`, `useOKLCh`, …).
-- **Angular** (v21.2+) — `@urcolor/angular`, standalone directives (`[urcColorAreaRoot]`) with `[(value)]` models, signal stores, and Signal Forms support via `[field]`.
+- **Vue 3** (v3.4+): `@urcolor/vue`, built on [Reka UI](https://reka-ui.com/) primitives, with `v-model` and slot props.
+- **React** (v18+): `@urcolor/react`, namespaced components (`ColorArea.Root`) with `value` / `onValueChange`.
+- **Svelte 5** (v5.29+): `@urcolor/svelte`, components with `bind:value`, `child` snippets, and rune-based hooks (`useColor`, `useOKLCh`, …).
+- **Angular** (v21.2+): `@urcolor/angular`, standalone directives (`[urcColorAreaRoot]`) with `[(value)]` models, signal stores, and Signal Forms support via `[field]`.
 
 Drag handling, keyboard maps, channel models, data attributes and WebGL
 rendering live once in `@urcolor/shared`; color conversion lives once in
@@ -345,13 +374,13 @@ frameworks side by side.
 
 ## Internationalized {#languages}
 
-Internationalization lives in one optional package, `@urcolor/i18n` — nothing
-in the core or the framework bindings depends on it.
+Internationalization lives in one optional package, `@urcolor/i18n`. Nothing in
+the core or the framework bindings depends on it.
 
-It answers two separate questions. `ChannelNames` translates **channel labels**
-into 77 languages, and `ColorNames` answers "what is this color called?" in up
-to 298 languages, from two independently sourced datasets. Color naming has its
-own page: [Color Naming](/guide/color-naming).
+It answers two separate questions from two independently sourced datasets.
+`ChannelNames` translates channel labels into 77 languages, and `ColorNames`
+answers "what is this color called?" in up to 298. Color naming has its own
+page: [Color Naming](/guide/color-naming).
 
 <details>
 <summary>Full language list</summary>
@@ -403,7 +432,10 @@ own page: [Color Naming](/guide/color-naming).
 
 </details>
 
-Channel labels — the words behind abbreviations like `H`, `S`, `L`, `V`, `R`, `G`, `B` (Hue, Saturation, Lightness, Value, Red, Green, Blue, and so on) — are what's translated. Construct a `ChannelNames` for a locale and call `of()`, or use the `translations` map directly if you need the full dictionary for a locale.
+What gets translated is the words behind abbreviations like `H`, `S`, `L`, `V`,
+`R`, `G`, `B`: hue, saturation, lightness, value, red, green, blue and the rest.
+Construct a `ChannelNames` for a locale and call `of()`, or use the
+`translations` map directly for a locale's full dictionary.
 
 ```ts
 import { ChannelNames } from "@urcolor/i18n";
@@ -414,5 +446,6 @@ channels.resolvedOptions(); // { locale: "ko" }
 ```
 
 ::: warning
-**Only channel labels are localized.** Color format codes (like `hex`, `srgb`, `hsl`) and numeric values are not translated.
+Only channel labels are localized. Color format codes such as `hex`, `srgb` and
+`hsl`, and numeric values, are not translated.
 :::

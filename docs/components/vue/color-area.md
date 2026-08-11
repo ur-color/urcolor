@@ -33,7 +33,7 @@ import ColorAreaOKLCh from './demo/ColorAreaOKLCh.vue'
 
 ::: warning
 `ColorAreaArea` is required. `ColorAreaRoot` owns the state but attaches no pointer
-or keyboard handlers of its own — they all live on `ColorAreaArea`, which also
+or keyboard handlers of its own: they all live on `ColorAreaArea`, which also
 measures the box that pointer coordinates are resolved against. A tree that puts
 the gradient and thumb directly under the root renders correctly but
 does not respond to input.
@@ -179,8 +179,8 @@ The interaction surface. Renders `role="application"` with `aria-roledescription
 ::: tip Building a custom interaction surface
 `ColorAreaRoot`'s context exposes `handleSlideStart`, `handleSlideMove`, `handleSlideEnd`
 and `snapshotValues`, so a custom surface can drive the same value maths. It cannot,
-however, register itself as the measured area — only `ColorAreaArea` writes
-`areaElement` — so pointer coordinates would be resolved against the root's box
+however, register itself as the measured area. Only `ColorAreaArea` writes
+`areaElement`. So pointer coordinates would be resolved against the root's box
 rather than the custom surface's. Reimplement `ColorAreaArea` (rather than wrapping
 it) if the two boxes differ.
 :::
@@ -189,7 +189,7 @@ it) if the two boxes differ.
 
 Renders the area's 2D gradient, sampled from the root's color space and channel configuration, over a checkerboard so alpha transparency is visible without a separate element.
 
-Any pair of `hsv`'s or `hsl`'s own three channels has an exact CSS equivalent, as do explicit corner colors and any axis bound to `alpha` — all of those render no `<canvas>` at all. A two-channel area in a perceptual space (`oklch`, `oklab`, `lab`, `lch`), in `hwb`, or in the RGB family keeps the canvas, as does corner mode with an `interpolationSpace` set.
+Any pair of `hsv`'s or `hsl`'s own three channels has an exact CSS equivalent, as do explicit corner colors and any axis bound to `alpha`, all of those render no `<canvas>` at all. A two-channel area in a perceptual space (`oklch`, `oklab`, `lab`, `lch`), in `hwb`, or in the RGB family keeps the canvas, as does corner mode with an `interpolationSpace` set.
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
@@ -220,7 +220,7 @@ Renders a checkerboard pattern behind the gradient to visualize alpha transparen
 
 The single combined handle, and the area's only focusable element. One thumb drives **both** axes: it renders `role="slider"`, takes `tabindex="0"` unless the root is disabled, and is positioned absolutely from the X and Y channel values. It reads the `--reka-slider-area-thumb-transform` custom property set by the root for its centering transform.
 
-Because one handle serves two channels, it announces both — `aria-label` names the channel pair and `aria-valuetext` carries both formatted values. There is no separate thumb per axis. The thumb is only a focus target and an ARIA surface; every value change is owned by `ColorAreaArea`, whose `keydown` listener sees the events that bubble up from here.
+Because one handle serves two channels, it announces both: `aria-label` names the channel pair and `aria-valuetext` carries both formatted values. There is no separate thumb per axis. The thumb is only a focus target and an ARIA surface; every value change is owned by `ColorAreaArea`, whose `keydown` listener sees the events that bubble up from here.
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|

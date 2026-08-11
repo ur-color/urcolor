@@ -1,6 +1,6 @@
 # How to Build Color Swatches
 
-Let's build color swatches for displaying and selecting colors step by step.
+A swatch renders one color as a filled element, static or selectable.
 
 <script setup>
 import ColorSwatchGuide from './demo/vue/ColorSwatchGuide.vue'
@@ -24,9 +24,16 @@ Here's what we'll end up with:
 
 </details>
 
+The parts, and how they nest:
+
+```mermaid
+flowchart TD
+  S["ColorSwatch<br/>value, alpha, pressed"] --> E["one element,<br/>painted with the color"]
+```
+
 ## Step 1: Set up state
 
-Start by importing the color model and defining your colors.
+Import the color model and define the colors.
 
 ::: code-group
 
@@ -69,11 +76,11 @@ export class MySwatch {
 
 :::
 
-`useColor()` creates color state from any CSS color string. Vue returns a `{ color }` shallow ref; React returns `{ color, setColor }`; Svelte returns a rune-backed object whose `color`, `hex` and `alpha` are **getters** — keep the object (`colorState.color`) rather than destructuring it, or you lose reactivity. Angular has no hook: a plain `signal<Color>()` is the state, and the swatch reads it with `[value]="color()"`.
+`useColor()` creates color state from any CSS color string. Vue returns a `{ color }` shallow ref and React returns `{ color, setColor }`. Svelte returns a rune-backed object whose `color`, `hex` and `alpha` are getters, so keep the object and read `colorState.color` rather than destructuring it, or reactivity is lost. Angular has no hook: a plain `signal<Color>()` is the state, and the swatch reads it with `[value]="color()"`.
 
 ## Step 2: Render a swatch
 
-The swatch root renders a single color as a filled element. Vue passes the color via `model-value`, React via `value`, Svelte via `value`, and Angular via `[value]`.
+The swatch root renders one color as a filled element. Vue passes it as `model-value`, React and Svelte as `value`, Angular as `[value]`.
 
 ::: code-group
 
@@ -147,19 +154,19 @@ export class MySwatch {
 
 :::
 
-The swatch renders the color as a background. It's completely unstyled — add your own sizing, border-radius, and other styles.
+The swatch paints the color as a background and nothing else. Sizing, border radius and the rest are yours.
 
-Svelte and Angular ship the swatch as a single part rather than a `Root` namespace member: `ColorSwatch` is the component itself, and `[urcColorSwatch]` is an attribute directive you put on whatever element you want — a `<div>` for a static sample, a `<button>` when it should be pressable. The `value` prop is display-only in all four frameworks; the two-way binding on a swatch is `pressed`, which Svelte exposes as `$bindable` (`bind:pressed`) and Angular as a `model()` (`[(pressed)]`).
+Svelte and Angular ship the swatch as a single part rather than a `Root` namespace member: `ColorSwatch` is the component itself, and `[urcColorSwatch]` is an attribute directive for whatever element you want: a `<div>` for a static sample, a `<button>` when it should be pressable. The `value` prop is display-only in all four frameworks; the two-way binding on a swatch is `pressed`, which Svelte exposes as `$bindable` (`bind:pressed`) and Angular as a `model()` (`[(pressed)]`).
 
-Angular ships every part of a family as a `COLOR_*_DIRECTIVES` array, so one entry in `imports` brings in the whole set.
+Angular ships each family as a `COLOR_*_DIRECTIVES` array, so one entry in `imports` brings in the whole set.
 
 ::: tip
-All components are completely unstyled — the classes above are just an example using Tailwind CSS. Use any styling approach you prefer.
+The components ship unstyled. The classes above are one example, written with Tailwind CSS; any styling approach works.
 :::
 
 ## Alpha transparency
 
-Set the `alpha` prop to show a checkerboard pattern behind semi-transparent colors:
+The `alpha` prop puts a checkerboard behind a semi-transparent color:
 
 ::: code-group
 
@@ -200,11 +207,11 @@ Set the `alpha` prop to show a checkerboard pattern behind semi-transparent colo
 
 :::
 
-Without `alpha`, the color is rendered fully opaque regardless of its alpha channel.
+Without `alpha` the color renders fully opaque, whatever its alpha channel says.
 
 ## Checkerboard size
 
-Customize the checkerboard pattern size in pixels:
+The checkerboard cell size, in pixels:
 
 ::: code-group
 
@@ -251,7 +258,7 @@ Customize the checkerboard pattern size in pixels:
 
 ## Multiple swatches
 
-Render a palette by looping over an array of colors:
+A palette is a loop over an array of colors:
 
 ::: code-group
 
@@ -415,11 +422,11 @@ export class MyPalette {
 
 :::
 
-Svelte reaches for `{#each}` and Angular for `@for`, and both keep the click handler on the swatch itself — Svelte's `onclick` lands on the rendered element through the rest props, and Angular's `(click)` is a native listener on the element you own. If you would rather not track selection by hand, bind `pressed` instead (`bind:pressed` in Svelte, `[(pressed)]` in Angular) and the swatch upgrades itself to a toggle button with `aria-pressed`, Enter/Space activation, and a `data-pressed` attribute to style against.
+Svelte reaches for `{#each}` and Angular for `@for`, and both keep the click handler on the swatch itself. Svelte's `onclick` lands on the rendered element through the rest props, and Angular's `(click)` is a native listener on the element you own. If you would rather not track selection by hand, bind `pressed` instead (`bind:pressed` in Svelte, `[(pressed)]` in Angular) and the swatch upgrades itself to a toggle button with `aria-pressed`, Enter/Space activation, and a `data-pressed` attribute to style against.
 
 ## String colors
 
-You can also pass a plain CSS color string instead of a `Color` object:
+A plain CSS color string works in place of a `Color` object:
 
 ::: code-group
 

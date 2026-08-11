@@ -9,7 +9,7 @@
 
 | Package | Description |
 | --- | --- |
-| `urcolor` | The color engine on its own, under an unscoped name — re-exports `@urcolor/core` |
+| `urcolor` | The color engine on its own, under an unscoped name. Re-exports `@urcolor/core` |
 | `@urcolor/core` | Core color logic and accessibility utilities |
 | `@urcolor/shared` | Framework-agnostic picker behavior, WebGL rendering, and grid samplers shared by every binding |
 | `@urcolor/vue` | Vue 3 components and composables |
@@ -109,16 +109,16 @@ yarn add @urcolor/angular
 
 :::
 
-Every framework package depends on `@urcolor/core` and `@urcolor/shared`, so both come along
-with whichever binding you install. The Vue package also pulls in
-[Reka UI](https://reka-ui.com/) and the React package
-[Base UI](https://base-ui.com/); the Svelte and Angular packages have no other
+Every framework package depends on `@urcolor/core` and `@urcolor/shared`, so
+both come along with whichever binding you install. The Vue package also pulls
+in [Reka UI](https://reka-ui.com/) and the React package
+[Base UI](https://base-ui.com/). The Svelte and Angular packages have no other
 runtime dependencies.
 
-### Core Only
+### Core only
 
-If you only need the color utilities without a framework binding, install
-`urcolor` — the unscoped name for the same engine:
+For the color utilities without a framework binding, install `urcolor`, the
+unscoped name for the same engine:
 
 ::: code-group
 
@@ -144,9 +144,9 @@ yarn add urcolor
 import { Color } from "urcolor";
 ```
 
-`urcolor` holds no code of its own: it re-exports `@urcolor/core` and depends on
+`urcolor` holds no code of its own. It re-exports `@urcolor/core` and depends on
 it by the same range the framework packages use, so you get one copy of the
-engine and one `Color` class either way. Install whichever name you prefer —
+engine and one `Color` class either way. Install whichever name you prefer.
 `@urcolor/core` is already present if you installed a framework binding, and
 mixing the two names in one project is safe.
 

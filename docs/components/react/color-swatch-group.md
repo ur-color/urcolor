@@ -29,7 +29,7 @@ modes, and the ordinary `ColorSwatch` is the item.
 :::
 
 Selection is keyed by the **serialized color string**, never by `Color`
-identity — `value` is a `string[]`, and it is the `value` you pass to each
+identity: `value` is a `string[]`, and it is the `value` you pass to each
 `ColorSwatch` that matches against it.
 
 ## Anatomy
@@ -42,7 +42,7 @@ identity — `value` is a `string[]`, and it is the `value` you pass to each
 </ColorSwatchGroup.Root>
 ```
 
-There is no `Item`, `ItemSwatch` or `Indicator` part — the swatch *is* the item.
+There is no `Item`, `ItemSwatch` or `Indicator` part. The swatch *is* the item.
 `ColorSwatch` reads the group off React context and switches itself from a static
 `role="img"` element into a selectable toggle button.
 
@@ -77,7 +77,7 @@ Toggle any number of swatches independently.
 ### Selected indicator
 
 There is no indicator part. Render your own marker as the swatch's children
-against the selection state — that is what both demos above do.
+against the selection state. That is what both demos above do.
 
 ```tsx
 <ColorSwatch value={color} className="grid place-items-center">
@@ -115,7 +115,7 @@ Extends `Omit<ComponentPropsWithoutRef<"div">, "defaultValue">`.
 
 ::: warning `orientation` does not restrict the arrow keys
 The prop reaches the underlying Base UI `ToggleGroup`, which uses it for the
-group's state and its `data-orientation` attribute — but it does not forward it
+group's state and its `data-orientation` attribute. But it does not forward it
 to the composite that owns keyboard navigation. That composite therefore runs at
 its `'both'` default, so all four arrow keys move focus in either orientation.
 Use `orientation` to describe and style the group, not to switch which arrows
@@ -141,7 +141,7 @@ Extends `Omit<ComponentPropsWithoutRef<"div">, "value">`.
 | `className` | `string` | — | Class applied to the rendered element. |
 | `style` | `React.CSSProperties` | — | Inline styles merged over the swatch's own `background` and custom properties. |
 
-There is no `Checkerboard` part in this family — the swatch paints the
+There is no `Checkerboard` part in this family. The swatch paints the
 transparency grid itself, under the color.
 
 ### CSS Variables
@@ -179,7 +179,7 @@ so a rule anywhere above the element wins:
 | `data-orientation` | Root | `'horizontal' \| 'vertical'` |
 | `data-multiple` | Root | Present when `type="multiple"` |
 | `data-disabled` | Root, ColorSwatch | Present when disabled |
-| `data-state` | ColorSwatch | `'on' \| 'off'` — whether the item is selected |
+| `data-state` | ColorSwatch | `'on' \| 'off'`. Whether the item is selected |
 | `data-pressed` | ColorSwatch | Present when the item is selected (Base UI's own attribute, alongside `data-state`) |
 
 ## Accessibility
@@ -195,7 +195,7 @@ the events from the focused swatch.
 | `role="group"` | Applied to the root. |
 | `role="img"` | Applied to every swatch, grouped or not. |
 | `aria-pressed` | Applied to a grouped swatch, reflecting its selection state. |
-| `aria-label` | **Not generated.** Pass your own on each swatch — a colored button has no text content to name it. |
+| `aria-label` | **Not generated.** Pass your own on each swatch. A colored button has no text content to name it. |
 
 ### Keyboard Navigation
 
@@ -208,5 +208,5 @@ the events from the focused swatch.
 
 Arrow navigation wraps at the ends while `loopFocus` is true, and clamps when it
 is false. `Home` and `End` do **not** move focus: the group does not enable them
-on its underlying composite. There is no typeahead and no `Ctrl/Cmd + A` — those
+on its underlying composite. There is no typeahead and no `Ctrl/Cmd + A`, those
 belong to Vue's listbox-based picker.

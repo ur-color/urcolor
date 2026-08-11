@@ -51,7 +51,7 @@ export class MyField {
 
 Three of the selectors are tag-qualified: `input[urcColorFieldInput]`, `button[urcColorFieldIncrement]` and `button[urcColorFieldDecrement]` must sit on those elements. The root and swatch selectors are element-agnostic.
 
-`urcColorFieldSwatch` takes its own `[value]` and never injects the root, so it can sit anywhere — inside the root, or beside it.
+`urcColorFieldSwatch` takes its own `[value]` and never injects the root, so it can sit anywhere: inside the root, or beside it.
 
 ## Examples
 
@@ -81,7 +81,7 @@ One root per channel, all bound to the same signal. The steppers disable themsel
 
 ### Alpha channel
 
-`channel="alpha"` edits opacity. It is not a channel of any color space — the root special-cases it and presents it as a `0–100` percentage.
+`channel="alpha"` edits opacity. It is not a channel of any color space: the root special-cases it and presents it as a `0–100` percentage.
 
 ```html
 <div urcColorFieldRoot [(value)]="color" channel="alpha" class="flex items-center rounded-md border">
@@ -94,7 +94,7 @@ One root per channel, all bound to the same signal. The steppers disable themsel
 
 ### Bounds and step
 
-`min`, `max` and `step` carry no `numberAttribute` transform, so bind them rather than writing them as static attributes — a static `min="20"` would arrive as the string `"20"`.
+`min`, `max` and `step` carry no `numberAttribute` transform, so bind them rather than writing them as static attributes. A static `min="20"` would arrive as the string `"20"`.
 
 ```html
 <div urcColorFieldRoot [(value)]="color" colorSpace="hsl" channel="l" [min]="20" [max]="80" [step]="5">
@@ -104,7 +104,7 @@ One root per channel, all bound to the same signal. The steppers disable themsel
 
 ### Commit, read-only and disabled
 
-`disabled` and `readonly` are the **native attributes**, not inputs — set them on the root element and the directive picks them both up. `(valueCommit)` fires once at the end of an interaction; `(valueChange)`, the output half of `[(value)]`, fires on every change including mid-typing.
+`disabled` and `readonly` are the **native attributes**, not inputs: set them on the root element and the directive picks them both up. `(valueCommit)` fires once at the end of an interaction; `(valueChange)`, the output half of `[(value)]`, fires on every change including mid-typing.
 
 ```html
 <div urcColorFieldRoot [(value)]="color" (valueCommit)="onCommit($event)" readonly>
@@ -139,7 +139,7 @@ Every directive sets `exportAs`, so the root's state is readable from the templa
 
 ## API Reference
 
-`COLOR_FIELD_DIRECTIVES` is the array of every part below. `COLOR_FIELD_DEFAULT_COLOR` is the `Color` a root falls back to when `[(value)]` is never bound — `hsl(210, 80%, 50%)`. `ColorFieldFormat` is the exported display-format union.
+`COLOR_FIELD_DIRECTIVES` is the array of every part below. `COLOR_FIELD_DEFAULT_COLOR` is the `Color` a root falls back to when `[(value)]` is never bound: `hsl(210, 80%, 50%)`. `ColorFieldFormat` is the exported display-format union.
 
 ### ColorFieldRoot
 
@@ -161,11 +161,11 @@ The root of the field. Owns the color, the field's own numeric and text state, a
 | `valueCommit` | `output<Color>` | — | Emitted once at the end of an interaction: blur, Enter, an arrow key, or a stepper press. |
 
 ::: warning `disabled` and `readonly` are not inputs
-Both are native DOM attributes. The static attributes are read at construction — which works under SSR — and a single `MutationObserver` keeps them live afterwards. The readable signals are named **`isDisabled`** and **`isReadOnly`**; `isDisabled` cannot be called `disabled` because `FormUiControl` reserves that member name for its own `InputSignal<boolean>`.
+Both are native DOM attributes. The static attributes are read at construction, which works under SSR, and a single `MutationObserver` keeps them live afterwards. The readable signals are named **`isDisabled`** and **`isReadOnly`**; `isDisabled` cannot be called `disabled` because `FormUiControl` reserves that member name for its own `InputSignal<boolean>`.
 :::
 
 ::: tip
-`min`, `max` and `step` have no `numberAttribute` transform. Bind them — `[min]="20"` — rather than writing them as static attributes.
+`min`, `max` and `step` have no `numberAttribute` transform. Bind them, `[min]="20"`, rather than writing them as static attributes.
 :::
 
 Readable signals, for `exportAs` template references and for `inject(ColorFieldRoot)`:
@@ -184,7 +184,7 @@ The root also exposes the operations the other parts call: `handleIncrease(multi
 
 ### ColorFieldInput
 
-The editable text surface. Applied to a native `<input>`, which it drives as a `spinbutton` — the field renders suffixed text (`210°`, `50%`, `#ff8800`) that a `type="number"` input would reject, so the stepping keyboard map is provided here instead of by the browser.
+The editable text surface. Applied to a native `<input>`, which it drives as a `spinbutton`. The field renders suffixed text (`210°`, `50%`, `#ff8800`) that a `type="number"` input would reject, so the stepping keyboard map is provided here instead of by the browser.
 
 - Selector: `input[urcColorFieldInput]`
 - Export as: `urcColorFieldInput`
@@ -193,7 +193,7 @@ The directive takes no inputs. It host-binds `type`, `role`, `value`, `aria-valu
 
 ### ColorFieldIncrement
 
-Steps the value up by `step`. Applied to a native `<button>`, which it host-binds to `type="button"` and `tabindex="-1"` — the input owns the field's tab stop, so the steppers are pointer affordances only.
+Steps the value up by `step`. Applied to a native `<button>`, which it host-binds to `type="button"` and `tabindex="-1"`. The input owns the field's tab stop, so the steppers are pointer affordances only.
 
 Holding the button repeats: one step immediately, a `400`ms pause, then a step every `60`ms. The release listeners live on `window`, so a pointer that leaves the button before lifting still ends the hold.
 
@@ -248,7 +248,7 @@ ColorField exposes the input as the single tab stop. The steppers carry `tabinde
 |-----------|-------------|
 | `role="spinbutton"` | Applied to `urcColorFieldInput`. |
 | `aria-valuenow` | The current value in display units. Absent while the field is empty. |
-| `aria-label` | Not generated for the input — set your own on the element. Defaults to `"Increase"` / `"Decrease"` on the steppers and `"Colour swatch"` on the swatch. |
+| `aria-label` | Not generated for the input; set your own on the element. Defaults to `"Increase"` / `"Decrease"` on the steppers and `"Colour swatch"` on the swatch. |
 | `role="img"` | Applied to `urcColorFieldSwatch`. |
 | `disabled` / `readOnly` | Native properties, mirrored onto the input from the root. |
 

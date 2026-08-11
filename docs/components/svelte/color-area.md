@@ -23,7 +23,7 @@ A rectangular 2D area component for adjusting two color channels mapped to the h
 </ColorArea.Root>
 ```
 
-`useColor` returns an object whose `color`, `hex` and `alpha` members are **getters**, not refs. Keep the object rather than destructuring it, and bind with Svelte 5's function form — `bind:value={() => colorState.color, colorState.setColor}` — which pairs the getter with the setter.
+`useColor` returns an object whose `color`, `hex` and `alpha` members are **getters**, not refs. Keep the object rather than destructuring it, and bind with Svelte 5's function form, `bind:value={() => colorState.color, colorState.setColor}`, which pairs the getter with the setter.
 
 ## Anatomy
 
@@ -160,7 +160,7 @@ Every part accepts a `child` snippet that replaces the element it would have ren
 
 ## API Reference
 
-Every part is also exported unnamespaced — `ColorAreaRoot`, `ColorAreaGradient`, `ColorAreaThumb` — alongside the `ColorArea.*` namespace. The root's context is readable with `colorAreaContext.get()`.
+Every part is also exported unnamespaced, `ColorAreaRoot`, `ColorAreaGradient`, `ColorAreaThumb`, alongside the `ColorArea.*` namespace. The root's context is readable with `colorAreaContext.get()`.
 
 ### ColorArea.Root
 
@@ -192,7 +192,7 @@ The root publishes `--reka-slider-area-thumb-transform` on its own `style`, whic
 
 ### ColorArea.Gradient
 
-Renders the area's two-dimensional color surface, sampled from the root's color space and channel configuration. Renders a `<span>` wrapper with an inner `<canvas>`. The transparency checkerboard is the wrapper's own CSS background, which the canvas bitmap composites over — there is no `Checkerboard` part in this package.
+Renders the area's two-dimensional color surface, sampled from the root's color space and channel configuration. Renders a `<span>` wrapper with an inner `<canvas>`. The transparency checkerboard is the wrapper's own CSS background, which the canvas bitmap composites over. There is no `Checkerboard` part in this package.
 
 Extends `HTMLAttributes<HTMLSpanElement>`.
 
@@ -211,7 +211,7 @@ Extends `HTMLAttributes<HTMLSpanElement>`.
 
 The single combined handle, and the area's only focusable element. One thumb drives **both** axes: it renders `role="slider"`, takes `tabindex="0"` unless the root is disabled, and is positioned from the horizontal and vertical channel values.
 
-Because one handle serves two channels, it announces both — `aria-label` names the channel pair and `aria-valuetext` carries both formatted values. There is no separate thumb per axis. The thumb is only a focus target and an ARIA surface; every value change is owned by the root, whose `keydown` listener sees the events that bubble up from here.
+Because one handle serves two channels, it announces both: `aria-label` names the channel pair and `aria-valuetext` carries both formatted values. There is no separate thumb per axis. The thumb is only a focus target and an ARIA surface; every value change is owned by the root, whose `keydown` listener sees the events that bubble up from here.
 
 Extends `HTMLAttributes<HTMLSpanElement>`.
 

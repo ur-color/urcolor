@@ -1,6 +1,6 @@
 # How to Build a Color Picker (Square in Ring)
 
-Let's combine a color ring and color area into an HSV color picker with a square gradient inside a hue ring.
+A hue ring with a square gradient inscribed in it, which is HSV in a single control.
 
 <script setup>
 import ColorPickerSquareInRingGuide from './demo/vue/ColorPickerSquareInRingGuide.vue'
@@ -25,9 +25,23 @@ Here's what we'll end up with:
 
 </details>
 
+The parts, and how they nest:
+
+```mermaid
+flowchart TD
+  C["relative container"] --> R["ColorRing Root<br/>hue"]
+  C --> A["ColorArea Root<br/>saturation, value<br/>inset 20.3%"]
+  R --> RG["Gradient"]
+  R --> RT["Thumb"]
+  A --> AG["Gradient"]
+  A --> AT["Thumb"]
+  S["one shared color state"] -.-> R
+  S -.-> A
+```
+
 ## Step 1: Set up shared state
 
-Both components will share the same color ref. Start with a single reactive color value.
+Both components read and write one color ref, so start with a single reactive value.
 
 ::: code-group
 
@@ -70,11 +84,11 @@ export class MyPicker {
 
 :::
 
-`useColor()` creates color state from any CSS color string. Vue returns a `{ color }` shallow ref; React returns `{ color, setColor }`. Svelte returns a rune-backed object whose `color`, `hex` and `alpha` are **getters** — keep the object (`colorState.color`) rather than destructuring it, or you lose reactivity. Angular has no hook: a plain `signal<Color>()` is the state, and `[(value)]` binds to it directly.
+`useColor()` creates color state from any CSS color string. Vue returns a `{ color }` shallow ref and React returns `{ color, setColor }`. Svelte returns a rune-backed object whose `color`, `hex` and `alpha` are getters, so keep the object and read `colorState.color` rather than destructuring it, or reactivity is lost. Angular has no hook: a plain `signal<Color>()` is the state, and `[(value)]` binds to it directly.
 
 ## Step 2: Add the outer hue ring
 
-The `ColorRing` handles hue selection. We use a relative container to position the ring and square together.
+`ColorRing` handles hue selection. A relative container positions the ring and the square together.
 
 ::: code-group
 
@@ -243,11 +257,11 @@ export class MyPicker {
 
 :::
 
-The outer `div` acts as the layout container. The ring is absolutely positioned to fill it.
+The outer `div` is the layout container, and the ring is absolutely positioned to fill it.
 
-Vue's `v-model` and Angular's `[(value)]` are true two-way bindings. React is one-way plus `onValueChange`. Svelte's `value` is `$bindable`, but `useColor` exposes getters, so bind it with Svelte 5's function form — `bind:value={() => colorState.color, colorState.setColor}` — which is exactly `v-model` for a getter/setter pair.
+Vue's `v-model` and Angular's `[(value)]` are true two-way bindings. React is one-way plus `onValueChange`. Svelte's `value` is `$bindable`, but `useColor` exposes getters, so bind it with Svelte 5's function form, `bind:value={() => colorState.color, colorState.setColor}`, which is `v-model` for a getter/setter pair.
 
-Angular ships every part of a family as a `COLOR_*_DIRECTIVES` array, so one entry in `imports` brings in the whole set. This recipe composes two families, so Step 3 adds a second array alongside the first.
+Angular ships each family as a `COLOR_*_DIRECTIVES` array, so one entry in `imports` brings in the whole set. This recipe composes two families, so Step 3 adds a second array alongside the first.
 
 Two more per-framework details show up here. In Angular the gradient's selector is `canvas[urcColorRingGradient]`, so it goes on a `<canvas>` element you own; Vue, React and Svelte render their own canvas for you. And Angular's `channelOverrides` is bound from a `readonly` class field rather than an inline object literal, so the input keeps its identity across change detection instead of looking changed on every pass.
 
@@ -505,10 +519,10 @@ export class MyPicker {
 
 :::
 
-The key is `inset-[20.3%]` — this inscribes the square perfectly inside the ring's inner circle (`50% × (1 − 0.84/√2) ≈ 20.3%`). The `:y-inverted="true"` prop flips the Y axis so value increases upward. Both components share the same `v-model="color"`, so dragging the hue ring updates the area's gradient, and dragging the area updates the color while keeping the hue ring in sync.
+`inset-[20.3%]` is the number that matters: it inscribes the square exactly inside the ring's inner circle, at `50% × (1 − 0.84/√2) ≈ 20.3%`. The `:y-inverted="true"` prop flips the Y axis so value increases upward. Both components share the same `v-model="color"`, so dragging the hue ring updates the area's gradient, and dragging the area updates the color while keeping the hue ring in sync.
 
-React, Svelte and Angular reach the same result with two naming differences. Their area root takes `xChannel` / `yChannel` where Vue takes `x-channel` / `y-channel`, and the Y flip is `yInverted` rather than `:y-inverted`. They also have no `ColorAreaArea` part: the root is the interactive surface, so the gradient and thumb are its direct children. Binding both roots to the same state is what keeps them in sync — `value={color}` plus `onValueChange={setColor}` on both roots in React, `bind:value={() => colorState.color, colorState.setColor}` twice in Svelte, `[(value)]="color"` twice in Angular.
+React, Svelte and Angular reach the same result with two naming differences. Their area root takes `xChannel` / `yChannel` where Vue takes `x-channel` / `y-channel`, and the Y flip is `yInverted` rather than `:y-inverted`. They also have no `ColorAreaArea` part: the root is the interactive surface, so the gradient and thumb are its direct children. Binding both roots to the same state is what keeps them in sync: `value={color}` plus `onValueChange={setColor}` on both roots in React, `bind:value={() => colorState.color, colorState.setColor}` twice in Svelte, `[(value)]="color"` twice in Angular.
 
 ::: tip
-All components are completely unstyled — the classes above are just an example using Tailwind CSS. To compute the inset for any `inner-radius`, use `50% × (1 − innerRadius / √2)`.
+The components ship unstyled. The classes above are one example, written with Tailwind CSS. To compute the inset for any `inner-radius`, use `50% × (1 − innerRadius / √2)`.
 :::

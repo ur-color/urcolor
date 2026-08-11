@@ -82,23 +82,16 @@ function onSelect(value: unknown) {
   flex-direction: column;
   gap: 6px;
   width: clamp(72px, 17cqw, 110px);
-  /*
-   * Own container, so `cqw` below means this panel's width rather than the
-   * stage's — that is what lets the wide swatch measure a ramp cell.
-   */
-  container-type: inline-size;
 }
 
 /*
- * Full width but exactly one ramp cell tall: the ramp is two equal columns with
- * a 6px gutter, so a cell is `(width - 6px) / 2`. Stated in `cqw` rather than
- * `%` because a percentage height would resolve against the panel's height, not
- * its width. The inset ring keeps a pale swatch from dissolving into the panel
- * fill.
+ * Full width and square, so the picked color reads as one big chip above the
+ * ramp rather than a letterboxed strip. The inset ring keeps a pale swatch from
+ * dissolving into the panel fill.
  */
 .sat-swatch-current {
   width: 100%;
-  height: calc((100cqw - 6px) / 2);
+  aspect-ratio: 1;
   border-radius: 6px;
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--vp-c-text-1) 12%, transparent);
 }

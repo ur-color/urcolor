@@ -96,7 +96,7 @@ OKLCh color wheel with Hue mapped to angle and Chroma to radius.
 
 ### Commit and disabled
 
-`disabled` is the **native attribute**, not an input — set it on the element and the root picks it up. `(valueCommit)` fires once at the end of an interaction, never mid-drag.
+`disabled` is the **native attribute**, not an input: set it on the element and the root picks it up. `(valueCommit)` fires once at the end of an interaction, never mid-drag.
 
 ```html
 <div urcColorWheelRoot [(value)]="color" (valueCommit)="onCommit($event)" disabled>
@@ -151,7 +151,7 @@ The root of the wheel. Owns the color, the pointer and keyboard interaction, and
 | `valueCommit` | `output<Color>` | — | Emitted once at the end of an interaction, never mid-drag. |
 
 ::: warning `disabled` is not an input
-`disabled` is the native DOM attribute. The static attribute is read at construction — which works under SSR — and a `MutationObserver` keeps it live afterwards. The readable signal is named **`isDisabled`**, not `disabled`, because `FormUiControl` reserves the member name `disabled` for its own `InputSignal<boolean>`.
+`disabled` is the native DOM attribute. The static attribute is read at construction, which works under SSR, and a `MutationObserver` keeps it live afterwards. The readable signal is named **`isDisabled`**, not `disabled`, because `FormUiControl` reserves the member name `disabled` for its own `InputSignal<boolean>`.
 :::
 
 Readable signals, for `exportAs` template references and for `inject(ColorWheelRoot)`:
@@ -172,7 +172,7 @@ Readable signals, for `exportAs` template references and for `inject(ColorWheelR
 
 ### ColorWheelGradient
 
-Paints the wheel's color disc onto a `<canvas>` you supply. The transparency checkerboard is this element's CSS background, which the canvas bitmap composites over — there is no `Checkerboard` part in this package.
+Paints the wheel's color disc onto a `<canvas>` you supply. The transparency checkerboard is this element's CSS background, which the canvas bitmap composites over. There is no `Checkerboard` part in this package.
 
 - Selector: `canvas[urcColorWheelGradient]`
 - Export as: `urcColorWheelGradient`
@@ -187,7 +187,7 @@ Paints the wheel's color disc onto a `<canvas>` you supply. The transparency che
 
 The single combined handle, and the wheel's only focusable element. One thumb drives **both** axes: it sets `role="slider"`, takes `tabindex="0"` unless the root is disabled, and is positioned in polar coordinates from the angle and radius channel values.
 
-Because one handle serves two channels, it announces both — `aria-label` names the channel pair and `aria-valuetext` carries both formatted values. There is no separate thumb per axis. The thumb is only a focus target and an ARIA surface; every value change is owned by the root, whose `keydown` listener sees the events that bubble up from here.
+Because one handle serves two channels, it announces both: `aria-label` names the channel pair and `aria-valuetext` carries both formatted values. There is no separate thumb per axis. The thumb is only a focus target and an ARIA surface; every value change is owned by the root, whose `keydown` listener sees the events that bubble up from here.
 
 - Selector: `[urcColorWheelThumb]`
 - Export as: `urcColorWheelThumb`

@@ -24,7 +24,7 @@ A numeric input component for editing a single color channel, with optional step
 </ColorField.Root>
 ```
 
-`useColor` returns an object whose `color`, `hex` and `alpha` members are **getters**, not refs. Keep the object rather than destructuring it, and bind with Svelte 5's function form — `bind:value={() => colorState.color, colorState.setColor}` — which pairs the getter with the setter.
+`useColor` returns an object whose `color`, `hex` and `alpha` members are **getters**, not refs. Keep the object rather than destructuring it, and bind with Svelte 5's function form, `bind:value={() => colorState.color, colorState.setColor}`, which pairs the getter with the setter.
 
 ## Anatomy
 
@@ -37,7 +37,7 @@ A numeric input component for editing a single color channel, with optional step
 </ColorField.Root>
 ```
 
-`ColorField.Swatch` takes its own `value` and reads nothing from the root's context, so it can sit anywhere in the tree — inside the root, or beside it.
+`ColorField.Swatch` takes its own `value` and reads nothing from the root's context, so it can sit anywhere in the tree, inside the root, or beside it.
 
 ## Examples
 
@@ -89,7 +89,7 @@ One root per channel, each bound to the same color state. The steppers are disab
 
 ### Alpha channel
 
-`channel="alpha"` edits opacity. It is not a channel of any color space — the root special-cases it and presents it as a `0–100` percentage.
+`channel="alpha"` edits opacity. It is not a channel of any color space: the root special-cases it and presents it as a `0–100` percentage.
 
 ```svelte
 <ColorField.Root
@@ -158,7 +158,7 @@ Every part accepts a `child` snippet that replaces the element it would have ren
 
 ## API Reference
 
-Every part is also exported unnamespaced — `ColorFieldRoot`, `ColorFieldInput`, `ColorFieldIncrement`, `ColorFieldDecrement`, `ColorFieldSwatch` — alongside the `ColorField.*` namespace. The root's context is readable with `colorFieldContext.get()`, and the display format union is exported as `ColorFieldFormat`.
+Every part is also exported unnamespaced, `ColorFieldRoot`, `ColorFieldInput`, `ColorFieldIncrement`, `ColorFieldDecrement`, `ColorFieldSwatch`, alongside the `ColorField.*` namespace. The root's context is readable with `colorFieldContext.get()`, and the display format union is exported as `ColorFieldFormat`.
 
 ### ColorField.Root
 
@@ -187,7 +187,7 @@ Extends `HTMLAttributes<HTMLDivElement>`.
 
 The editable text surface. Renders an `<input type="text" role="spinbutton">` and owns the keyboard map, the blur/Enter commit, and the select-on-focus behaviour.
 
-It is a `spinbutton` rather than `type="number"` because the field renders suffixed text — `210°`, `50%`, `#ff8800` — that a numeric input would reject.
+It is a `spinbutton` rather than `type="number"` because the field renders suffixed text, `210°`, `50%`, `#ff8800`, that a numeric input would reject.
 
 Extends `HTMLInputAttributes`.
 
@@ -200,7 +200,7 @@ The part sets `value`, `disabled`, `readonly`, `autocomplete="off"`, `autocorrec
 
 ### ColorField.Increment
 
-Steps the value up by `step`. Renders a `<button type="button">` with `tabindex="-1"` — the input owns the field's tab stop, so the steppers are pointer affordances only.
+Steps the value up by `step`. Renders a `<button type="button">` with `tabindex="-1"`. The input owns the field's tab stop, so the steppers are pointer affordances only.
 
 Holding the button repeats: one step immediately, a `400`ms pause, then a step every `60`ms. The release listeners live on `window`, so a pointer that leaves the button before lifting still ends the hold.
 
@@ -266,7 +266,7 @@ ColorField exposes the input as the single tab stop. The steppers carry `tabinde
 |-----------|-------------|
 | `role="spinbutton"` | Applied to `ColorField.Input`. |
 | `aria-valuenow` | The current value in display units. Absent while the field is empty. |
-| `aria-label` | Not generated for the input — supply your own. Defaults to `"Increase"` / `"Decrease"` on the steppers and `"Colour swatch"` on the swatch. |
+| `aria-label` | Not generated for the input. Supply your own. Defaults to `"Increase"` / `"Decrease"` on the steppers and `"Colour swatch"` on the swatch. |
 | `role="img"` | Applied to `ColorField.Swatch`. |
 | `disabled` / `readonly` | Native attributes, mirrored onto the input from the root. |
 
