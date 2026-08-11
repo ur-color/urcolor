@@ -19,7 +19,6 @@ export interface ColorTriangleContextValue {
   zMin: number;
   zMax: number;
   isThreeChannel: boolean;
-  rotation: number;
   vertices: [Point, Point, Point];
   isDragging: boolean;
   thumbAlignment: "contain" | "overflow";

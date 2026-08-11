@@ -4,7 +4,7 @@ import type { PrimitiveProps } from "reka-ui";
 import { createContext, useDirection, useForwardExpose, VisuallyHidden } from "reka-ui";
 import { computed, ref, toRef, toRefs } from "vue";
 import { Color, type SpaceId } from "@urcolor/core";
-import { triangleVertices, clampToTriangle, barycentricCoords, pointInTriangle, insetTriangle, type Point, colorSpaces } from "@urcolor/shared";
+import { triangleVertices, clampToTriangle, barycentricCoords, pointInTriangle, insetTriangle, measureBox, type BoxMeasure, type Point, colorSpaces } from "@urcolor/shared";
 
 type Direction = "ltr" | "rtl";
 
@@ -21,7 +21,6 @@ export interface ColorTriangleRootProps extends /* @vue-ignore */ PrimitiveProps
   xChannel?: string;
   yChannel?: string;
   zChannel?: string;
-  rotation?: number;
   orientation?: "vertical" | "horizontal";
   inverted?: boolean;
   thumbAlignment?: "contain" | "overflow";
@@ -55,7 +54,6 @@ export interface ColorTriangleRootContext {
   zMin: Ref<number>;
   zMax: Ref<number>;
   isThreeChannel: Ref<boolean>;
-  rotation: Ref<number>;
   vertices: Ref<[Point, Point, Point]>;
   orientation: Ref<"vertical" | "horizontal">;
   dir: Ref<Direction>;
@@ -81,7 +79,6 @@ const props = withDefaults(defineProps<ColorTriangleRootProps>(), {
   disabled: false,
   defaultValue: "hsl(0, 100%, 50%)",
   colorSpace: "hsv",
-  rotation: 0,
   orientation: "vertical",
   inverted: false,
   thumbAlignment: "overflow",
@@ -133,7 +130,7 @@ const zStep = computed(() => zConfig.value?.step ?? 1);
 
 // Triangle vertices in normalized 0-1 space
 const vertices = computed(() => {
-  const [v0, v1, v2] = triangleVertices(1, 1, props.rotation);
+  const [v0, v1, v2] = triangleVertices(1, 1);
   return props.inverted ? [v0, v2, v1] as [Point, Point, Point] : [v0, v1, v2] as [Point, Point, Point];
 });
 
@@ -161,11 +158,17 @@ const currentZValue = computed(() => displayValues.value[2] ?? zMin.value);
 
 const valueBeforeSlide = ref({ x: currentXValue.value, y: currentYValue.value, z: currentZValue.value });
 
-function getValuesFromPointer(event: PointerEvent): { x: number; y: number; z?: number } {
-  const rect = drag.rect.value ?? currentElement.value.getBoundingClientRect();
+/**
+ * The element measured once per gesture. `usePointerDrag` caches a plain rect,
+ * which cannot describe a rotated box, so the triangle keeps its own.
+ */
+let gestureBox: BoxMeasure | undefined;
 
-  const nx = (event.clientX - rect.left) / rect.width;
-  const ny = (event.clientY - rect.top) / rect.height;
+function getValuesFromPointer(event: PointerEvent): { x: number; y: number; z?: number } {
+  const box = gestureBox ?? measureBox(currentElement.value);
+  gestureBox = box;
+
+  const { x: nx, y: ny } = box.normalize(event.clientX, event.clientY);
 
   const [v0, v1, v2] = containVertices.value;
   const clamped = clampToTriangle(nx, ny, v0, v1, v2);
@@ -258,9 +261,7 @@ function setChannelValues(partial: { x?: number; y?: number; z?: number }, optio
 
 /** Reject a pointerdown that lands outside the triangle. */
 function isInsideTriangle(event: PointerEvent): boolean {
-  const rect = currentElement.value.getBoundingClientRect();
-  const nx = (event.clientX - rect.left) / rect.width;
-  const ny = (event.clientY - rect.top) / rect.height;
+  const { x: nx, y: ny } = measureBox(currentElement.value).normalize(event.clientX, event.clientY);
   const [hv0, hv1, hv2] = vertices.value;
   return pointInTriangle(nx, ny, hv0, hv1, hv2);
 }
@@ -278,6 +279,7 @@ const drag = usePointerDrag({
     updateValues(vals.x, vals.y, false, vals.z);
   },
   onEnd() {
+    gestureBox = undefined;
     const prev = valueBeforeSlide.value;
     if (prev.x !== currentXValue.value || prev.y !== currentYValue.value || prev.z !== currentZValue.value) {
       if (colorRef.value) emits("changeEnd", colorRef.value);
@@ -360,7 +362,6 @@ provideColorTriangleRootContext({
   zMin,
   zMax,
   isThreeChannel,
-  rotation: computed(() => props.rotation),
   orientation: computed(() => props.orientation!),
   vertices,
   dir,
@@ -385,6 +386,7 @@ provideColorTriangleRootContext({
     @pointerdown="drag.onPointerDown"
     @pointermove="drag.onPointerMove"
     @pointerup="drag.onPointerUp"
+    @pointercancel="drag.onPointerCancel"
     @keydown="handleKeyDown"
   >
     <slot :model-value="colorRef" />

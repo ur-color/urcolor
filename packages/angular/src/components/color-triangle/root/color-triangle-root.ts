@@ -9,7 +9,6 @@ import {
   inject,
   input,
   model,
-  numberAttribute,
   output,
   signal,
 } from "@angular/core";
@@ -105,8 +104,6 @@ export class ColorTriangleRoot implements FormValueControl<Color> {
   readonly yChannel = input<string>();
   /** The channel mapped to the third vertex. Supplying it selects the three-channel simplex. */
   readonly zChannel = input<string>();
-  /** Rotation of the triangle, in degrees. */
-  readonly rotation = input(0, { transform: numberAttribute });
   /** Swaps the second and third vertices, mirroring the triangle. */
   readonly inverted = input(false, { transform: booleanAttribute });
   /** Whether the thumb is centred on the edge (`"overflow"`) or kept inside it. */
@@ -200,7 +197,7 @@ export class ColorTriangleRoot implements FormValueControl<Color> {
 
   /** The three corners in normalised 0-1 space. `inverted` swaps the last two. */
   readonly vertices = computed<[Point, Point, Point]>(() => {
-    const [v0, v1, v2] = triangleVertices(1, 1, this.rotation());
+    const [v0, v1, v2] = triangleVertices(1, 1);
     return this.inverted() ? [v0, v2, v1] : [v0, v1, v2];
   });
 
@@ -487,7 +484,7 @@ export class ColorTriangleRoot implements FormValueControl<Color> {
   }
 
   protected onPointerCancel(): void {
-    this.drag.cancel();
+    this.drag.pointerCancel();
     this.draggingState.set(false);
   }
 

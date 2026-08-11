@@ -33,7 +33,6 @@ export interface ColorTriangleContextValue {
     /** The third channel in display units; equal to `minZ` in two-channel mode. */
     readonly valueZ: number;
     /** Rotation of the triangle, in degrees. */
-    readonly rotation: number;
     /** The three corners in normalised 0-1 space; what the outline is clipped to. */
     readonly vertices: readonly [Point, Point, Point];
     /**

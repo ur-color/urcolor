@@ -156,3 +156,58 @@ describe("usePointerDrag", () => {
     cafSpy.mockRestore();
   });
 });
+
+describe("usePointerDrag: releasing a stranded gesture", () => {
+  it("ends the drag on pointercancel", () => {
+    const onEnd = mock(() => {});
+    const drag = usePointerDrag({
+      disabled: ref(false),
+      target: ref(document.createElement("div")),
+      onMove: () => {},
+      onEnd,
+    });
+
+    drag.onPointerDown(makeEvent());
+    expect(drag.isDragging.value).toBe(true);
+
+    drag.onPointerCancel(makeEvent());
+
+    expect(drag.isDragging.value).toBe(false);
+    expect(onEnd).toHaveBeenCalledTimes(1);
+  });
+
+  it("ends the drag on pointerup even when capture was already lost", () => {
+    const onEnd = mock(() => {});
+    const drag = usePointerDrag({
+      disabled: ref(false),
+      target: ref(document.createElement("div")),
+      onMove: () => {},
+      onEnd,
+    });
+
+    drag.onPointerDown(makeEvent());
+    // A browser that takes the gesture over drops the capture first; the
+    // release then arrives with nothing captured.
+    const released = makeEvent();
+    (released.target as HTMLElement).hasPointerCapture = mock(() => false);
+    drag.onPointerUp(released);
+
+    expect(drag.isDragging.value).toBe(false);
+    expect(onEnd).toHaveBeenCalledTimes(1);
+  });
+
+  it("ignores a cancel for a gesture that never started", () => {
+    const onEnd = mock(() => {});
+    const drag = usePointerDrag({
+      disabled: ref(false),
+      target: ref(document.createElement("div")),
+      onMove: () => {},
+      onEnd,
+    });
+
+    drag.onPointerCancel(makeEvent());
+
+    expect(drag.isDragging.value).toBe(false);
+    expect(onEnd).not.toHaveBeenCalled();
+  });
+});

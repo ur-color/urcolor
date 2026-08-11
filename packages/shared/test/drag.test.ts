@@ -111,3 +111,60 @@ describe("createDragController", () => {
     expect(c.isDragging).toBe(false);
   });
 });
+
+describe("createDragController: releasing a stranded gesture", () => {
+  it("ends the drag on pointerup even when capture was already lost", () => {
+    const { el, captured } = makeElement({ left: 0, top: 0, width: 100, height: 100 });
+    const ends: DragPoint[] = [];
+    const c = createDragController({ getElement: () => el, onMove: () => {}, onEnd: p => ends.push(p) });
+
+    c.pointerDown(makeEvent(50, 50, el));
+    expect(c.isDragging).toBe(true);
+
+    // The browser dropped the capture before the release reached us.
+    captured.clear();
+    c.pointerUp(makeEvent(60, 60, el));
+
+    expect(c.isDragging).toBe(false);
+    expect(ends).toHaveLength(1);
+  });
+
+  it("reports a cancelled gesture through onEnd, at the last delivered position", () => {
+    const { el } = makeElement({ left: 0, top: 0, width: 100, height: 100 });
+    const ends: DragPoint[] = [];
+    const c = createDragController({ getElement: () => el, onMove: () => {}, onEnd: p => ends.push(p) });
+
+    c.pointerDown(makeEvent(50, 50, el));
+    c.pointerCancel();
+
+    expect(c.isDragging).toBe(false);
+    expect(ends).toHaveLength(1);
+    expect(ends[0]!.normalizedX).toBeCloseTo(0.5, 5);
+  });
+
+  it("stays silent when a teardown drops the gesture", () => {
+    const { el } = makeElement({ left: 0, top: 0, width: 100, height: 100 });
+    const ends: DragPoint[] = [];
+    const c = createDragController({ getElement: () => el, onMove: () => {}, onEnd: p => ends.push(p) });
+
+    c.pointerDown(makeEvent(50, 50, el));
+    // `cancel` is what a root calls as it is destroyed. Emitting from there
+    // would hand a change event to an application that has already thrown the
+    // control away.
+    c.cancel();
+
+    expect(c.isDragging).toBe(false);
+    expect(ends).toHaveLength(0);
+  });
+
+  it("ignores a cancel for a gesture that never started", () => {
+    const { el } = makeElement({ left: 0, top: 0, width: 100, height: 100 });
+    const ends: DragPoint[] = [];
+    const c = createDragController({ getElement: () => el, onMove: () => {}, onEnd: p => ends.push(p) });
+
+    c.pointerCancel();
+
+    expect(c.isDragging).toBe(false);
+    expect(ends).toHaveLength(0);
+  });
+});

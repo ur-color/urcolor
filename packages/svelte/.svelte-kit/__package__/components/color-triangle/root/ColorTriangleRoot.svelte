@@ -18,7 +18,6 @@
     /** The channel mapped to the third vertex. Supplying it switches the triangle to a three-channel simplex. */
     zChannel?: string;
     /** Rotation of the triangle, in degrees. */
-    rotation?: number;
     /** Swaps the second and third vertices, mirroring the triangle. */
     inverted?: boolean;
     /** Whether the thumb is centred on the edge (`"overflow"`) or kept inside it. */
@@ -85,7 +84,6 @@
     xChannel,
     yChannel,
     zChannel,
-    rotation = 0,
     inverted = false,
     thumbAlignment = "overflow",
     disabled = false,
@@ -139,7 +137,7 @@
 
   /** The three corners in normalised 0-1 space. `inverted` swaps the last two. */
   const vertices = $derived.by<[Point, Point, Point]>(() => {
-    const [v0, v1, v2] = triangleVertices(1, 1, rotation);
+    const [v0, v1, v2] = triangleVertices(1, 1);
     return inverted ? [v0, v2, v1] : [v0, v1, v2];
   });
 
@@ -348,7 +346,7 @@
     const onPointerMove = (event: PointerEvent): void => drag.pointerMove(event);
     const onPointerUp = (event: PointerEvent): void => drag.pointerUp(event);
     const onPointerCancel = (): void => {
-      drag.cancel();
+      drag.pointerCancel();
       dragging = false;
     };
     const onKeyDown = (event: KeyboardEvent): void => {
@@ -469,9 +467,6 @@
     },
     get valueZ() {
       return valueZ;
-    },
-    get rotation() {
-      return rotation;
     },
     get vertices() {
       return vertices;

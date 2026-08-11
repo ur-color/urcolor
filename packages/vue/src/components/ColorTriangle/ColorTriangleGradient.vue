@@ -108,7 +108,7 @@ useGradientCanvas({
   sources: () => [
     props.channelOverrides,
     rootContext.colorSpace.value, rootContext.xChannelKey.value, rootContext.yChannelKey.value, rootContext.zChannelKey.value,
-    rootContext.colorRef.value, rootContext.rotation.value,
+    rootContext.colorRef.value,
   ],
   paint,
   isDragging: rootContext.isDragging,

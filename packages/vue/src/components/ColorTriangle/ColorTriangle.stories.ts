@@ -43,7 +43,7 @@ export const HSV_Saturation_Value: Story = { name: "HSV / Saturation × Value", 
 export const HSL_Saturation_Lightness: Story = { name: "HSL / Saturation × Lightness", render: renderTriangle({ colorSpace: "hsl", xChannel: "s", yChannel: "l" }) };
 export const OKLCh_Chroma_Lightness: Story = { name: "OKLCh / Chroma × Lightness", render: renderTriangle({ colorSpace: "oklch", xChannel: "c", yChannel: "l" }) };
 export const HWB_Whiteness_Blackness: Story = { name: "HWB / Whiteness × Blackness", render: renderTriangle({ colorSpace: "hwb", xChannel: "w", yChannel: "b" }) };
-export const Rotated: Story = { name: "HSV / Rotated 90°", render: renderTriangle({ colorSpace: "hsv", xChannel: "s", yChannel: "v", rotation: 90 }) };
+export const Rotated: Story = { name: "HSV / Rotated 90°", render: renderTriangle({ colorSpace: "hsv", xChannel: "s", yChannel: "v", style: "transform: rotate(90deg)" }) };
 export const Disabled: Story = { name: "Disabled", render: renderTriangle({ disabled: true }) };
 
 // 3-channel (Maxwell's triangle) stories

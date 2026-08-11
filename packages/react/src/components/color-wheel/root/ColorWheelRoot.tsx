@@ -165,9 +165,17 @@ export const ColorWheelRoot = forwardRef<HTMLDivElement, ColorWheelRootProps>(
     }, [angleMin, angleMax, radiusMin, radiusMax, startAngle]);
 
     const handlePointerUp = useCallback((event: React.PointerEvent) => {
+      // The capture is released when the element still holds it, but the
+      // gesture ends either way. A browser that takes a drag over (a touch that
+      // becomes a scroll, a context menu, a pointer leaving the window) drops
+      // the capture first, and a release that insisted on it returned early and
+      // left `isDragging` stuck at `true`. Every gradient suppresses its
+      // repaints while a drag is in flight, so the surface then stopped
+      // repainting for the rest of the component's life, silently.
       const target = event.target as HTMLElement;
-      if (!target.hasPointerCapture(event.pointerId)) return;
-      target.releasePointerCapture(event.pointerId);
+      if (target.hasPointerCapture?.(event.pointerId)) {
+        target.releasePointerCapture(event.pointerId);
+      }
       setIsDragging(false);
       rectRef.current = undefined;
       const prev = valueBeforeSlide.current;
@@ -210,7 +218,7 @@ export const ColorWheelRoot = forwardRef<HTMLDivElement, ColorWheelRootProps>(
           ref={(el) => { (elementRef as React.MutableRefObject<HTMLDivElement | null>).current = el; if (typeof ref === "function") ref(el); else if (ref) ref.current = el; }}
           aria-disabled={disabled} data-disabled={disabled ? "" : undefined}
           className={className} style={style}
-          onPointerDown={handlePointerDown} onPointerMove={handlePointerMove} onPointerUp={handlePointerUp} onKeyDown={handleKeyDown}
+          onPointerDown={handlePointerDown} onPointerMove={handlePointerMove} onPointerUp={handlePointerUp} onPointerCancel={handlePointerUp} onKeyDown={handleKeyDown}
         >
           {children}
         </div>

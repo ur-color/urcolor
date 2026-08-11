@@ -16,7 +16,6 @@ export interface ColorTriangleRootProps extends HTMLAttributes<HTMLDivElement> {
     /** The channel mapped to the third vertex. Supplying it switches the triangle to a three-channel simplex. */
     zChannel?: string;
     /** Rotation of the triangle, in degrees. */
-    rotation?: number;
     /** Swaps the second and third vertices, mirroring the triangle. */
     inverted?: boolean;
     /** Whether the thumb is centred on the edge (`"overflow"`) or kept inside it. */

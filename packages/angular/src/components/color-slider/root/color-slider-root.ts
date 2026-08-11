@@ -203,7 +203,7 @@ export class ColorSliderRoot implements FormValueControl<Color> {
   }
 
   protected onPointerCancel(): void {
-    this.drag.cancel();
+    this.drag.pointerCancel();
     this.draggingState.set(false);
   }
 

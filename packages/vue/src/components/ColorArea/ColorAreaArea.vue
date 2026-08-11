@@ -71,6 +71,7 @@ const drag = usePointerDrag({
     @pointerdown="drag.onPointerDown"
     @pointermove="drag.onPointerMove"
     @pointerup="drag.onPointerUp"
+    @pointercancel="drag.onPointerCancel"
   >
     <slot />
   </Primitive>

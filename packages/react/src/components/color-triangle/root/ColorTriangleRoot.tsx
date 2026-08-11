@@ -1,6 +1,6 @@
 import { forwardRef, useCallback, useMemo, useRef, useState } from "react";
 import { Color, type SpaceId } from "@urcolor/core";
-import { triangleVertices, clampToTriangle, barycentricCoords, pointInTriangle, type Point, colorSpaces, getChannelConfig, displayToNative, nativeToDisplay, type ChannelConfig } from "@urcolor/shared";
+import { triangleVertices, clampToTriangle, barycentricCoords, pointInTriangle, measureBox, type BoxMeasure, type Point, colorSpaces, getChannelConfig, displayToNative, nativeToDisplay, type ChannelConfig } from "@urcolor/shared";
 import { ColorTriangleContext, type ColorTriangleContextValue } from "./ColorTriangleRootContext";
 
 export interface ColorTriangleRootProps {
@@ -11,7 +11,6 @@ export interface ColorTriangleRootProps {
   xChannel?: string;
   yChannel?: string;
   zChannel?: string;
-  rotation?: number;
   inverted?: boolean;
   thumbAlignment?: "contain" | "overflow";
   onValueChange?: (color: Color) => void;
@@ -39,7 +38,6 @@ export const ColorTriangleRoot = forwardRef<HTMLDivElement, ColorTriangleRootPro
       xChannel: xChannelProp,
       yChannel: yChannelProp,
       zChannel: zChannelProp,
-      rotation = 0,
       inverted = false,
       thumbAlignment = "overflow",
       onValueChange,
@@ -85,9 +83,9 @@ export const ColorTriangleRoot = forwardRef<HTMLDivElement, ColorTriangleRootPro
     const zStep = zConfig?.step ?? 1;
 
     const vertices = useMemo<[Point, Point, Point]>(() => {
-      const [v0, v1, v2] = triangleVertices(1, 1, rotation);
+      const [v0, v1, v2] = triangleVertices(1, 1);
       return inverted ? [v0, v2, v1] : [v0, v1, v2];
-    }, [rotation, inverted]);
+    }, [inverted]);
 
     const clipPathStyle = useMemo(() => {
       const pts = vertices.map(p => `${(p.x * 100).toFixed(2)}% ${(p.y * 100).toFixed(2)}%`).join(", ");
@@ -124,7 +122,8 @@ export const ColorTriangleRoot = forwardRef<HTMLDivElement, ColorTriangleRootPro
 
     const thumbElement = useRef<HTMLElement | undefined>(undefined);
     const elementRef = useRef<HTMLDivElement>(null);
-    const rectRef = useRef<DOMRect | undefined>(undefined);
+    // Measured once per gesture: both reads behind `measureBox` force layout.
+    const boxRef = useRef<BoxMeasure | undefined>(undefined);
     const valueBeforeSlide = useRef({ x: currentXValue, y: currentYValue, z: currentZValue });
 
     function snap(value: number, min: number, max: number, step: number): number {
@@ -157,11 +156,10 @@ export const ColorTriangleRoot = forwardRef<HTMLDivElement, ColorTriangleRootPro
     function getValuesFromPointer(clientX: number, clientY: number): { x: number; y: number; z?: number } {
       const el = elementRef.current;
       if (!el) return { x: xMin, y: yMin };
-      const rect = rectRef.current || el.getBoundingClientRect();
-      rectRef.current = rect;
+      const box = boxRef.current ?? measureBox(el);
+      boxRef.current = box;
 
-      const nx = (clientX - rect.left) / rect.width;
-      const ny = (clientY - rect.top) / rect.height;
+      const { x: nx, y: ny } = box.normalize(clientX, clientY);
 
       const [v0, v1, v2] = vertices;
       const clamped = clampToTriangle(nx, ny, v0, v1, v2);
@@ -324,9 +322,8 @@ export const ColorTriangleRoot = forwardRef<HTMLDivElement, ColorTriangleRootPro
       const el = elementRef.current;
       if (!el) return;
 
-      const rect = el.getBoundingClientRect();
-      const nx = (event.clientX - rect.left) / rect.width;
-      const ny = (event.clientY - rect.top) / rect.height;
+      const box = measureBox(el);
+      const { x: nx, y: ny } = box.normalize(event.clientX, event.clientY);
       const [hv0, hv1, hv2] = vertices;
       if (!pointInTriangle(nx, ny, hv0, hv1, hv2)) return;
 
@@ -337,7 +334,7 @@ export const ColorTriangleRoot = forwardRef<HTMLDivElement, ColorTriangleRootPro
 
       setIsDragging(true);
       valueBeforeSlide.current = { x: currentXValue, y: currentYValue, z: currentZValue };
-      rectRef.current = rect;
+      boxRef.current = box;
       const vals = getValuesFromPointer(event.clientX, event.clientY);
       updateValues(vals.x, vals.y, false, vals.z);
     }, [disabled, vertices, currentXValue, currentYValue, currentZValue, xMin, xMax, yMin, yMax, zMin, zMax, colorRef, xConfig, yConfig, zConfig, isThreeChannel, isControlled, onValueChange]);
@@ -357,11 +354,19 @@ export const ColorTriangleRoot = forwardRef<HTMLDivElement, ColorTriangleRootPro
     }, [vertices, xMin, xMax, yMin, yMax, zMin, zMax, colorRef, xConfig, yConfig, zConfig, isThreeChannel, isControlled, onValueChange]);
 
     const handlePointerUp = useCallback((event: React.PointerEvent) => {
+      // The capture is released when the element still holds it, but the
+      // gesture ends either way. A browser that takes a drag over (a touch that
+      // becomes a scroll, a context menu, a pointer leaving the window) drops
+      // the capture first, and a release that insisted on it returned early and
+      // left `isDragging` stuck at `true`. Every gradient suppresses its
+      // repaints while a drag is in flight, so the surface then stopped
+      // repainting for the rest of the component's life, silently.
       const target = event.target as HTMLElement;
-      if (!target.hasPointerCapture(event.pointerId)) return;
-      target.releasePointerCapture(event.pointerId);
+      if (target.hasPointerCapture?.(event.pointerId)) {
+        target.releasePointerCapture(event.pointerId);
+      }
       setIsDragging(false);
-      rectRef.current = undefined;
+      boxRef.current = undefined;
       const prev = valueBeforeSlide.current;
       if (prev.x !== currentXValue || prev.y !== currentYValue || prev.z !== currentZValue) {
         if (colorRef) onValueCommit?.(colorRef);
@@ -378,9 +383,9 @@ export const ColorTriangleRoot = forwardRef<HTMLDivElement, ColorTriangleRootPro
       disabled, colorSpace, xChannelKey, yChannelKey, zChannelKey,
       colorRef, currentXValue, currentYValue, currentZValue,
       xMin, xMax, yMin, yMax, zMin, zMax,
-      isThreeChannel, rotation, vertices,
+      isThreeChannel, vertices,
       isDragging, thumbAlignment, thumbElement,
-    }), [disabled, colorSpace, xChannelKey, yChannelKey, zChannelKey, colorRef, currentXValue, currentYValue, currentZValue, xMin, xMax, yMin, yMax, zMin, zMax, isThreeChannel, rotation, vertices, isDragging, thumbAlignment]);
+    }), [disabled, colorSpace, xChannelKey, yChannelKey, zChannelKey, colorRef, currentXValue, currentYValue, currentZValue, xMin, xMax, yMin, yMax, zMin, zMax, isThreeChannel, vertices, isDragging, thumbAlignment]);
 
     return (
       <ColorTriangleContext.Provider value={ctxValue}>
@@ -398,6 +403,7 @@ export const ColorTriangleRoot = forwardRef<HTMLDivElement, ColorTriangleRootPro
           onPointerDown={handlePointerDown}
           onPointerMove={handlePointerMove}
           onPointerUp={handlePointerUp}
+          onPointerCancel={handlePointerUp}
           onKeyDown={handleKeyDown}
         >
           {children}

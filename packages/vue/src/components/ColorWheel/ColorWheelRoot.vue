@@ -251,6 +251,7 @@ provideColorWheelRootContext({
     @pointerdown="drag.onPointerDown"
     @pointermove="drag.onPointerMove"
     @pointerup="drag.onPointerUp"
+    @pointercancel="drag.onPointerCancel"
     @keydown="handleKeyDown"
   >
     <slot :model-value="colorRef" />

@@ -25,6 +25,8 @@ export interface UsePointerDragReturn {
   onPointerDown: (event: PointerEvent) => void;
   onPointerMove: (event: PointerEvent) => void;
   onPointerUp: (event: PointerEvent) => void;
+  /** Ends a gesture the browser took over, without committing a pending move. */
+  onPointerCancel: (event: PointerEvent) => void;
 }
 
 /**
@@ -66,6 +68,14 @@ export function usePointerDrag(options: UsePointerDragOptions): UsePointerDragRe
    * pointer went up is never lost to the throttle — a fast flick that ends
    * immediately after a move still commits where it ended.
    */
+  /** Drop a throttled move without delivering it. */
+  function discardFrame() {
+    if (frame === undefined) return;
+    cancelAnimationFrame(frame);
+    frame = undefined;
+    pendingMove = undefined;
+  }
+
   function flushFrame() {
     if (frame === undefined) return;
     cancelAnimationFrame(frame);
@@ -114,17 +124,48 @@ export function usePointerDrag(options: UsePointerDragOptions): UsePointerDragRe
     });
   }
 
-  function onPointerUp(event: PointerEvent) {
+  /**
+   * Ends the gesture: flush any throttled move, drop the cached rect, clear the
+   * flag and commit.
+   *
+   * Capture is released only when the element still holds it. Requiring it in
+   * order to end the gesture is what used to strand `isDragging` at `true`: a
+   * browser that takes a gesture over (a touch that becomes a scroll, a
+   * context menu, a pointer leaving the window) drops the capture first, and
+   * the release that follows then found nothing to release and returned early.
+   * Nothing cleared the flag afterwards, and because every gradient suppresses
+   * its repaints while a drag is in flight, the surface silently stopped
+   * updating for the rest of the component's life.
+   */
+  function end(event: PointerEvent, flush: boolean) {
     if (!isDragging.value) return;
-    const target = event.target as HTMLElement;
-    if (!target.hasPointerCapture(event.pointerId)) return;
-    target.releasePointerCapture(event.pointerId);
 
-    flushFrame();
+    const target = event.target as HTMLElement | null;
+    if (target?.hasPointerCapture?.(event.pointerId)) {
+      target.releasePointerCapture(event.pointerId);
+    }
+
+    if (flush) flushFrame();
+    else discardFrame();
+
     rect.value = undefined;
     isDragging.value = false;
     options.onEnd();
   }
 
-  return { isDragging, rect, onPointerDown, onPointerMove, onPointerUp };
+  /** Release: the last throttled move still counts. */
+  function onPointerUp(event: PointerEvent) {
+    end(event, true);
+  }
+
+  /**
+   * Cancellation: the browser has taken the gesture over, so a move it never
+   * showed the user is not committed. The value stays where the last delivered
+   * move put it.
+   */
+  function onPointerCancel(event: PointerEvent) {
+    end(event, false);
+  }
+
+  return { isDragging, rect, onPointerDown, onPointerMove, onPointerUp, onPointerCancel };
 }

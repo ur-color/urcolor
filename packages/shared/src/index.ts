@@ -6,6 +6,7 @@ export * from "./canvas";
 export * from "./swatch";
 export * from "./channel-model";
 export * from "./drag";
+export * from "./transform";
 export * from "./slider";
 export * from "./toggle";
 export * from "./gradient";

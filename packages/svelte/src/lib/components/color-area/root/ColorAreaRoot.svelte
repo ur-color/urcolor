@@ -219,7 +219,7 @@
     const onPointerMove = (event: PointerEvent): void => drag.pointerMove(event);
     const onPointerUp = (event: PointerEvent): void => drag.pointerUp(event);
     const onPointerCancel = (): void => {
-      drag.cancel();
+      drag.pointerCancel();
       dragging = false;
     };
     const onKeyDown = (event: KeyboardEvent): void => {
