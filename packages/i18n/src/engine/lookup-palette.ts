@@ -28,9 +28,9 @@ function proximity(distance: number, maxDistance: number): number {
  * Nearest-centroid search over every entry in the chunk.
  *
  * Brute force is the right choice here, not a concession: the largest shipped
- * chunk holds 897 entries, so a full scan is a few microseconds — cheaper than
- * building and traversing a spatial index, and immune to the correctness traps
- * that come with one.
+ * chunk holds a few hundred entries, so a full scan is a few microseconds —
+ * cheaper than building and traversing a spatial index, and immune to the
+ * correctness traps that come with one.
  */
 export function lookupPalette(
   chunk: PaletteChunk,

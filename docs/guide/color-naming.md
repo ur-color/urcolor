@@ -9,6 +9,10 @@ under [Sources](#sources). By default `uwdata` answers the 20 locales it covers
 and `wikidata` answers the rest, and whichever one answered is named by
 `resolvedOptions().source`.
 
+Two further sources, `pantone` and `ral`, catalogue industrial color codes
+rather than naming colors in a language. They are opt-in and are covered under
+[Catalogue codes](#catalogue-codes).
+
 ## Basic usage
 
 ```ts
@@ -123,7 +127,7 @@ extremes.
 | `source` | source id, or an array of them | `["uwdata", "wikidata"]` | Which dataset(s) answer, in priority order. A single id pins the instance and throws if that source lacks the locale |
 | `style` | `"long"` \| `"short"` | `"long"` | Display name vs. matching key |
 | `fallback` | `"nearest"` \| `"none"` | `"nearest"` | Whether a `"nearest"` result is withheld by `of()`. Meaningfully filters full-model results; a no-op for hue-model locales (see above); highly consequential for `wikidata`'s palette locales, where almost every query reports `"nearest"` |
-| `maxDistance` | number | `0.075` (full/hue), `0.15` (palette) | Oklab search radius used at lookup time, unconditionally rather than only when `fallback` is `"nearest"`. Wider by default for `wikidata`, because 964 catalogued colors leave real gaps a bin-tuned radius would miss |
+| `maxDistance` | number | `0.075` (full/hue), `0.15` (palette) | Oklab search radius used at lookup time, unconditionally rather than only when `fallback` is `"nearest"`. Wider by default for `wikidata`, because 730 catalogued colors leave real gaps a bin-tuned radius would miss |
 | `topN` | number | `5` | Candidates returned by `resolve()` |
 
 ## Reverse lookup
@@ -152,16 +156,32 @@ Romanian has only a handful, so `resolvedOptions().coverage`, the fraction of
 sRGB-reachable Oklab space that has data, ranges from about 96% (en) down to
 single digits (ro).
 
-`wikidata` spans 298 languages with a discrete-palette model: 964 catalogued
+`wikidata` spans 298 languages with a discrete-palette model: 730 catalogued
 colors, each with one exact sRGB value, named in whatever languages Wikidata
 editors have supplied. This is where the long tail lives, and languages like
 Georgian and Cherokee have color names here and none in `uwdata`.
 `resolvedOptions().coverage` means `terms / itemCount` there, the fraction of
 the catalogue this language names rather than of Oklab space, and it ranges from
-93% (en, 897 terms) down to a single term for the thinnest locales. Georgian's
-14-term chunk (coverage 1.45%) cannot name an arbitrary color, but it resolves
+88% (en, 640 terms) down to a single term for the thinnest locales. Georgian's
+14-term chunk cannot name an arbitrary color, but it resolves
 `colorOf("ყვითელი")` correctly, which is exactly the capability `uwdata` lacks
 there.
+
+### What wikidata does not contain
+
+Three sync-time policies shape this source.
+
+Pantone, RAL and NCS codes are not named here. They are catalogue entries, not
+words in a language, and they live in the `pantone` and `ral` sources instead.
+NCS has no openly licensed dataset, so those colors are not named at all.
+Descriptive names for catalogue colors do stay: German `verkehrsrot` and
+Italian `rosso traffico` are ordinary color words.
+
+Every name is lower-cased under the rules of its own locale, so `Rot` ships as
+`rot` and the lookup key and display name are the same string.
+
+Names written in a script the locale does not use are dropped. This is what
+removed `Eigengrau` from the Russian chunk and `umber` from Cyrillic Serbian.
 
 ## Sources
 
@@ -198,6 +218,46 @@ locale-level, so `load("ro")` stays on `uwdata`'s 4 terms. That is deliberate,
 because switching sources on a coverage threshold would return perceptual data
 for one language and catalogue data for another with no defensible cutoff. Pass
 `{ source: ["wikidata"] }` when you want breadth over perceptual fidelity.
+
+## Catalogue codes
+
+`pantone` and `ral` catalogue industrial color codes. A code is written the
+same way in every locale, so each source ships one chunk under the `und` tag
+and answers whatever locale is requested.
+
+```ts
+const codes = await ColorNames.load("ru", { source: "pantone" });
+
+codes.resolvedOptions().locale; // "und"
+codes.of(Color.parse("#0F4C81")!); // "pantone classic blue"
+codes.colorOf("19-4052"); // reachable by TCX number
+codes.colorOf("classic blue"); // and by bare name
+```
+
+| Source | Entries | Aliases |
+| --- | --- | --- |
+| `pantone` | 2,310 Fashion, Home + Interiors (TCX/TPG) colors | TCX number, spaced name, hyphenated slug |
+| `ral` | 215 RAL Classic codes | bare code, English name |
+
+Neither is in the default chain, so an ordinary lookup answers with a word
+rather than a code. Both report `coverage: 1`, because a catalogue names its
+own catalogue entirely.
+
+::: warning Trademarks and licensing
+PANTONE is a trademark of Pantone LLC and RAL is a trademark of RAL gGmbH.
+These sources ship factual color values keyed by code, not the color systems
+themselves, and `@urcolor/i18n` is affiliated with neither company.
+
+The `pantone` upstream declares no license and states that the color names are
+Pantone copyright. Read the package README and make your own assessment before
+redistributing that source.
+:::
+
+`pantone` is the Fashion, Home + Interiors collection, not the Pantone Matching
+System, so it answers to TCX numbers such as `19-4052` rather than PMS codes
+such as `448 C`. RAL publishes no authoritative sRGB renderings and two
+conventions circulate; these values follow Wikipedia's *List of RAL colours*.
+RAL Design and RAL Effect are not included.
 
 ## Channel labels
 

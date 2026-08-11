@@ -46,8 +46,8 @@ export interface ColorNamesOptions {
    * {@link resolve}, which documents that `resolve()` always looks up with
    * the full radius regardless of `fallback`. Defaults to
    * {@link DEFAULT_MAX_DISTANCE} for `full`/`hue` locales and the wider
-   * {@link DEFAULT_PALETTE_MAX_DISTANCE} for `palette` locales, since 964
-   * catalogued colours spread across Oklab leave real gaps that a
+   * {@link DEFAULT_PALETTE_MAX_DISTANCE} for `palette` locales, since a few
+   * hundred catalogued colours spread across Oklab leave real gaps that a
    * bin-grid-tuned radius would miss.
    */
   maxDistance?: number;
@@ -99,8 +99,9 @@ const DEFAULT_TOP_N = 5;
 
 /**
  * The palette model's default search radius is wider than the binned models'.
- * 964 catalogued colours spread across Oklab leave real gaps — a radius tuned
- * for a dense 0.05 bin grid would report "none" for ordinary colours.
+ * A few hundred catalogued colours spread across Oklab leave real gaps — a
+ * radius tuned for a dense 0.05 bin grid would report "none" for ordinary
+ * colours.
  */
 const DEFAULT_PALETTE_MAX_DISTANCE = 0.15;
 

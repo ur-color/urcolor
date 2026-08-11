@@ -14,7 +14,7 @@ export const EXCLUDED_LANGUAGES: ReadonlySet<string> = new Set(["mul", "zxx"]);
  * Wikidata ships regional and orthographic variants as independent label sets,
  * usually far thinner than their base tag. Shipping them verbatim is a footgun:
  * `negotiateLocale` prefers an exact tag match, so a 6-term `en-gb` chunk would
- * beat the 897-term `en` chunk for a caller asking for "en-GB".
+ * beat the far larger `en` chunk for a caller asking for "en-GB".
  *
  * Region-only variants therefore fold into their base tag, while genuine script
  * variants stay distinct under well-formed BCP 47 script subtags. Chinese
@@ -89,7 +89,7 @@ export function isCatalogueCode(label: string): boolean {
  *
  * Wikidata does not classify every catalogue item. Q35827305 is labelled
  * `RAL 9002` in eight languages but carries only `P31 wd:Q1075`, the generic
- * colour class, with no RAL statement for {@link CATALOGUE_QUERY} to match. A
+ * colour class, with no RAL statement for `CATALOGUE_QUERY` to match. A
  * QID-only split leaves it in the linguistic source.
  *
  * This supplements the QID rule rather than replacing it. The QID rule is

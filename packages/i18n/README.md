@@ -26,7 +26,9 @@ The API follows the ECMAScript `Intl` classes: `of()`, `resolvedOptions()`, and
 
 ## Coverage
 
-Colour-name data comes from two independent sources: `uwdata` and `wikidata`.
+Colour-name data comes from four independent sources. `uwdata` and `wikidata`
+name colours in a language and answer the default chain. `pantone` and `ral`
+catalogue industrial codes, are language-neutral, and are opt-in only.
 
 ### uwdata
 
@@ -70,7 +72,7 @@ query to the fully saturated colour at the same hue.
 ### wikidata
 
 The `wikidata` source covers **298 languages** with a discrete-palette model:
-964 catalogued colours, each with one exact sRGB value, named in whatever
+730 catalogued colours, each with one exact sRGB value, named in whatever
 languages Wikidata editors have supplied. This is where the long tail lives —
 Georgian, Cherokee, Aymara, Amharic, and Aramaic have colour names here and
 none in `uwdata`.
@@ -81,7 +83,7 @@ speakers *spontaneously name* a region of colour space, `wikidata` records the
 `resolve()` reports `probability` as a **proximity confidence, not a naming
 frequency** — read `binDistance` for the underlying Oklab distance.
 
-Coverage is `terms / 964`: `en` 93%, `de` 50%, `ja` 28%, `ka` 1.5%. Thin
+Coverage is `terms / 730`: `en` 88%, `de` 37%, `ja` 37%, `ka` 1.9%. Thin
 languages are shipped rather than pruned — Georgian's 14-term chunk (32 other
 locales carry just a single term) can't name an arbitrary colour, but it
 resolves `colorOf("ყვითელი")` correctly.
@@ -90,12 +92,63 @@ Wikidata is **CC0-1.0**. The "no license declared upstream, make your own
 assessment" caveat in [Licensing](#licensing) below is about `uwdata`
 specifically — it does not apply here.
 
+Three sync-time policies shape what this source ships.
+
+**Catalogue codes moved out.** Pantone, RAL and NCS entries are no longer named
+here. Use the `pantone` and `ral` sources below; NCS has no openly licensed
+dataset, so those colours are not named at all. Items are identified by QID,
+not by matching label text, because Wikidata localises the codes: `Q24885519`
+is `Pantone 448 C` in English and `彩通448C` in Chinese. Only code-shaped
+labels are dropped, so descriptive names on catalogue items survive: German
+`verkehrsrot` and Italian `rosso traffico` are ordinary colour words and stay.
+
+**Names are lower-cased under their own locale.** `Rot` ships as `rot`, and
+Turkish `İ` folds to a bare `i` rather than to `i` plus a combining dot. The
+lookup key and the display name are therefore the same string.
+
+**Names in the wrong script are dropped.** A script counts as valid for a
+locale when it is attested in at least `max(3, 5%)` of that locale's own terms.
+This is what removed `Eigengrau` from the Russian chunk, `umber` from Cyrillic
+Serbian, and single-character typos such as `Cиньо-зелен`, whose `C` is Latin.
+Japanese keeps its katakana names, because katakana clears the threshold there.
+
+### pantone and ral
+
+Two catalogue sources, opt-in and language-neutral. `RAL 1005` is written the
+same way in every locale, so each ships one chunk under the `und` tag and
+answers whatever locale is requested:
+
+```ts
+const codes = await ColorNames.load("ru", { source: "pantone" });
+codes.of(Color.parse("#0F4C81")!); // "pantone classic blue"
+codes.colorOf("19-4052");          // reachable by TCX number too
+```
+
+| Source | Entries | Upstream | Aliases |
+| --- | --- | --- | --- |
+| `pantone` | 2,310 Fashion, Home + Interiors (TCX/TPG) colours | [Margaret2/pantone-colors](https://github.com/Margaret2/pantone-colors) | TCX number, spaced name, hyphenated slug |
+| `ral` | 215 RAL Classic codes | [ieskudero/ral-colors](https://github.com/ieskudero/ral-colors) | bare code, English name |
+
+Neither is in the default chain, so an ordinary lookup answers with a word
+rather than a code. Both report `coverage: 1`, since a catalogue names its own
+catalogue entirely.
+
+`pantone` is the Fashion, Home + Interiors collection, **not** the Pantone
+Matching System: it answers to TCX numbers such as `19-4052`, not to PMS codes
+such as `448 C`. RAL publishes no authoritative sRGB renderings and two
+conventions circulate; these values match Wikipedia's *List of RAL colours*.
+RAL Design and RAL Effect are not included.
+
+Read [Licensing](#licensing) before redistributing `pantone`.
+
 ### Default source chain
 
 Omitting `source` walks the default chain — `uwdata` first, then `wikidata`.
 `uwdata` answers the 20 locales it covers, `wikidata` answers the other 278,
 and `resolvedOptions().source` always names whichever one actually did while
-`resolvedOptions().sources` reports the whole chain that was considered.
+`resolvedOptions().sources` reports the whole chain that was considered. The
+catalogue sources are registered but deliberately absent from this chain: an
+ordinary lookup must answer with a word, never with `ral 6018`.
 Call `getDefaultSources()` to read that chain directly, without constructing
 a `ColorNames` instance first:
 
@@ -165,6 +218,16 @@ exactly the `citation` and `disclaimer` exposed on `getSource("wikidata")`:
 > naming behaviour. Coverage is uneven across languages, and a name's
 > presence does not imply it is the term speakers would actually choose.
 
+### pantone and ral
+
+`pantone` derives from
+[Margaret2/pantone-colors](https://github.com/Margaret2/pantone-colors), the
+Fashion, Home + Interiors (TCX/TPG) collection. `ral` derives from
+[ieskudero/ral-colors](https://github.com/ieskudero/ral-colors), RAL Classic.
+Both expose their `citation` and `disclaimer` on `getSource()`, and both
+disclaimers name the trademark holder and state that this package ships colour
+values rather than the colour system. See [Licensing](#licensing).
+
 ## Licensing
 
 `uwdata`'s upstream repository declares no license file. Its README asks only
@@ -174,6 +237,24 @@ should make their own assessment.
 
 `wikidata` content is **CC0-1.0** — no such caveat applies to names from that
 source.
+
+`ral` comes from an **MIT**-licensed repository. RAL is a trademark of RAL
+gGmbH; this package ships factual colour values keyed by code, not the RAL
+system itself, and is neither affiliated with nor endorsed by RAL gGmbH.
+
+`pantone` needs the closest reading of the four. Its upstream repository
+declares **no license**, and its README states that the colour names are
+Pantone copyright while the hex values are published freely on pantone.com.
+PANTONE is a trademark of Pantone LLC, and this package is neither affiliated
+with nor endorsed by Pantone LLC. Make your own assessment before
+redistributing this source, and note that it is opt-in: a consumer who never
+passes `{ source: "pantone" }` never loads its chunk.
+
+The obvious MIT-licensed Pantone alternative was evaluated and rejected on
+accuracy rather than licensing. Its values are a naive CMYK to RGB conversion
+rather than Pantone's published sRGB renderings, and are wrong throughout: it
+gives 185 as `#FF173D` against a published `#E4002B`, and 354 as `#33FF1A`
+against `#00B140`.
 
 ## Adding a source
 
