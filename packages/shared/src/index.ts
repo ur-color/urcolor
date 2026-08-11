@@ -8,5 +8,6 @@ export * from "./drag";
 export * from "./slider";
 export * from "./toggle";
 export * from "./gradient";
+export * from "./css-gradient";
 export * from "./color-spaces";
 export * from "./geometry";
