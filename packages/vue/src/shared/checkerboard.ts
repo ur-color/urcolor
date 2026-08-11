@@ -1,6 +1,12 @@
-/** CSS `background` value that paints the transparency checkerboard. */
-export const CHECKERBOARD_BACKGROUND
-  = "repeating-conic-gradient(rgb(230, 230, 230) 0% 25%, white 0% 50%) 0% 50% / 16px 16px";
+// Re-exported rather than redeclared so the Vue package and `@urcolor/shared`
+// can never drift on the recipe or on the custom properties it reads.
+export {
+  CHECKERBOARD_BACKGROUND,
+  CHECKERBOARD_STYLE,
+  CHECKERBOARD_VAR,
+  CHECKERBOARD_VARS,
+  DEFAULT_CHECKER_SIZE,
+} from "@urcolor/shared";
 
 let warned = false;
 

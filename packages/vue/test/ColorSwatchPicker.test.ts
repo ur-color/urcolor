@@ -243,8 +243,8 @@ describe("ColorSwatchPicker", () => {
     const wrapper = mount(makePicker(), { attachTo: document.body });
     const swatches = wrapper.findAll("[aria-roledescription=\"color swatch\"]");
     expect(swatches).toHaveLength(3);
-    expect(swatches[0]!.attributes("style")).toContain("--swatch-color: rgb(255 0 0)");
-    expect(swatches[2]!.attributes("style")).toContain("--swatch-color: rgb(0 0 255)");
+    expect(swatches[0]!.attributes("style")).toContain("--urcolor-swatch-color: rgb(255 0 0)");
+    expect(swatches[2]!.attributes("style")).toContain("--urcolor-swatch-color: rgb(0 0 255)");
   });
 
   it("should reflect orientation on the listbox", () => {

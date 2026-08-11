@@ -301,7 +301,7 @@ describe("ColorField", () => {
       const w = mount(ColorFieldSwatch, {
         props: { modelValue: "hsl(180, 50%, 50%)" },
       });
-      expect(w.attributes("style")).toContain("--swatch-color:");
+      expect(w.attributes("style")).toContain("--urcolor-swatch-color:");
     });
   });
 

@@ -17,7 +17,7 @@ export interface CheckerboardProps extends /* @vue-ignore */ PrimitiveProps {
 <script setup lang="ts">
 import { computed } from "vue";
 import { Primitive, useForwardExpose } from "reka-ui";
-import { CHECKERBOARD_BACKGROUND, warnCheckerboardDeprecated } from "./checkerboard";
+import { CHECKERBOARD_STYLE, warnCheckerboardDeprecated } from "./checkerboard";
 
 const props = withDefaults(defineProps<CheckerboardProps>(), {
   as: "div",
@@ -32,7 +32,7 @@ const style = computed(() => ({
   position: "absolute" as const,
   inset: "0",
   pointerEvents: "none" as const,
-  background: CHECKERBOARD_BACKGROUND,
+  ...CHECKERBOARD_STYLE,
   ...(props.shape === "circle" ? { borderRadius: "50%" } : {}),
 }));
 </script>

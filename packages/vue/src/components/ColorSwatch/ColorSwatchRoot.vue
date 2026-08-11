@@ -1,13 +1,16 @@
 <script lang="ts">
 import type { PrimitiveProps } from "reka-ui";
-import { Color } from "@urcolor/core";
+import type { Color } from "@urcolor/core";
 
 export interface ColorSwatchRootProps extends /* @vue-ignore */ PrimitiveProps {
   as?: string;
   asChild?: boolean;
   /** The color value to display. */
   modelValue?: Color | string | null;
-  /** The checkerboard size in pixels. */
+  /**
+   * The checkerboard size in pixels. Left unset, the grid reads
+   * `--urcolor-checkerboard-size` and falls back to `16px`.
+   */
   checkerSize?: number;
   /** When true, reflects the color's alpha channel. When false, displays the color as fully opaque. */
   alpha?: boolean;
@@ -19,50 +22,23 @@ export interface ColorSwatchRootProps extends /* @vue-ignore */ PrimitiveProps {
 <script setup lang="ts">
 import { computed } from "vue";
 import { Primitive, useForwardExpose } from "reka-ui";
+import { parseColor, swatchPaint, swatchStyle as buildSwatchStyle } from "@urcolor/shared";
 
 const props = withDefaults(defineProps<ColorSwatchRootProps>(), {
   as: "div",
-  checkerSize: 16,
 });
 
 const { forwardRef } = useForwardExpose();
 
-const color = computed(() => {
-  if (!props.modelValue) return undefined;
-  if (props.modelValue instanceof Color) return props.modelValue;
-  return Color.parse(props.modelValue) ?? undefined;
-});
+const color = computed(() => parseColor(props.modelValue));
+const paint = computed(() => swatchPaint(props.modelValue, props.alpha));
 
-const opaqueString = computed(() => {
-  if (!color.value) return "transparent";
-  const c = color.value.withAlpha(1);
-  const srgb = c.to("srgb");
-  return srgb.toString();
-});
+const alphaValue = computed(() => paint.value.alpha);
+const colorString = computed(() => paint.value.color);
 
-const alphaValue = computed(() => {
-  if (!color.value) return 1;
-  return color.value.alpha;
-});
-
-const colorString = computed(() => {
-  if (!color.value) return "transparent";
-  if (!props.alpha) return opaqueString.value;
-  const srgb = color.value.to("srgb");
-  return srgb.toString();
-});
-
-const swatchStyle = computed(() => {
-  const size = props.checkerSize;
-  const checkerboard = `repeating-conic-gradient(rgb(230, 230, 230) 0%, rgb(230, 230, 230) 25%, white 0%, white 50%) 0% 50% / ${size}px ${size}px`;
-  return {
-    "--swatch-color-opaque": opaqueString.value,
-    "--swatch-alpha": alphaValue.value,
-    "--swatch-checkerboard": checkerboard,
-    "--swatch-color": colorString.value,
-    "background": `linear-gradient(${colorString.value}, ${colorString.value}), ${checkerboard}`,
-  };
-});
+const swatchStyle = computed(() =>
+  buildSwatchStyle({ ...paint.value, checkerSize: props.checkerSize }),
+);
 
 // An invisible swatch: either there's no color at all, or the color's
 // alpha channel is fully transparent. Either way, nothing is visible.

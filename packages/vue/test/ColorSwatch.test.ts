@@ -19,13 +19,13 @@ describe("ColorSwatchRoot", () => {
   it("should render as transparent when model-value is an invalid color string", () => {
     const wrapper: VueWrapper = mount(ColorSwatchRoot, { props: { modelValue: "not-a-color" } });
     const style = wrapper.attributes("style") ?? "";
-    expect(style).toContain("--swatch-color: transparent");
+    expect(style).toContain("--urcolor-swatch-color: transparent");
   });
 
   it("should still render a valid color string", () => {
     const wrapper: VueWrapper = mount(ColorSwatchRoot, { props: { modelValue: "red" } });
     const style = wrapper.attributes("style") ?? "";
-    expect(style).not.toContain("--swatch-color: transparent");
+    expect(style).not.toContain("--urcolor-swatch-color: transparent");
   });
 
   it("should accept a Color instance without re-parsing", () => {
@@ -119,7 +119,7 @@ describe("ColorSwatch data-no-color and alpha", () => {
 describe("ColorFieldSwatch (consumer of ColorSwatchRoot)", () => {
   it("should still render the --swatch-color CSS variable", () => {
     const wrapper = mount(ColorFieldSwatch, { props: { modelValue: "hsl(180, 50%, 50%)" } });
-    expect(wrapper.attributes("style")).toContain("--swatch-color:");
+    expect(wrapper.attributes("style")).toContain("--urcolor-swatch-color:");
   });
 
   it("should forward the accessible name and role from ColorSwatchRoot", () => {

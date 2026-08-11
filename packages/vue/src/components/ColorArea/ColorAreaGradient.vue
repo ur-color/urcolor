@@ -40,7 +40,7 @@ import { Color } from "@urcolor/core";
 import { cssAreaBilinear, cssAreaChannels, drawGradient, getChannelConfig, sampleBilinearGrid, sampleChannelGrid } from "@urcolor/shared";
 import { applyChannelOverrides, renderToCanvas, useGradientCanvas } from "../../shared/useGradientCanvas";
 import { CSS_GRADIENT_ROOT_STYLE, cssLayerStyle, useCssGradient } from "../../shared/useCssGradient";
-import { CHECKERBOARD_BACKGROUND } from "../../shared/checkerboard";
+import { CHECKERBOARD_STYLE } from "../../shared/checkerboard";
 import { injectColorAreaRootContext } from "./ColorAreaRoot.vue";
 
 const props = withDefaults(defineProps<ColorAreaGradientProps>(), {
@@ -264,7 +264,7 @@ useGradientCanvas({
   <Primitive
     :as-child="asChild"
     :as="as"
-    :style="{ background: CHECKERBOARD_BACKGROUND }"
+    :style="CHECKERBOARD_STYLE"
     :data-disabled="rootContext.disabled.value ? '' : undefined"
   >
     <span

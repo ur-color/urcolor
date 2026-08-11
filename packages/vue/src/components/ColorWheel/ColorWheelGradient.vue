@@ -22,7 +22,7 @@ import { useForwardExpose, Primitive } from "reka-ui";
 import { cssWheelPolar, getChannelConfig, samplePolarGrid } from "@urcolor/shared";
 import { applyChannelOverrides, renderToCanvas, useGradientCanvas } from "../../shared/useGradientCanvas";
 import { CSS_GRADIENT_ROOT_STYLE, cssLayerStyle, useCssGradient } from "../../shared/useCssGradient";
-import { CHECKERBOARD_BACKGROUND } from "../../shared/checkerboard";
+import { CHECKERBOARD_STYLE } from "../../shared/checkerboard";
 import { injectColorWheelRootContext } from "./ColorWheelRoot.vue";
 
 const props = withDefaults(defineProps<ColorWheelGradientProps>(), {
@@ -100,7 +100,7 @@ useGradientCanvas({
   <Primitive
     :as-child="asChild"
     :as="as"
-    :style="{ background: CHECKERBOARD_BACKGROUND, borderRadius: '50%' }"
+    :style="{ ...CHECKERBOARD_STYLE, borderRadius: '50%' }"
     :data-disabled="rootContext.disabled.value ? '' : undefined"
   >
     <span

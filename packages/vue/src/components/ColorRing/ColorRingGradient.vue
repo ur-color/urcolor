@@ -24,7 +24,7 @@ import { useForwardExpose, Primitive } from "reka-ui";
 import { channelStops, cssConicStops, getChannelConfig, sampleConicRing } from "@urcolor/shared";
 import { applyChannelOverrides, renderToCanvas, useGradientCanvas } from "../../shared/useGradientCanvas";
 import { CSS_GRADIENT_ROOT_STYLE, cssLayerStyle, useCssGradient } from "../../shared/useCssGradient";
-import { CHECKERBOARD_BACKGROUND } from "../../shared/checkerboard";
+import { CHECKERBOARD_STYLE } from "../../shared/checkerboard";
 import { injectColorRingRootContext } from "./ColorRingRoot.vue";
 
 const props = withDefaults(defineProps<ColorRingGradientProps>(), {
@@ -109,7 +109,7 @@ useGradientCanvas({
   <Primitive
     :as-child="asChild"
     :as="as"
-    :style="{ background: CHECKERBOARD_BACKGROUND, maskImage: checkerboardMask, WebkitMaskImage: checkerboardMask }"
+    :style="{ ...CHECKERBOARD_STYLE, maskImage: checkerboardMask, WebkitMaskImage: checkerboardMask }"
     :data-disabled="rootContext.disabled.value ? '' : undefined"
   >
     <span

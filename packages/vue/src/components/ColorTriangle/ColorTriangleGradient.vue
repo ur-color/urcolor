@@ -21,7 +21,7 @@ import { useForwardExpose, Primitive } from "reka-ui";
 import { getChannelConfig, sampleTriangleGrid } from "@urcolor/shared";
 import { applyChannelOverrides, renderToCanvas, useGradientCanvas } from "../../shared/useGradientCanvas";
 import { warnNoCssRecipe } from "../../shared/useCssGradient";
-import { CHECKERBOARD_BACKGROUND } from "../../shared/checkerboard";
+import { CHECKERBOARD_STYLE } from "../../shared/checkerboard";
 import { injectColorTriangleRootContext } from "./ColorTriangleRoot.vue";
 
 const props = withDefaults(defineProps<ColorTriangleGradientProps>(), {
@@ -119,7 +119,7 @@ useGradientCanvas({
   <Primitive
     :as-child="asChild"
     :as="as"
-    :style="{ background: CHECKERBOARD_BACKGROUND, clipPath }"
+    :style="{ ...CHECKERBOARD_STYLE, clipPath }"
     :data-disabled="rootContext.disabled.value ? '' : undefined"
   >
     <canvas

@@ -7,7 +7,10 @@ export interface ColorFieldSwatchProps extends /* @vue-ignore */ ColorSwatchRoot
   asChild?: boolean;
   /** The color value to display. */
   modelValue?: Color | string | null;
-  /** The checkerboard size in pixels. */
+  /**
+   * The checkerboard size in pixels. Left unset, the grid reads
+   * `--urcolor-checkerboard-size` and falls back to `16px`.
+   */
   checkerSize?: number;
   /** When true, reflects the color's alpha channel. When false, displays the color as fully opaque. */
   alpha?: boolean;
