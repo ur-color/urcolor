@@ -1,17 +1,45 @@
 import { forwardRef, useCallback, useEffect, useRef, type ComponentPropsWithoutRef } from "react";
 import { Color } from "@urcolor/core";
-import { getChannelConfig, renderToCanvas, samplePolarGrid } from "@urcolor/shared";
+import { cssWheelPolar, getChannelConfig, renderToCanvas, samplePolarGrid, type GradientRenderer } from "@urcolor/shared";
 import { useColorWheelContext } from "../root/ColorWheelRootContext";
 import { CHECKERBOARD_BACKGROUND } from "../../../utils";
+import { CssGradientLayers, resolveCssGradient } from "../../../cssGradient";
 
 export interface ColorWheelGradientProps extends ComponentPropsWithoutRef<"span"> {
+  /**
+   * Which painter to use.
+   * - `"auto"` (default) - CSS when an exact recipe exists, canvas otherwise
+   * - `"css"` - force CSS; falls back to the canvas with a dev warning if none exists
+   * - `"canvas"` - force the canvas painter
+   */
+  renderer?: GradientRenderer;
   channelOverrides?: Record<string, number> | false;
 }
 
 export const ColorWheelGradient = forwardRef<HTMLSpanElement, ColorWheelGradientProps>(
-  function ColorWheelGradient({ channelOverrides = { alpha: 1 }, style, children, ...props }, ref) {
+  function ColorWheelGradient({ renderer = "auto", channelOverrides = { alpha: 1 }, style, children, ...props }, ref) {
     const ctx = useColorWheelContext();
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
+
+    function applyOverrides(color: Color): Color {
+      if (!channelOverrides) return color;
+      let result = color;
+      const updates: Record<string, number> = {};
+      for (const [k, v] of Object.entries(channelOverrides)) {
+        if (k === "alpha") result = result.withAlpha(v);
+        else if (getChannelConfig(ctx.colorSpace, k)) updates[k] = v;
+      }
+      if (Object.keys(updates).length > 0) result = result.with({ space: ctx.colorSpace, ...updates });
+      return result;
+    }
+
+    const cssLayers = resolveCssGradient(renderer, "ColorWheelGradient", () => {
+      if (!ctx.colorRef) return null;
+      return cssWheelPolar(
+        applyOverrides(ctx.colorRef), ctx.colorSpace,
+        ctx.angleChannelKey, ctx.radiusChannelKey, ctx.startAngle,
+      );
+    });
 
     const render = useCallback(() => {
       const canvas = canvasRef.current;
@@ -67,7 +95,9 @@ export const ColorWheelGradient = forwardRef<HTMLSpanElement, ColorWheelGradient
             sampled grid fills its whole square, and clipping in-canvas as well
             as on the element leaves a seam along the boundary. Matches the Vue
             implementation. */}
-        <canvas ref={canvasRef} style={{ position: "absolute", inset: "0", width: "100%", height: "100%", pointerEvents: "none", clipPath: "circle(50%)" }} />
+        {cssLayers
+          ? <CssGradientLayers layers={cssLayers} style={{ clipPath: "circle(50%)" }} />
+          : <canvas ref={canvasRef} style={{ position: "absolute", inset: "0", width: "100%", height: "100%", pointerEvents: "none", clipPath: "circle(50%)" }} />}
         {children}
       </span>
     );

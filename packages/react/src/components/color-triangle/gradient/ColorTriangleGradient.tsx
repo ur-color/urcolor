@@ -1,10 +1,17 @@
 import { forwardRef, useEffect, useRef, type ComponentPropsWithoutRef } from "react";
 import { Color, type SpaceId } from "@urcolor/core";
-import { getChannelConfig, sampleTriangleGrid } from "@urcolor/shared";
+import { getChannelConfig, sampleTriangleGrid, type GradientRenderer } from "@urcolor/shared";
 import { useColorTriangleContext } from "../root/ColorTriangleRootContext";
 import { CHECKERBOARD_BACKGROUND } from "../../../utils";
+import { warnNoCssRecipe } from "../../../cssGradient";
 
 export interface ColorTriangleGradientProps extends ComponentPropsWithoutRef<"span"> {
+  /**
+   * Which painter to use. A barycentric sweep has no CSS equivalent, so this
+   * component always paints into a canvas - the prop exists for symmetry with
+   * the other gradients, and `"css"` warns and falls back.
+   */
+  renderer?: GradientRenderer;
   channelOverrides?: Record<string, number> | false;
 }
 
@@ -23,7 +30,11 @@ function applyOverrides(baseColor: Color, colorSpace: SpaceId, overrides: Record
 }
 
 export const ColorTriangleGradient = forwardRef<HTMLSpanElement, ColorTriangleGradientProps>(
-  function ColorTriangleGradient({ channelOverrides = { alpha: 1 }, style, children, ...props }, ref) {
+  function ColorTriangleGradient({ renderer = "auto", channelOverrides = { alpha: 1 }, style, children, ...props }, ref) {
+    // A barycentric sweep has no CSS equivalent, so there is nothing to resolve -
+    // only the same warning the other gradients emit when asked for the impossible.
+    if (renderer === "css") warnNoCssRecipe("ColorTriangleGradient");
+
     const ctx = useColorTriangleContext();
     const canvasRef = useRef<HTMLCanvasElement>(null);
 

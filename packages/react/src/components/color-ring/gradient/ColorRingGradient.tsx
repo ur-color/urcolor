@@ -1,15 +1,23 @@
-import { forwardRef, useCallback, useEffect, useRef, useMemo, type ComponentPropsWithoutRef } from "react";
+import { forwardRef, useCallback, useEffect, useRef, type ComponentPropsWithoutRef } from "react";
 import { Color, type SpaceId } from "@urcolor/core";
-import { getChannelConfig, renderToCanvas, sampleConicRing } from "@urcolor/shared";
+import { channelStops, cssConicStops, getChannelConfig, renderToCanvas, sampleConicRing, type GradientRenderer } from "@urcolor/shared";
 import { useColorRingContext } from "../root/ColorRingRootContext";
 import { CHECKERBOARD_BACKGROUND } from "../../../utils";
+import { CssGradientLayers, resolveCssGradient } from "../../../cssGradient";
 
 export interface ColorRingGradientProps extends ComponentPropsWithoutRef<"span"> {
+  /**
+   * Which painter to use.
+   * - `"auto"` (default) - CSS when an exact recipe exists, canvas otherwise
+   * - `"css"` - force CSS; falls back to the canvas with a dev warning if none exists
+   * - `"canvas"` - force the canvas painter
+   */
+  renderer?: GradientRenderer;
   channelOverrides?: Record<string, number> | false;
 }
 
 export const ColorRingGradient = forwardRef<HTMLSpanElement, ColorRingGradientProps>(
-  function ColorRingGradient({ channelOverrides = { alpha: 1 }, style, children, ...props }, ref) {
+  function ColorRingGradient({ renderer = "auto", channelOverrides = { alpha: 1 }, style, children, ...props }, ref) {
     const rootCtx = useColorRingContext();
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
@@ -36,6 +44,16 @@ export const ColorRingGradient = forwardRef<HTMLSpanElement, ColorRingGradientPr
       if (Object.keys(updates).length > 0) result = result.with({ space: cs, ...updates });
       return result;
     }
+
+    // `sampleConicRing` writes an opaque alpha byte for every pixel, so the CSS
+    // stops drop the base color's alpha to match rather than tinting the ring.
+    const cssLayers = resolveCssGradient(renderer, "ColorRingGradient", () => {
+      const baseColor = rootCtx.colorRef;
+      if (!baseColor) return null;
+      const overridden = applyOverrides(baseColor, rootCtx.colorSpace).withAlpha(1);
+      const stops = channelStops(overridden, rootCtx.colorSpace, rootCtx.channelKey);
+      return stops && cssConicStops(stops, rootCtx.startAngle);
+    });
 
     const render = useCallback(() => {
       const canvas = canvasRef.current;
@@ -79,10 +97,14 @@ export const ColorRingGradient = forwardRef<HTMLSpanElement, ColorRingGradientPr
 
     return (
       <span ref={ref} data-disabled={rootCtx.disabled ? "" : undefined} style={{ background: CHECKERBOARD_BACKGROUND, maskImage: checkerboardMask, WebkitMaskImage: checkerboardMask, ...style }} {...props}>
-        <canvas
-          ref={canvasRef}
-          style={{ position: "absolute", inset: "0", width: "100%", height: "100%", pointerEvents: "none" }}
-        />
+        {cssLayers
+          ? <CssGradientLayers layers={cssLayers} />
+          : (
+              <canvas
+                ref={canvasRef}
+                style={{ position: "absolute", inset: "0", width: "100%", height: "100%", pointerEvents: "none" }}
+              />
+            )}
         {children}
       </span>
     );

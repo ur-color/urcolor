@@ -1,8 +1,9 @@
 import { forwardRef, useCallback, useEffect, useMemo, useRef, type ComponentPropsWithoutRef } from "react";
 import { Color, type SpaceId } from "@urcolor/core";
-import { drawGradient, getChannelConfig, renderToCanvas, sampleBilinearGrid, sampleChannelGrid } from "@urcolor/shared";
+import { cssAreaBilinear, cssAreaChannels, drawGradient, getChannelConfig, renderToCanvas, sampleBilinearGrid, sampleChannelGrid, type GradientRenderer } from "@urcolor/shared";
 import { useColorAreaContext } from "../root/ColorAreaRootContext";
 import { CHECKERBOARD_BACKGROUND } from "../../../utils";
+import { CssGradientLayers, resolveCssGradient } from "../../../cssGradient";
 
 export interface ColorAreaGradientProps extends ComponentPropsWithoutRef<"span"> {
   topLeft?: string;
@@ -10,11 +11,18 @@ export interface ColorAreaGradientProps extends ComponentPropsWithoutRef<"span">
   bottomLeft?: string;
   bottomRight?: string;
   interpolationSpace?: SpaceId;
+  /**
+   * Which painter to use.
+   * - `"auto"` (default) - CSS when an exact recipe exists, canvas otherwise
+   * - `"css"` - force CSS; falls back to the canvas with a dev warning if none exists
+   * - `"canvas"` - force the canvas painter
+   */
+  renderer?: GradientRenderer;
   channelOverrides?: Record<string, number> | false;
 }
 
 export const ColorAreaGradient = forwardRef<HTMLSpanElement, ColorAreaGradientProps>(
-  function ColorAreaGradient({ topLeft, topRight, bottomLeft, bottomRight, interpolationSpace, channelOverrides = { alpha: 1 }, style, children, ...props }, ref) {
+  function ColorAreaGradient({ topLeft, topRight, bottomLeft, bottomRight, interpolationSpace, renderer = "auto", channelOverrides = { alpha: 1 }, style, children, ...props }, ref) {
     const rootCtx = useColorAreaContext();
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
@@ -43,6 +51,44 @@ export const ColorAreaGradient = forwardRef<HTMLSpanElement, ColorAreaGradientPr
       if (Object.keys(updates).length > 0) result = result.with({ space: cs, ...updates });
       return result;
     }
+
+    /**
+     * The four corners in screen order, with the mirror swap the CPU path
+     * applies. `hasAlphaAxis` decides whether the corners keep their own alpha,
+     * matching the flag `drawGradient` and `sampleBilinearGrid` are handed.
+     */
+    function orientedCorners(): [Color, Color, Color, Color] | null {
+      const parsed = [topLeft, topRight, bottomLeft, bottomRight].map(c => Color.parse(c ?? "black"));
+      if (parsed.some(c => !c)) return null;
+
+      let [a, b, c, d] = parsed as [Color, Color, Color, Color];
+      if (!hasAlphaAxis) [a, b, c, d] = [a.withAlpha(1), b.withAlpha(1), c.withAlpha(1), d.withAlpha(1)];
+      if (!rootCtx.isSlidingFromLeft) [a, b, c, d] = [b, a, d, c];
+      if (!rootCtx.isSlidingFromTop) [a, b, c, d] = [c, d, a, b];
+      return [a, b, c, d];
+    }
+
+    const cssLayers = resolveCssGradient(renderer, "ColorAreaGradient", () => {
+      if (topLeft || topRight || bottomLeft || bottomRight) {
+        // `interpolationSpace` stays on the canvas. The two row gradients could
+        // be densified into stops in that space, but the vertical lerp is a sRGB
+        // alpha composite either way - the result would be perceptual on one
+        // axis and not the other, which is worse than not taking this path.
+        if (interpolationSpace) return null;
+        const corners = orientedCorners();
+        return corners && cssAreaBilinear(...corners);
+      }
+
+      if (!rootCtx.colorRef || !rootCtx.colorSpace) return null;
+      return cssAreaChannels(
+        applyOverrides(rootCtx.colorRef, rootCtx.colorSpace),
+        rootCtx.colorSpace,
+        xIsAlpha ? null : rootCtx.xChannelKey,
+        yIsAlpha ? null : rootCtx.yChannelKey,
+        rootCtx.isSlidingFromLeft,
+        rootCtx.isSlidingFromTop,
+      );
+    });
 
     const render = useCallback(() => {
       const canvas = canvasRef.current;
@@ -156,10 +202,14 @@ export const ColorAreaGradient = forwardRef<HTMLSpanElement, ColorAreaGradientPr
 
     return (
       <span ref={ref} data-disabled={rootCtx.disabled ? "" : undefined} style={{ background: CHECKERBOARD_BACKGROUND, ...style }} {...props}>
-        <canvas
-          ref={canvasRef}
-          style={{ position: "absolute", inset: "0", width: "100%", height: "100%", pointerEvents: "none", opacity: canvasOpacity }}
-        />
+        {cssLayers
+          ? <CssGradientLayers layers={cssLayers} style={{ opacity: canvasOpacity }} />
+          : (
+              <canvas
+                ref={canvasRef}
+                style={{ position: "absolute", inset: "0", width: "100%", height: "100%", pointerEvents: "none", opacity: canvasOpacity }}
+              />
+            )}
         {children}
       </span>
     );

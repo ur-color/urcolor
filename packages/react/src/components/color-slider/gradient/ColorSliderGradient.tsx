@@ -1,8 +1,9 @@
 import { forwardRef, useCallback, useEffect, useMemo, useRef, type ComponentPropsWithoutRef } from "react";
 import { Color, type SpaceId } from "@urcolor/core";
-import { drawLinearGradient, getChannelConfig, interpolateStops } from "@urcolor/shared";
+import { cssLinearStops, defaultStepsFor, drawLinearGradient, getChannelConfig, interpolateStops, type GradientRenderer } from "@urcolor/shared";
 import { useColorSliderContext } from "../root/ColorSliderRootContext";
 import { CHECKERBOARD_BACKGROUND } from "../../../utils";
+import { CssGradientLayers, resolveCssGradient } from "../../../cssGradient";
 
 export interface ColorSliderGradientProps extends ComponentPropsWithoutRef<"span"> {
   /** Array of color stops. When omitted, auto-computes from the slider's channel and current color. */
@@ -12,6 +13,13 @@ export interface ColorSliderGradientProps extends ComponentPropsWithoutRef<"span
   /** When set to a non-RGB color space, interpolates stops in that space for perceptual accuracy. */
   interpolationSpace?: SpaceId;
   /**
+   * Which painter to use.
+   * - `"auto"` (default) - CSS when an exact recipe exists, canvas otherwise
+   * - `"css"` - force CSS; falls back to the canvas with a dev warning if none exists
+   * - `"canvas"` - force the canvas painter
+   */
+  renderer?: GradientRenderer;
+  /**
    * Lock specific channels to fixed values in the gradient.
    * - `{ alpha: 1 }` (default) - lock alpha to 1
    * - `false` - no overrides
@@ -20,7 +28,7 @@ export interface ColorSliderGradientProps extends ComponentPropsWithoutRef<"span
 }
 
 export const ColorSliderGradient = forwardRef<HTMLSpanElement, ColorSliderGradientProps>(
-  function ColorSliderGradient({ colors: colorsProp, angle: angleProp, interpolationSpace, channelOverrides = { alpha: 1 }, style, children, ...props }, ref) {
+  function ColorSliderGradient({ colors: colorsProp, angle: angleProp, interpolationSpace, renderer = "auto", channelOverrides = { alpha: 1 }, style, children, ...props }, ref) {
     const { colorRef, channel, colorSpace, orientation, inverted } = useColorSliderContext();
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
@@ -37,7 +45,15 @@ export const ColorSliderGradient = forwardRef<HTMLSpanElement, ColorSliderGradie
       return 1;
     }, [isAlphaChannel, channelOverrides, colorRef]);
 
-    const autoColors = useMemo<Color[] | null>(() => {
+    /**
+     * The shader holds 16 uniform slots, so the WebGL path can never ask for
+     * more than that. The CSS path has no such ceiling and asks for
+     * `defaultStepsFor(...)` instead - 36 across a hue sweep, where banding
+     * between sRGB-lerped stops is visible and 12 is not enough.
+     */
+    const WEBGL_STOPS = 12;
+
+    const buildAutoColors = (steps: number): Color[] | null => {
       if (colorsProp) return null;
       if (!colorRef) return null;
 
@@ -60,7 +76,6 @@ export const ColorSliderGradient = forwardRef<HTMLSpanElement, ColorSliderGradie
       const cfg = getChannelConfig(colorSpace, channel);
       if (!cfg) return null;
 
-      const steps = 12;
       const colors: Color[] = [];
       const cMin = cfg.nativeMin ?? cfg.min;
       const cMax = cfg.nativeMax ?? cfg.max;
@@ -86,36 +101,52 @@ export const ColorSliderGradient = forwardRef<HTMLSpanElement, ColorSliderGradie
         colors.push(c);
       }
       return colors;
-    }, [colorsProp, colorRef, isAlphaChannel, channelOverrides, colorSpace, channel]);
+    };
 
-    const render = useCallback(() => {
-      const canvas = canvasRef.current;
-      if (!canvas) return;
+    const autoColors = useMemo<Color[] | null>(
+      () => buildAutoColors(WEBGL_STOPS),
+      [colorsProp, colorRef, isAlphaChannel, channelOverrides, colorSpace, channel],
+    );
 
+    /**
+     * The stop list both painters draw, differing only in how many stops they
+     * can hold. Mirroring reverses the stops rather than flipping the gradient,
+     * which is what the WebGL path has always done.
+     */
+    const resolveColors = (steps: number): Color[] | null => {
       let colors: Color[];
 
       if (colorsProp) {
         const parsed = colorsProp.map(c => Color.parse(c));
-        if (parsed.some(c => !c) || parsed.length < 2) return;
+        if (parsed.some(c => !c) || parsed.length < 2) return null;
         colors = parsed as Color[];
-      } else if (autoColors) {
-        colors = autoColors;
-        if (colors.length < 2) return;
       } else {
-        return;
+        const auto = buildAutoColors(steps);
+        if (!auto || auto.length < 2) return null;
+        colors = auto;
       }
 
-      const shouldMirror = effectiveMirrorX || effectiveMirrorY;
-      if (shouldMirror) {
-        colors = [...colors].reverse();
-      }
+      if (effectiveMirrorX || effectiveMirrorY) colors = [...colors].reverse();
+      if (interpolationSpace) return interpolateStops(colors, 32, interpolationSpace);
+      return colors;
+    };
 
-      if (interpolationSpace) {
-        const interpolated = interpolateStops(colors, 32, interpolationSpace);
-        drawLinearGradient(canvas, interpolated, effectiveAngle, isAlphaChannel);
-      } else {
-        drawLinearGradient(canvas, colors, effectiveAngle, isAlphaChannel);
-      }
+    /**
+     * `interpolationSpace` does not force the canvas here: a 1D sweep is fully
+     * expressible as stops, and `resolveColors` already densifies to 32 of them
+     * computed in that space.
+     */
+    const cssLayers = resolveCssGradient(renderer, "ColorSliderGradient", () => {
+      const colors = resolveColors(colorsProp ? WEBGL_STOPS : defaultStepsFor(colorSpace, channel));
+      return colors && cssLinearStops(colors, effectiveAngle);
+    });
+
+    const render = useCallback(() => {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+      const colors = resolveColors(WEBGL_STOPS);
+      if (!colors) return;
+      drawLinearGradient(canvas, colors, effectiveAngle, isAlphaChannel);
     }, [colorsProp, autoColors, effectiveMirrorX, effectiveMirrorY, interpolationSpace, effectiveAngle, isAlphaChannel]);
 
     // ResizeObserver for canvas
@@ -143,17 +174,21 @@ export const ColorSliderGradient = forwardRef<HTMLSpanElement, ColorSliderGradie
 
     return (
       <span ref={ref} style={{ background: CHECKERBOARD_BACKGROUND, ...style }} {...props}>
-        <canvas
-          ref={canvasRef}
-          style={{
-            position: "absolute",
-            inset: "0",
-            width: "100%",
-            height: "100%",
-            pointerEvents: "none",
-            opacity: canvasOpacity,
-          }}
-        />
+        {cssLayers
+          ? <CssGradientLayers layers={cssLayers} style={{ opacity: canvasOpacity }} />
+          : (
+              <canvas
+                ref={canvasRef}
+                style={{
+                  position: "absolute",
+                  inset: "0",
+                  width: "100%",
+                  height: "100%",
+                  pointerEvents: "none",
+                  opacity: canvasOpacity,
+                }}
+              />
+            )}
         {children}
       </span>
     );
