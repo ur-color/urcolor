@@ -82,7 +82,7 @@ export function buildOutput(
   let collisions = 0;
 
   for (const [lang, labelMap] of labels) {
-    const chunk = buildPaletteChunk(lang, items, labelMap, aliases.get(lang) ?? []);
+    const { chunk } = buildPaletteChunk(lang, items, labelMap, aliases.get(lang) ?? []);
     // A locale whose every labelled item fell outside the catalogue would
     // produce a chunk that can answer nothing; don't ship one.
     if (chunk.terms.length === 0) continue;

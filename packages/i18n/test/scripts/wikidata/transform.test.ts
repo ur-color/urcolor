@@ -10,12 +10,14 @@ import {
   catalogueMembership,
   groupAliases,
   groupLabels,
+  fold,
   isCatalogueCode,
   normalizeLanguage,
   paletteCoverage,
   pickHex,
   pruneCatalogueItems,
   stripCatalogueCodes,
+  supportsLocaleCase,
 } from "../../../scripts/sync-wikidata/transform";
 
 const fixture = (name: string) => Bun.file(`${import.meta.dir}/../../fixtures/wikidata/${name}`).text();
@@ -218,7 +220,7 @@ describe("groupLabels", () => {
 describe("buildPaletteChunk", () => {
   it("emits one entry per labelled item, in salience order", async () => {
     const { items, labels, aliases } = await load();
-    const chunk = buildPaletteChunk("en", items, labels.get("en")!, aliases.get("en") ?? []);
+    const { chunk } = buildPaletteChunk("en", items, labels.get("en")!, aliases.get("en") ?? []);
 
     expect(chunk.model).toBe("palette");
     expect(chunk.lang).toBe("en");
@@ -228,7 +230,7 @@ describe("buildPaletteChunk", () => {
 
   it("keeps both sides of a name collision, most-linked first", async () => {
     const { items, labels, aliases } = await load();
-    const chunk = buildPaletteChunk("en", items, labels.get("en")!, aliases.get("en") ?? []);
+    const { chunk } = buildPaletteChunk("en", items, labels.get("en")!, aliases.get("en") ?? []);
     const whites = chunk.terms
       .map((term, index) => ({ term: term[0], qid: chunk.provenance[index]![0] }))
       .filter(entry => entry.term === "white");
@@ -237,20 +239,20 @@ describe("buildPaletteChunk", () => {
 
   it("uses a lowercased term key and the written label as the name", async () => {
     const { items, labels, aliases } = await load();
-    const chunk = buildPaletteChunk("en", items, labels.get("en")!, aliases.get("en") ?? []);
+    const { chunk } = buildPaletteChunk("en", items, labels.get("en")!, aliases.get("en") ?? []);
     const lilac = chunk.terms.find(t => t[1] === "lilac");
     expect(lilac?.[0]).toBe("lilac");
   });
 
   it("always leaves pCT null — the source carries no such signal", async () => {
     const { items, labels, aliases } = await load();
-    const chunk = buildPaletteChunk("en", items, labels.get("en")!, aliases.get("en") ?? []);
+    const { chunk } = buildPaletteChunk("en", items, labels.get("en")!, aliases.get("en") ?? []);
     expect(chunk.terms.every(t => t[3] === null)).toBe(true);
   });
 
   it("indexes aliases lowercased, pointing at the right term", async () => {
     const { items, labels, aliases } = await load();
-    const chunk = buildPaletteChunk("en", items, labels.get("en")!, aliases.get("en") ?? []);
+    const { chunk } = buildPaletteChunk("en", items, labels.get("en")!, aliases.get("en") ?? []);
     expect(chunk.terms[chunk.aliases["yellow color"]!]?.[0]).toBe("yellow");
     expect(chunk.terms[chunk.aliases["color yellow"]!]?.[0]).toBe("yellow");
     // "White" is an alias of Q23444, lowercased on the way in.
@@ -273,13 +275,13 @@ describe("buildPaletteChunk", () => {
       { qid: "Q2", value: "shared" },
       { qid: "Q1", value: "shared" },
     ];
-    const chunk = buildPaletteChunk("xx", items, labels, aliases);
+    const { chunk } = buildPaletteChunk("xx", items, labels, aliases);
     expect(chunk.terms[chunk.aliases.shared!]?.[1]).toBe("foo");
   });
 
   it("omits items this language has no label for", async () => {
     const { items, labels, aliases } = await load();
-    const chunk = buildPaletteChunk("ka", items, labels.get("ka")!, aliases.get("ka") ?? []);
+    const { chunk } = buildPaletteChunk("ka", items, labels.get("ka")!, aliases.get("ka") ?? []);
     expect(chunk.terms).toHaveLength(1);
     expect(chunk.terms[0]?.[1]).toBe("ყვითელი");
   });
@@ -288,7 +290,7 @@ describe("buildPaletteChunk", () => {
     const decomposed = "же́"; // же + combining acute
     const composed = decomposed.normalize("NFC");
     const items = buildItems([{ qid: "Q1", hex: "FFFFFF", sitelinks: 1 }]);
-    const chunk = buildPaletteChunk(
+    const { chunk } = buildPaletteChunk(
       "xx",
       items,
       new Map([["Q1", decomposed]]),
@@ -302,7 +304,7 @@ describe("buildPaletteChunk", () => {
 describe("paletteCoverage", () => {
   it("reports terms over the catalogue size", async () => {
     const { items, labels, aliases } = await load();
-    const chunk = buildPaletteChunk("en", items, labels.get("en")!, aliases.get("en") ?? []);
+    const { chunk } = buildPaletteChunk("en", items, labels.get("en")!, aliases.get("en") ?? []);
     expect(paletteCoverage(chunk, 4)).toEqual({ model: "palette", terms: 4, coverage: 1 });
     expect(paletteCoverage(chunk, 8).coverage).toBe(0.5);
   });
@@ -398,5 +400,83 @@ describe("catalogue split", () => {
     // fraction of the catalogue this language names".
     const items = [{ qid: "Q9", hex: "FFFFFF", sitelinks: 0 }];
     expect(pruneCatalogueItems(items, membership, new Set())).toHaveLength(1);
+  });
+});
+
+describe("fold", () => {
+  it("lower-cases under the rules of the given locale", () => {
+    expect(fold("Rot", "de")).toBe("rot");
+    expect(fold("Sarı", "az")).toBe("sarı");
+  });
+
+  it("folds Turkish dotted capital I to a bare i", () => {
+    // Under the invariant rule this yields "i" plus a combining dot above,
+    // a different string and so a different lookup key.
+    expect(fold("İnci", "tr")).toBe("inci");
+    expect("İnci".toLowerCase()).not.toBe("inci");
+  });
+
+  it("returns NFC", () => {
+    expect(fold("Grünbeige".normalize("NFD"), "de")).toBe("grünbeige".normalize("NFC"));
+  });
+
+  it("falls back to the invariant rule for tags Intl rejects", () => {
+    expect(supportsLocaleCase("map-bms")).toBe(false);
+    expect(fold("Abang", "map-bms")).toBe("abang");
+  });
+
+  it("reports ordinary tags as supported", () => {
+    expect(supportsLocaleCase("tr")).toBe(true);
+    expect(supportsLocaleCase("zh-Hant")).toBe(true);
+    expect(supportsLocaleCase("be-tarask")).toBe(true);
+  });
+});
+
+describe("buildPaletteChunk hygiene", () => {
+  const items = [
+    { qid: "Q1", hex: "FF0000", sitelinks: 9, centroid: [0.6, 0.2, 0.1] as [number, number, number] },
+    { qid: "Q2", hex: "00FF00", sitelinks: 8, centroid: [0.8, -0.2, 0.1] as [number, number, number] },
+    { qid: "Q3", hex: "0000FF", sitelinks: 7, centroid: [0.4, 0.0, -0.3] as [number, number, number] },
+    { qid: "Q4", hex: "FFFF00", sitelinks: 6, centroid: [0.9, -0.1, 0.2] as [number, number, number] },
+    { qid: "Q5", hex: "000000", sitelinks: 5, centroid: [0.0, 0.0, 0.0] as [number, number, number] },
+    { qid: "Q6", hex: "808080", sitelinks: 4, centroid: [0.6, 0.0, 0.0] as [number, number, number] },
+  ];
+
+  it("folds every name and key, and drops script-foreign names", () => {
+    const labels = new Map([
+      ["Q1", "Красный"],
+      ["Q2", "Зелёный"],
+      ["Q3", "Синий"],
+      ["Q4", "Жёлтый"],
+      ["Q5", "Eigengrau"],
+      ["Q6", "rосмический латте"],
+    ]);
+
+    const { chunk, droppedByScript } = buildPaletteChunk("ru", items, labels, []);
+
+    expect(chunk.terms.map(entry => entry[1])).toEqual(["красный", "зелёный", "синий", "жёлтый"]);
+    expect(chunk.terms.map(entry => entry[0])).toEqual(["красный", "зелёный", "синий", "жёлтый"]);
+    // Reported in upstream spelling, which is what the sync report prints.
+    expect(droppedByScript).toEqual(["Eigengrau", "rосмический латте"]);
+  });
+
+  it("keeps provenance aligned with the surviving terms", () => {
+    const labels = new Map([["Q1", "Красный"], ["Q5", "Eigengrau"], ["Q2", "Зелёный"], ["Q3", "Синий"]]);
+    const { chunk } = buildPaletteChunk("ru", items, labels, []);
+    expect(chunk.terms).toHaveLength(3);
+    expect(chunk.provenance.map(entry => entry[0])).toEqual(["Q1", "Q2", "Q3"]);
+  });
+
+  it("folds aliases too", () => {
+    const labels = new Map([["Q1", "Красный"]]);
+    const { chunk } = buildPaletteChunk("ru", items, labels, [{ qid: "Q1", value: "КРАСНЫЙ ЦВЕТ" }]);
+    expect(chunk.aliases["красный цвет"]).toBe(0);
+  });
+
+  it("ships a chunk too thin to calibrate unchecked", () => {
+    const labels = new Map([["Q1", "Lotong"], ["Q2", "ᨌᨛᨒ"]]);
+    const { chunk, droppedByScript } = buildPaletteChunk("bug", items, labels, []);
+    expect(chunk.terms).toHaveLength(2);
+    expect(droppedByScript).toEqual([]);
   });
 });

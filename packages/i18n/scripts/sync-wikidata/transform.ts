@@ -1,6 +1,7 @@
 import { Color } from "@urcolor/core";
 import type { LanguageCoverage, PaletteChunk, TermEntry } from "../../src/engine/types";
 import type { Catalogue, RawAliasRow, RawCatalogueRow, RawItemRow, RawLabelRow } from "./fetch";
+import { attestedScripts, isScriptConsistent } from "./scripts";
 
 /**
  * Wikidata pseudo-languages. `mul` ("multiple languages") is present in the
@@ -236,24 +237,83 @@ export function groupAliases(rows: readonly RawAliasRow[]): Map<string, { qid: s
   return byLang;
 }
 
+/**
+ * Whether `Intl` accepts a tag for case mapping. Only `map-bms` is rejected in
+ * the current data: its second subtag is neither a region nor a well-formed
+ * variant, so the tag is structurally invalid even though the language is
+ * real.
+ */
+export function supportsLocaleCase(lang: string): boolean {
+  try {
+    "A".toLocaleLowerCase(lang);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Lower-cases under the rules of the name's own language.
+ *
+ * `uwdata` ships every display name in lower case in every language it covers,
+ * German included, and this brings `wikidata` into line.
+ *
+ * Both normalisation passes are load-bearing. Turkish `İ` folds to `i` under
+ * `tr`, but under the invariant rule it folds to `i` followed by a combining
+ * dot above: a different string, and so a different lookup key. Normalising
+ * after the fold collapses that back to NFC.
+ */
+export function fold(value: string, lang: string): string {
+  const composed = value.normalize("NFC");
+  try {
+    return composed.toLocaleLowerCase(lang).normalize("NFC");
+  } catch {
+    return composed.toLowerCase().normalize("NFC");
+  }
+}
+
+export interface PaletteChunkResult {
+  chunk: PaletteChunk;
+  /** Names the alphabet check removed, in upstream spelling, for the report. */
+  droppedByScript: string[];
+}
+
 export function buildPaletteChunk(
   lang: string,
   items: readonly ColorItem[],
   labels: ReadonlyMap<string, string>,
   aliases: readonly { qid: string; value: string }[],
-): PaletteChunk {
-  const terms: TermEntry[] = [];
-  const provenance: [string, string][] = [];
-  const indexByQid = new Map<string, number>();
-
-  // `items` is already in salience order, so the emitted entries inherit it.
+): PaletteChunkResult {
+  // `items` is already in salience order, so the candidates inherit it.
+  const candidates: { item: ColorItem; label: string }[] = [];
   for (const item of items) {
     const label = labels.get(item.qid);
     if (label === undefined) continue;
+    candidates.push({ item, label: label.normalize("NFC") });
+  }
 
-    const name = label.normalize("NFC");
+  // Calibrated against this locale's own names, which is only possible once
+  // they have all been collected. The check runs before the fold because case
+  // does not affect script, and the report reads better in upstream spelling.
+  const allowed = attestedScripts(candidates.map(candidate => candidate.label));
+
+  const terms: TermEntry[] = [];
+  const provenance: [string, string][] = [];
+  const indexByQid = new Map<string, number>();
+  const droppedByScript: string[] = [];
+
+  for (const { item, label } of candidates) {
+    if (!isScriptConsistent(label, allowed)) {
+      droppedByScript.push(label);
+      continue;
+    }
+
+    // Once the display name is folded, the key and the name are the same
+    // string. A separate `toLowerCase()` key would be redundant here and, for
+    // Turkish, actively wrong.
+    const name = fold(label, lang);
     indexByQid.set(item.qid, terms.length);
-    terms.push([name.toLowerCase(), name, item.centroid, null]);
+    terms.push([name, name, item.centroid, null]);
     provenance.push([item.qid, item.hex]);
   }
 
@@ -269,12 +329,15 @@ export function buildPaletteChunk(
     .sort((a, b) => a.termIndex - b.termIndex);
 
   for (const { alias, termIndex } of orderedAliases) {
-    const key = alias.value.normalize("NFC").toLowerCase();
+    const key = fold(alias.value, lang);
     // First wins, and the sort above means "first" is the most-linked item.
     if (!(key in aliasIndex)) aliasIndex[key] = termIndex;
   }
 
-  return { lang, model: "palette", terms, provenance, aliases: aliasIndex };
+  return {
+    chunk: { lang, model: "palette", terms, provenance, aliases: aliasIndex },
+    droppedByScript,
+  };
 }
 
 /**
