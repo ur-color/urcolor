@@ -5,4 +5,4 @@
 // sRGB hex triplet.
 //
 // Wikidata content is released under CC0-1.0.
-export default {"lang":"atj","model":"palette","terms":[["waseskonaw","waseskonaw",[0.45201371817442365,-0.03245697517079771,-0.3115281656775778],null],["wapaw","wapaw",[1.0000000000000002,-4.996003610813204e-16,0],null],["osawaw","osawaw",[0.4967423067120131,0.07136498995549045,0.10074230251957222],null],["otcitcicic","Otcitcicic",[0.8723564815030961,0.07868879837223175,-0.011900211471554734],null]],"provenance":[["Q1088","0000FF"],["Q23444","FFFFFF"],["Q47071","964B00"],["Q429220","FFC0DB"]],"aliases":{}};
+export default {"lang":"atj","model":"palette","terms":[["waseskonaw","waseskonaw",[0.45201371817442365,-0.03245697517079771,-0.3115281656775778],null],["wapaw","wapaw",[1.0000000000000002,-4.996003610813204e-16,0],null],["osawaw","osawaw",[0.4967423067120131,0.07136498995549045,0.10074230251957222],null],["otcitcicic","otcitcicic",[0.8723564815030961,0.07868879837223175,-0.011900211471554734],null]],"provenance":[["Q1088","0000FF"],["Q23444","FFFFFF"],["Q47071","964B00"],["Q429220","FFC0DB"]],"aliases":{}};

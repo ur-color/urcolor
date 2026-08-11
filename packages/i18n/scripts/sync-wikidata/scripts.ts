@@ -32,6 +32,11 @@ export const CHECKED_SCRIPTS: readonly string[] = [
   "Mongolian", "Meetei_Mayek", "Syloti_Nagri", "Buginese", "Tifinagh",
   "Canadian_Aboriginal", "Javanese", "Balinese", "Yi", "Vai", "Adlam", "Nko",
   "Osage", "Coptic", "Runic", "Gothic", "Cypriot",
+  // Added after the first sync reported 79 letters in no listed script:
+  // Tai Tham carries Northern Thai (`nod`) and Ol Chiki carries Santali
+  // (`sat`). Both were being skipped rather than checked, which is exactly
+  // the gap `unlistedScriptLetters` exists to expose.
+  "Tai_Tham", "Ol_Chiki",
 ];
 
 const SCRIPT_PATTERNS: ReadonlyArray<readonly [string, RegExp]> = CHECKED_SCRIPTS.map(

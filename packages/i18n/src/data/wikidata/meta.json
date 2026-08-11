@@ -1,1497 +1,1497 @@
 {
   "source": "wikidata",
-  "retrievedAt": "2026-08-02T10:06:55.686Z",
-  "itemCount": 964,
+  "retrievedAt": "2026-08-11T21:27:50.383Z",
+  "itemCount": 730,
   "languages": {
     "ady": {
       "model": "palette",
       "terms": 1,
-      "coverage": 0.001
+      "coverage": 0.0014
     },
     "aeb-Arab": {
       "model": "palette",
       "terms": 13,
-      "coverage": 0.0135
+      "coverage": 0.0178
     },
     "aeb-Latn": {
       "model": "palette",
       "terms": 1,
-      "coverage": 0.001
+      "coverage": 0.0014
     },
     "af": {
       "model": "palette",
       "terms": 167,
-      "coverage": 0.1732
+      "coverage": 0.2288
     },
     "ak": {
       "model": "palette",
       "terms": 2,
-      "coverage": 0.0021
+      "coverage": 0.0027
     },
     "am": {
       "model": "palette",
       "terms": 12,
-      "coverage": 0.0124
+      "coverage": 0.0164
     },
     "an": {
       "model": "palette",
-      "terms": 15,
-      "coverage": 0.0156
+      "terms": 34,
+      "coverage": 0.0466
     },
     "ang": {
       "model": "palette",
       "terms": 13,
-      "coverage": 0.0135
+      "coverage": 0.0178
     },
     "anp": {
       "model": "palette",
       "terms": 7,
-      "coverage": 0.0073
+      "coverage": 0.0096
     },
     "apc": {
       "model": "palette",
       "terms": 5,
-      "coverage": 0.0052
+      "coverage": 0.0068
     },
     "ar": {
       "model": "palette",
-      "terms": 199,
-      "coverage": 0.2064
+      "terms": 197,
+      "coverage": 0.2699
     },
     "arc": {
       "model": "palette",
       "terms": 10,
-      "coverage": 0.0104
+      "coverage": 0.0137
     },
     "arq": {
       "model": "palette",
       "terms": 6,
-      "coverage": 0.0062
+      "coverage": 0.0082
     },
     "ary": {
       "model": "palette",
       "terms": 8,
-      "coverage": 0.0083
+      "coverage": 0.011
     },
     "arz": {
       "model": "palette",
       "terms": 27,
-      "coverage": 0.028
+      "coverage": 0.037
     },
     "as": {
       "model": "palette",
       "terms": 2,
-      "coverage": 0.0021
+      "coverage": 0.0027
     },
     "ast": {
       "model": "palette",
       "terms": 48,
-      "coverage": 0.0498
+      "coverage": 0.0658
     },
     "atj": {
       "model": "palette",
       "terms": 4,
-      "coverage": 0.0041
+      "coverage": 0.0055
     },
     "av": {
       "model": "palette",
       "terms": 1,
-      "coverage": 0.001
+      "coverage": 0.0014
     },
     "awa": {
       "model": "palette",
       "terms": 9,
-      "coverage": 0.0093
+      "coverage": 0.0123
     },
     "ay": {
       "model": "palette",
       "terms": 15,
-      "coverage": 0.0156
+      "coverage": 0.0205
     },
     "az": {
       "model": "palette",
-      "terms": 41,
-      "coverage": 0.0425
+      "terms": 40,
+      "coverage": 0.0548
     },
     "azb": {
       "model": "palette",
       "terms": 22,
-      "coverage": 0.0228
+      "coverage": 0.0301
     },
     "ba": {
       "model": "palette",
       "terms": 15,
-      "coverage": 0.0156
+      "coverage": 0.0205
     },
     "ban": {
       "model": "palette",
       "terms": 15,
-      "coverage": 0.0156
+      "coverage": 0.0205
     },
     "bar": {
       "model": "palette",
-      "terms": 5,
-      "coverage": 0.0052
+      "terms": 4,
+      "coverage": 0.0055
     },
     "bcl": {
       "model": "palette",
       "terms": 11,
-      "coverage": 0.0114
+      "coverage": 0.0151
     },
     "bdr": {
       "model": "palette",
       "terms": 1,
-      "coverage": 0.001
+      "coverage": 0.0014
     },
     "be": {
       "model": "palette",
       "terms": 47,
-      "coverage": 0.0488
+      "coverage": 0.0644
     },
     "be-tarask": {
       "model": "palette",
       "terms": 63,
-      "coverage": 0.0654
+      "coverage": 0.0863
     },
     "bg": {
       "model": "palette",
-      "terms": 30,
-      "coverage": 0.0311
+      "terms": 29,
+      "coverage": 0.0397
     },
     "bho": {
       "model": "palette",
       "terms": 4,
-      "coverage": 0.0041
+      "coverage": 0.0055
     },
     "bjn": {
       "model": "palette",
       "terms": 6,
-      "coverage": 0.0062
+      "coverage": 0.0082
     },
     "bn": {
       "model": "palette",
       "terms": 82,
-      "coverage": 0.0851
+      "coverage": 0.1123
     },
     "bo": {
       "model": "palette",
       "terms": 17,
-      "coverage": 0.0176
+      "coverage": 0.0233
     },
     "br": {
       "model": "palette",
       "terms": 23,
-      "coverage": 0.0239
+      "coverage": 0.0315
     },
     "bs": {
       "model": "palette",
       "terms": 19,
-      "coverage": 0.0197
+      "coverage": 0.026
     },
     "btm": {
       "model": "palette",
       "terms": 2,
-      "coverage": 0.0021
+      "coverage": 0.0027
     },
     "bug": {
       "model": "palette",
       "terms": 3,
-      "coverage": 0.0031
+      "coverage": 0.0041
     },
     "ca": {
       "model": "palette",
-      "terms": 168,
-      "coverage": 0.1743
+      "terms": 162,
+      "coverage": 0.2219
     },
     "cdo": {
       "model": "palette",
       "terms": 11,
-      "coverage": 0.0114
+      "coverage": 0.0151
     },
     "ce": {
       "model": "palette",
       "terms": 13,
-      "coverage": 0.0135
+      "coverage": 0.0178
     },
     "ceb": {
       "model": "palette",
       "terms": 4,
-      "coverage": 0.0041
+      "coverage": 0.0055
     },
     "ch": {
       "model": "palette",
       "terms": 8,
-      "coverage": 0.0083
+      "coverage": 0.011
     },
     "cho": {
       "model": "palette",
       "terms": 7,
-      "coverage": 0.0073
+      "coverage": 0.0096
     },
     "chr": {
       "model": "palette",
       "terms": 4,
-      "coverage": 0.0041
+      "coverage": 0.0055
     },
     "chy": {
       "model": "palette",
       "terms": 1,
-      "coverage": 0.001
+      "coverage": 0.0014
     },
     "ckb": {
       "model": "palette",
       "terms": 19,
-      "coverage": 0.0197
+      "coverage": 0.026
     },
     "cr": {
       "model": "palette",
       "terms": 2,
-      "coverage": 0.0021
+      "coverage": 0.0027
     },
     "crh": {
       "model": "palette",
       "terms": 3,
-      "coverage": 0.0031
+      "coverage": 0.0041
     },
     "cs": {
       "model": "palette",
-      "terms": 113,
-      "coverage": 0.1172
+      "terms": 111,
+      "coverage": 0.1521
     },
     "csb": {
       "model": "palette",
       "terms": 5,
-      "coverage": 0.0052
+      "coverage": 0.0068
     },
     "cu": {
       "model": "palette",
       "terms": 4,
-      "coverage": 0.0041
+      "coverage": 0.0055
     },
     "cv": {
       "model": "palette",
       "terms": 15,
-      "coverage": 0.0156
+      "coverage": 0.0205
     },
     "cy": {
       "model": "palette",
-      "terms": 43,
-      "coverage": 0.0446
+      "terms": 42,
+      "coverage": 0.0575
     },
     "da": {
       "model": "palette",
-      "terms": 103,
-      "coverage": 0.1068
+      "terms": 87,
+      "coverage": 0.1192
     },
     "dag": {
       "model": "palette",
       "terms": 1,
-      "coverage": 0.001
+      "coverage": 0.0014
     },
     "de": {
       "model": "palette",
-      "terms": 480,
-      "coverage": 0.4979
+      "terms": 269,
+      "coverage": 0.3685
     },
     "dga": {
       "model": "palette",
       "terms": 2,
-      "coverage": 0.0021
+      "coverage": 0.0027
     },
     "din": {
       "model": "palette",
       "terms": 1,
-      "coverage": 0.001
+      "coverage": 0.0014
     },
     "diq": {
       "model": "palette",
       "terms": 6,
-      "coverage": 0.0062
+      "coverage": 0.0082
     },
     "dsb": {
       "model": "palette",
       "terms": 10,
-      "coverage": 0.0104
+      "coverage": 0.0137
     },
     "dtp": {
       "model": "palette",
       "terms": 2,
-      "coverage": 0.0021
+      "coverage": 0.0027
     },
     "dty": {
       "model": "palette",
       "terms": 6,
-      "coverage": 0.0062
+      "coverage": 0.0082
     },
     "dua": {
       "model": "palette",
       "terms": 1,
-      "coverage": 0.001
+      "coverage": 0.0014
     },
     "el": {
       "model": "palette",
       "terms": 51,
-      "coverage": 0.0529
+      "coverage": 0.0699
     },
     "eml": {
       "model": "palette",
       "terms": 1,
-      "coverage": 0.001
+      "coverage": 0.0014
     },
     "en": {
       "model": "palette",
-      "terms": 897,
-      "coverage": 0.9305
+      "terms": 640,
+      "coverage": 0.8767
     },
     "eo": {
       "model": "palette",
       "terms": 148,
-      "coverage": 0.1535
+      "coverage": 0.2027
     },
     "es": {
       "model": "palette",
-      "terms": 452,
-      "coverage": 0.4689
+      "terms": 241,
+      "coverage": 0.3301
     },
     "et": {
       "model": "palette",
-      "terms": 164,
-      "coverage": 0.1701
+      "terms": 163,
+      "coverage": 0.2233
     },
     "eu": {
       "model": "palette",
       "terms": 59,
-      "coverage": 0.0612
+      "coverage": 0.0808
     },
     "ext": {
       "model": "palette",
       "terms": 16,
-      "coverage": 0.0166
+      "coverage": 0.0219
     },
     "fa": {
       "model": "palette",
-      "terms": 159,
-      "coverage": 0.1649
+      "terms": 158,
+      "coverage": 0.2164
     },
     "fi": {
       "model": "palette",
       "terms": 65,
-      "coverage": 0.0674
+      "coverage": 0.089
     },
     "fj": {
       "model": "palette",
       "terms": 13,
-      "coverage": 0.0135
+      "coverage": 0.0178
     },
     "fo": {
       "model": "palette",
-      "terms": 28,
-      "coverage": 0.029
+      "terms": 15,
+      "coverage": 0.0205
     },
     "fr": {
       "model": "palette",
-      "terms": 438,
-      "coverage": 0.4544
+      "terms": 226,
+      "coverage": 0.3096
     },
     "frr": {
       "model": "palette",
       "terms": 13,
-      "coverage": 0.0135
+      "coverage": 0.0178
     },
     "fur": {
       "model": "palette",
       "terms": 5,
-      "coverage": 0.0052
+      "coverage": 0.0068
     },
     "fy": {
       "model": "palette",
-      "terms": 85,
-      "coverage": 0.0882
+      "terms": 81,
+      "coverage": 0.111
     },
     "ga": {
       "model": "palette",
       "terms": 37,
-      "coverage": 0.0384
+      "coverage": 0.0507
     },
     "gan": {
       "model": "palette",
       "terms": 5,
-      "coverage": 0.0052
+      "coverage": 0.0068
     },
     "gd": {
       "model": "palette",
       "terms": 3,
-      "coverage": 0.0031
+      "coverage": 0.0041
     },
     "gl": {
       "model": "palette",
       "terms": 54,
-      "coverage": 0.056
+      "coverage": 0.074
     },
     "gn": {
       "model": "palette",
       "terms": 12,
-      "coverage": 0.0124
+      "coverage": 0.0164
     },
     "got": {
       "model": "palette",
       "terms": 3,
-      "coverage": 0.0031
+      "coverage": 0.0041
     },
     "gpe": {
       "model": "palette",
       "terms": 1,
-      "coverage": 0.001
+      "coverage": 0.0014
     },
     "grc": {
       "model": "palette",
       "terms": 9,
-      "coverage": 0.0093
+      "coverage": 0.0123
     },
     "gu": {
       "model": "palette",
       "terms": 3,
-      "coverage": 0.0031
+      "coverage": 0.0041
     },
     "guc": {
       "model": "palette",
       "terms": 8,
-      "coverage": 0.0083
+      "coverage": 0.011
     },
     "gur": {
       "model": "palette",
       "terms": 4,
-      "coverage": 0.0041
+      "coverage": 0.0055
     },
     "gv": {
       "model": "palette",
       "terms": 23,
-      "coverage": 0.0239
+      "coverage": 0.0315
     },
     "ha": {
       "model": "palette",
       "terms": 6,
-      "coverage": 0.0062
+      "coverage": 0.0082
     },
     "hak": {
       "model": "palette",
       "terms": 12,
-      "coverage": 0.0124
+      "coverage": 0.0164
     },
     "haw": {
       "model": "palette",
       "terms": 6,
-      "coverage": 0.0062
+      "coverage": 0.0082
     },
     "he": {
       "model": "palette",
-      "terms": 93,
-      "coverage": 0.0965
+      "terms": 91,
+      "coverage": 0.1247
     },
     "hi": {
       "model": "palette",
       "terms": 44,
-      "coverage": 0.0456
+      "coverage": 0.0603
     },
     "hif": {
       "model": "palette",
       "terms": 1,
-      "coverage": 0.001
+      "coverage": 0.0014
     },
     "hr": {
       "model": "palette",
       "terms": 24,
-      "coverage": 0.0249
+      "coverage": 0.0329
     },
     "hsb": {
       "model": "palette",
       "terms": 7,
-      "coverage": 0.0073
+      "coverage": 0.0096
     },
     "ht": {
       "model": "palette",
       "terms": 14,
-      "coverage": 0.0145
+      "coverage": 0.0192
     },
     "hu": {
       "model": "palette",
       "terms": 79,
-      "coverage": 0.082
+      "coverage": 0.1082
     },
     "hy": {
       "model": "palette",
-      "terms": 36,
-      "coverage": 0.0373
+      "terms": 34,
+      "coverage": 0.0466
     },
     "hyw": {
       "model": "palette",
       "terms": 13,
-      "coverage": 0.0135
+      "coverage": 0.0178
     },
     "ia": {
       "model": "palette",
       "terms": 3,
-      "coverage": 0.0031
+      "coverage": 0.0041
     },
     "iba": {
       "model": "palette",
       "terms": 4,
-      "coverage": 0.0041
+      "coverage": 0.0055
     },
     "id": {
       "model": "palette",
-      "terms": 253,
-      "coverage": 0.2624
+      "terms": 251,
+      "coverage": 0.3438
     },
     "ie": {
       "model": "palette",
       "terms": 1,
-      "coverage": 0.001
+      "coverage": 0.0014
     },
     "ig": {
       "model": "palette",
       "terms": 7,
-      "coverage": 0.0073
+      "coverage": 0.0096
     },
     "ik": {
       "model": "palette",
       "terms": 5,
-      "coverage": 0.0052
+      "coverage": 0.0068
     },
     "ilo": {
       "model": "palette",
       "terms": 2,
-      "coverage": 0.0021
+      "coverage": 0.0027
     },
     "inh": {
       "model": "palette",
       "terms": 1,
-      "coverage": 0.001
+      "coverage": 0.0014
     },
     "io": {
       "model": "palette",
       "terms": 38,
-      "coverage": 0.0394
+      "coverage": 0.0521
     },
     "is": {
       "model": "palette",
-      "terms": 29,
-      "coverage": 0.0301
+      "terms": 16,
+      "coverage": 0.0219
     },
     "isv-Cyrl": {
       "model": "palette",
-      "terms": 2,
-      "coverage": 0.0021
+      "terms": 6,
+      "coverage": 0.0082
     },
     "isv-Latn": {
       "model": "palette",
-      "terms": 2,
-      "coverage": 0.0021
+      "terms": 6,
+      "coverage": 0.0082
     },
     "it": {
       "model": "palette",
-      "terms": 468,
-      "coverage": 0.4855
+      "terms": 258,
+      "coverage": 0.3534
     },
     "iu": {
       "model": "palette",
       "terms": 3,
-      "coverage": 0.0031
+      "coverage": 0.0041
     },
     "ja": {
       "model": "palette",
-      "terms": 273,
-      "coverage": 0.2832
+      "terms": 272,
+      "coverage": 0.3726
     },
     "jam": {
       "model": "palette",
       "terms": 3,
-      "coverage": 0.0031
+      "coverage": 0.0041
     },
     "jbo": {
       "model": "palette",
       "terms": 5,
-      "coverage": 0.0052
+      "coverage": 0.0068
     },
     "jv": {
       "model": "palette",
       "terms": 19,
-      "coverage": 0.0197
+      "coverage": 0.026
     },
     "ka": {
       "model": "palette",
       "terms": 14,
-      "coverage": 0.0145
+      "coverage": 0.0192
     },
     "kaa": {
       "model": "palette",
       "terms": 1,
-      "coverage": 0.001
+      "coverage": 0.0014
     },
     "kab": {
       "model": "palette",
       "terms": 3,
-      "coverage": 0.0031
+      "coverage": 0.0041
     },
     "kaj": {
       "model": "palette",
       "terms": 2,
-      "coverage": 0.0021
+      "coverage": 0.0027
     },
     "kbp": {
       "model": "palette",
       "terms": 9,
-      "coverage": 0.0093
+      "coverage": 0.0123
     },
     "kcg": {
       "model": "palette",
       "terms": 6,
-      "coverage": 0.0062
+      "coverage": 0.0082
     },
     "kea": {
       "model": "palette",
       "terms": 7,
-      "coverage": 0.0073
+      "coverage": 0.0096
     },
     "kg": {
       "model": "palette",
       "terms": 1,
-      "coverage": 0.001
+      "coverage": 0.0014
     },
     "kge": {
       "model": "palette",
       "terms": 16,
-      "coverage": 0.0166
+      "coverage": 0.0219
     },
     "kk": {
       "model": "palette",
       "terms": 11,
-      "coverage": 0.0114
+      "coverage": 0.0151
     },
     "kl": {
       "model": "palette",
-      "terms": 14,
-      "coverage": 0.0145
+      "terms": 1,
+      "coverage": 0.0014
     },
     "km": {
       "model": "palette",
       "terms": 9,
-      "coverage": 0.0093
+      "coverage": 0.0123
     },
     "kn": {
       "model": "palette",
       "terms": 11,
-      "coverage": 0.0114
+      "coverage": 0.0151
     },
     "ko": {
       "model": "palette",
       "terms": 107,
-      "coverage": 0.111
+      "coverage": 0.1466
     },
     "ks": {
       "model": "palette",
       "terms": 19,
-      "coverage": 0.0197
+      "coverage": 0.026
     },
     "ksh": {
       "model": "palette",
       "terms": 2,
-      "coverage": 0.0021
+      "coverage": 0.0027
     },
     "ku": {
       "model": "palette",
       "terms": 12,
-      "coverage": 0.0124
+      "coverage": 0.0164
     },
     "ku-Latn": {
       "model": "palette",
       "terms": 2,
-      "coverage": 0.0021
+      "coverage": 0.0027
     },
     "kw": {
       "model": "palette",
       "terms": 20,
-      "coverage": 0.0207
+      "coverage": 0.0274
     },
     "ky": {
       "model": "palette",
       "terms": 4,
-      "coverage": 0.0041
+      "coverage": 0.0055
     },
     "la": {
       "model": "palette",
       "terms": 44,
-      "coverage": 0.0456
+      "coverage": 0.0603
     },
     "lad": {
       "model": "palette",
       "terms": 9,
-      "coverage": 0.0093
+      "coverage": 0.0123
     },
     "lb": {
       "model": "palette",
       "terms": 38,
-      "coverage": 0.0394
+      "coverage": 0.0521
     },
     "lbe": {
       "model": "palette",
       "terms": 11,
-      "coverage": 0.0114
+      "coverage": 0.0151
     },
     "lfn": {
       "model": "palette",
       "terms": 15,
-      "coverage": 0.0156
+      "coverage": 0.0205
     },
     "lg": {
       "model": "palette",
       "terms": 1,
-      "coverage": 0.001
+      "coverage": 0.0014
     },
     "li": {
       "model": "palette",
       "terms": 1,
-      "coverage": 0.001
+      "coverage": 0.0014
     },
     "lij": {
       "model": "palette",
       "terms": 1,
-      "coverage": 0.001
+      "coverage": 0.0014
     },
     "lld": {
       "model": "palette",
       "terms": 9,
-      "coverage": 0.0093
+      "coverage": 0.0123
     },
     "lmo": {
       "model": "palette",
       "terms": 19,
-      "coverage": 0.0197
+      "coverage": 0.026
     },
     "ln": {
       "model": "palette",
       "terms": 13,
-      "coverage": 0.0135
+      "coverage": 0.0178
     },
     "lo": {
       "model": "palette",
       "terms": 3,
-      "coverage": 0.0031
+      "coverage": 0.0041
     },
     "lt": {
       "model": "palette",
       "terms": 37,
-      "coverage": 0.0384
+      "coverage": 0.0507
     },
     "ltg": {
       "model": "palette",
       "terms": 1,
-      "coverage": 0.001
+      "coverage": 0.0014
     },
     "lv": {
       "model": "palette",
       "terms": 19,
-      "coverage": 0.0197
+      "coverage": 0.026
     },
     "lzh": {
       "model": "palette",
       "terms": 16,
-      "coverage": 0.0166
+      "coverage": 0.0219
     },
     "mad": {
       "model": "palette",
       "terms": 7,
-      "coverage": 0.0073
+      "coverage": 0.0096
     },
     "mag": {
       "model": "palette",
       "terms": 5,
-      "coverage": 0.0052
+      "coverage": 0.0068
     },
     "mai": {
       "model": "palette",
       "terms": 1,
-      "coverage": 0.001
+      "coverage": 0.0014
     },
     "map-bms": {
       "model": "palette",
       "terms": 8,
-      "coverage": 0.0083
+      "coverage": 0.011
     },
     "mdf": {
       "model": "palette",
       "terms": 11,
-      "coverage": 0.0114
+      "coverage": 0.0151
     },
     "mhr": {
       "model": "palette",
       "terms": 2,
-      "coverage": 0.0021
+      "coverage": 0.0027
     },
     "mi": {
       "model": "palette",
       "terms": 3,
-      "coverage": 0.0031
+      "coverage": 0.0041
     },
     "mk": {
       "model": "palette",
-      "terms": 70,
-      "coverage": 0.0726
+      "terms": 69,
+      "coverage": 0.0945
     },
     "ml": {
       "model": "palette",
       "terms": 26,
-      "coverage": 0.027
+      "coverage": 0.0356
     },
     "mn": {
       "model": "palette",
       "terms": 3,
-      "coverage": 0.0031
+      "coverage": 0.0041
     },
     "mnc": {
       "model": "palette",
       "terms": 10,
-      "coverage": 0.0104
+      "coverage": 0.0137
     },
     "mni": {
       "model": "palette",
       "terms": 5,
-      "coverage": 0.0052
+      "coverage": 0.0068
     },
     "mr": {
       "model": "palette",
       "terms": 12,
-      "coverage": 0.0124
+      "coverage": 0.0164
     },
     "ms": {
       "model": "palette",
-      "terms": 60,
-      "coverage": 0.0622
+      "terms": 59,
+      "coverage": 0.0808
     },
     "ms-Arab": {
       "model": "palette",
       "terms": 12,
-      "coverage": 0.0124
+      "coverage": 0.0164
     },
     "mt": {
       "model": "palette",
       "terms": 9,
-      "coverage": 0.0093
+      "coverage": 0.0123
     },
     "mwl": {
       "model": "palette",
       "terms": 4,
-      "coverage": 0.0041
+      "coverage": 0.0055
     },
     "my": {
       "model": "palette",
       "terms": 20,
-      "coverage": 0.0207
+      "coverage": 0.0274
     },
     "myv": {
       "model": "palette",
       "terms": 8,
-      "coverage": 0.0083
+      "coverage": 0.011
     },
     "mzn": {
       "model": "palette",
       "terms": 21,
-      "coverage": 0.0218
+      "coverage": 0.0288
     },
     "na": {
       "model": "palette",
       "terms": 1,
-      "coverage": 0.001
+      "coverage": 0.0014
     },
     "nah": {
       "model": "palette",
       "terms": 23,
-      "coverage": 0.0239
+      "coverage": 0.0315
     },
     "nan": {
       "model": "palette",
       "terms": 18,
-      "coverage": 0.0187
+      "coverage": 0.0247
     },
     "nap": {
       "model": "palette",
       "terms": 3,
-      "coverage": 0.0031
+      "coverage": 0.0041
     },
     "nb": {
       "model": "palette",
-      "terms": 97,
-      "coverage": 0.1006
+      "terms": 82,
+      "coverage": 0.1123
     },
     "nds": {
       "model": "palette",
       "terms": 11,
-      "coverage": 0.0114
+      "coverage": 0.0151
     },
     "ne": {
       "model": "palette",
       "terms": 17,
-      "coverage": 0.0176
+      "coverage": 0.0233
     },
     "new": {
       "model": "palette",
       "terms": 8,
-      "coverage": 0.0083
+      "coverage": 0.011
     },
     "nl": {
       "model": "palette",
-      "terms": 370,
-      "coverage": 0.3838
+      "terms": 157,
+      "coverage": 0.2151
     },
     "nn": {
       "model": "palette",
-      "terms": 62,
-      "coverage": 0.0643
+      "terms": 49,
+      "coverage": 0.0671
     },
     "nod": {
       "model": "palette",
       "terms": 13,
-      "coverage": 0.0135
+      "coverage": 0.0178
     },
     "nqo": {
       "model": "palette",
       "terms": 12,
-      "coverage": 0.0124
+      "coverage": 0.0164
     },
     "nrm": {
       "model": "palette",
       "terms": 8,
-      "coverage": 0.0083
+      "coverage": 0.011
     },
     "nso": {
       "model": "palette",
       "terms": 37,
-      "coverage": 0.0384
+      "coverage": 0.0507
     },
     "nv": {
       "model": "palette",
       "terms": 5,
-      "coverage": 0.0052
+      "coverage": 0.0068
     },
     "oc": {
       "model": "palette",
       "terms": 27,
-      "coverage": 0.028
+      "coverage": 0.037
     },
     "olo": {
       "model": "palette",
       "terms": 5,
-      "coverage": 0.0052
+      "coverage": 0.0068
     },
     "om": {
       "model": "palette",
       "terms": 1,
-      "coverage": 0.001
+      "coverage": 0.0014
     },
     "or": {
       "model": "palette",
       "terms": 6,
-      "coverage": 0.0062
+      "coverage": 0.0082
     },
     "os": {
       "model": "palette",
       "terms": 19,
-      "coverage": 0.0197
+      "coverage": 0.026
     },
     "pa": {
       "model": "palette",
       "terms": 16,
-      "coverage": 0.0166
+      "coverage": 0.0219
     },
     "pag": {
       "model": "palette",
       "terms": 4,
-      "coverage": 0.0041
+      "coverage": 0.0055
     },
     "pam": {
       "model": "palette",
       "terms": 9,
-      "coverage": 0.0093
+      "coverage": 0.0123
     },
     "pap": {
       "model": "palette",
       "terms": 14,
-      "coverage": 0.0145
+      "coverage": 0.0192
     },
     "pcd": {
       "model": "palette",
       "terms": 6,
-      "coverage": 0.0062
+      "coverage": 0.0082
     },
     "pdc": {
       "model": "palette",
       "terms": 13,
-      "coverage": 0.0135
+      "coverage": 0.0178
     },
     "pih": {
       "model": "palette",
       "terms": 1,
-      "coverage": 0.001
+      "coverage": 0.0014
     },
     "pl": {
       "model": "palette",
-      "terms": 114,
-      "coverage": 0.1183
+      "terms": 111,
+      "coverage": 0.1521
     },
     "pnb": {
       "model": "palette",
       "terms": 29,
-      "coverage": 0.0301
+      "coverage": 0.0397
     },
     "pnt": {
       "model": "palette",
       "terms": 2,
-      "coverage": 0.0021
+      "coverage": 0.0027
     },
     "ps": {
       "model": "palette",
       "terms": 11,
-      "coverage": 0.0114
+      "coverage": 0.0151
     },
     "pt": {
       "model": "palette",
-      "terms": 112,
-      "coverage": 0.1162
+      "terms": 115,
+      "coverage": 0.1575
     },
     "pwn": {
       "model": "palette",
       "terms": 4,
-      "coverage": 0.0041
+      "coverage": 0.0055
     },
     "qu": {
       "model": "palette",
       "terms": 15,
-      "coverage": 0.0156
+      "coverage": 0.0205
     },
     "ro": {
       "model": "palette",
       "terms": 65,
-      "coverage": 0.0674
+      "coverage": 0.089
     },
     "ru": {
       "model": "palette",
-      "terms": 200,
-      "coverage": 0.2075
+      "terms": 162,
+      "coverage": 0.2219
     },
     "rue": {
       "model": "palette",
       "terms": 2,
-      "coverage": 0.0021
+      "coverage": 0.0027
     },
     "rup": {
       "model": "palette",
       "terms": 7,
-      "coverage": 0.0073
+      "coverage": 0.0096
     },
     "ryu": {
       "model": "palette",
       "terms": 2,
-      "coverage": 0.0021
+      "coverage": 0.0027
     },
     "sa": {
       "model": "palette",
       "terms": 11,
-      "coverage": 0.0114
+      "coverage": 0.0151
     },
     "sah": {
       "model": "palette",
       "terms": 9,
-      "coverage": 0.0093
+      "coverage": 0.0123
     },
     "sat": {
       "model": "palette",
       "terms": 7,
-      "coverage": 0.0073
+      "coverage": 0.0096
     },
     "sc": {
       "model": "palette",
       "terms": 2,
-      "coverage": 0.0021
+      "coverage": 0.0027
     },
     "scn": {
       "model": "palette",
       "terms": 63,
-      "coverage": 0.0654
+      "coverage": 0.0863
     },
     "sco": {
       "model": "palette",
       "terms": 18,
-      "coverage": 0.0187
+      "coverage": 0.0247
     },
     "sd": {
       "model": "palette",
-      "terms": 9,
-      "coverage": 0.0093
+      "terms": 8,
+      "coverage": 0.011
     },
     "se": {
       "model": "palette",
       "terms": 10,
-      "coverage": 0.0104
+      "coverage": 0.0137
     },
     "sgs": {
       "model": "palette",
       "terms": 12,
-      "coverage": 0.0124
+      "coverage": 0.0164
     },
     "sh": {
       "model": "palette",
       "terms": 24,
-      "coverage": 0.0249
+      "coverage": 0.0329
     },
     "shi": {
       "model": "palette",
       "terms": 1,
-      "coverage": 0.001
+      "coverage": 0.0014
     },
     "shn": {
       "model": "palette",
       "terms": 10,
-      "coverage": 0.0104
+      "coverage": 0.0137
     },
     "shy-Latn": {
       "model": "palette",
       "terms": 1,
-      "coverage": 0.001
+      "coverage": 0.0014
     },
     "si": {
       "model": "palette",
       "terms": 5,
-      "coverage": 0.0052
+      "coverage": 0.0068
     },
     "sjd": {
       "model": "palette",
       "terms": 9,
-      "coverage": 0.0093
+      "coverage": 0.0123
     },
     "sje": {
       "model": "palette",
       "terms": 4,
-      "coverage": 0.0041
+      "coverage": 0.0055
     },
     "sju": {
       "model": "palette",
       "terms": 4,
-      "coverage": 0.0041
+      "coverage": 0.0055
     },
     "sk": {
       "model": "palette",
       "terms": 28,
-      "coverage": 0.029
+      "coverage": 0.0384
     },
     "sl": {
       "model": "palette",
-      "terms": 182,
-      "coverage": 0.1888
+      "terms": 179,
+      "coverage": 0.2452
     },
     "sma": {
       "model": "palette",
       "terms": 10,
-      "coverage": 0.0104
+      "coverage": 0.0137
     },
     "smj": {
       "model": "palette",
       "terms": 10,
-      "coverage": 0.0104
+      "coverage": 0.0137
     },
     "smn": {
       "model": "palette",
       "terms": 4,
-      "coverage": 0.0041
+      "coverage": 0.0055
     },
     "sms": {
       "model": "palette",
       "terms": 4,
-      "coverage": 0.0041
+      "coverage": 0.0055
     },
     "sn": {
       "model": "palette",
       "terms": 21,
-      "coverage": 0.0218
+      "coverage": 0.0288
     },
     "so": {
       "model": "palette",
       "terms": 13,
-      "coverage": 0.0135
+      "coverage": 0.0178
     },
     "sq": {
       "model": "palette",
       "terms": 11,
-      "coverage": 0.0114
+      "coverage": 0.0151
     },
     "sr": {
       "model": "palette",
-      "terms": 52,
-      "coverage": 0.0539
+      "terms": 51,
+      "coverage": 0.0699
     },
     "sr-Cyrl": {
       "model": "palette",
       "terms": 19,
-      "coverage": 0.0197
+      "coverage": 0.026
     },
     "sr-Latn": {
       "model": "palette",
       "terms": 19,
-      "coverage": 0.0197
+      "coverage": 0.026
     },
     "stq": {
       "model": "palette",
       "terms": 3,
-      "coverage": 0.0031
+      "coverage": 0.0041
     },
     "su": {
       "model": "palette",
       "terms": 10,
-      "coverage": 0.0104
+      "coverage": 0.0137
     },
     "sv": {
       "model": "palette",
-      "terms": 170,
-      "coverage": 0.1763
+      "terms": 157,
+      "coverage": 0.2151
     },
     "sw": {
       "model": "palette",
       "terms": 14,
-      "coverage": 0.0145
+      "coverage": 0.0192
     },
     "syl": {
       "model": "palette",
       "terms": 2,
-      "coverage": 0.0021
+      "coverage": 0.0027
     },
     "szl": {
       "model": "palette",
       "terms": 5,
-      "coverage": 0.0052
+      "coverage": 0.0068
     },
     "szy": {
       "model": "palette",
       "terms": 8,
-      "coverage": 0.0083
+      "coverage": 0.011
     },
     "ta": {
       "model": "palette",
       "terms": 15,
-      "coverage": 0.0156
+      "coverage": 0.0205
     },
     "tcy": {
       "model": "palette",
       "terms": 3,
-      "coverage": 0.0031
+      "coverage": 0.0041
     },
     "te": {
       "model": "palette",
       "terms": 11,
-      "coverage": 0.0114
+      "coverage": 0.0151
     },
     "tg": {
       "model": "palette",
       "terms": 13,
-      "coverage": 0.0135
+      "coverage": 0.0178
     },
     "th": {
       "model": "palette",
-      "terms": 40,
-      "coverage": 0.0415
+      "terms": 39,
+      "coverage": 0.0534
     },
     "ti": {
       "model": "palette",
       "terms": 1,
-      "coverage": 0.001
+      "coverage": 0.0014
     },
     "tig": {
       "model": "palette",
       "terms": 1,
-      "coverage": 0.001
+      "coverage": 0.0014
     },
     "tl": {
       "model": "palette",
       "terms": 22,
-      "coverage": 0.0228
+      "coverage": 0.0301
     },
     "tly": {
       "model": "palette",
       "terms": 8,
-      "coverage": 0.0083
+      "coverage": 0.011
     },
     "tn": {
       "model": "palette",
       "terms": 1,
-      "coverage": 0.001
+      "coverage": 0.0014
     },
     "tok": {
       "model": "palette",
       "terms": 17,
-      "coverage": 0.0176
+      "coverage": 0.0233
     },
     "tpi": {
       "model": "palette",
       "terms": 4,
-      "coverage": 0.0041
+      "coverage": 0.0055
     },
     "tr": {
       "model": "palette",
       "terms": 93,
-      "coverage": 0.0965
+      "coverage": 0.1274
     },
     "ts": {
       "model": "palette",
       "terms": 11,
-      "coverage": 0.0114
+      "coverage": 0.0151
     },
     "tt": {
       "model": "palette",
-      "terms": 48,
-      "coverage": 0.0498
+      "terms": 47,
+      "coverage": 0.0644
     },
     "tt-Cyrl": {
       "model": "palette",
       "terms": 21,
-      "coverage": 0.0218
+      "coverage": 0.0288
     },
     "tt-Latn": {
       "model": "palette",
       "terms": 1,
-      "coverage": 0.001
+      "coverage": 0.0014
     },
     "tw": {
       "model": "palette",
       "terms": 1,
-      "coverage": 0.001
+      "coverage": 0.0014
     },
     "ty": {
       "model": "palette",
       "terms": 11,
-      "coverage": 0.0114
+      "coverage": 0.0151
     },
     "udm": {
       "model": "palette",
-      "terms": 12,
-      "coverage": 0.0124
+      "terms": 11,
+      "coverage": 0.0151
     },
     "ug": {
       "model": "palette",
       "terms": 8,
-      "coverage": 0.0083
+      "coverage": 0.011
     },
     "uk": {
       "model": "palette",
       "terms": 120,
-      "coverage": 0.1245
+      "coverage": 0.1644
     },
     "ur": {
       "model": "palette",
       "terms": 45,
-      "coverage": 0.0467
+      "coverage": 0.0616
     },
     "uz": {
       "model": "palette",
       "terms": 10,
-      "coverage": 0.0104
+      "coverage": 0.0137
     },
     "vec": {
       "model": "palette",
-      "terms": 134,
-      "coverage": 0.139
+      "terms": 130,
+      "coverage": 0.1781
     },
     "vep": {
       "model": "palette",
       "terms": 8,
-      "coverage": 0.0083
+      "coverage": 0.011
     },
     "vi": {
       "model": "palette",
       "terms": 82,
-      "coverage": 0.0851
+      "coverage": 0.1123
     },
     "vls": {
       "model": "palette",
       "terms": 4,
-      "coverage": 0.0041
+      "coverage": 0.0055
     },
     "vo": {
       "model": "palette",
       "terms": 8,
-      "coverage": 0.0083
+      "coverage": 0.011
     },
     "vro": {
       "model": "palette",
       "terms": 11,
-      "coverage": 0.0114
+      "coverage": 0.0151
     },
     "wa": {
       "model": "palette",
       "terms": 4,
-      "coverage": 0.0041
+      "coverage": 0.0055
     },
     "war": {
       "model": "palette",
       "terms": 13,
-      "coverage": 0.0135
+      "coverage": 0.0178
     },
     "wo": {
       "model": "palette",
       "terms": 6,
-      "coverage": 0.0062
+      "coverage": 0.0082
     },
     "wuu": {
       "model": "palette",
       "terms": 16,
-      "coverage": 0.0166
+      "coverage": 0.0219
     },
     "xal": {
       "model": "palette",
       "terms": 1,
-      "coverage": 0.001
+      "coverage": 0.0014
     },
     "xh": {
       "model": "palette",
       "terms": 1,
-      "coverage": 0.001
+      "coverage": 0.0014
     },
     "xmf": {
       "model": "palette",
       "terms": 7,
-      "coverage": 0.0073
+      "coverage": 0.0096
     },
     "yi": {
       "model": "palette",
       "terms": 20,
-      "coverage": 0.0207
+      "coverage": 0.0274
     },
     "yo": {
       "model": "palette",
       "terms": 6,
-      "coverage": 0.0062
+      "coverage": 0.0082
     },
     "yue": {
       "model": "palette",
       "terms": 63,
-      "coverage": 0.0654
+      "coverage": 0.0863
     },
     "za": {
       "model": "palette",
       "terms": 14,
-      "coverage": 0.0145
+      "coverage": 0.0192
     },
     "zh": {
       "model": "palette",
-      "terms": 221,
-      "coverage": 0.2293
+      "terms": 218,
+      "coverage": 0.2986
     },
     "zh-Hant": {
       "model": "palette",
       "terms": 111,
-      "coverage": 0.1151
+      "coverage": 0.1521
     },
     "zu": {
       "model": "palette",
       "terms": 12,
-      "coverage": 0.0124
+      "coverage": 0.0164
     }
   }
 }

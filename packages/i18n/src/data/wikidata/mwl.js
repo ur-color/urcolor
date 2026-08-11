@@ -5,4 +5,4 @@
 // sRGB hex triplet.
 //
 // Wikidata content is released under CC0-1.0.
-export default {"lang":"mwl","model":"palette","terms":[["burmeilho","burmeilho",[0.6279553639214311,0.2248630684262744,0.125846277330585],null],["negro","Negro",[0,0,0],null],["berde","berde",[0.8664396175234368,-0.23388758093655815,0.1794984451609376],null],["branco","branco",[1.0000000000000002,-4.996003610813204e-16,0],null]],"provenance":[["Q3142","FF0000"],["Q23445","000000"],["Q3133","00FF00"],["Q23444","FFFFFF"]],"aliases":{}};
+export default {"lang":"mwl","model":"palette","terms":[["burmeilho","burmeilho",[0.6279553639214311,0.2248630684262744,0.125846277330585],null],["negro","negro",[0,0,0],null],["berde","berde",[0.8664396175234368,-0.23388758093655815,0.1794984451609376],null],["branco","branco",[1.0000000000000002,-4.996003610813204e-16,0],null]],"provenance":[["Q3142","FF0000"],["Q23445","000000"],["Q3133","00FF00"],["Q23444","FFFFFF"]],"aliases":{}};

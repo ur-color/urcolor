@@ -5,4 +5,4 @@
 // sRGB hex triplet.
 //
 // Wikidata content is released under CC0-1.0.
-export default {"lang":"ak","model":"palette","terms":[["tumtum","Tumtum",[0,0,0],null],["fitaa","fitaa",[1.0000000000000002,-4.996003610813204e-16,0],null]],"provenance":[["Q23445","000000"],["Q23444","FFFFFF"]],"aliases":{}};
+export default {"lang":"ak","model":"palette","terms":[["tumtum","tumtum",[0,0,0],null],["fitaa","fitaa",[1.0000000000000002,-4.996003610813204e-16,0],null]],"provenance":[["Q23445","000000"],["Q23444","FFFFFF"]],"aliases":{}};

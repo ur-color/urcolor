@@ -5,4 +5,4 @@
 // sRGB hex triplet.
 //
 // Wikidata content is released under CC0-1.0.
-export default {"lang":"ksh","model":"palette","terms":[["schwaaz","Schwaaz",[0,0,0],null],["jääl","Jääl",[0.9679827267927991,-0.07136908291823663,0.19856971763168096],null]],"provenance":[["Q23445","000000"],["Q943","FFFF00"]],"aliases":{"schwarz":0}};
+export default {"lang":"ksh","model":"palette","terms":[["schwaaz","schwaaz",[0,0,0],null],["jääl","jääl",[0.9679827267927991,-0.07136908291823663,0.19856971763168096],null]],"provenance":[["Q23445","000000"],["Q943","FFFF00"]],"aliases":{"schwarz":0}};

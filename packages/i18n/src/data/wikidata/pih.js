@@ -5,4 +5,4 @@
 // sRGB hex triplet.
 //
 // Wikidata content is released under CC0-1.0.
-export default {"lang":"pih","model":"palette","terms":[["yeloe","Yeloe",[0.9679827267927991,-0.07136908291823663,0.19856971763168096],null]],"provenance":[["Q943","FFFF00"]],"aliases":{}};
+export default {"lang":"pih","model":"palette","terms":[["yeloe","yeloe",[0.9679827267927991,-0.07136908291823663,0.19856971763168096],null]],"provenance":[["Q943","FFFF00"]],"aliases":{}};

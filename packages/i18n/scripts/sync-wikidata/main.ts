@@ -20,6 +20,7 @@ import {
   buildItems,
   buildPaletteChunk,
   catalogueMembership,
+  inferCatalogueMembership,
   groupAliases,
   groupLabels,
   paletteCoverage,
@@ -61,6 +62,8 @@ export interface SyncOutput {
   catalogueDropped: Record<Catalogue, number>;
   /** Descriptive labels on catalogue items that were kept, e.g. `Verkehrsrot`. */
   catalogueSpared: number;
+  /** Catalogue items Wikidata left unclassified, recognised by their labels. */
+  inferredCatalogueItems: string[];
   /** Locale -> names the alphabet check removed, in upstream spelling. */
   droppedByScript: Record<string, string[]>;
   /** Letters in no listed script: the script table's blind spot, as a number. */
@@ -83,6 +86,12 @@ export function buildOutput(
   retrievedAt: string,
 ): SyncOutput {
   const membership = catalogueMembership(catalogueRows);
+  // Wikidata leaves some catalogue items unclassified: Q35827305 is labelled
+  // `RAL 9002` in eight languages but carries only the generic colour class,
+  // so the membership query cannot see it. Inferring from the label first
+  // means pruning, counting and the report all treat it like any other
+  // catalogue item.
+  const inferredCatalogueItems = inferCatalogueMembership(membership, labelRows);
 
   const splitLabels = stripCatalogueCodes(labelRows, membership);
   const splitAliases = stripCatalogueCodes(aliasRows, membership);
@@ -161,6 +170,7 @@ export function buildOutput(
     collisions,
     catalogueDropped,
     catalogueSpared,
+    inferredCatalogueItems,
     droppedByScript,
     unlistedLetters,
     // Sorted for the same reason `sortedLanguages` is: `labels` iterates in
@@ -251,6 +261,10 @@ export async function main(): Promise<void> {
   const { pantone, ral, ncs } = output.catalogueDropped;
   console.log(`\nCatalogue codes removed: ${pantone + ral + ncs} (pantone ${pantone}, ral ${ral}, ncs ${ncs})`);
   console.log(`Descriptive names kept on catalogue items: ${output.catalogueSpared}`);
+  console.log(
+    "Catalogue items Wikidata left unclassified, inferred from labels: "
+    + `${output.inferredCatalogueItems.length}`,
+  );
 
   const scriptDrops = Object.entries(output.droppedByScript);
   const scriptTotal = scriptDrops.reduce((sum, [, names]) => sum + names.length, 0);

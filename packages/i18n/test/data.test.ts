@@ -11,6 +11,8 @@ import { uwdataChunks } from "../src/sources/uwdata/chunks";
 import type { FullChunk, HueChunk } from "../src/engine/types";
 import { ColorNames } from "../src/color-names";
 import { getDefaultSources, getSource, listSources, loadChunk } from "../src/engine/registry";
+import { fold } from "../scripts/sync-wikidata/transform";
+import { attestedScripts, isScriptConsistent } from "../scripts/sync-wikidata/scripts";
 
 const FULL_LANGS = ["de", "en", "es", "fa", "fi", "fr", "ko", "nl", "pl", "pt", "ro", "ru", "sv", "zh"];
 
@@ -174,8 +176,70 @@ describe("wikidata data integrity", () => {
   // wrote a handful of thin ones, and coverage recomputed against the new,
   // shrunken denominator without complaint. These floors are the only guard
   // against that class of silent regression for this source.
-  it("keeps at least 900 catalogued items", () => {
-    expect(wikidataMeta.itemCount).toBeGreaterThanOrEqual(900);
+  // The floor was 900 before the catalogue split. `itemCount` is now the
+  // linguistic catalogue only — 731 items, the ~1,000 colour items minus the
+  // Pantone, RAL and NCS entries that lost every label to the split — so the
+  // floor moves with it. Everything the comment above says about why a floor
+  // exists at all still holds.
+  it("keeps at least 650 catalogued items", () => {
+    expect(wikidataMeta.itemCount).toBeGreaterThanOrEqual(650);
+  });
+
+  // The three guards below assert the shipped data against the sync's own
+  // policies rather than against transform internals, so a future sync cannot
+  // regress any of them silently.
+  it("ships no catalogue codes", async () => {
+    const source = getSource("wikidata");
+    const offenders: string[] = [];
+    for (const locale of Object.keys(source.languages)) {
+      const chunk = await loadChunk("wikidata", locale);
+      if (chunk.model !== "palette") continue;
+      for (const [, name] of chunk.terms) {
+        if (/(^|[\s-])(pantone|ral|ncs)([\s-]|$)/iu.test(name)) offenders.push(`${locale}: ${name}`);
+      }
+    }
+    expect(offenders).toEqual([]);
+  });
+
+  it("ships every name folded under its own locale, with key and name equal", async () => {
+    const source = getSource("wikidata");
+    const offenders: string[] = [];
+    for (const locale of Object.keys(source.languages)) {
+      const chunk = await loadChunk("wikidata", locale);
+      if (chunk.model !== "palette") continue;
+      for (const [term, name] of chunk.terms) {
+        if (term !== name) offenders.push(`${locale}: key ${JSON.stringify(term)} != ${JSON.stringify(name)}`);
+        if (name !== fold(name, locale)) offenders.push(`${locale}: ${JSON.stringify(name)} is not folded`);
+      }
+    }
+    expect(offenders).toEqual([]);
+  });
+
+  it("ships every name in a script its own locale attests", async () => {
+    const source = getSource("wikidata");
+    const offenders: string[] = [];
+    for (const locale of Object.keys(source.languages)) {
+      const chunk = await loadChunk("wikidata", locale);
+      if (chunk.model !== "palette") continue;
+      const allowed = attestedScripts(chunk.terms.map(entry => entry[1]));
+      for (const [, name] of chunk.terms) {
+        if (!isScriptConsistent(name, allowed)) offenders.push(`${locale}: ${name}`);
+      }
+    }
+    expect(offenders).toEqual([]);
+  });
+
+  it("no longer names Eigengrau in Russian, but still names red", async () => {
+    const russian = await ColorNames.load("ru", { source: "wikidata" });
+    expect(russian.colorOf("Eigengrau")).toBeUndefined();
+    expect(russian.colorOf("красный")).toBeDefined();
+  });
+
+  it("keeps a descriptive name that sits on a RAL item", async () => {
+    // Q2516404 is RAL 3020. German calls it Verkehrsrot, which is an ordinary
+    // colour word and must survive a split keyed on the item.
+    const german = await ColorNames.load("de", { source: "wikidata" });
+    expect(german.colorOf("verkehrsrot")).toBeDefined();
   });
 
   it("keeps at least 280 shipped locales", () => {

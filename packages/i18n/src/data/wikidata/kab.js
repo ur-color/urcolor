@@ -5,4 +5,4 @@
 // sRGB hex triplet.
 //
 // Wikidata content is released under CC0-1.0.
-export default {"lang":"kab","model":"palette","terms":[["aberkan","Aberkan",[0,0,0],null],["awraɣ","Awraɣ",[0.9679827267927991,-0.07136908291823663,0.19856971763168096],null],["amellal","amellal",[1.0000000000000002,-4.996003610813204e-16,0],null]],"provenance":[["Q23445","000000"],["Q943","FFFF00"],["Q23444","FFFFFF"]],"aliases":{}};
+export default {"lang":"kab","model":"palette","terms":[["aberkan","aberkan",[0,0,0],null],["awraɣ","awraɣ",[0.9679827267927991,-0.07136908291823663,0.19856971763168096],null],["amellal","amellal",[1.0000000000000002,-4.996003610813204e-16,0],null]],"provenance":[["Q23445","000000"],["Q943","FFFF00"],["Q23444","FFFFFF"]],"aliases":{}};

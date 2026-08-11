@@ -5,4 +5,4 @@
 // sRGB hex triplet.
 //
 // Wikidata content is released under CC0-1.0.
-export default {"lang":"btm","model":"palette","terms":[["rara","Rara",[0.6279553639214311,0.2248630684262744,0.125846277330585],null],["lomlom","Lomlom",[0,0,0],null]],"provenance":[["Q3142","FF0000"],["Q23445","000000"]],"aliases":{}};
+export default {"lang":"btm","model":"palette","terms":[["rara","rara",[0.6279553639214311,0.2248630684262744,0.125846277330585],null],["lomlom","lomlom",[0,0,0],null]],"provenance":[["Q3142","FF0000"],["Q23445","000000"]],"aliases":{}};

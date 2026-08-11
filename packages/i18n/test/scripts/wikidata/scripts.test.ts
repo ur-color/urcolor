@@ -96,6 +96,16 @@ describe("unlistedScriptLetters", () => {
     expect(unlistedScriptLetters("ꠗꠟꠣ")).toBe(0); // Syloti Nagri
     expect(unlistedScriptLetters("ꯑꯉꯥꯡꯕ")).toBe(0); // Meetei Mayek
     expect(unlistedScriptLetters("ܣܘܡܩܐ")).toBe(0); // Syriac
+    expect(unlistedScriptLetters("ᩈᩦᨯᩯ᩠ᨦ")).toBe(0); // Tai Tham, for `nod`
+    expect(unlistedScriptLetters("ᱦᱮᱸᱫᱮ")).toBe(0); // Ol Chiki, for `sat`
+  });
+
+  it("classifies the scripts that the first sync reported as unlisted", () => {
+    // Northern Thai and Santali were being skipped rather than checked. Their
+    // own letters must now attest their own scripts, or the check would still
+    // be a no-op for those locales.
+    expect([...scriptsOf("ᩈᩦᨯᩯ᩠ᨦ")]).toEqual(["Tai_Tham"]);
+    expect([...scriptsOf("ᱦᱮᱸᱫᱮ")]).toEqual(["Ol_Chiki"]);
   });
 
   it("counts a letter in a script the table omits", () => {

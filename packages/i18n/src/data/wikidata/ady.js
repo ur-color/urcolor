@@ -5,4 +5,4 @@
 // sRGB hex triplet.
 //
 // Wikidata content is released under CC0-1.0.
-export default {"lang":"ady","model":"palette","terms":[["щхъуантiэ","щхъуантIэ",[0.5813085478022165,-0.028174287719936797,-0.03365412376426019],null]],"provenance":[["Q17122834","608090"]],"aliases":{}};
+export default {"lang":"ady","model":"palette","terms":[["щхъуантiэ","щхъуантiэ",[0.5813085478022165,-0.028174287719936797,-0.03365412376426019],null]],"provenance":[["Q17122834","608090"]],"aliases":{}};

@@ -5,4 +5,4 @@
 // sRGB hex triplet.
 //
 // Wikidata content is released under CC0-1.0.
-export default {"lang":"din","model":"palette","terms":[["waan","Waan",[0.6495622536997971,0.0710065954672032,0.12109879027326431],null]],"provenance":[["Q194191","CC7722"]],"aliases":{}};
+export default {"lang":"din","model":"palette","terms":[["waan","waan",[0.6495622536997971,0.0710065954672032,0.12109879027326431],null]],"provenance":[["Q194191","CC7722"]],"aliases":{}};

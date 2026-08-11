@@ -5,4 +5,4 @@
 // sRGB hex triplet.
 //
 // Wikidata content is released under CC0-1.0.
-export default {"lang":"gpe","model":"palette","terms":[["maroon","Maroon",[0.37669209005029736,0.1348887900115369,0.07549150776684616],null]],"provenance":[["Q25393814","800000"]],"aliases":{"maroon (color)":0}};
+export default {"lang":"gpe","model":"palette","terms":[["maroon","maroon",[0.37669209005029736,0.1348887900115369,0.07549150776684616],null]],"provenance":[["Q25393814","800000"]],"aliases":{"maroon (color)":0}};

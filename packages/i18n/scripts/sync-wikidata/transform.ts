@@ -84,8 +84,61 @@ export function isCatalogueCode(label: string): boolean {
   return /\p{Nd}/u.test(label) || MARKER_PATTERN.test(label);
 }
 
+/**
+ * A label that announces itself as a catalogue code, whatever its item says.
+ *
+ * Wikidata does not classify every catalogue item. Q35827305 is labelled
+ * `RAL 9002` in eight languages but carries only `P31 wd:Q1075`, the generic
+ * colour class, with no RAL statement for {@link CATALOGUE_QUERY} to match. A
+ * QID-only split leaves it in the linguistic source.
+ *
+ * This supplements the QID rule rather than replacing it. The QID rule is
+ * still what catches `彩通448C` and `פנטון 448c`, which no English-shaped
+ * pattern would. This one only catches the reverse case: an unclassified item
+ * whose label is the code spelled out.
+ *
+ * Anchored at the start and requiring a separator or digit after the marker,
+ * so `coral` and `general grey` are untouched. No colour word in any language
+ * begins with a catalogue marker followed by a number.
+ */
+export function looksLikeBareCatalogueCode(label: string): boolean {
+  return catalogueOfLabel(label) !== undefined;
+}
+
+/** Which catalogue a bare code label announces, or `undefined` if it is not one. */
+export function catalogueOfLabel(label: string): Catalogue | undefined {
+  const match = new RegExp(`^(${CATALOGUE_MARKERS.join("|")})([\\s\\-]|\\p{Nd})`, "iu").exec(label);
+  if (match === null) return undefined;
+
+  const marker = match[1]!.toLowerCase();
+  if (marker === "ral") return "ral";
+  if (marker === "ncs") return "ncs";
+  return "pantone";
+}
+
 export function catalogueMembership(rows: readonly RawCatalogueRow[]): Map<string, Catalogue> {
   return new Map(rows.map(row => [row.qid, row.catalogue]));
+}
+
+/**
+ * Adds items Wikidata failed to classify but whose labels give them away, so
+ * that pruning and the sync report treat them like any other catalogue item.
+ * Returns the QIDs it added, which `main.ts` reports: a growing count means
+ * upstream classification is degrading.
+ */
+export function inferCatalogueMembership(
+  membership: Map<string, Catalogue>,
+  rows: readonly RawLabelRow[],
+): string[] {
+  const inferred: string[] = [];
+  for (const row of rows) {
+    if (membership.has(row.qid)) continue;
+    const catalogue = catalogueOfLabel(row.value);
+    if (catalogue === undefined) continue;
+    membership.set(row.qid, catalogue);
+    inferred.push(row.qid);
+  }
+  return inferred.sort();
 }
 
 /** Splits label or alias rows into the ones that stay and the codes that go. */

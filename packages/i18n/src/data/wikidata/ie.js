@@ -5,4 +5,4 @@
 // sRGB hex triplet.
 //
 // Wikidata content is released under CC0-1.0.
-export default {"lang":"ie","model":"palette","terms":[["nigri","Nigri",[0,0,0],null]],"provenance":[["Q23445","000000"]],"aliases":{}};
+export default {"lang":"ie","model":"palette","terms":[["nigri","nigri",[0,0,0],null]],"provenance":[["Q23445","000000"]],"aliases":{}};

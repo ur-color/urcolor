@@ -8,6 +8,8 @@ import {
   buildItems,
   buildPaletteChunk,
   catalogueMembership,
+  catalogueOfLabel,
+  inferCatalogueMembership,
   groupAliases,
   groupLabels,
   fold,
@@ -478,5 +480,43 @@ describe("buildPaletteChunk hygiene", () => {
     const { chunk, droppedByScript } = buildPaletteChunk("bug", items, labels, []);
     expect(chunk.terms).toHaveLength(2);
     expect(droppedByScript).toEqual([]);
+  });
+});
+
+describe("bare catalogue codes on unclassified items", () => {
+  it("recognises a code label whatever its item says", () => {
+    // Q35827305 is labelled `RAL 9002` in eight languages but carries only
+    // the generic colour class, so the membership query cannot see it.
+    expect(catalogueOfLabel("RAL 9002")).toBe("ral");
+    expect(catalogueOfLabel("Pantone 448 C")).toBe("pantone");
+    expect(catalogueOfLabel("NCS red")).toBe("ncs");
+    expect(catalogueOfLabel("彩通448C")).toBe("pantone");
+  });
+
+  it("leaves ordinary words alone", () => {
+    // Anchored at the start and requiring a separator or digit after the
+    // marker, so no real colour word is reachable.
+    expect(catalogueOfLabel("coral")).toBeUndefined();
+    expect(catalogueOfLabel("general grey")).toBeUndefined();
+    expect(catalogueOfLabel("Verkehrsrot")).toBeUndefined();
+    expect(catalogueOfLabel("ralph")).toBeUndefined();
+  });
+
+  it("adds unclassified items to the membership map and reports them", () => {
+    const membership = new Map<string, Catalogue>([["Q1", "pantone"]]);
+    const inferred = inferCatalogueMembership(membership, [
+      { qid: "Q2", lang: "en", value: "RAL 9002" },
+      { qid: "Q2", lang: "de", value: "RAL 9002" },
+      { qid: "Q3", lang: "en", value: "coral" },
+    ]);
+    expect(inferred).toEqual(["Q2"]);
+    expect(membership.get("Q2")).toBe("ral");
+    expect(membership.has("Q3")).toBe(false);
+  });
+
+  it("never overrides a catalogue the membership query already stated", () => {
+    const membership = new Map<string, Catalogue>([["Q1", "pantone"]]);
+    inferCatalogueMembership(membership, [{ qid: "Q1", lang: "en", value: "RAL 9002" }]);
+    expect(membership.get("Q1")).toBe("pantone");
   });
 });

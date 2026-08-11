@@ -5,4 +5,4 @@
 // sRGB hex triplet.
 //
 // Wikidata content is released under CC0-1.0.
-export default {"lang":"na","model":"palette","terms":[["etangang","Etangang",[0,0,0],null]],"provenance":[["Q23445","000000"]],"aliases":{}};
+export default {"lang":"na","model":"palette","terms":[["etangang","etangang",[0,0,0],null]],"provenance":[["Q23445","000000"]],"aliases":{}};

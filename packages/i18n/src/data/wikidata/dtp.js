@@ -5,4 +5,4 @@
 // sRGB hex triplet.
 //
 // Wikidata content is released under CC0-1.0.
-export default {"lang":"dtp","model":"palette","terms":[["aragang","aragang",[0.6279553639214311,0.2248630684262744,0.125846277330585],null],["osilou","Osilou",[0.9679827267927991,-0.07136908291823663,0.19856971763168096],null]],"provenance":[["Q3142","FF0000"],["Q943","FFFF00"]],"aliases":{}};
+export default {"lang":"dtp","model":"palette","terms":[["aragang","aragang",[0.6279553639214311,0.2248630684262744,0.125846277330585],null],["osilou","osilou",[0.9679827267927991,-0.07136908291823663,0.19856971763168096],null]],"provenance":[["Q3142","FF0000"],["Q943","FFFF00"]],"aliases":{}};

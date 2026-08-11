@@ -5,4 +5,4 @@
 // sRGB hex triplet.
 //
 // Wikidata content is released under CC0-1.0.
-export default {"lang":"wa","model":"palette","terms":[["rodje","Rodje",[0.6279553639214311,0.2248630684262744,0.125846277330585],null],["noer (coleur)","Noer (coleur)",[0,0,0],null],["vete","vete",[0.8664396175234368,-0.23388758093655815,0.1794984451609376],null],["djaene","Djaene",[0.9679827267927991,-0.07136908291823663,0.19856971763168096],null]],"provenance":[["Q3142","FF0000"],["Q23445","000000"],["Q3133","00FF00"],["Q943","FFFF00"]],"aliases":{}};
+export default {"lang":"wa","model":"palette","terms":[["rodje","rodje",[0.6279553639214311,0.2248630684262744,0.125846277330585],null],["noer (coleur)","noer (coleur)",[0,0,0],null],["vete","vete",[0.8664396175234368,-0.23388758093655815,0.1794984451609376],null],["djaene","djaene",[0.9679827267927991,-0.07136908291823663,0.19856971763168096],null]],"provenance":[["Q3142","FF0000"],["Q23445","000000"],["Q3133","00FF00"],["Q943","FFFF00"]],"aliases":{}};

@@ -5,4 +5,4 @@
 // sRGB hex triplet.
 //
 // Wikidata content is released under CC0-1.0.
-export default {"lang":"isv-Latn","model":"palette","terms":[["črny","črny",[0,0,0],null],["běly","běly",[1.0000000000000002,-4.996003610813204e-16,0],null]],"provenance":[["Q23445","000000"],["Q23444","FFFFFF"]],"aliases":{"běly cvět":1,"běly kolor":1}};
+export default {"lang":"isv-Latn","model":"palette","terms":[["črny","črny",[0,0,0],null],["zeleny","zeleny",[0.8664396175234368,-0.23388758093655815,0.1794984451609376],null],["žolty","žolty",[0.9679827267927991,-0.07136908291823663,0.19856971763168096],null],["běly","běly",[1.0000000000000002,-4.996003610813204e-16,0],null],["oranževy","oranževy",[0.7303931417745938,0.11331419732013226,0.1480362289582759],null],["zlaty","zlaty",[0.8867710792703533,-0.016925177350215648,0.18139812690946144],null]],"provenance":[["Q23445","000000"],["Q3133","00FF00"],["Q943","FFFF00"],["Q23444","FFFFFF"],["Q39338","FF7F00"],["Q208045","FFD700"]],"aliases":{"běly cvět":3,"běly kolor":3,"zlaty kolor":5,"zlaty cvět":5}};
