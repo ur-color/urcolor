@@ -1,10 +1,12 @@
 import { describe, expect, it } from "bun:test";
 import {
   ALIASES_QUERY,
+  CATALOGUE_QUERY,
   ITEMS_QUERY,
   LABELS_QUERY,
   SchemaError,
   parseAliases,
+  parseCatalogue,
   parseItems,
   parseLabels,
   runQuery,
@@ -28,7 +30,7 @@ describe("queries", () => {
 describe("parseItems", () => {
   it("parses rows and extracts the QID from the entity URI", async () => {
     const rows = parseItems(await fixture("items.json"));
-    expect(rows).toHaveLength(5);
+    expect(rows).toHaveLength(7);
     expect(rows[0]).toEqual({ qid: "Q943", hex: "FFFF00", sitelinks: 189 });
   });
 
@@ -71,7 +73,7 @@ describe("parseItems", () => {
 describe("parseLabels", () => {
   it("parses the language tag from xml:lang", async () => {
     const rows = parseLabels(await fixture("labels.json"));
-    expect(rows).toHaveLength(10);
+    expect(rows).toHaveLength(14);
     expect(rows[0]).toEqual({ qid: "Q943", lang: "en", value: "yellow" });
     expect(rows.find(r => r.lang === "ka")?.value).toBe("ყვითელი");
   });
@@ -153,5 +155,28 @@ describe("runQuery", () => {
     // eslint-disable-next-line @typescript-eslint/await-thenable
     await expect(runQuery("nonsense", { fetchImpl, delayMs: 0 })).rejects.toThrow(SchemaError);
     expect(calls).toBe(1);
+  });
+});
+
+describe("parseCatalogue", () => {
+  it("reads QID and catalogue name from each binding", async () => {
+    const rows = parseCatalogue(await fixture("catalogue.json"));
+    expect(rows).toEqual([
+      { qid: "Q2516404", catalogue: "ral" },
+      { qid: "Q24885519", catalogue: "pantone" },
+    ]);
+  });
+
+  it("throws on an unknown catalogue name", async () => {
+    // Drift here would silently widen the split to a system this package has
+    // no source for, deleting names with nothing to replace them.
+    const drifted = (await fixture("catalogue.json")).replace('"ral"', '"munsell"');
+    expect(() => parseCatalogue(drifted)).toThrow(SchemaError);
+  });
+
+  it("queries all three discriminators", () => {
+    expect(CATALOGUE_QUERY).toContain("wd:Q104919542");
+    expect(CATALOGUE_QUERY).toContain("wd:Q17421658");
+    expect(CATALOGUE_QUERY).toContain("wd:Q1503197");
   });
 });

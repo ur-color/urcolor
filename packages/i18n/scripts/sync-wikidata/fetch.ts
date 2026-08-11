@@ -40,6 +40,32 @@ export const LABELS_QUERY
 export const ALIASES_QUERY
   = `SELECT DISTINCT ?item ?alias WHERE { ${COLOUR_ITEM} . ?item skos:altLabel ?alias }`;
 
+/**
+ * Which items are industrial catalogue entries rather than linguistic colour
+ * names. Membership is a property of the item, so one statement covers every
+ * language at once: Q24885519 is `Pantone 448 C` in English, `彩通448C` in
+ * Chinese and `פנטון 448c` in Hebrew, and a label regex written in English
+ * misses the other two.
+ *
+ * NCS uses `P361` rather than `P31` because its four items carry only
+ * `P31 wd:Q1075`, the generic colour class, and are distinguished solely by
+ * the system they are part of.
+ */
+export const CATALOGUE_QUERY = `SELECT DISTINCT ?item ?catalogue WHERE {
+  { ?item wdt:P31 wd:Q104919542 . BIND("pantone" AS ?catalogue) }
+  UNION { ?item wdt:P31 wd:Q17421658 . BIND("ral" AS ?catalogue) }
+  UNION { ?item wdt:P361 wd:Q1503197 . BIND("ncs" AS ?catalogue) }
+}`;
+
+export type Catalogue = "pantone" | "ral" | "ncs";
+
+const CATALOGUES: ReadonlySet<string> = new Set<Catalogue>(["pantone", "ral", "ncs"]);
+
+export interface RawCatalogueRow {
+  qid: string;
+  catalogue: Catalogue;
+}
+
 export interface RawItemRow {
   qid: string;
   /** Six hex digits, no leading `#`, exactly as upstream stores it. */
@@ -187,4 +213,25 @@ export function parseLabels(json: string): RawLabelRow[] {
 
 export function parseAliases(json: string): RawAliasRow[] {
   return parseLangRows(json, "alias", "aliases");
+}
+
+/**
+ * An unknown catalogue name throws rather than being ignored. Silently
+ * widening the split to a system this package has no replacement source for
+ * would delete names and leave those colours nameless.
+ */
+export function parseCatalogue(json: string): RawCatalogueRow[] {
+  return bindingsOf(json, "catalogue").map((binding, index) => {
+    const where = `catalogue.bindings[${index}]`;
+    const catalogue = cellValue(binding, "catalogue", where);
+    if (!CATALOGUES.has(catalogue)) {
+      throw new SchemaError(
+        `WDQS schema drift in ${where}: "${catalogue}" is not a known catalogue.`,
+      );
+    }
+    return {
+      qid: qidOf(cellValue(binding, "item", where), where),
+      catalogue: catalogue as Catalogue,
+    };
+  });
 }

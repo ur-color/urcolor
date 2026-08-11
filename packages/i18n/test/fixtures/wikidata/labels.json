@@ -11,7 +11,11 @@
       { "item": { "type": "uri", "value": "http://www.wikidata.org/entity/Q943" }, "label": { "xml:lang": "mul", "type": "literal", "value": "FFFF00" } },
       { "item": { "type": "uri", "value": "http://www.wikidata.org/entity/Q23444" }, "label": { "xml:lang": "en", "type": "literal", "value": "white" } },
       { "item": { "type": "uri", "value": "http://www.wikidata.org/entity/Q62391724" }, "label": { "xml:lang": "en", "type": "literal", "value": "white" } },
-      { "item": { "type": "uri", "value": "http://www.wikidata.org/entity/Q12894641" }, "label": { "xml:lang": "en-us", "type": "literal", "value": "lilac" } }
+      { "item": { "type": "uri", "value": "http://www.wikidata.org/entity/Q12894641" }, "label": { "xml:lang": "en-us", "type": "literal", "value": "lilac" } },
+      { "item": { "type": "uri", "value": "http://www.wikidata.org/entity/Q2516404" }, "label": { "xml:lang": "en", "type": "literal", "value": "RAL 3020" } },
+      { "item": { "type": "uri", "value": "http://www.wikidata.org/entity/Q2516404" }, "label": { "xml:lang": "de", "type": "literal", "value": "Verkehrsrot" } },
+      { "item": { "type": "uri", "value": "http://www.wikidata.org/entity/Q24885519" }, "label": { "xml:lang": "en", "type": "literal", "value": "Pantone 448 C" } },
+      { "item": { "type": "uri", "value": "http://www.wikidata.org/entity/Q24885519" }, "label": { "xml:lang": "ru", "type": "literal", "value": "Pantone 448 C" } }
     ]
   }
 }

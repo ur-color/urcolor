@@ -1,0 +1,9 @@
+{
+  "head": { "vars": [ "item", "catalogue" ] },
+  "results": {
+    "bindings": [
+      { "item": { "type": "uri", "value": "http://www.wikidata.org/entity/Q2516404" }, "catalogue": { "type": "literal", "value": "ral" } },
+      { "item": { "type": "uri", "value": "http://www.wikidata.org/entity/Q24885519" }, "catalogue": { "type": "literal", "value": "pantone" } }
+    ]
+  }
+}
