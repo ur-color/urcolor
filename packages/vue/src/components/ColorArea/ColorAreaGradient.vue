@@ -1,10 +1,18 @@
 <script lang="ts">
 import type { PrimitiveProps } from "reka-ui";
 import type { SpaceId } from "@urcolor/core";
+import type { GradientRenderer } from "@urcolor/shared";
 
 export interface ColorAreaGradientProps extends /* @vue-ignore */ PrimitiveProps {
   as?: string;
   asChild?: boolean;
+  /**
+   * Which painter to use.
+   * - `"auto"` (default) — CSS when an exact recipe exists, canvas otherwise
+   * - `"css"` — force CSS; falls back to the canvas with a dev warning if none exists
+   * - `"canvas"` — force the canvas painter
+   */
+  renderer?: GradientRenderer;
   /** Color for the top-left corner. Accepts any CSS color string supported by culori (hex, rgb(), hsl(), oklch(), color(), named colors, etc.). */
   topLeft?: string;
   /** Color for the top-right corner. */
@@ -29,13 +37,15 @@ export interface ColorAreaGradientProps extends /* @vue-ignore */ PrimitiveProps
 import { ref, computed } from "vue";
 import { useForwardExpose, Primitive } from "reka-ui";
 import { Color } from "@urcolor/core";
-import { drawGradient, getChannelConfig, sampleBilinearGrid, sampleChannelGrid } from "@urcolor/shared";
+import { cssAreaBilinear, cssAreaChannels, drawGradient, getChannelConfig, sampleBilinearGrid, sampleChannelGrid } from "@urcolor/shared";
 import { applyChannelOverrides, renderToCanvas, useGradientCanvas } from "../../shared/useGradientCanvas";
+import { CSS_GRADIENT_ROOT_STYLE, cssLayerStyle, useCssGradient } from "../../shared/useCssGradient";
 import { CHECKERBOARD_BACKGROUND } from "../../shared/checkerboard";
 import { injectColorAreaRootContext } from "./ColorAreaRoot.vue";
 
 const props = withDefaults(defineProps<ColorAreaGradientProps>(), {
   as: "span",
+  renderer: "auto",
   channelOverrides: () => ({ alpha: 1 }),
 });
 
@@ -62,6 +72,52 @@ const canvasOpacity = computed(() => {
     return rootContext.colorRef.value?.alpha ?? 1;
   }
   return 1;
+});
+
+/**
+ * The four corners in screen order, with the mirror swap the CPU path applies.
+ * `hasAlphaAxis` decides whether the corners keep their own alpha, matching the
+ * flag `drawGradient` and `sampleBilinearGrid` are handed.
+ */
+function orientedCorners(): [Color, Color, Color, Color] | null {
+  const parsed = [props.topLeft, props.topRight, props.bottomLeft, props.bottomRight]
+    .map(c => Color.parse(c ?? "black"));
+  if (parsed.some(c => !c)) return null;
+
+  let [a, b, c, d] = parsed as [Color, Color, Color, Color];
+  if (!hasAlphaAxis.value) [a, b, c, d] = [a.withAlpha(1), b.withAlpha(1), c.withAlpha(1), d.withAlpha(1)];
+  if (!rootContext.isSlidingFromLeft.value) [a, b, c, d] = [b, a, d, c];
+  if (!rootContext.isSlidingFromTop.value) [a, b, c, d] = [c, d, a, b];
+  return [a, b, c, d];
+}
+
+const cssLayers = useCssGradient({
+  renderer: () => props.renderer,
+  name: "ColorAreaGradient",
+  build: () => {
+    if (props.topLeft || props.topRight || props.bottomLeft || props.bottomRight) {
+      // `interpolationSpace` stays on the canvas. The two row gradients could be
+      // densified into stops in that space, but the vertical lerp is a sRGB
+      // alpha composite either way — the result would be perceptual on one axis
+      // and not the other, which is worse than not taking this path.
+      if (props.interpolationSpace) return null;
+      const corners = orientedCorners();
+      return corners ? cssAreaBilinear(...corners) : null;
+    }
+
+    const colorSpace = rootContext.colorSpace.value;
+    const baseColor = rootContext.colorRef.value;
+    if (!baseColor || !colorSpace) return null;
+
+    return cssAreaChannels(
+      applyChannelOverrides(baseColor, colorSpace, props.channelOverrides),
+      colorSpace,
+      xIsAlpha.value ? null : rootContext.xChannelKey.value,
+      yIsAlpha.value ? null : rootContext.yChannelKey.value,
+      rootContext.isSlidingFromLeft.value,
+      rootContext.isSlidingFromTop.value,
+    );
+  },
 });
 
 function paint(canvas: HTMLCanvasElement) {
@@ -211,7 +267,18 @@ useGradientCanvas({
     :style="{ background: CHECKERBOARD_BACKGROUND }"
     :data-disabled="rootContext.disabled.value ? '' : undefined"
   >
+    <span
+      v-if="cssLayers"
+      :style="{ ...CSS_GRADIENT_ROOT_STYLE, opacity: canvasOpacity }"
+    >
+      <span
+        v-for="(layer, i) in cssLayers"
+        :key="i"
+        :style="cssLayerStyle(layer)"
+      />
+    </span>
     <canvas
+      v-else
       ref="canvasRef"
       :style="{ position: 'absolute', inset: '0', width: '100%', height: '100%', pointerEvents: 'none', opacity: canvasOpacity }"
     />

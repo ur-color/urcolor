@@ -13,6 +13,7 @@ import {
   defaultStepsFor,
   isCyclicChannel,
 } from "../src/css-gradient";
+import { evalLayers } from "./css-gradient-eval";
 
 const BASE = Color.parse("hsl(210, 80%, 50%)")!;
 const RED = Color.parse("red")!;
@@ -113,27 +114,41 @@ describe("cssAreaBilinear", () => {
   });
 });
 
-describe("cssAreaChannels — HSV s × v", () => {
+describe("cssAreaChannels — HSV and HSL", () => {
   const base = BASE.to("hsv");
 
-  it("stacks the hue, then white, then black", () => {
+  it("stacks the hue, then saturation, then value", () => {
     expect(cssAreaChannels(base, "hsv", "s", "v", true, false)).toEqual([
       { image: "linear-gradient(rgb(0 128 255), rgb(0 128 255))" },
-      { image: "linear-gradient(to right, #fff, rgb(255 255 255 / 0))" },
+      { image: "linear-gradient(to right, rgb(255 255 255), rgb(255 255 255 / 0))" },
       { image: "linear-gradient(to top, #000, rgb(0 0 0 / 0))" },
     ]);
+  });
+
+  it("puts the hue sweep in the row layer when hue is an axis", () => {
+    const layers = cssAreaChannels(base, "hsv", "h", "s", true, false, { steps: 3 })!;
+    expect(layers[0]!.image)
+      .toBe("linear-gradient(to right, rgb(255 0 0), rgb(0 255 255), rgb(255 0 0))");
+    // v is fixed at 0.9, so it contributes a flat 0.1 of black rather than a ramp.
+    expect(layers[2]!.image).toBe("linear-gradient(rgb(0 0 0 / 0.1), rgb(0 0 0 / 0.1))");
+  });
+
+  it("drops a fixed channel's layer when it contributes nothing", () => {
+    // l is fixed at exactly 0.5, the neutral, so there is no lightness layer.
+    const layers = cssAreaChannels(BASE, "hsl", "h", "s", true, false, { steps: 3 })!;
+    expect(layers).toHaveLength(2);
   });
 
   it("swaps the layer directions when the axes are swapped", () => {
     const layers = cssAreaChannels(base, "hsv", "v", "s", true, false)!;
     // s is now on y and slides from the bottom; v is on x and slides from the left.
-    expect(layers[1]!.image).toBe("linear-gradient(to top, #fff, rgb(255 255 255 / 0))");
+    expect(layers[1]!.image).toBe("linear-gradient(to top, rgb(255 255 255), rgb(255 255 255 / 0))");
     expect(layers[2]!.image).toBe("linear-gradient(to right, #000, rgb(0 0 0 / 0))");
   });
 
   it("flips a direction when the axis slides backwards", () => {
     const layers = cssAreaChannels(base, "hsv", "s", "v", false, false)!;
-    expect(layers[1]!.image).toBe("linear-gradient(to left, #fff, rgb(255 255 255 / 0))");
+    expect(layers[1]!.image).toBe("linear-gradient(to left, rgb(255 255 255), rgb(255 255 255 / 0))");
   });
 
   it("paints opaque regardless of the base color's alpha", () => {
@@ -141,54 +156,51 @@ describe("cssAreaChannels — HSV s × v", () => {
     expect(layers[0]!.image).not.toContain("/");
   });
 
-  it("reproduces the HSV sweep exactly", () => {
+  // Every pair of each space's own three channels, in both axis orders and both
+  // slide directions, evaluated from the emitted CSS rather than a re-derivation.
+  const PAIRS = [
+    ["hsv", "s", "v"], ["hsv", "h", "s"], ["hsv", "h", "v"],
+    ["hsl", "s", "l"], ["hsl", "h", "s"], ["hsl", "h", "l"],
+  ] as const;
+
+  it.each(PAIRS)("reproduces the %s %s × %s sweep from its own CSS", (space, xChannel, yChannel) => {
     let worst = 0;
-    for (const h of [0, 37, 120, 210, 300, 359]) {
-      const color = Color.parse(`hsl(${h}, 80%, 50%)`)!.to("hsv");
-      const hue = rgb(color.with({ space: "hsv", s: 1, v: 1 }));
-      for (let si = 0; si <= 20; si++) {
-        for (let vi = 0; vi <= 20; vi++) {
-          const s = si / 20;
-          const v = vi / 20;
-          const layered = over([0, 0, 0], over([1, 1, 1], hue, 1 - s), 1 - v);
-          worst = Math.max(worst, maxError(layered, rgb(color.with({ space: "hsv", s, v }))));
+    for (const seed of ["hsl(210, 80%, 50%)", "hsl(37, 40%, 70%)", "hsl(300, 100%, 25%)"]) {
+      const color = Color.parse(seed)!.to(space);
+      for (const fromLeft of [true, false]) {
+        for (const fromTop of [true, false]) {
+          // The hue axis is stops lerped in sRGB, so it is only exact *at* a
+          // stop. Sampling on the stop grid isolates the two overlay claims,
+          // which are the ones that have to hold everywhere.
+          const layers = cssAreaChannels(
+            color, space, xChannel, yChannel, fromLeft, fromTop, { steps: 13 },
+          )!;
+          for (let xi = 0; xi <= 12; xi++) {
+            for (let yi = 0; yi <= 12; yi++) {
+              const x = xi / 12;
+              const y = yi / 12;
+              const painted = evalLayers(layers, x, y).slice(0, 3);
+
+              const range = (channel: string) => channel === "h" ? [0, 360] : [0, 1];
+              const at = (channel: string, t: number) => {
+                const [lo, hi] = range(channel);
+                return lo! + t * (hi! - lo!);
+              };
+              const xt = fromLeft ? x : 1 - x;
+              const yt = fromTop ? y : 1 - y;
+              const truth = rgb(color.with({
+                space,
+                [xChannel]: at(xChannel, xt),
+                [yChannel]: at(yChannel, yt),
+              }));
+              worst = Math.max(worst, maxError(painted, truth));
+            }
+          }
         }
       }
     }
-    expect(worst).toBeLessThan(1e-12);
-  });
-});
-
-describe("cssAreaChannels — HSL s × l", () => {
-  it("puts the gray-to-hue row under a black-to-white overlay", () => {
-    expect(cssAreaChannels(BASE, "hsl", "s", "l", true, false)).toEqual([
-      { image: "linear-gradient(to right, rgb(128 128 128), rgb(0 128 255))" },
-      {
-        image: "linear-gradient(to top, #000 0%, rgb(0 0 0 / 0) 50%, "
-          + "rgb(255 255 255 / 0) 50%, #fff 100%)",
-      },
-    ]);
-  });
-
-  it("reproduces the HSL sweep exactly on both halves of the lightness ramp", () => {
-    let worst = 0;
-    for (const h of [0, 37, 120, 210, 300, 359]) {
-      const color = Color.parse(`hsl(${h}, 80%, 50%)`)!;
-      const gray = rgb(color.with({ space: "hsl", s: 0, l: 0.5 }));
-      const hue = rgb(color.with({ space: "hsl", s: 1, l: 0.5 }));
-      for (let si = 0; si <= 20; si++) {
-        for (let li = 0; li <= 20; li++) {
-          const s = si / 20;
-          const l = li / 20;
-          const row = over(hue, gray, s);
-          const layered = l < 0.5
-            ? over([0, 0, 0], row, 1 - 2 * l)
-            : over([1, 1, 1], row, 2 * l - 1);
-          worst = Math.max(worst, maxError(layered, rgb(color.with({ space: "hsl", s, l }))));
-        }
-      }
-    }
-    expect(worst).toBeLessThan(1e-12);
+    // One byte of rounding: the CSS stops are serialised through `rgb()`.
+    expect(worst).toBeLessThan(1 / 255);
   });
 });
 
@@ -230,8 +242,8 @@ describe("cssAreaChannels — combinations that stay on the canvas", () => {
     expect(cssAreaChannels(BASE.to(space), space, x, y, true, true)).toBeNull();
   });
 
-  it("returns null for an HSV pair that is not s × v", () => {
-    expect(cssAreaChannels(BASE.to("hsv"), "hsv", "h", "s", true, true)).toBeNull();
+  it("returns null for a channel the space does not define", () => {
+    expect(cssAreaChannels(BASE.to("hsv"), "hsv", "s", "l", true, true)).toBeNull();
   });
 
   it("returns null when both axes name the same channel", () => {
@@ -353,7 +365,7 @@ describe("collapseLayers", () => {
     expect(layers).toHaveLength(1);
     expect(layers[0]!.image).toBe(
       "linear-gradient(to top, #000, rgb(0 0 0 / 0)), "
-      + "linear-gradient(to right, #fff, rgb(255 255 255 / 0)), "
+      + "linear-gradient(to right, rgb(255 255 255), rgb(255 255 255 / 0)), "
       + "linear-gradient(rgb(0 128 255), rgb(0 128 255))",
     );
   });

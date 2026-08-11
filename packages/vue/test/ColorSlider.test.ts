@@ -359,7 +359,10 @@ describe("given a ColorSlider with a gradient, while dragging", () => {
       Object.defineProperty(HTMLCanvasElement.prototype, "getContext", originalGetContextDescriptor);
   });
 
-  function mountSliderWithGradient() {
+  // `renderer: "canvas"` is what puts a canvas in the tree at all — a hue
+  // slider takes the CSS path by default, and the drag-suppression behaviour
+  // under test belongs to the canvas lifecycle.
+  function mountSliderWithGradient(renderer: "auto" | "css" | "canvas" = "canvas") {
     return mount(defineComponent({
       setup() {
         return () =>
@@ -370,12 +373,24 @@ describe("given a ColorSlider with a gradient, while dragging", () => {
           }, {
             default: () => [
               h(ColorSliderTrack, null, { default: () => h(ColorSliderThumb) }),
-              h(ColorSliderGradient),
+              h(ColorSliderGradient, { renderer }),
             ],
           });
       },
     }), { attachTo: document.body });
   }
+
+  it("paints a hue slider with CSS and no canvas by default", () => {
+    const wrapper = mountSliderWithGradient("auto");
+    expect(wrapper.find("canvas").exists()).toBe(false);
+    expect(wrapper.html()).toContain("linear-gradient(90deg");
+    expect(viewportSpy.mock.calls.length).toBe(0);
+  });
+
+  it("still paints into a canvas when the renderer is forced", () => {
+    const wrapper = mountSliderWithGradient("canvas");
+    expect(wrapper.find("canvas").exists()).toBe(true);
+  });
 
   it("should not repaint the gradient while dragging, and repaint exactly once when the drag ends", async () => {
     const wrapper = mountSliderWithGradient();

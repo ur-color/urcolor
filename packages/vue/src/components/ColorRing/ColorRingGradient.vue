@@ -1,9 +1,17 @@
 <script lang="ts">
 import type { PrimitiveProps } from "reka-ui";
+import type { GradientRenderer } from "@urcolor/shared";
 
 export interface ColorRingGradientProps extends /* @vue-ignore */ PrimitiveProps {
   as?: string;
   asChild?: boolean;
+  /**
+   * Which painter to use.
+   * - `"auto"` (default) — CSS when an exact recipe exists, canvas otherwise
+   * - `"css"` — force CSS; falls back to the canvas with a dev warning if none exists
+   * - `"canvas"` — force the canvas painter
+   */
+  renderer?: GradientRenderer;
   channelOverrides?: Record<string, number> | false;
   /** @deprecated Use innerRadius on ColorRingRoot instead */
   innerRadius?: number;
@@ -13,13 +21,15 @@ export interface ColorRingGradientProps extends /* @vue-ignore */ PrimitiveProps
 <script setup lang="ts">
 import { ref, computed } from "vue";
 import { useForwardExpose, Primitive } from "reka-ui";
-import { getChannelConfig, sampleConicRing } from "@urcolor/shared";
+import { channelStops, cssConicStops, getChannelConfig, sampleConicRing } from "@urcolor/shared";
 import { applyChannelOverrides, renderToCanvas, useGradientCanvas } from "../../shared/useGradientCanvas";
+import { CSS_GRADIENT_ROOT_STYLE, cssLayerStyle, useCssGradient } from "../../shared/useCssGradient";
 import { CHECKERBOARD_BACKGROUND } from "../../shared/checkerboard";
 import { injectColorRingRootContext } from "./ColorRingRoot.vue";
 
 const props = withDefaults(defineProps<ColorRingGradientProps>(), {
   as: "span",
+  renderer: "auto",
   channelOverrides: () => ({ alpha: 1 }),
 });
 
@@ -40,6 +50,23 @@ const canvasRef = ref<HTMLCanvasElement | null>(null);
 const checkerboardMask = computed(() => {
   const p = (props.innerRadius ?? rootContext.innerRadius.value) * 100;
   return `radial-gradient(circle closest-side at center, transparent calc(${p}% - 0.5px), #000 calc(${p}% + 0.5px), #000 calc(100% - 0.5px), transparent 100%)`;
+});
+
+// `sampleConicRing` writes an opaque alpha byte for every pixel, so the CSS
+// stops drop the base color's alpha to match rather than tinting the ring.
+const cssLayers = useCssGradient({
+  renderer: () => props.renderer,
+  name: "ColorRingGradient",
+  build: () => {
+    const colorSpace = rootContext.colorSpace.value;
+    const baseColor = rootContext.colorRef.value;
+    if (!baseColor) return null;
+
+    const overriddenBase = applyChannelOverrides(baseColor, colorSpace, props.channelOverrides);
+    const stops = channelStops(overriddenBase.withAlpha(1), colorSpace, rootContext.channelKey.value);
+    if (!stops) return null;
+    return cssConicStops(stops, rootContext.startAngle.value);
+  },
 });
 
 function paint(canvas: HTMLCanvasElement) {
@@ -85,7 +112,18 @@ useGradientCanvas({
     :style="{ background: CHECKERBOARD_BACKGROUND, maskImage: checkerboardMask, WebkitMaskImage: checkerboardMask }"
     :data-disabled="rootContext.disabled.value ? '' : undefined"
   >
+    <span
+      v-if="cssLayers"
+      :style="CSS_GRADIENT_ROOT_STYLE"
+    >
+      <span
+        v-for="(layer, i) in cssLayers"
+        :key="i"
+        :style="cssLayerStyle(layer)"
+      />
+    </span>
     <canvas
+      v-else
       ref="canvasRef"
       :style="{ position: 'absolute', inset: '0', width: '100%', height: '100%', pointerEvents: 'none' }"
     />

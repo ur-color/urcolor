@@ -94,7 +94,7 @@ This matters for two reasons. Out-of-gamut `oklch()` in a CSS gradient is gamut-
 
 ## Recipes
 
-### Slider — `cssLinearStops`, never null
+### Slider — `cssLinearStops`, null only below two stops
 
 ```
 linear-gradient(<angle + 90>deg, <stop0> 0%, …, <stopN> 100%)
@@ -104,7 +104,7 @@ The component's `angle` is 0 for left-to-right and 90 for top-to-bottom. CSS mea
 
 This is not an approximation. `drawLinearGradient` uploads the same stops and lerps between them in sRGB in the fragment shader; a CSS `linear-gradient` lerps between the same stops in sRGB. Mirroring is already applied at the data level by reversing the stop array, so no CSS-side flag is needed.
 
-### Ring — `cssConicStops`, never null
+### Ring — `cssConicStops`, null only below two stops
 
 ```
 conic-gradient(from <startAngle>deg, <stop0> 0deg, …, <stopN> 360deg)
@@ -130,37 +130,35 @@ Mirroring swaps the corner colors, reusing the swap the existing CPU path alread
 
 **Exception:** when `interpolationSpace` is set on the corner-mode area, the builder returns `null` and the component stays on `sampleBilinearGrid`. The two row gradients could be densified into stops in the requested space, but the vertical lerp would still be a sRGB alpha composite, so the result would be perceptual on one axis and not the other. Silently half-honouring the prop is worse than not taking the CSS path.
 
-### Area, HSV `s` × `v` — exact
+### Area, any pair of HSV's or HSL's own channels — exact overlays
+
+Both spaces decompose the same way, so one builder covers all three pairs in each — `s`×`v`, `h`×`s` and `h`×`v` in HSV, and `s`×`l`, `h`×`s` and `h`×`l` in HSL. That matters because the *default* area for both spaces is `h`×`s` (the roots take `channels[0]` and `channels[1]`), not the `s`×`v` a hand-written recipe would have covered.
+
+Three layers, always in this order:
 
 ```
-layer 0:  <hue>                                        (solid, s = 1, v = 1)
-layer 1:  linear-gradient(to right, #fff, transparent)
-layer 2:  linear-gradient(to top,   #000, transparent)
+layer 0  row:          the hue, fully saturated, at the neutral third channel
+                       — a solid when hue is fixed, a stop sweep when it is an axis
+layer 1  saturation:   the neutral (white in HSV, mid gray in HSL) faded out
+layer 2  third channel: HSV — black faded out
+                        HSL — #000 0%, transparent 50%, transparent 50%, #fff 100%
 ```
 
-At `v = 1`, HSV gives `max = 1` and `min = 1 - s`, which is `lerp(white, pureHue, s)` — the white layer at alpha `1 - s`. Multiplying by `v` scales every channel uniformly, which is the black layer at alpha `1 - v`. Both layers are exact, not approximations.
+A channel that is *not* an axis contributes the same layer at a constant alpha instead of a ramp, and is dropped entirely when that alpha is zero.
+
+Layer order is load-bearing: saturation must composite before the third channel. Reversed, HSV gives `hue·v·s + white·(1-s)` where the truth is `(hue·s + white·(1-s))·v`.
+
+Both overlays are exact:
+
+- **Saturation.** At the neutral third channel a color is `lerp(neutral, hue, s)` in both spaces, which is the neutral at alpha `1 - s`.
+- **HSV value.** It scales every channel uniformly, which is black at alpha `1 - v`.
+- **HSL lightness.** For `l > 0.5` white at alpha `2l - 1` gives `(1 - (2l-1))·(0.5 + s(hue - 0.5)) + (2l-1) = l + 2s(1-l)(hue - 0.5)`, and HSL's own `l + s·(1 - |2l - 1|)·(hue - 0.5)` is the same on that half. For `l < 0.5` black at alpha `1 - 2l` gives `2l·(0.5 + s(hue - 0.5)) = l + 2ls(hue - 0.5)`, HSL again.
+
+The hue axis is the one approximation, and it is the same one the slider and ring already make: N stops lerped in sRGB rather than a per-pixel sweep.
+
+The doubled stop at 50% pairs transparent black with transparent white so neither half of the lightness ramp interpolates through the other's premultiplied color. Both stops are fully transparent, so the hard stop is invisible.
 
 Directions flip with `isSlidingFromLeft` and `isSlidingFromTop`.
-
-### Area, HSL `s` × `l` — exact
-
-```
-layer 0:  linear-gradient(to right, #808080, <hue>)
-layer 1:  linear-gradient(to top,
-            #000 0%, rgb(0 0 0 / 0) 50%,
-            rgb(255 255 255 / 0) 50%, #fff 100%)
-```
-
-For `l > 0.5` the overlay applies white at alpha `2l - 1`:
-
-```
-(1 - (2l-1)) · (0.5 + s(hue - 0.5)) + (2l-1)
-  = l + 2s(1-l)(hue - 0.5)
-```
-
-and HSL's own definition gives `l + s·(1 - |2l - 1|)·(hue - 0.5)`, which for `l > 0.5` is `l + 2s(1-l)(hue - 0.5)`. Identical. For `l < 0.5` the overlay applies black at alpha `1 - 2l`, giving `2l·(0.5 + s(hue - 0.5)) = l + 2ls(hue - 0.5)`, and HSL gives `l + s·(2l)·(hue - 0.5)`. Identical again.
-
-The doubled stop at 50% pairs transparent black with transparent white so neither half of the ramp interpolates through the other's premultiplied color. Both stops are fully transparent, so the hard stop is invisible.
 
 ### Area, one axis is `alpha` — exact, any space
 
@@ -173,7 +171,7 @@ The real channel is sampled into stops in JavaScript, so this works in every spa
 
 ### Area, everything else — null
 
-Both axes real, in a space with no recipe above: `oklch` `c`×`l`, `oklab` `a`×`b`, `lab`, `lch`, `hwb`, and the `srgb` family. Canvas.
+Both axes real, in a space other than HSV or HSL: `oklch`, `oklab`, `lab`, `lch`, `hwb`, and the RGB family. Canvas.
 
 ### Wheel, `h` × `s` on `hsv` and `hsl` — exact
 
@@ -245,7 +243,9 @@ Files touched, per framework:
 
 ## Testing
 
-**`packages/shared/test/css-gradient.test.ts`** — exact string assertions for each recipe, and `null` assertions for each combination that must stay on canvas (`oklch` `c`×`l`, `oklab` `a`×`b`, `hwb`, `srgb` pairs, corner mode with `interpolationSpace`, non-`h`/`s` wheel pairs). The builders touch no DOM, so these run with no environment. Also covers the angle conversion, the conic origin, the stop-count defaults including the cyclic case, and `collapseLayers` — that a mask-free run merges and reverses, and that a masked layer splits the run.
+**`packages/shared/test/css-gradient-eval.ts`** — a miniature CSS gradient renderer: it parses the strings the builders emit and composites them the way a browser does, including premultiplied stop interpolation and `mask-image`. Re-deriving the algebra in the test would only check the derivation against itself; evaluating the emitted CSS checks the actual output. It handles only the grammar the builders produce and throws on anything else.
+
+**`packages/shared/test/css-gradient.test.ts`** — exact string assertions for each recipe, exactness sweeps for all six HSV/HSL channel pairs run through the evaluator, and `null` assertions for each combination that must stay on canvas (`oklch` `c`×`l`, `oklab` `a`×`b`, `hwb`, `srgb` pairs, corner mode with `interpolationSpace`, non-`h`/`s` wheel pairs). The builders touch no DOM, so these run with no environment. Also covers the angle conversion, the conic origin, the stop-count defaults including the cyclic case, and `collapseLayers` — that a mask-free run merges and reverses, and that a masked layer splits the run.
 
 **Per framework** — for each of the five components: `renderer="auto"` in HSV renders no `<canvas>` and a non-empty background; the same component in `oklch` with two real channels renders a `<canvas>`; `renderer="canvas"` renders a `<canvas>` regardless.
 

@@ -1,9 +1,17 @@
 <script lang="ts">
 import type { PrimitiveProps } from "reka-ui";
+import type { GradientRenderer } from "@urcolor/shared";
 
 export interface ColorWheelGradientProps extends /* @vue-ignore */ PrimitiveProps {
   as?: string;
   asChild?: boolean;
+  /**
+   * Which painter to use.
+   * - `"auto"` (default) — CSS when an exact recipe exists, canvas otherwise
+   * - `"css"` — force CSS; falls back to the canvas with a dev warning if none exists
+   * - `"canvas"` — force the canvas painter
+   */
+  renderer?: GradientRenderer;
   channelOverrides?: Record<string, number> | false;
 }
 </script>
@@ -11,13 +19,15 @@ export interface ColorWheelGradientProps extends /* @vue-ignore */ PrimitiveProp
 <script setup lang="ts">
 import { ref } from "vue";
 import { useForwardExpose, Primitive } from "reka-ui";
-import { getChannelConfig, samplePolarGrid } from "@urcolor/shared";
+import { cssWheelPolar, getChannelConfig, samplePolarGrid } from "@urcolor/shared";
 import { applyChannelOverrides, renderToCanvas, useGradientCanvas } from "../../shared/useGradientCanvas";
+import { CSS_GRADIENT_ROOT_STYLE, cssLayerStyle, useCssGradient } from "../../shared/useCssGradient";
 import { CHECKERBOARD_BACKGROUND } from "../../shared/checkerboard";
 import { injectColorWheelRootContext } from "./ColorWheelRoot.vue";
 
 const props = withDefaults(defineProps<ColorWheelGradientProps>(), {
   as: "span",
+  renderer: "auto",
   channelOverrides: () => ({ alpha: 1 }),
 });
 
@@ -25,6 +35,28 @@ const rootContext = injectColorWheelRootContext();
 useForwardExpose();
 
 const canvasRef = ref<HTMLCanvasElement | null>(null);
+
+// The circle is cut here, as it is on the canvas, and for the same reason: the
+// root's own `border-radius` alone would leave the corners of the square
+// gradient showing.
+const CSS_LAYERS_STYLE = { ...CSS_GRADIENT_ROOT_STYLE, clipPath: "circle(50%)" };
+
+const cssLayers = useCssGradient({
+  renderer: () => props.renderer,
+  name: "ColorWheelGradient",
+  build: () => {
+    const colorSpace = rootContext.colorSpace.value;
+    const baseColor = rootContext.colorRef.value;
+    if (!baseColor) return null;
+
+    const overriddenBase = applyChannelOverrides(baseColor, colorSpace, props.channelOverrides);
+    return cssWheelPolar(
+      overriddenBase, colorSpace,
+      rootContext.angleChannelKey.value, rootContext.radiusChannelKey.value,
+      rootContext.startAngle.value,
+    );
+  },
+});
 
 function paint(canvas: HTMLCanvasElement) {
   const colorSpace = rootContext.colorSpace.value;
@@ -71,7 +103,18 @@ useGradientCanvas({
     :style="{ background: CHECKERBOARD_BACKGROUND, borderRadius: '50%' }"
     :data-disabled="rootContext.disabled.value ? '' : undefined"
   >
+    <span
+      v-if="cssLayers"
+      :style="CSS_LAYERS_STYLE"
+    >
+      <span
+        v-for="(layer, i) in cssLayers"
+        :key="i"
+        :style="cssLayerStyle(layer)"
+      />
+    </span>
     <canvas
+      v-else
       ref="canvasRef"
       :style="{ position: 'absolute', inset: '0', width: '100%', height: '100%', pointerEvents: 'none', clipPath: 'circle(50%)' }"
     />

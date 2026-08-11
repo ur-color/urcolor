@@ -1,9 +1,16 @@
 <script lang="ts">
 import type { PrimitiveProps } from "reka-ui";
+import type { GradientRenderer } from "@urcolor/shared";
 
 export interface ColorTriangleGradientProps extends /* @vue-ignore */ PrimitiveProps {
   as?: string;
   asChild?: boolean;
+  /**
+   * Which painter to use. A barycentric sweep has no CSS equivalent, so this
+   * component always paints into a canvas — the prop exists for symmetry with
+   * the other gradients, and `"css"` warns and falls back.
+   */
+  renderer?: GradientRenderer;
   channelOverrides?: Record<string, number> | false;
 }
 </script>
@@ -13,16 +20,22 @@ import { ref, computed } from "vue";
 import { useForwardExpose, Primitive } from "reka-ui";
 import { getChannelConfig, sampleTriangleGrid } from "@urcolor/shared";
 import { applyChannelOverrides, renderToCanvas, useGradientCanvas } from "../../shared/useGradientCanvas";
+import { warnNoCssRecipe } from "../../shared/useCssGradient";
 import { CHECKERBOARD_BACKGROUND } from "../../shared/checkerboard";
 import { injectColorTriangleRootContext } from "./ColorTriangleRoot.vue";
 
 const props = withDefaults(defineProps<ColorTriangleGradientProps>(), {
   as: "span",
+  renderer: "auto",
   channelOverrides: () => ({ alpha: 1 }),
 });
 
 const rootContext = injectColorTriangleRootContext();
 useForwardExpose();
+
+// A barycentric sweep has no CSS equivalent, so there is nothing to resolve —
+// only the same warning the other gradients emit when asked for the impossible.
+if (props.renderer === "css") warnNoCssRecipe("ColorTriangleGradient");
 
 const canvasRef = ref<HTMLCanvasElement | null>(null);
 

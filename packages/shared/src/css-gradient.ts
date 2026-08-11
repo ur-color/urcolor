@@ -222,8 +222,9 @@ export function cssAreaBilinear(tl: Color, tr: Color, bl: Color, br: Color): Css
 
 /**
  * A 2D channel area, when the space's mapping to sRGB factors into layered
- * compositing. `null` otherwise — `oklch`, `oklab`, `lab`, `lch`, `hwb` and the
- * RGB-family pairs all stay on the canvas.
+ * compositing — which is any pair of HSV's or HSL's own three channels.
+ * `null` otherwise: `oklch`, `oklab`, `lab`, `lch`, `hwb` and the RGB-family
+ * pairs all stay on the canvas.
  *
  * A `null` channel means that axis is alpha, matching the components' own
  * convention. An alpha axis is CSS-able in *every* space, because the other
@@ -243,7 +244,9 @@ export function cssAreaChannels(
   const opaque = base.withAlpha(1);
 
   if (xChannel && yChannel) {
-    return cssAreaChannelPair(opaque, space, xChannel, yChannel, slidingFromLeft, slidingFromTop);
+    return cssAreaChannelPair(
+      opaque, space, xChannel, yChannel, slidingFromLeft, slidingFromTop, options,
+    );
   }
   if (!xChannel && !yChannel) return null;
 
@@ -263,6 +266,36 @@ export function cssAreaChannels(
   }];
 }
 
+/** A layer of one flat color, since `background-image` takes no bare color. */
+function solid(color: string): CssGradientLayer {
+  return { image: `linear-gradient(${color}, ${color})` };
+}
+
+/**
+ * A 2D area in HSV or HSL, for any pair of that space's three channels.
+ *
+ * Both spaces decompose the same way — hue picks a row color, saturation fades
+ * it toward the neutral, and the third channel darkens or lightens the
+ * result — so one builder covers all three pairs in each. The channel that is
+ * *not* an axis contributes the same layer at a constant alpha instead of a
+ * ramp.
+ *
+ * Layer order is load-bearing: saturation must composite before the third
+ * channel. Reversed, HSV would give `hue·v·s + white·(1-s)` where the truth is
+ * `(hue·s + white·(1-s))·v`.
+ *
+ * The two overlays are exact.
+ * - Saturation: at the neutral third channel a color is `lerp(neutral, hue, s)`
+ *   in both spaces, which is the neutral at alpha `1 - s`.
+ * - HSV value: it scales every channel uniformly, which is black at alpha `1 - v`.
+ * - HSL lightness: for `l > 0.5` white at alpha `2l - 1` gives
+ *   `l + 2s(1-l)(hue - 0.5)`, which is HSL's own `l + s·(1 - |2l - 1|)·(hue - 0.5)`
+ *   on that half; for `l < 0.5` black at alpha `1 - 2l` gives `l + 2ls(hue - 0.5)`,
+ *   HSL again.
+ *
+ * The hue axis is the one approximation, and it is the same one the slider and
+ * ring already make: N stops lerped in sRGB rather than a per-pixel sweep.
+ */
 function cssAreaChannelPair(
   base: Color,
   space: SpaceId,
@@ -270,52 +303,82 @@ function cssAreaChannelPair(
   yChannel: string,
   slidingFromLeft: boolean,
   slidingFromTop: boolean,
+  options: StopOptions = {},
 ): CssGradientLayer[] | null {
-  const pair = new Set([xChannel, yChannel]);
+  if (space !== "hsv" && space !== "hsl") return null;
+  if (xChannel === yChannel) return null;
 
-  // HSV, saturation × value. At v = 1 the color is `lerp(white, pureHue, s)`,
-  // which is the white layer at alpha `1 - s`; multiplying by `v` scales every
-  // channel uniformly, which is the black layer at alpha `1 - v`. Both exact.
-  //
-  // Layer order is load-bearing: white must composite before black, or the
-  // result is `hue·v·s + white·(1-s)` instead of `(hue·s + white·(1-s))·v`.
-  if (space === "hsv" && pair.size === 2 && pair.has("s") && pair.has("v")) {
-    const sOnX = xChannel === "s";
-    const hue = base.with({ space: "hsv", s: 1, v: 1 });
-    const sDir = axisDirection(sOnX, sOnX ? slidingFromLeft : slidingFromTop);
-    const vDir = axisDirection(!sOnX, sOnX ? slidingFromTop : slidingFromLeft);
-    return [
-      { image: `linear-gradient(${css(hue)}, ${css(hue)})` },
-      { image: `linear-gradient(${sDir}, #fff, ${TRANSPARENT_WHITE})` },
-      { image: `linear-gradient(${vDir}, #000, ${TRANSPARENT_BLACK})` },
-    ];
+  const third = space === "hsv" ? "v" : "l";
+  const known = new Set(["h", "s", third]);
+  if (!known.has(xChannel) || !known.has(yChannel)) return null;
+
+  /** The neutral third-channel value the row and the saturation overlay assume. */
+  const neutral = space === "hsv" ? { v: 1 } : { l: 0.5 };
+  const b = base.to(space);
+
+  /** Where a channel lives, or `null` when it is fixed at the base color's value. */
+  function axisOf(channel: string): { onX: boolean; forward: boolean } | null {
+    if (channel === xChannel) return { onX: true, forward: slidingFromLeft };
+    if (channel === yChannel) return { onX: false, forward: slidingFromTop };
+    return null;
   }
 
-  // HSL, saturation × lightness. For l > 0.5 the overlay applies white at alpha
-  // `2l - 1`, giving `l + 2s(1-l)(hue - 0.5)`, which is HSL's own
-  // `l + s·(1 - |2l - 1|)·(hue - 0.5)` on that half. For l < 0.5 it applies
-  // black at alpha `1 - 2l`, giving `l + 2ls(hue - 0.5)` — HSL again. Exact on
-  // both halves.
-  //
-  // The doubled stop at 50% pairs transparent black with transparent white so
-  // neither half interpolates through the other's premultiplied color. Both are
-  // fully transparent, so the hard stop is invisible.
-  if (space === "hsl" && pair.size === 2 && pair.has("s") && pair.has("l")) {
-    const sOnX = xChannel === "s";
-    const gray = base.with({ space: "hsl", s: 0, l: 0.5 });
-    const hue = base.with({ space: "hsl", s: 1, l: 0.5 });
-    const sDir = axisDirection(sOnX, sOnX ? slidingFromLeft : slidingFromTop);
-    const lDir = axisDirection(!sOnX, sOnX ? slidingFromTop : slidingFromLeft);
-    return [
-      { image: `linear-gradient(${sDir}, ${css(gray)}, ${css(hue)})` },
-      {
-        image: `linear-gradient(${lDir}, #000 0%, ${TRANSPARENT_BLACK} 50%, `
-          + `${TRANSPARENT_WHITE} 50%, #fff 100%)`,
-      },
-    ];
+  const layers: CssGradientLayer[] = [];
+
+  // Row: fully saturated hue at the neutral third channel.
+  const hAxis = axisOf("h");
+  if (hAxis) {
+    const [hMin, hMax] = channelRange(space, "h")!;
+    const steps = options.steps ?? CYCLIC_STEPS;
+    const stops = Array.from({ length: steps }, (_, i) => {
+      const t = i / (steps - 1);
+      return css(b.with({ space, h: hMin + t * (hMax - hMin), s: 1, ...neutral }));
+    });
+    layers.push({
+      image: `linear-gradient(${axisDirection(hAxis.onX, hAxis.forward)}, ${stops.join(", ")})`,
+    });
+  } else {
+    layers.push(solid(css(b.with({ space, s: 1, ...neutral }))));
   }
 
-  return null;
+  // Saturation: fade toward the neutral — white in HSV, mid gray in HSL.
+  const gray = b.with({ space, s: 0, ...neutral });
+  const sAxis = axisOf("s");
+  if (sAxis) {
+    layers.push({
+      image: `linear-gradient(${axisDirection(sAxis.onX, sAxis.forward)}, ${css(gray)}, ${fade(gray)})`,
+    });
+  } else {
+    const a = 1 - b.get("s");
+    if (a > 0) layers.push(solid(css(gray.withAlpha(a))));
+  }
+
+  // Third channel: darken (HSV) or darken-then-lighten (HSL).
+  const tAxis = axisOf(third);
+  if (space === "hsv") {
+    if (tAxis) {
+      layers.push({
+        image: `linear-gradient(${axisDirection(tAxis.onX, tAxis.forward)}, #000, ${TRANSPARENT_BLACK})`,
+      });
+    } else {
+      const a = 1 - b.get("v");
+      if (a > 0) layers.push(solid(`rgb(0 0 0 / ${num(a)})`));
+    }
+  } else if (tAxis) {
+    // The doubled stop at 50% pairs transparent black with transparent white so
+    // neither half interpolates through the other's premultiplied color. Both
+    // are fully transparent, so the hard stop is invisible.
+    layers.push({
+      image: `linear-gradient(${axisDirection(tAxis.onX, tAxis.forward)}, `
+        + `#000 0%, ${TRANSPARENT_BLACK} 50%, ${TRANSPARENT_WHITE} 50%, #fff 100%)`,
+    });
+  } else {
+    const l = b.get("l");
+    if (l < 0.5) layers.push(solid(`rgb(0 0 0 / ${num(1 - 2 * l)})`));
+    else if (l > 0.5) layers.push(solid(`rgb(255 255 255 / ${num(2 * l - 1)})`));
+  }
+
+  return layers;
 }
 
 /**
