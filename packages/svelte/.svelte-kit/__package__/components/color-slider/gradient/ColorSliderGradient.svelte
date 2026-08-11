@@ -2,6 +2,7 @@
   import type { Snippet } from "svelte";
   import type { HTMLAttributes } from "svelte/elements";
   import type { SpaceId } from "@urcolor/core";
+  import type { GradientRenderer } from "@urcolor/shared";
   import type { ChildSnippetArgs } from "../../../shared/child.js";
 
   export interface ColorSliderGradientProps extends HTMLAttributes<HTMLSpanElement> {
@@ -18,6 +19,13 @@
      */
     channelOverrides?: Record<string, number> | false;
     /**
+     * Which painter to use.
+     * - `"auto"` (default) — CSS when an exact recipe exists, canvas otherwise
+     * - `"css"` — force CSS; falls back to the canvas with a dev warning if none exists
+     * - `"canvas"` — force the canvas painter
+     */
+    renderer?: GradientRenderer;
+    /**
      * Replaces the default `<canvas>`; receives its props, including the paint
      * attachment. The checkerboard wrapper is always rendered by this part.
      */
@@ -28,7 +36,8 @@
 <script lang="ts">
   import { createAttachmentKey } from "svelte/attachments";
   import { Color } from "@urcolor/core";
-  import { CHECKERBOARD_BACKGROUND, drawLinearGradient, getChannelConfig, interpolateStops } from "@urcolor/shared";
+  import { CHECKERBOARD_BACKGROUND, cssLinearStops, defaultStepsFor, drawLinearGradient, getChannelConfig, interpolateStops } from "@urcolor/shared";
+  import { CSS_GRADIENT_ROOT_STYLE, cssLayerStyle, resolveCssGradient } from "../../../shared/cssGradient.svelte.js";
   import type { ChildProps } from "../../../shared/child.js";
   import { gradientAttachment } from "../../../shared/gradient.svelte.js";
   import { colorSliderContext } from "../root/context.svelte.js";
@@ -43,6 +52,7 @@
     channelOverrides = { alpha: 1 },
     class: className,
     style,
+    renderer = "auto",
     children,
     child,
     ...rest
@@ -76,7 +86,7 @@
     return result;
   }
 
-  const autoColors = $derived.by<Color[] | null>(() => {
+  function buildAutoColors(steps: number): Color[] | null {
     if (colorsProp) return null;
 
     if (isAlphaChannel) {
@@ -91,30 +101,41 @@
     const min = config.nativeMin ?? config.min;
     const max = config.nativeMax ?? config.max;
     const stops: Color[] = [];
-    for (let i = 0; i < AUTO_STEPS; i++) {
-      const t = i / (AUTO_STEPS - 1);
+    for (let i = 0; i < steps; i++) {
+      const t = i / (steps - 1);
       stops.push(base.with({ space: context.colorSpace, [context.channel]: min + t * (max - min) }));
     }
     return stops;
-  });
+  }
 
-  function paint(canvas: HTMLCanvasElement): void {
+  /**
+   * The stop list both painters draw, differing only in how many stops they can
+   * hold: the shader has 16 uniform slots, CSS has no ceiling. Mirroring
+   * reverses the stops rather than flipping the gradient, as the WebGL path has
+   * always done.
+   */
+  function resolveStops(steps: number): Color[] | null {
     let stops: Color[];
     if (colorsProp) {
       const parsed = colorsProp.map(entry => Color.parse(entry));
-      if (parsed.length < 2 || parsed.some(entry => !entry)) return;
+      if (parsed.length < 2 || parsed.some(entry => !entry)) return null;
       stops = parsed as Color[];
-    } else if (autoColors && autoColors.length >= 2) {
-      stops = autoColors;
     } else {
-      return;
+      const auto = buildAutoColors(steps);
+      if (!auto || auto.length < 2) return null;
+      stops = auto;
     }
 
     if (mirrored) stops = [...stops].reverse();
-    const resolved = interpolationSpace
+    return interpolationSpace
       ? interpolateStops(stops, INTERPOLATION_STEPS, interpolationSpace)
       : stops;
-    drawLinearGradient(canvas, resolved, effectiveAngle, isAlphaChannel);
+  }
+
+  function paint(canvas: HTMLCanvasElement): void {
+    const stops = resolveStops(AUTO_STEPS);
+    if (!stops) return;
+    drawLinearGradient(canvas, stops, effectiveAngle, isAlphaChannel);
   }
 
   const paintCanvas = gradientAttachment(paint);
@@ -133,6 +154,16 @@
     };
   }
 
+  /**
+   * `interpolationSpace` does not force the canvas here: a 1D sweep is fully
+   * expressible as stops, and `resolveStops` already densifies to 32 of them
+   * computed in that space.
+   */
+  const cssLayers = $derived.by(() => resolveCssGradient(renderer, "ColorSliderGradient", !!child, () => {
+    const stops = resolveStops(colorsProp ? AUTO_STEPS : defaultStepsFor(context.colorSpace, context.channel));
+    return stops && cssLinearStops(stops, effectiveAngle);
+  }));
+
   const canvasProps = $derived<ChildProps>({
     style: `position:absolute;inset:0;width:100%;height:100%;pointer-events:none;opacity:${canvasOpacity};`,
     [attachmentKey]: canvasAttachment,
@@ -147,7 +178,13 @@
 </script>
 
 <span {...elementProps}>
-  {#if child}
+  {#if cssLayers}
+    <span style={`${CSS_GRADIENT_ROOT_STYLE}opacity:${canvasOpacity};`}>
+      {#each cssLayers as layer, index (index)}
+        <span style={cssLayerStyle(layer)}></span>
+      {/each}
+    </span>
+  {:else if child}
     {@render child({ props: canvasProps })}
   {:else}
     <canvas {...canvasProps}></canvas>

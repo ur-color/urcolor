@@ -2,6 +2,7 @@
   import type { Snippet } from "svelte";
   import type { HTMLAttributes } from "svelte/elements";
   import type { SpaceId } from "@urcolor/core";
+  import type { GradientRenderer } from "@urcolor/shared";
   import type { ChildSnippetArgs } from "../../../shared/child.js";
 
   export interface ColorAreaGradientProps extends HTMLAttributes<HTMLSpanElement> {
@@ -22,6 +23,13 @@
      */
     channelOverrides?: Record<string, number> | false;
     /**
+     * Which painter to use.
+     * - `"auto"` (default) — CSS when an exact recipe exists, canvas otherwise
+     * - `"css"` — force CSS; falls back to the canvas with a dev warning if none exists
+     * - `"canvas"` — force the canvas painter
+     */
+    renderer?: GradientRenderer;
+    /**
      * Replaces the default `<canvas>`; receives its props, including the paint
      * attachment. The checkerboard wrapper is always rendered by this part.
      */
@@ -34,6 +42,8 @@
   import { Color } from "@urcolor/core";
   import {
     CHECKERBOARD_BACKGROUND,
+    cssAreaBilinear,
+    cssAreaChannels,
     DATA_DISABLED,
     drawGradient,
     getChannelConfig,
@@ -41,6 +51,7 @@
     sampleBilinearGrid,
     sampleChannelGrid,
   } from "@urcolor/shared";
+  import { CSS_GRADIENT_ROOT_STYLE, cssLayerStyle, resolveCssGradient } from "../../../shared/cssGradient.svelte.js";
   import type { ChildProps } from "../../../shared/child.js";
   import { gradientAttachment } from "../../../shared/gradient.svelte.js";
   import { colorAreaContext } from "../root/context.svelte.js";
@@ -57,6 +68,7 @@
     channelOverrides = { alpha: 1 },
     class: className,
     style,
+    renderer = "auto",
     children,
     child,
     ...rest
@@ -219,6 +231,39 @@
     };
   }
 
+  /**
+   * The four corners in screen order, with the mirror swap the CPU path applies.
+   * `hasAlphaAxis` decides whether the corners keep their own alpha, matching
+   * the flag `drawGradient` and `sampleBilinearGrid` are handed.
+   */
+  function orientedCorners(): [Color, Color, Color, Color] | null {
+    const corners = cornerColors();
+    if (!corners) return null;
+    let [a, b, c, d] = corners;
+    if (!hasAlphaAxis) [a, b, c, d] = [a.withAlpha(1), b.withAlpha(1), c.withAlpha(1), d.withAlpha(1)];
+    if (!context.isSlidingFromLeft) [a, b, c, d] = [b, a, d, c];
+    if (!context.isSlidingFromTop) [a, b, c, d] = [c, d, a, b];
+    return [a, b, c, d];
+  }
+
+  const cssLayers = $derived.by(() => resolveCssGradient(renderer, "ColorAreaGradient", !!child, () => {
+    if (hasCorners) {
+      // `interpolationSpace` stays on the canvas. The two row gradients could be
+      // densified into stops in that space, but the vertical lerp is a sRGB
+      // alpha composite either way — the result would be perceptual on one axis
+      // and not the other, which is worse than not taking this path.
+      if (interpolationSpace) return null;
+      const corners = orientedCorners();
+      return corners && cssAreaBilinear(...corners);
+    }
+    return cssAreaChannels(
+      withOverrides(context.color), context.colorSpace,
+      xIsAlpha ? null : context.xChannelKey,
+      yIsAlpha ? null : context.yChannelKey,
+      context.isSlidingFromLeft, context.isSlidingFromTop,
+    );
+  }));
+
   const canvasProps = $derived<ChildProps>({
     style: `position:absolute;inset:0;width:100%;height:100%;pointer-events:none;opacity:${canvasOpacity};`,
     [attachmentKey]: canvasAttachment,
@@ -234,7 +279,13 @@
 </script>
 
 <span {...elementProps}>
-  {#if child}
+  {#if cssLayers}
+    <span style={`${CSS_GRADIENT_ROOT_STYLE}opacity:${canvasOpacity};`}>
+      {#each cssLayers as layer, index (index)}
+        <span style={cssLayerStyle(layer)}></span>
+      {/each}
+    </span>
+  {:else if child}
     {@render child({ props: canvasProps })}
   {:else}
     <canvas {...canvasProps}></canvas>

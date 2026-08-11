@@ -1,6 +1,7 @@
 <script module lang="ts">
   import type { Snippet } from "svelte";
   import type { HTMLAttributes } from "svelte/elements";
+  import type { GradientRenderer } from "@urcolor/shared";
   import type { ChildSnippetArgs } from "../../../shared/child.js";
 
   export interface ColorWheelGradientProps extends HTMLAttributes<HTMLSpanElement> {
@@ -10,6 +11,13 @@
      * - `false` — no overrides
      */
     channelOverrides?: Record<string, number> | false;
+    /**
+     * Which painter to use.
+     * - `"auto"` (default) — CSS when an exact recipe exists, canvas otherwise
+     * - `"css"` — force CSS; falls back to the canvas with a dev warning if none exists
+     * - `"canvas"` — force the canvas painter
+     */
+    renderer?: GradientRenderer;
     /**
      * Replaces the default `<canvas>`; receives its props, including the paint
      * attachment. The checkerboard wrapper is always rendered by this part.
@@ -21,7 +29,8 @@
 <script lang="ts">
   import { createAttachmentKey } from "svelte/attachments";
   import { Color } from "@urcolor/core";
-  import { CHECKERBOARD_BACKGROUND, DATA_DISABLED, getChannelConfig, renderToCanvas, samplePolarGrid } from "@urcolor/shared";
+  import { CHECKERBOARD_BACKGROUND, cssWheelPolar, DATA_DISABLED, getChannelConfig, renderToCanvas, samplePolarGrid } from "@urcolor/shared";
+  import { CSS_GRADIENT_ROOT_STYLE, cssLayerStyle, resolveCssGradient } from "../../../shared/cssGradient.svelte.js";
   import type { ChildProps } from "../../../shared/child.js";
   import { gradientAttachment } from "../../../shared/gradient.svelte.js";
   import { colorWheelContext } from "../root/context.svelte.js";
@@ -33,6 +42,7 @@
     channelOverrides = { alpha: 1 },
     class: className,
     style,
+    renderer = "auto",
     children,
     child,
     ...rest
@@ -101,6 +111,12 @@
   // The disc is cut here rather than inside `renderToCanvas`: the sampled grid
   // fills its whole square, and clipping in-canvas as well as on the wrapper
   // leaves a seam along the boundary.
+  const cssLayers = $derived.by(() => resolveCssGradient(renderer, "ColorWheelGradient", !!child, () =>
+    cssWheelPolar(
+      withOverrides(context.color), context.colorSpace,
+      context.angleChannel, context.radiusChannel, context.startAngle,
+    )));
+
   const canvasProps = $derived<ChildProps>({
     style:
       "position:absolute;inset:0;width:100%;height:100%;pointer-events:none;clip-path:circle(50%);",
@@ -117,7 +133,13 @@
 </script>
 
 <span {...elementProps}>
-  {#if child}
+  {#if cssLayers}
+    <span style={`${CSS_GRADIENT_ROOT_STYLE}clip-path:circle(50%);`}>
+      {#each cssLayers as layer, index (index)}
+        <span style={cssLayerStyle(layer)}></span>
+      {/each}
+    </span>
+  {:else if child}
     {@render child({ props: canvasProps })}
   {:else}
     <canvas {...canvasProps}></canvas>

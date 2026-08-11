@@ -1,7 +1,7 @@
 # CSS Gradients for SSR
 
 **Date:** 2026-08-11
-**Status:** Draft
+**Status:** Implemented
 
 ## Goal
 
@@ -84,7 +84,13 @@ export function cssWheelPolar(
 
 Layers are ordered bottom-first. A `collapseLayers(layers)` helper merges each run of consecutive mask-free layers into a single comma-joined `background-image` value, reversing the run because CSS paints the first background layer on top. Every recipe except the two mask-carrying ones collapses to a single element.
 
-The framework components render one absolutely-positioned `<span>` per collapsed layer, inset to the root, `pointer-events: none` — the same box the canvas occupied. The checkerboard background stays on the `Primitive` where it already is, and the clip/mask that shapes the ring, wheel and triangle stays on the `Primitive` too, so it cuts the spans exactly as it cut the canvas.
+Vue, React and Svelte render one absolutely-positioned `<span>` per collapsed layer inside a wrapper span, `pointer-events: none` — the same box the canvas occupied. The wrapper is what carries `opacity`, so it applies to the composited stack as it did to the single canvas rather than fading each layer against what is behind it. The checkerboard background stays on the root where it already is, and the clip/mask that shapes the ring, wheel and triangle stays there too, so it cuts the spans exactly as it cut the canvas.
+
+Svelte adds one rule of its own: a `child` snippet forces the canvas. The snippet receives the canvas' props, paint attachment included, and there is nothing to hand it on the CSS path.
+
+**Angular is different.** Its gradients are directives *on* the `<canvas>` the consumer supplies, so there is no element to drop and no sibling to add. The recipe becomes that canvas' own CSS background instead — which the never-acquired bitmap would otherwise have composited over — with the checkerboard kept as the bottom layer of the same `background` shorthand, so a `background` binding and a `background-image` one cannot race.
+
+Having exactly one element costs Angular the two masked recipes: a `mask-image` there would apply to the whole element rather than to its own layer. `collapseLayers` merges every mask-free layer into one, so this rules out only corner-mode areas and areas with an alpha axis, which fall back to the canvas. Every other recipe collapses to a single layer and works.
 
 ### Color serialization
 
@@ -249,7 +255,11 @@ Files touched, per framework:
 
 **Per framework** — for each of the five components: `renderer="auto"` in HSV renders no `<canvas>` and a non-empty background; the same component in `oklch` with two real channels renders a `<canvas>`; `renderer="canvas"` renders a `<canvas>` regardless.
 
-**SSR** — `@vue/server-renderer` does not currently resolve in this workspace. If adding it is a one-line devDependency, `ColorSlider` and an HSV `ColorArea` get a real `renderToString` assertion. If it is not, the DOM-free builder tests plus the no-canvas mount tests carry the guarantee: the builders provably need no browser, and the components provably emit no canvas.
+**SSR** — React's tests go through `react-dom/server`'s `renderToStaticMarkup`, which runs with no DOM at all: exactly the environment the canvas painters cannot work in, so the assertions are on the markup a server really produces. Vue's equivalent would need `@vue/server-renderer`, which does not resolve in this workspace; its tests assert the absence of a `<canvas>` from a mount instead, which the DOM-free builder tests back up.
+
+Svelte and Angular have no test harness in this repo at all, and adding one is outside this change. They are verified by `svelte-check` / `tsc` and eslint.
+
+The end-to-end check is `bun run docs:build`, which server-renders every demo page through VitePress. After this change `components/vue/color-slider.html` and `color-ring.html` contain no `<canvas>` at all, `color-area.html` keeps exactly one (the OKLCh demo), and `color-wheel.html` keeps the two perceptual wheels.
 
 **Existing tests to update** — `packages/vue/test/useGradientCanvas.test.ts`, `packages/vue/test/ColorSlider.test.ts`, `packages/vue/test/ColorAreaGradient.test.ts`, and the React `*.test.tsx` files under each `gradient/` directory, all of which assert canvas presence under what is about to become the CSS default.
 

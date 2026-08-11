@@ -187,10 +187,13 @@ it) if the two boxes differ.
 
 ### ColorAreaGradient
 
-Renders a 2D gradient canvas for the color area. Automatically samples the gradient from the root's color space and channel configuration, and paints a checkerboard behind the canvas so alpha transparency is visible without a separate element.
+Renders the area's 2D gradient, sampled from the root's color space and channel configuration, over a checkerboard so alpha transparency is visible without a separate element.
+
+Any pair of `hsv`'s or `hsl`'s own three channels has an exact CSS equivalent, as do explicit corner colors and any axis bound to `alpha` — all of those render no `<canvas>` at all. A two-channel area in a perceptual space (`oklch`, `oklab`, `lab`, `lch`), in `hwb`, or in the RGB family keeps the canvas, as does corner mode with an `interpolationSpace` set.
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
+| `renderer` | `'auto' \| 'css' \| 'canvas'` | `'auto'` | Which painter to use. `'auto'` paints with stacked CSS gradients when an exact recipe exists for the color space and channels, and falls back to the canvas otherwise. `'css'` forces the CSS path and warns in development if no recipe exists. `'canvas'` always paints into a `<canvas>`. |
 | `topLeft` | `string` | — | Override: color for the top-left corner. |
 | `topRight` | `string` | — | Override: color for the top-right corner. |
 | `bottomLeft` | `string` | — | Override: color for the bottom-left corner. |

@@ -151,10 +151,11 @@ When `name` is set on a form control, the root also renders a visually hidden `<
 
 ### ColorTriangleGradient
 
-Renders the triangle's color surface as a `<canvas>` inside a wrapper element, sampled from the root's color space and channel configuration — including the third channel when one is set. The transparency checkerboard is the wrapper's own CSS background, which the canvas composites over, so no separate part is needed for it.
+Renders the triangle's color surface as a `<canvas>` inside a wrapper element, sampled from the root's color space and channel configuration — including the third channel when one is set. A barycentric sweep has no CSS equivalent, so unlike the other gradients this always paints into a canvas and does not appear in server-rendered HTML. The transparency checkerboard is the wrapper's own CSS background, which the canvas composites over, so no separate part is needed for it.
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
+| `renderer` | `'auto' \| 'css' \| 'canvas'` | `'auto'` | Accepted for symmetry with the other gradients. A barycentric sweep has no CSS recipe, so every value paints into a `<canvas>`; `'css'` warns in development. |
 | `channelOverrides` | `Record<string, number> \| false` | `{ alpha: 1 }` | Lock specific channels to fixed values in the gradient. Set to `false` to reflect all channels from current color including alpha. |
 | `as` | `string` | `'span'` | The element or component to render as. |
 | `asChild` | `boolean` | `false` | Merge props onto the single child instead of rendering an element. |

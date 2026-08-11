@@ -130,10 +130,11 @@ The annulus the thumb travels around. Sizing and positioning are yours; this par
 
 ### ColorRingGradient
 
-Paints the ring's conic color ramp, sampled from the root's color space and channel. Renders a `<span>` wrapper with a `<canvas>` inside; the wrapper carries the annulus mask, which applies to it and to every descendant, so one rasterisation cuts both the hole and the corners. The transparency checkerboard is this element's own CSS background, which the canvas bitmap composites over, so no separate part is needed for it.
+Paints the ring's conic color ramp, sampled from the root's color space and channel. A conic sweep of one channel has an exact CSS equivalent in every color space, so by default this paints a `conic-gradient` and renders no `<canvas>` at all. The wrapper carries the annulus mask, which applies to it and to every descendant, so one rasterisation cuts both the hole and the corners. The transparency checkerboard is this element's own CSS background, which the gradient composites over, so no separate part is needed for it.
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
+| `renderer` | `'auto' \| 'css' \| 'canvas'` | `'auto'` | Which painter to use. `'auto'` paints with stacked CSS gradients when an exact recipe exists for the color space and channels, and falls back to the canvas otherwise. `'css'` forces the CSS path and warns in development if no recipe exists. `'canvas'` always paints into a `<canvas>`. |
 | `channelOverrides` | `Record<string, number> \| false` | `{ alpha: 1 }` | Lock specific channels to fixed values in the gradient. Set to `false` to reflect all channels from current color including alpha. |
 | `innerRadius` | `number` | Auto | **Deprecated.** Use `innerRadius` on `ColorRingRoot` instead. Overrides the mask's inner radius ratio for this gradient only, when set. |
 | `as` | `string` | `'span'` | The element or component to render as. |

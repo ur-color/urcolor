@@ -58,9 +58,47 @@ Every component follows the WAI-ARIA color picker pattern with:
 - Proper ARIA roles, labels, and live regions
 - Focus management and visible focus indicators
 
+## Server Rendered {#ssr}
+
+Gradients paint with stacked CSS gradients wherever an exact recipe exists, so
+they appear in server-rendered HTML and on first paint — no `<canvas>` element,
+no WebGL context, no post-hydration repaint. In a VitePress, Nuxt, Next or
+SvelteKit page a picker is simply *there* in the markup.
+
+What that covers:
+
+| Surface | CSS | Canvas |
+| --- | --- | --- |
+| Color Slider | every color space | — |
+| Color Ring | every color space | — |
+| Color Area | any `hsv` or `hsl` channel pair, explicit corner colors, any `alpha` axis | perceptual and RGB-family channel pairs, `hwb`, corner colors with `interpolationSpace` |
+| Color Wheel | hue × saturation in `hsv` and `hsl` | every other space and channel pair |
+| Color Triangle | — | always |
+
+The stops themselves are computed with `Color`, which runs on a server perfectly
+well, so a perceptual space is no obstacle to a one-dimensional ramp — only the
+*interpolation between* stops has to be something CSS can express. That is why a
+slider is CSS in `oklch` while a two-channel `oklch` area is not.
+
+Each recipe is an exact algebraic equivalent of the sampler it replaces, not an
+approximation, with one deliberate exception: an axis bound to hue is 36 stops
+lerped in sRGB rather than a per-pixel sweep, the same trade the slider and ring
+have always made.
+
+Every `Gradient` part takes a `renderer` prop — `'auto'` (the default), `'css'`
+or `'canvas'` — if you need to pin the behaviour.
+
+The Angular bindings are directives *on* your `<canvas>`, so there is no element
+to drop; the recipe becomes that canvas' own CSS background instead, and no
+drawing context is acquired. The two recipes that need a `mask-image` on their
+own layer — corner-mode areas and areas with an `alpha` axis — fall back to the
+canvas there.
+
 ## Fast {#fast}
 
-Color area gradients are rendered via **WebGL** directly on the GPU. This is critical for color spaces like OKLab, Lab, LCH, and OKLCH where gradients cannot be accurately represented with CSS `linear-gradient` — each pixel needs to be calculated individually in the correct color space. WebGL makes this possible at full resolution with smooth, jank-free performance.
+Gradients that CSS cannot express — a two-channel plane in OKLab, Lab, LCH or
+OKLCH, where every pixel has to be evaluated in the correct color space — are
+rendered on the GPU through **WebGL**, at full resolution and jank-free.
 
 The runtime has zero external dependencies beyond the core color math, keeping bundle size small.
 
@@ -116,9 +154,10 @@ the bilinear plane, whose cost is dominated by mixing rather than conversion.
 The per-pixel channel samplers are the other way round: the HSV plane and hue
 ring evaluate a fresh color at all 16 384 pixels, so they are paced by
 single-conversion throughput, where culori's direct converter chain stays 1.2×
-to 1.8× ahead of urcolor's XYZ-hub routing. That gap is why the components
-render through WebGL, where the shader does the same work in one draw call
-regardless of surface size.
+to 1.8× ahead of urcolor's XYZ-hub routing. That gap is why the surfaces that
+still need a canvas go through WebGL where they can, since the shader does the
+same work in one draw call regardless of surface size — and why the ones with an
+exact CSS recipe now skip the sampling entirely.
 
 ## Comparison {#comparison}
 

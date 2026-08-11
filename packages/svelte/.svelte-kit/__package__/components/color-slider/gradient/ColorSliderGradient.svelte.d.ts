@@ -1,6 +1,7 @@
 import type { Snippet } from "svelte";
 import type { HTMLAttributes } from "svelte/elements";
 import type { SpaceId } from "@urcolor/core";
+import type { GradientRenderer } from "@urcolor/shared";
 import type { ChildSnippetArgs } from "../../../shared/child.js";
 export interface ColorSliderGradientProps extends HTMLAttributes<HTMLSpanElement> {
     /** Explicit colour stops. When omitted, they are computed from the channel and the current colour. */
@@ -15,6 +16,13 @@ export interface ColorSliderGradientProps extends HTMLAttributes<HTMLSpanElement
      * - `false` — no overrides
      */
     channelOverrides?: Record<string, number> | false;
+    /**
+     * Which painter to use.
+     * - `"auto"` (default) — CSS when an exact recipe exists, canvas otherwise
+     * - `"css"` — force CSS; falls back to the canvas with a dev warning if none exists
+     * - `"canvas"` — force the canvas painter
+     */
+    renderer?: GradientRenderer;
     /**
      * Replaces the default `<canvas>`; receives its props, including the paint
      * attachment. The checkerboard wrapper is always rendered by this part.

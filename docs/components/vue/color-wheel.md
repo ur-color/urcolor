@@ -107,10 +107,11 @@ The default slot receives the current color as `modelValue`.
 
 ### ColorWheelGradient
 
-Renders a polar gradient canvas for the wheel. Automatically samples the gradient from the root's color space and channel configuration. The transparency checkerboard is this element's own CSS background, so no separate part is needed for it.
+Renders the wheel's polar gradient, sampled from the root's color space and channel configuration. A hue × saturation wheel in `hsv` or `hsl` has an exact CSS equivalent — a `conic-gradient` under a `radial-gradient` — so those render no `<canvas>` at all. Any other space or channel pair keeps the canvas. The transparency checkerboard is this element's own CSS background, so no separate part is needed for it.
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
+| `renderer` | `'auto' \| 'css' \| 'canvas'` | `'auto'` | Which painter to use. `'auto'` paints with stacked CSS gradients when an exact recipe exists for the color space and channels, and falls back to the canvas otherwise. `'css'` forces the CSS path and warns in development if no recipe exists. `'canvas'` always paints into a `<canvas>`. |
 | `channelOverrides` | `Record<string, number> \| false` | `{ alpha: 1 }` | Lock specific channels to fixed values in the gradient. Set to `false` to reflect all channels from current color including alpha. |
 | `as` | `string` | `'span'` | The element or component to render as. |
 | `asChild` | `boolean` | `false` | Merge props onto the single child instead of rendering an element. |
