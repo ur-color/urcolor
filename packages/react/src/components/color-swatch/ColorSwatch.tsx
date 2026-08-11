@@ -1,7 +1,7 @@
 import { forwardRef, useContext, useMemo, type ComponentPropsWithoutRef } from "react";
 import type { Color } from "@urcolor/core";
 import { swatchPaint, swatchStyle } from "@urcolor/shared";
-import { Toggle } from "@base-ui-components/react/toggle";
+import { Toggle } from "../../primitives/toggle/Toggle";
 import { ColorSwatchGroupContext } from "../color-swatch-group/root/ColorSwatchGroupRootContext";
 
 export interface ColorSwatchProps extends Omit<ComponentPropsWithoutRef<"div">, "value"> {
@@ -35,25 +35,24 @@ export const ColorSwatch = forwardRef<HTMLDivElement, ColorSwatchProps>(
     // Inside a group: render as a Toggle button
     if (groupCtx) {
       const isDisabled = disabledProp || groupCtx.disabled;
+      const isSelected = groupCtx.isSelected(value as string);
 
       return (
         <Toggle
           ref={ref as React.Ref<HTMLButtonElement>}
           value={value as string}
           disabled={isDisabled}
-          render={(renderProps, state) => {
-            const { style: renderStyle, ...restRenderProps } = renderProps as any;
-            return (
-              <button
-                role="img"
-                style={{ ...swatchStyle, ...renderStyle, ...style }}
-                data-state={state.pressed ? "on" : "off"}
-                data-disabled={isDisabled ? "" : undefined}
-                {...props}
-                {...restRenderProps}
-              />
-            );
-          }}
+          role="img"
+          // `data-state` is documented in docs/components/react/color-swatch.md
+          // and survives the move off base-ui. `data-pressed` and
+          // `data-disabled` come from `toggleAria` inside Toggle.
+          data-state={isSelected ? "on" : "off"}
+          style={{ ...swatchStyle, ...style }}
+          // `ColorSwatchProps` is declared against the standalone `<div>`, so
+          // its event handlers are typed for one. Inside a group the element is
+          // a `<button>`; the handlers are structurally identical and only
+          // their `currentTarget` differs, which no caller reads through here.
+          {...(props as Omit<ComponentPropsWithoutRef<"button">, "value">)}
         />
       );
     }

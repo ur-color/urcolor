@@ -5,6 +5,8 @@ export type SelectionType = "single" | "multiple";
 export interface ColorSwatchGroupContextValue {
   type: SelectionType;
   disabled: boolean;
+  /** Whether a swatch value is in the current selection. */
+  isSelected: (value: string) => boolean;
 }
 
 export const ColorSwatchGroupContext = createContext<ColorSwatchGroupContextValue | null>(null);

@@ -1,8 +1,10 @@
-import { forwardRef, useMemo, type ComponentPropsWithoutRef } from "react";
-import { ToggleGroup } from "@base-ui-components/react/toggle-group";
+import { forwardRef, useMemo, type ComponentPropsWithoutRef, type ReactNode } from "react";
+import { ToggleGroup, useToggleGroupContext } from "../../../primitives/toggle";
 import { ColorSwatchGroupContext, type ColorSwatchGroupContextValue, type SelectionType } from "./ColorSwatchGroupRootContext";
 
-export interface ColorSwatchGroupRootProps extends Omit<ComponentPropsWithoutRef<"div">, "defaultValue"> {
+export interface ColorSwatchGroupRootProps extends Omit<ComponentPropsWithoutRef<"div">, "defaultValue" | "dir"> {
+  /** The reading direction, which mirrors horizontal arrow navigation. */
+  dir?: "ltr" | "rtl";
   /** Whether to allow single or multiple selection. */
   type?: SelectionType;
   /** The controlled selected value(s). */
@@ -33,27 +35,47 @@ export const ColorSwatchGroupRoot = forwardRef<HTMLDivElement, ColorSwatchGroupR
       ...rest
     } = props;
 
-    const ctxValue = useMemo<ColorSwatchGroupContextValue>(() => ({
-      type,
-      disabled,
-    }), [type, disabled]);
-
     return (
-      <ColorSwatchGroupContext.Provider value={ctxValue}>
-        <ToggleGroup
-          ref={ref}
-          value={value}
-          defaultValue={defaultValue}
-          onValueChange={onValueChange ? (val) => onValueChange(val as string[]) : undefined}
-          disabled={disabled}
-          orientation={orientation}
-          loopFocus={loopFocus}
-          multiple={type === "multiple"}
-          {...rest}
-        >
+      <ToggleGroup
+        ref={ref}
+        value={value}
+        defaultValue={defaultValue}
+        onValueChange={onValueChange}
+        disabled={disabled}
+        orientation={orientation}
+        loopFocus={loopFocus}
+        multiple={type === "multiple"}
+        {...rest}
+      >
+        <ColorSwatchGroupProvider type={type} disabled={disabled}>
           {children}
-        </ToggleGroup>
-      </ColorSwatchGroupContext.Provider>
+        </ColorSwatchGroupProvider>
+      </ToggleGroup>
     );
   },
 );
+
+/**
+ * Bridges the toggle group's selection into the swatch-group context.
+ *
+ * It sits inside `ToggleGroup` rather than around it so the selection lives in
+ * exactly one place: a swatch needs `isSelected` to emit its documented
+ * `data-state`, and duplicating the state to supply it would let the two
+ * disagree.
+ */
+function ColorSwatchGroupProvider(
+  { type, disabled, children }: { type: SelectionType; disabled: boolean; children?: ReactNode },
+) {
+  const toggleCtx = useToggleGroupContext();
+  const ctxValue = useMemo<ColorSwatchGroupContextValue>(() => ({
+    type,
+    disabled,
+    isSelected: (value: string) => toggleCtx?.isSelected(value) ?? false,
+  }), [type, disabled, toggleCtx]);
+
+  return (
+    <ColorSwatchGroupContext.Provider value={ctxValue}>
+      {children}
+    </ColorSwatchGroupContext.Provider>
+  );
+}
