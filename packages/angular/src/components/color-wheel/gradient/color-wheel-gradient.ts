@@ -1,5 +1,6 @@
 import {
   afterNextRender,
+  computed,
   DestroyRef,
   Directive,
   effect,
@@ -9,7 +10,8 @@ import {
   input,
 } from "@angular/core";
 import { Color } from "@urcolor/core";
-import { CHECKERBOARD_BACKGROUND, DATA_DISABLED, getChannelConfig, renderToCanvas, samplePolarGrid } from "@urcolor/shared";
+import { CHECKERBOARD_BACKGROUND, cssWheelPolar, DATA_DISABLED, getChannelConfig, renderToCanvas, samplePolarGrid } from "@urcolor/shared";
+import { cssGradientBackground, type GradientRenderer } from "../../../shared/css-gradient";
 import { ColorWheelRoot } from "../root/color-wheel-root";
 
 /** Edge length of the sampled square the disc is cut from. */
@@ -42,10 +44,22 @@ export type ColorWheelChannelOverrides = Record<string, number> | false;
     "[style.pointer-events]": "'none'",
     "[style.border-radius]": "'50%'",
     "[style.clip-path]": "'circle(50%)'",
-    "[style.background]": "checkerboard",
+    "[style.background]": "background()",
   },
 })
 export class ColorWheelGradient {
+  /**
+   * Which painter to use.
+   * - `"auto"` (default) — CSS when an exact recipe exists, canvas otherwise
+   * - `"css"` — force CSS; falls back to the canvas with a dev warning if none exists
+   * - `"canvas"` — force the canvas painter
+   *
+   * On the CSS path the recipe becomes this canvas' own CSS background and no
+   * drawing context is ever acquired, so the gradient survives server
+   * rendering and costs no WebGL context.
+   */
+  readonly renderer = input<GradientRenderer>("auto");
+
   /** Locked channels. Defaults to `{ alpha: 1 }`; pass `false` to disable. */
   readonly channelOverrides = input<ColorWheelChannelOverrides>({ alpha: 1 });
 
@@ -56,6 +70,20 @@ export class ColorWheelGradient {
   private readonly injector = inject(Injector);
   private readonly destroyRef = inject(DestroyRef);
 
+  /**
+   * The CSS recipe as this canvas' background, or the bare checkerboard when
+   * the canvas painter is the one that runs.
+   */
+  protected readonly background = computed(
+    () => cssGradientBackground(this.renderer(), "ColorWheelGradient", () => cssWheelPolar(
+      this.withOverrides(this.root.value()), this.root.colorSpace(),
+      this.root.angleChannelKey(), this.root.radiusChannelKey(), this.root.startAngle(),
+    )) ?? this.checkerboard,
+  );
+
+  /** Whether the canvas should paint at all. */
+  private readonly usesCanvas = computed(() => this.background() === this.checkerboard);
+
   constructor() {
     // Canvas work is deferred to `afterNextRender`: it never runs on the
     // server, where `OffscreenCanvas` does not exist. The effect is created
@@ -63,16 +91,21 @@ export class ColorWheelGradient {
     afterNextRender(() => {
       const canvas = this.host.nativeElement;
 
-      effect(() => this.paint(canvas), { injector: this.injector });
+      effect(() => {
+        if (this.usesCanvas()) this.paint(canvas);
+      }, { injector: this.injector });
 
       if (typeof ResizeObserver !== "undefined") {
-        const observer = new ResizeObserver(() => this.paint(canvas));
+        const observer = new ResizeObserver(() => {
+          if (this.usesCanvas()) this.paint(canvas);
+        });
         observer.observe(canvas);
         this.destroyRef.onDestroy(() => observer.disconnect());
       }
 
       this.destroyRef.onDestroy(() => {
         // WebGL contexts are a capped per-document resource; release ours.
+        if (!this.usesCanvas()) return;
         canvas.getContext("webgl")?.getExtension("WEBGL_lose_context")?.loseContext();
       });
     });

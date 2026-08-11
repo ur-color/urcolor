@@ -12,12 +12,14 @@ import {
 import { Color, type SpaceId } from "@urcolor/core";
 import {
   CHECKERBOARD_BACKGROUND,
+  cssAreaChannels,
   drawGradient,
   getChannelConfig,
   renderToCanvas,
   sampleBilinearGrid,
   sampleChannelGrid,
 } from "@urcolor/shared";
+import { cssGradientBackground, type GradientRenderer } from "../../../shared/css-gradient";
 import { ColorAreaRoot } from "../root/color-area-root";
 
 /** Both axes are sampled at this resolution and then smoothly upscaled. */
@@ -45,11 +47,23 @@ export type ColorAreaChannelOverrides = Record<string, number> | false;
     "[style.width]": "'100%'",
     "[style.height]": "'100%'",
     "[style.pointer-events]": "'none'",
-    "[style.background]": "checkerboard",
+    "[style.background]": "background()",
     "[style.opacity]": "canvasOpacity()",
   },
 })
 export class ColorAreaGradient {
+  /**
+   * Which painter to use.
+   * - `"auto"` (default) — CSS when an exact recipe exists, canvas otherwise
+   * - `"css"` — force CSS; falls back to the canvas with a dev warning if none exists
+   * - `"canvas"` — force the canvas painter
+   *
+   * On the CSS path the recipe becomes this canvas' own CSS background and no
+   * drawing context is ever acquired, so the gradient survives server
+   * rendering and costs no WebGL context.
+   */
+  readonly renderer = input<GradientRenderer>("auto");
+
   /** Explicit top-left corner colour. Supplying any corner switches to corner mode. */
   readonly topLeft = input<string>();
   /** Explicit top-right corner colour. */
@@ -90,6 +104,26 @@ export class ColorAreaGradient {
     return 1;
   });
 
+  /**
+   * The CSS recipe as this canvas' background, or the bare checkerboard when
+   * the canvas painter is the one that runs.
+   */
+  protected readonly background = computed(
+    () => cssGradientBackground(this.renderer(), "ColorAreaGradient", () => {
+      // Corner mode and an alpha axis both need a `mask-image` on their own
+      // layer, which a single element cannot express — see `cssGradientBackground`.
+      if (this.hasCorners() || this.hasAlphaAxis()) return null;
+      return cssAreaChannels(
+        this.withOverrides(this.root.value()), this.root.colorSpace(),
+        this.root.xChannelKey(), this.root.yChannelKey(),
+        this.root.isSlidingFromLeft(), this.root.isSlidingFromTop(),
+      );
+    }) ?? this.checkerboard,
+  );
+
+  /** Whether the canvas should paint at all. */
+  private readonly usesCanvas = computed(() => this.background() === this.checkerboard);
+
   constructor() {
     // Canvas work is deferred to `afterNextRender`: it never runs on the
     // server, where `OffscreenCanvas` and WebGL do not exist. The effect is
@@ -97,16 +131,21 @@ export class ColorAreaGradient {
     afterNextRender(() => {
       const canvas = this.host.nativeElement;
 
-      effect(() => this.paint(canvas), { injector: this.injector });
+      effect(() => {
+        if (this.usesCanvas()) this.paint(canvas);
+      }, { injector: this.injector });
 
       if (typeof ResizeObserver !== "undefined") {
-        const observer = new ResizeObserver(() => this.paint(canvas));
+        const observer = new ResizeObserver(() => {
+          if (this.usesCanvas()) this.paint(canvas);
+        });
         observer.observe(canvas);
         this.destroyRef.onDestroy(() => observer.disconnect());
       }
 
       this.destroyRef.onDestroy(() => {
         // WebGL contexts are a capped per-document resource; release ours.
+        if (!this.usesCanvas()) return;
         canvas.getContext("webgl")?.getExtension("WEBGL_lose_context")?.loseContext();
       });
     });

@@ -11,6 +11,7 @@ import {
 } from "@angular/core";
 import { Color } from "@urcolor/core";
 import { CHECKERBOARD_BACKGROUND, DATA_DISABLED, getChannelConfig, renderToCanvas, sampleTriangleGrid } from "@urcolor/shared";
+import { warnNoCssRecipe, type GradientRenderer } from "../../../shared/css-gradient";
 import { ColorTriangleRoot } from "../root/color-triangle-root";
 
 /** Both axes are sampled at this resolution and then smoothly upscaled. */
@@ -48,6 +49,13 @@ export type ColorTriangleChannelOverrides = Record<string, number> | false;
   },
 })
 export class ColorTriangleGradient {
+  /**
+   * Which painter to use. A barycentric sweep has no CSS equivalent, so this
+   * directive always paints into its canvas — the input exists for symmetry
+   * with the other gradients, and `"css"` warns and falls back.
+   */
+  readonly renderer = input<GradientRenderer>("auto");
+
   /** Locked channels. Defaults to `{ alpha: 1 }`; pass `false` to disable. */
   readonly channelOverrides = input<ColorTriangleChannelOverrides>({ alpha: 1 });
 
@@ -73,6 +81,13 @@ export class ColorTriangleGradient {
   });
 
   constructor() {
+    // A barycentric sweep has no CSS equivalent, so there is nothing to
+    // resolve — only the same warning the other gradients emit when asked for
+    // the impossible.
+    effect(() => {
+      if (this.renderer() === "css") warnNoCssRecipe("ColorTriangleGradient");
+    });
+
     // Canvas work is deferred to `afterNextRender`: it never runs on the
     // server, where `OffscreenCanvas` and WebGL do not exist. The effect is
     // created here rather than as a field so that it, too, is browser-only.

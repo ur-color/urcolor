@@ -10,7 +10,8 @@ import {
   input,
 } from "@angular/core";
 import type { Color } from "@urcolor/core";
-import { CHECKERBOARD_BACKGROUND, DATA_DISABLED, getChannelConfig, renderToCanvas, sampleConicRing } from "@urcolor/shared";
+import { channelStops, CHECKERBOARD_BACKGROUND, cssConicStops, DATA_DISABLED, getChannelConfig, renderToCanvas, sampleConicRing } from "@urcolor/shared";
+import { cssGradientBackground, type GradientRenderer } from "../../../shared/css-gradient";
 import { ColorRingRoot } from "../root/color-ring-root";
 
 const SAMPLE_SIZE = 128;
@@ -44,12 +45,24 @@ export type ColorRingChannelOverrides = Record<string, number> | false;
     "[style.width]": "'100%'",
     "[style.height]": "'100%'",
     "[style.pointer-events]": "'none'",
-    "[style.background]": "checkerboard",
+    "[style.background]": "background()",
     "[style.mask-image]": "mask()",
     "[style.-webkit-mask-image]": "mask()",
   },
 })
 export class ColorRingGradient {
+  /**
+   * Which painter to use.
+   * - `"auto"` (default) — CSS when an exact recipe exists, canvas otherwise
+   * - `"css"` — force CSS; falls back to the canvas with a dev warning if none exists
+   * - `"canvas"` — force the canvas painter
+   *
+   * On the CSS path the recipe becomes this canvas' own CSS background and no
+   * drawing context is ever acquired, so the gradient survives server
+   * rendering and costs no WebGL context.
+   */
+  readonly renderer = input<GradientRenderer>("auto");
+
   /** Locked channels. Defaults to `{ alpha: 1 }`; pass `false` to disable. */
   readonly channelOverrides = input<ColorRingChannelOverrides>({ alpha: 1 });
 
@@ -68,6 +81,23 @@ export class ColorRingGradient {
     );
   });
 
+  /**
+   * The CSS recipe as this canvas' background, or the bare checkerboard when
+   * the canvas painter is the one that runs.
+   */
+  protected readonly background = computed(
+    () => cssGradientBackground(this.renderer(), "ColorRingGradient", () => {
+      // `sampleConicRing` writes an opaque alpha byte for every pixel, so the
+      // CSS stops drop the base colour's alpha to match rather than tinting it.
+      const base = this.withOverrides(this.root.value()).withAlpha(1);
+      const stops = channelStops(base, this.root.colorSpace(), this.root.channelKey());
+      return stops && cssConicStops(stops, this.root.startAngle());
+    }) ?? this.checkerboard,
+  );
+
+  /** Whether the canvas should paint at all. */
+  private readonly usesCanvas = computed(() => this.background() === this.checkerboard);
+
   constructor() {
     // Canvas work is deferred to `afterNextRender`: it never runs on the
     // server, where `OffscreenCanvas` does not exist. The effect is created
@@ -75,16 +105,21 @@ export class ColorRingGradient {
     afterNextRender(() => {
       const canvas = this.host.nativeElement;
 
-      effect(() => this.paint(canvas), { injector: this.injector });
+      effect(() => {
+        if (this.usesCanvas()) this.paint(canvas);
+      }, { injector: this.injector });
 
       if (typeof ResizeObserver !== "undefined") {
-        const observer = new ResizeObserver(() => this.paint(canvas));
+        const observer = new ResizeObserver(() => {
+          if (this.usesCanvas()) this.paint(canvas);
+        });
         observer.observe(canvas);
         this.destroyRef.onDestroy(() => observer.disconnect());
       }
 
       this.destroyRef.onDestroy(() => {
         // WebGL contexts are a capped per-document resource; release ours.
+        if (!this.usesCanvas()) return;
         canvas.getContext("webgl")?.getExtension("WEBGL_lose_context")?.loseContext();
       });
     });

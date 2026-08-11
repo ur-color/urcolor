@@ -12,10 +12,13 @@ import {
 import { Color, type SpaceId } from "@urcolor/core";
 import {
   CHECKERBOARD_BACKGROUND,
+  cssLinearStops,
+  defaultStepsFor,
   drawLinearGradient,
   getChannelConfig,
   interpolateStops,
 } from "@urcolor/shared";
+import { cssGradientBackground, type GradientRenderer } from "../../../shared/css-gradient";
 import { ColorSliderRoot } from "../root/color-slider-root";
 
 const AUTO_STEPS = 12;
@@ -42,11 +45,23 @@ export type ColorSliderChannelOverrides = Record<string, number> | false;
     "[style.width]": "'100%'",
     "[style.height]": "'100%'",
     "[style.pointer-events]": "'none'",
-    "[style.background]": "checkerboard",
+    "[style.background]": "background()",
     "[style.opacity]": "canvasOpacity()",
   },
 })
 export class ColorSliderGradient {
+  /**
+   * Which painter to use.
+   * - `"auto"` (default) — CSS when an exact recipe exists, canvas otherwise
+   * - `"css"` — force CSS; falls back to the canvas with a dev warning if none exists
+   * - `"canvas"` — force the canvas painter
+   *
+   * On the CSS path the recipe becomes this canvas' own CSS background and no
+   * drawing context is ever acquired, so the gradient survives server
+   * rendering and costs no WebGL context.
+   */
+  readonly renderer = input<GradientRenderer>("auto");
+
   /** Explicit colour stops. When omitted they are derived from the channel. */
   readonly colors = input<string[]>();
   /** Rotation in degrees. Defaults to 90 for a vertical slider, 0 otherwise. */
@@ -94,7 +109,7 @@ export class ColorSliderGradient {
     return result;
   }
 
-  private readonly autoColors = computed<Color[] | null>(() => {
+  private buildAutoColors(steps: number): Color[] | null {
     if (this.colors()) return null;
 
     const colorSpace = this.root.colorSpace();
@@ -109,12 +124,58 @@ export class ColorSliderGradient {
     const min = config.nativeMin ?? config.min;
     const max = config.nativeMax ?? config.max;
     const stops: Color[] = [];
-    for (let i = 0; i < AUTO_STEPS; i++) {
-      const t = i / (AUTO_STEPS - 1);
+    for (let i = 0; i < steps; i++) {
+      const t = i / (steps - 1);
       stops.push(base.with({ space: colorSpace, [channel]: min + t * (max - min) }));
     }
     return stops;
-  });
+  }
+
+  /**
+   * The stop list both painters draw, differing only in how many stops they can
+   * hold: the shader has 16 uniform slots, CSS has no ceiling. Mirroring
+   * reverses the stops rather than flipping the gradient, as the WebGL path has
+   * always done.
+   *
+   * `interpolationSpace` does not force the canvas — a 1D sweep is fully
+   * expressible as stops, and they are densified in that space here.
+   */
+  private resolveStops(steps: number): Color[] | null {
+    const explicit = this.colors();
+    let stops: Color[];
+
+    if (explicit) {
+      const parsed = explicit.map(entry => Color.parse(entry));
+      if (parsed.length < 2 || parsed.some(entry => !entry)) return null;
+      stops = parsed as Color[];
+    } else {
+      const auto = this.buildAutoColors(steps);
+      if (!auto || auto.length < 2) return null;
+      stops = auto;
+    }
+
+    // Horizontal and vertical both mirror along their own axis when inverted.
+    if (this.root.inverted()) stops = [...stops].reverse();
+
+    const space = this.interpolationSpace();
+    return space ? interpolateStops(stops, INTERPOLATION_STEPS, space) : stops;
+  }
+
+  /**
+   * The CSS recipe as this canvas' background, or `null` when the canvas
+   * painter is the one that runs.
+   */
+  protected readonly background = computed(
+    () => cssGradientBackground(this.renderer(), "ColorSliderGradient", () => {
+      const stops = this.resolveStops(
+        this.colors() ? AUTO_STEPS : defaultStepsFor(this.root.colorSpace(), this.root.channel()),
+      );
+      return stops && cssLinearStops(stops, this.effectiveAngle());
+    }) ?? this.checkerboard,
+  );
+
+  /** Whether the canvas should paint at all. */
+  private readonly usesCanvas = computed(() => this.background() === this.checkerboard);
 
   constructor() {
     // Canvas work is deferred to `afterNextRender`: it never runs on the
@@ -123,40 +184,29 @@ export class ColorSliderGradient {
     afterNextRender(() => {
       const canvas = this.host.nativeElement;
 
-      effect(() => this.paint(canvas), { injector: this.injector });
+      effect(() => {
+        if (this.usesCanvas()) this.paint(canvas);
+      }, { injector: this.injector });
 
       if (typeof ResizeObserver !== "undefined") {
-        const observer = new ResizeObserver(() => this.paint(canvas));
+        const observer = new ResizeObserver(() => {
+          if (this.usesCanvas()) this.paint(canvas);
+        });
         observer.observe(canvas);
         this.destroyRef.onDestroy(() => observer.disconnect());
       }
 
       this.destroyRef.onDestroy(() => {
         // WebGL contexts are a capped per-document resource; release ours.
+        if (!this.usesCanvas()) return;
         canvas.getContext("webgl")?.getExtension("WEBGL_lose_context")?.loseContext();
       });
     });
   }
 
   private paint(canvas: HTMLCanvasElement): void {
-    const explicit = this.colors();
-    let stops: Color[];
-
-    if (explicit) {
-      const parsed = explicit.map(entry => Color.parse(entry));
-      if (parsed.length < 2 || parsed.some(entry => !entry)) return;
-      stops = parsed as Color[];
-    } else {
-      const auto = this.autoColors();
-      if (!auto || auto.length < 2) return;
-      stops = auto;
-    }
-
-    // Horizontal and vertical both mirror along their own axis when inverted.
-    if (this.root.inverted()) stops = [...stops].reverse();
-
-    const space = this.interpolationSpace();
-    const resolved = space ? interpolateStops(stops, INTERPOLATION_STEPS, space) : stops;
-    drawLinearGradient(canvas, resolved, this.effectiveAngle(), this.isAlphaChannel());
+    const stops = this.resolveStops(AUTO_STEPS);
+    if (!stops) return;
+    drawLinearGradient(canvas, stops, this.effectiveAngle(), this.isAlphaChannel());
   }
 }
