@@ -2,7 +2,7 @@
 
 Add `@urcolor/preact`, `@urcolor/solid`, `@urcolor/lit`, `@urcolor/alpine` and
 `@urcolor/ember` at full parity with the existing Vue, React, Svelte and Angular
-packages: all 8 components, all 30 parts, all 14 colour hooks.
+packages: all 8 components, all 26 parts, all 14 colour hooks.
 
 ## Foundation
 
@@ -83,7 +83,7 @@ its users. Style encapsulation is deliberately given up; this library never
 wanted it.
 
 Elements are named `<urcolor-slider-root>`, `<urcolor-slider-track>`,
-`<urcolor-slider-thumb>` and so on, 30 in total. Root elements hold state on
+`<urcolor-slider-thumb>` and so on, 26 in total. Root elements hold state on
 `@property` accessors; parts resolve their root with
 `closest("urcolor-slider-root")` rather than shipping a context protocol.
 
@@ -126,18 +126,22 @@ dot-notation used elsewhere, so Ember's docs carry their own examples.
 
 ## Component surface
 
-8 components, 30 parts, identical in every package:
+8 components, 26 parts, identical in every new package:
 
 | Component | Parts |
 | --- | --- |
 | ColorSwatch | (single component) |
 | ColorSwatchGroup | Root |
-| ColorSlider | Root, Control, Track, Range, Thumb, Gradient, Checkerboard |
+| ColorSlider | Root, Control, Track, Range, Thumb, Gradient |
 | ColorField | Root, Input, Increment, Decrement, Swatch |
-| ColorArea | Root, Gradient, Checkerboard, Thumb |
-| ColorRing | Root, Track, Gradient, Checkerboard, Thumb |
-| ColorWheel | Root, Gradient, Checkerboard, Thumb |
-| ColorTriangle | Root, Gradient, Checkerboard, Thumb |
+| ColorArea | Root, Gradient, Thumb |
+| ColorRing | Root, Track, Gradient, Thumb |
+| ColorWheel | Root, Gradient, Thumb |
+| ColorTriangle | Root, Gradient, Thumb |
+
+`Checkerboard` is absent deliberately. React still exports one per family, marked
+`@deprecated` because the `Gradient` part paints the checkerboard itself, and
+Svelte, the newest package, ships none. The new packages follow Svelte.
 
 ## Idiom mapping
 
@@ -148,7 +152,7 @@ is established precedent rather than a new inconsistency.
 | --- | --- | --- |
 | Preact | React source verbatim, dot-notation parts | `useColor`, `useHSL`, … unchanged |
 | Solid | `createContext`, props read as getters, `<ColorSlider.Root>` | `createColor`, `createHSL`, … |
-| Lit | 30 custom elements, parts find root via `closest()` | reactive controllers, `new ColorController(this, "hsl(…)")` |
+| Lit | 26 custom elements, parts find root via `closest()` | reactive controllers, `new ColorController(this, "hsl(…)")` |
 | Alpine | `x-color` directive over `<urcolor-*>` elements | `$color` magic |
 | Ember | yielded contextual components | `@tracked` classes mirroring Angular: `ColorStore`, `HslStore`, … |
 
@@ -193,13 +197,28 @@ no sibling to copy and no other route to verification.
 
 ## Build order
 
-1. Step 0: remove base-ui from React.
-2. Preact, which validates the alias build.
-3. Lit.
-4. Alpine, which depends on Lit.
-5. Solid.
-6. Ember.
-7. Documentation sweep, once every API is settled.
+One plan per subsystem, in `docs/superpowers/plans/`:
+
+| # | Plan | Depends on |
+| --- | --- | --- |
+| 1 | `2026-08-11-react-remove-base-ui.md` | — |
+| 2 | `2026-08-11-shared-gradient-stops.md` | — |
+| 3 | `2026-08-11-preact-package.md` | 1 |
+| 4 | `2026-08-11-lit-package.md` | 1, 2 |
+| 5 | `2026-08-11-alpine-package.md` | 4 |
+| 6 | `2026-08-11-solid-package.md` | 1, 2 |
+| 7 | `2026-08-11-ember-package.md` | 1, 2 |
+| 8 | `2026-08-11-five-framework-docs.md` | 3-7 |
+
+Plans 1 and 2 are prerequisites and are independent of each other. Plans 4, 6
+and 7 are independent of each other and of 3, so they can run in parallel once
+1 and 2 land. Documentation runs last, because a page written against a guessed
+API is worse than no page.
+
+Plan 2 is not in the original spec. It was added after the plans found
+`buildAutoColors` and `resolveStops` duplicated verbatim in all four existing
+framework packages: without lifting them into `shared` first, the three
+hand-ported packages would make it seven copies.
 
 ## Risks
 
