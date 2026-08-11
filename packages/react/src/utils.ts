@@ -18,4 +18,4 @@ export {
 export const PAGE_KEYS: readonly string[] = PAGE_KEYS_LITERAL;
 export const ARROW_KEYS: readonly string[] = ARROW_KEYS_LITERAL;
 
-export { CHECKERBOARD_BACKGROUND, warnCheckerboardDeprecated } from "@urcolor/shared";
+export { CHECKERBOARD_BACKGROUND, CHECKERBOARD_STYLE, warnCheckerboardDeprecated } from "@urcolor/shared";

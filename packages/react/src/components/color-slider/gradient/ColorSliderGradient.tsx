@@ -2,7 +2,7 @@ import { forwardRef, useCallback, useEffect, useMemo, useRef, type ComponentProp
 import { Color, type SpaceId } from "@urcolor/core";
 import { cssLinearStops, defaultStepsFor, drawLinearGradient, getChannelConfig, interpolateStops, type GradientRenderer } from "@urcolor/shared";
 import { useColorSliderContext } from "../root/ColorSliderRootContext";
-import { CHECKERBOARD_BACKGROUND } from "../../../utils";
+import { CHECKERBOARD_STYLE } from "../../../utils";
 import { CssGradientLayers, resolveCssGradient } from "../../../cssGradient";
 
 export interface ColorSliderGradientProps extends ComponentPropsWithoutRef<"span"> {
@@ -173,7 +173,7 @@ export const ColorSliderGradient = forwardRef<HTMLSpanElement, ColorSliderGradie
     }, []);
 
     return (
-      <span ref={ref} style={{ background: CHECKERBOARD_BACKGROUND, ...style }} {...props}>
+      <span ref={ref} style={{ ...CHECKERBOARD_STYLE, ...style }} {...props}>
         {cssLayers
           ? <CssGradientLayers layers={cssLayers} style={{ opacity: canvasOpacity }} />
           : (

@@ -1,4 +1,5 @@
 import { forwardRef, type ComponentPropsWithoutRef } from "react";
+import { CHECKERBOARD_STYLE } from "@urcolor/shared";
 import { warnCheckerboardDeprecated } from "../../../utils";
 
 /**
@@ -18,7 +19,7 @@ export const ColorSliderCheckerboard = forwardRef<HTMLDivElement, ColorSliderChe
           position: "absolute",
           inset: "0",
           pointerEvents: "none",
-          background: "repeating-conic-gradient(rgb(230, 230, 230) 0% 25%, white 0% 50%) 0% 50% / 16px 16px",
+          ...CHECKERBOARD_STYLE,
           ...style,
         }}
         {...props}

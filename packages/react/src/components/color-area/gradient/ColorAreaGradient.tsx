@@ -2,7 +2,7 @@ import { forwardRef, useCallback, useEffect, useMemo, useRef, type ComponentProp
 import { Color, type SpaceId } from "@urcolor/core";
 import { cssAreaBilinear, cssAreaChannels, drawGradient, getChannelConfig, renderToCanvas, sampleBilinearGrid, sampleChannelGrid, type GradientRenderer } from "@urcolor/shared";
 import { useColorAreaContext } from "../root/ColorAreaRootContext";
-import { CHECKERBOARD_BACKGROUND } from "../../../utils";
+import { CHECKERBOARD_STYLE } from "../../../utils";
 import { CssGradientLayers, resolveCssGradient } from "../../../cssGradient";
 
 export interface ColorAreaGradientProps extends ComponentPropsWithoutRef<"span"> {
@@ -201,7 +201,7 @@ export const ColorAreaGradient = forwardRef<HTMLSpanElement, ColorAreaGradientPr
     }, []);
 
     return (
-      <span ref={ref} data-disabled={rootCtx.disabled ? "" : undefined} style={{ background: CHECKERBOARD_BACKGROUND, ...style }} {...props}>
+      <span ref={ref} data-disabled={rootCtx.disabled ? "" : undefined} style={{ ...CHECKERBOARD_STYLE, ...style }} {...props}>
         {cssLayers
           ? <CssGradientLayers layers={cssLayers} style={{ opacity: canvasOpacity }} />
           : (

@@ -2,7 +2,7 @@ import { forwardRef, useEffect, useRef, type ComponentPropsWithoutRef } from "re
 import { Color, type SpaceId } from "@urcolor/core";
 import { getChannelConfig, sampleTriangleGrid, type GradientRenderer } from "@urcolor/shared";
 import { useColorTriangleContext } from "../root/ColorTriangleRootContext";
-import { CHECKERBOARD_BACKGROUND } from "../../../utils";
+import { CHECKERBOARD_STYLE } from "../../../utils";
 import { warnNoCssRecipe } from "../../../cssGradient";
 
 export interface ColorTriangleGradientProps extends ComponentPropsWithoutRef<"span"> {
@@ -133,7 +133,7 @@ export const ColorTriangleGradient = forwardRef<HTMLSpanElement, ColorTriangleGr
     }, []);
 
     return (
-      <span ref={ref} data-disabled={ctx.disabled ? "" : undefined} style={{ background: CHECKERBOARD_BACKGROUND, clipPath, ...style }} {...props}>
+      <span ref={ref} data-disabled={ctx.disabled ? "" : undefined} style={{ ...CHECKERBOARD_STYLE, clipPath, ...style }} {...props}>
         <canvas
           ref={canvasRef}
           style={{

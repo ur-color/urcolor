@@ -39,24 +39,35 @@ describe("ColorSwatchRoot", () => {
   it("should render as transparent when value is an invalid color string", () => {
     const { container, cleanup } = renderInto(<ColorSwatchRoot value="not-a-color" />);
     const el = container.firstElementChild as HTMLElement;
-    expect(el.style.getPropertyValue("--swatch-color")).toBe("transparent");
+    expect(el.style.getPropertyValue("--urcolor-swatch-color")).toBe("transparent");
     cleanup();
   });
 
   it("should emit all four CSS variables even with no valid color", () => {
     const { container, cleanup } = renderInto(<ColorSwatchRoot value={null} />);
     const el = container.firstElementChild as HTMLElement;
-    expect(el.style.getPropertyValue("--swatch-color")).toBe("transparent");
-    expect(el.style.getPropertyValue("--swatch-color-opaque")).toBe("transparent");
+    expect(el.style.getPropertyValue("--urcolor-swatch-color")).toBe("transparent");
+    expect(el.style.getPropertyValue("--urcolor-swatch-color-opaque")).toBe("transparent");
+    expect(el.style.getPropertyValue("--urcolor-swatch-alpha")).toBe("1");
+    expect(el.style.getPropertyValue("--urcolor-swatch-checkerboard")).not.toBe("");
+    cleanup();
+  });
+
+  // The deprecated names carry the resolved value rather than a `var()` at
+  // their replacement, so reading one from script still returns a colour.
+  it("should keep the deprecated variable names readable", () => {
+    const { container, cleanup } = renderInto(<ColorSwatchRoot value="red" />);
+    const el = container.firstElementChild as HTMLElement;
+    expect(el.style.getPropertyValue("--swatch-color"))
+      .toBe(el.style.getPropertyValue("--urcolor-swatch-color"));
     expect(el.style.getPropertyValue("--swatch-alpha")).toBe("1");
-    expect(el.style.getPropertyValue("--swatch-checkerboard")).not.toBe("");
     cleanup();
   });
 
   it("should still render a valid color string", () => {
     const { container, cleanup } = renderInto(<ColorSwatchRoot value="red" />);
     const el = container.firstElementChild as HTMLElement;
-    expect(el.style.getPropertyValue("--swatch-color")).not.toBe("transparent");
+    expect(el.style.getPropertyValue("--urcolor-swatch-color")).not.toBe("transparent");
     cleanup();
   });
 

@@ -2,7 +2,7 @@ import { forwardRef, useCallback, useEffect, useRef, type ComponentPropsWithoutR
 import { Color } from "@urcolor/core";
 import { cssWheelPolar, getChannelConfig, renderToCanvas, samplePolarGrid, type GradientRenderer } from "@urcolor/shared";
 import { useColorWheelContext } from "../root/ColorWheelRootContext";
-import { CHECKERBOARD_BACKGROUND } from "../../../utils";
+import { CHECKERBOARD_STYLE } from "../../../utils";
 import { CssGradientLayers, resolveCssGradient } from "../../../cssGradient";
 
 export interface ColorWheelGradientProps extends ComponentPropsWithoutRef<"span"> {
@@ -90,7 +90,7 @@ export const ColorWheelGradient = forwardRef<HTMLSpanElement, ColorWheelGradient
     }, []);
 
     return (
-      <span ref={ref} data-disabled={ctx.disabled ? "" : undefined} style={{ background: CHECKERBOARD_BACKGROUND, borderRadius: "50%", ...style }} {...props}>
+      <span ref={ref} data-disabled={ctx.disabled ? "" : undefined} style={{ ...CHECKERBOARD_STYLE, borderRadius: "50%", ...style }} {...props}>
         {/* The disc shape is cut here rather than inside `renderToCanvas`: the
             sampled grid fills its whole square, and clipping in-canvas as well
             as on the element leaves a seam along the boundary. Matches the Vue

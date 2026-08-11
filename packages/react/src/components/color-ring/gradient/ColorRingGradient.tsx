@@ -2,7 +2,7 @@ import { forwardRef, useCallback, useEffect, useRef, type ComponentPropsWithoutR
 import { Color, type SpaceId } from "@urcolor/core";
 import { channelStops, cssConicStops, getChannelConfig, renderToCanvas, sampleConicRing, type GradientRenderer } from "@urcolor/shared";
 import { useColorRingContext } from "../root/ColorRingRootContext";
-import { CHECKERBOARD_BACKGROUND } from "../../../utils";
+import { CHECKERBOARD_STYLE } from "../../../utils";
 import { CssGradientLayers, resolveCssGradient } from "../../../cssGradient";
 
 export interface ColorRingGradientProps extends ComponentPropsWithoutRef<"span"> {
@@ -96,7 +96,7 @@ export const ColorRingGradient = forwardRef<HTMLSpanElement, ColorRingGradientPr
     }, []);
 
     return (
-      <span ref={ref} data-disabled={rootCtx.disabled ? "" : undefined} style={{ background: CHECKERBOARD_BACKGROUND, maskImage: checkerboardMask, WebkitMaskImage: checkerboardMask, ...style }} {...props}>
+      <span ref={ref} data-disabled={rootCtx.disabled ? "" : undefined} style={{ ...CHECKERBOARD_STYLE, maskImage: checkerboardMask, WebkitMaskImage: checkerboardMask, ...style }} {...props}>
         {cssLayers
           ? <CssGradientLayers layers={cssLayers} />
           : (
