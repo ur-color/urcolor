@@ -9,10 +9,15 @@ function renderInto(node: React.ReactElement) {
   const container = document.createElement("div");
   document.body.appendChild(container);
   const root = createRoot(container);
-  act(() => { root.render(node); });
+  act(() => {
+    root.render(node);
+  });
   return {
     container,
-    cleanup: () => { act(() => root.unmount()); container.remove(); },
+    cleanup: () => {
+      act(() => root.unmount());
+      container.remove();
+    },
   };
 }
 
@@ -77,7 +82,10 @@ describe("Slider parts", () => {
 
   it("steps the value on ArrowRight", () => {
     let seen: number | undefined;
-    const { container, cleanup } = renderInto(tree(30, (v) => { seen = v; }));
+    const onChange = (v: number) => {
+      seen = v;
+    };
+    const { container, cleanup } = renderInto(tree(30, onChange));
     fireKey(container.querySelector("[role='slider']")!, "ArrowRight");
     expect(seen).toBe(31);
     cleanup();
@@ -85,7 +93,10 @@ describe("Slider parts", () => {
 
   it("commits once on keyup after a keyboard change", () => {
     let commits = 0;
-    const { container, cleanup } = renderInto(tree(30, () => {}, () => { commits += 1; }));
+    const onCommit = () => {
+      commits += 1;
+    };
+    const { container, cleanup } = renderInto(tree(30, () => {}, onCommit));
     const thumb = container.querySelector("[role='slider']") as HTMLElement;
     fireKey(thumb, "ArrowRight");
     act(() => {
@@ -97,8 +108,11 @@ describe("Slider parts", () => {
 
   it("ignores keys on a disabled slider", () => {
     let seen: number | undefined;
+    const onChange = (v: number) => {
+      seen = v;
+    };
     const { container, cleanup } = renderInto(
-      tree(30, (v) => { seen = v; }, undefined, { disabled: true }),
+      tree(30, onChange, undefined, { disabled: true }),
     );
     fireKey(container.querySelector("[role='slider']")!, "ArrowRight");
     expect(seen).toBeUndefined();
@@ -107,8 +121,11 @@ describe("Slider parts", () => {
 
   it("mirrors arrow direction when inverted", () => {
     let seen: number | undefined;
+    const onChange = (v: number) => {
+      seen = v;
+    };
     const { container, cleanup } = renderInto(
-      tree(30, (v) => { seen = v; }, undefined, { inverted: true }),
+      tree(30, onChange, undefined, { inverted: true }),
     );
     fireKey(container.querySelector("[role='slider']")!, "ArrowRight");
     expect(seen).toBe(29);

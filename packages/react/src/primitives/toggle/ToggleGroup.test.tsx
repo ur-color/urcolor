@@ -10,21 +10,39 @@ function renderInto(node: React.ReactElement) {
   const container = document.createElement("div");
   document.body.appendChild(container);
   const root = createRoot(container);
-  act(() => { root.render(node); });
+  act(() => {
+    root.render(node);
+  });
   return {
     container,
-    cleanup: () => { act(() => root.unmount()); container.remove(); },
+    cleanup: () => {
+      act(() => root.unmount());
+      container.remove();
+    },
   };
 }
 
 function click(el: Element) {
-  act(() => { el.dispatchEvent(new window.MouseEvent("click", { bubbles: true })); });
+  act(() => {
+    el.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+  });
 }
 
 function fireKey(el: Element, key: string) {
   act(() => {
     el.dispatchEvent(new window.KeyboardEvent("keydown", { key, bubbles: true, cancelable: true }));
   });
+}
+
+/** A callback and the last value it received. */
+function sink<T>() {
+  const box: { value?: T } = {};
+  return {
+    box,
+    set: (value: T) => {
+      box.value = value;
+    },
+  };
 }
 
 function group(props: Record<string, unknown> = {}) {
@@ -39,11 +57,11 @@ function group(props: Record<string, unknown> = {}) {
 
 describe("ToggleGroup", () => {
   it("selects a single value by default", () => {
-    let seen: string[] | undefined;
-    const { container, cleanup } = renderInto(group({ onValueChange: (v: string[]) => { seen = v; } }));
+    const seen = sink<string[]>();
+    const { container, cleanup } = renderInto(group({ onValueChange: seen.set }));
     const buttons = container.querySelectorAll("button");
     click(buttons[1]!);
-    expect(seen).toEqual(["green"]);
+    expect(seen.box.value).toEqual(["green"]);
     cleanup();
   });
 

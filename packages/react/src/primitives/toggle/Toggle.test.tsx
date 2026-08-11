@@ -9,15 +9,22 @@ function renderInto(node: React.ReactElement) {
   const container = document.createElement("div");
   document.body.appendChild(container);
   const root = createRoot(container);
-  act(() => { root.render(node); });
+  act(() => {
+    root.render(node);
+  });
   return {
     container,
-    cleanup: () => { act(() => root.unmount()); container.remove(); },
+    cleanup: () => {
+      act(() => root.unmount());
+      container.remove();
+    },
   };
 }
 
 function click(el: Element) {
-  act(() => { el.dispatchEvent(new window.MouseEvent("click", { bubbles: true })); });
+  act(() => {
+    el.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+  });
 }
 
 describe("Toggle", () => {

@@ -10,10 +10,26 @@ function renderInto(node: React.ReactElement) {
   const container = document.createElement("div");
   document.body.appendChild(container);
   const root = createRoot(container);
-  act(() => { root.render(node); });
+  act(() => {
+    root.render(node);
+  });
   return {
     container,
-    cleanup: () => { act(() => root.unmount()); container.remove(); },
+    cleanup: () => {
+      act(() => root.unmount());
+      container.remove();
+    },
+  };
+}
+
+/** A callback and the last value it received. */
+function sink<T>() {
+  const box: { value?: T } = {};
+  return {
+    box,
+    set: (value: T) => {
+      box.value = value;
+    },
   };
 }
 
@@ -35,6 +51,15 @@ function fireArrowRight(el: Element) {
   });
 }
 
+function hueAfterArrowRight(extra: Record<string, unknown> = {}): number {
+  const seen = sink<Color>();
+  const { container, cleanup } = renderInto(hueSlider(seen.set, extra));
+  fireArrowRight(container.querySelector("[role='slider']")!);
+  cleanup();
+  expect(seen.box.value).toBeDefined();
+  return Math.round(seen.box.value!.to("hsl").get("h"));
+}
+
 describe("ColorSlider behaviour", () => {
   it("exposes the channel value through slider aria", () => {
     const { container, cleanup } = renderInto(hueSlider());
@@ -45,28 +70,15 @@ describe("ColorSlider behaviour", () => {
   });
 
   it("advances the hue on ArrowRight", () => {
-    let next: Color | undefined;
-    const { container, cleanup } = renderInto(hueSlider((c) => { next = c; }));
-    fireArrowRight(container.querySelector("[role='slider']")!);
-    expect(next).toBeDefined();
-    expect(Math.round(next!.to("hsl").get("h"))).toBe(211);
-    cleanup();
+    expect(hueAfterArrowRight()).toBe(211);
   });
 
   it("reverses arrow direction when inverted", () => {
-    let next: Color | undefined;
-    const { container, cleanup } = renderInto(hueSlider((c) => { next = c; }, { inverted: true }));
-    fireArrowRight(container.querySelector("[role='slider']")!);
-    expect(Math.round(next!.to("hsl").get("h"))).toBe(209);
-    cleanup();
+    expect(hueAfterArrowRight({ inverted: true })).toBe(209);
   });
 
   it("mirrors arrow direction in rtl", () => {
-    let next: Color | undefined;
-    const { container, cleanup } = renderInto(hueSlider((c) => { next = c; }, { dir: "rtl" }));
-    fireArrowRight(container.querySelector("[role='slider']")!);
-    expect(Math.round(next!.to("hsl").get("h"))).toBe(209);
-    cleanup();
+    expect(hueAfterArrowRight({ dir: "rtl" })).toBe(209);
   });
 
   it("marks orientation and disabled on the root", () => {

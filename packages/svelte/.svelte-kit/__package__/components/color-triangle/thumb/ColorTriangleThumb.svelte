@@ -11,7 +11,7 @@
 
 <script lang="ts">
   import { createAttachmentKey } from "svelte/attachments";
-  import { barycentricToCartesian, channelLabel, DATA_DISABLED, DATA_DRAGGING, formatChannelValue } from "@urcolor/shared";
+  import { barycentricFromChannels, barycentricToCartesian, channelLabel, DATA_DISABLED, DATA_DRAGGING, formatChannelValue } from "@urcolor/shared";
   import type { ChildProps } from "../../../shared/child.js";
   import { colorTriangleContext } from "../root/context.svelte.js";
 
@@ -19,30 +19,12 @@
 
   const context = colorTriangleContext.get();
 
-  /**
-   * Channel values back to barycentric weights.
-   *
-   * In three-channel mode all three axes are read and renormalised — only their
-   * ratio is meaningful. In two-channel mode the first channel is `u`, the
-   * second runs backwards along `w`, and `v` is whatever is left over.
-   */
-  const bary = $derived.by(() => {
-    const xRange = context.maxX - context.minX;
-    const yRange = context.maxY - context.minY;
-
-    if (context.isThreeChannel) {
-      const zRange = context.maxZ - context.minZ;
-      const rawU = xRange === 0 ? 0 : (context.valueX - context.minX) / xRange;
-      const rawV = yRange === 0 ? 0 : (context.valueY - context.minY) / yRange;
-      const rawW = zRange === 0 ? 0 : (context.valueZ - context.minZ) / zRange;
-      const sum = rawU + rawV + rawW || 1;
-      return { u: rawU / sum, v: rawV / sum, w: rawW / sum };
-    }
-
-    const u = xRange === 0 ? 0 : (context.valueX - context.minX) / xRange;
-    const w = yRange === 0 ? 0 : 1 - (context.valueY - context.minY) / yRange;
-    return { u, v: Math.max(0, 1 - u - w), w };
-  });
+  /** Channel values back to barycentric weights. See `barycentricFromChannels`. */
+  const bary = $derived(barycentricFromChannels(
+    { value: context.valueX, min: context.minX, max: context.maxX },
+    { value: context.valueY, min: context.minY, max: context.maxY },
+    context.isThreeChannel ? { value: context.valueZ, min: context.minZ, max: context.maxZ } : undefined,
+  ));
 
   const position = $derived.by(() => {
     const [v0, v1, v2] = context.positionVertices;

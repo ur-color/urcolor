@@ -11,7 +11,7 @@ export default defineConfig({
       fileName: "index",
     },
     rollupOptions: {
-      external: ["react", "react-dom", "react/jsx-runtime", "@urcolor/core", "@urcolor/shared", "@base-ui-components/react"],
+      external: ["react", "react-dom", "react/jsx-runtime", "@urcolor/core", "@urcolor/shared"],
     },
   },
 });
