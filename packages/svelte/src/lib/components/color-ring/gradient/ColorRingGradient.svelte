@@ -1,6 +1,7 @@
 <script module lang="ts">
   import type { Snippet } from "svelte";
   import type { HTMLAttributes } from "svelte/elements";
+  import type { GradientRenderer } from "@urcolor/shared";
   import type { ChildSnippetArgs } from "../../../shared/child.js";
 
   export interface ColorRingGradientProps extends HTMLAttributes<HTMLSpanElement> {
@@ -10,6 +11,13 @@
      * - `false` — no overrides
      */
     channelOverrides?: Record<string, number> | false;
+    /**
+     * Which painter to use.
+     * - `"auto"` (default) — CSS when an exact recipe exists, canvas otherwise
+     * - `"css"` — force CSS; falls back to the canvas with a dev warning if none exists
+     * - `"canvas"` — force the canvas painter
+     */
+    renderer?: GradientRenderer;
     /**
      * Replaces the default `<canvas>`; receives its props, including the paint
      * attachment. The checkerboard-and-mask wrapper is always rendered by this part.
@@ -21,7 +29,8 @@
 <script lang="ts">
   import { createAttachmentKey } from "svelte/attachments";
   import type { Color } from "@urcolor/core";
-  import { CHECKERBOARD_BACKGROUND, DATA_DISABLED, getChannelConfig, renderToCanvas, sampleConicRing } from "@urcolor/shared";
+  import { channelStops, CHECKERBOARD_BACKGROUND, cssConicStops, DATA_DISABLED, getChannelConfig, renderToCanvas, sampleConicRing } from "@urcolor/shared";
+  import { CSS_GRADIENT_ROOT_STYLE, cssLayerStyle, resolveCssGradient } from "../../../shared/cssGradient.svelte.js";
   import type { ChildProps } from "../../../shared/child.js";
   import { gradientAttachment } from "../../../shared/gradient.svelte.js";
   import { colorRingContext } from "../root/context.svelte.js";
@@ -32,6 +41,7 @@
     channelOverrides = { alpha: 1 },
     class: className,
     style,
+    renderer = "auto",
     children,
     child,
     ...rest
@@ -107,6 +117,13 @@
     };
   }
 
+  // `sampleConicRing` writes an opaque alpha byte for every pixel, so the CSS
+  // stops drop the base colour's alpha to match rather than tinting the ring.
+  const cssLayers = $derived.by(() => resolveCssGradient(renderer, "ColorRingGradient", !!child, () => {
+    const stops = channelStops(withOverrides(context.color).withAlpha(1), context.colorSpace, context.channel);
+    return stops && cssConicStops(stops, context.startAngle);
+  }));
+
   const canvasProps = $derived<ChildProps>({
     style: "position:absolute;inset:0;width:100%;height:100%;pointer-events:none;",
     [attachmentKey]: canvasAttachment,
@@ -122,7 +139,13 @@
 </script>
 
 <span {...elementProps}>
-  {#if child}
+  {#if cssLayers}
+    <span style={CSS_GRADIENT_ROOT_STYLE}>
+      {#each cssLayers as layer, index (index)}
+        <span style={cssLayerStyle(layer)}></span>
+      {/each}
+    </span>
+  {:else if child}
     {@render child({ props: canvasProps })}
   {:else}
     <canvas {...canvasProps}></canvas>

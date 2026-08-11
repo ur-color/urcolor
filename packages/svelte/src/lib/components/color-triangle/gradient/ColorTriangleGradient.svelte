@@ -1,6 +1,7 @@
 <script module lang="ts">
   import type { Snippet } from "svelte";
   import type { HTMLAttributes } from "svelte/elements";
+  import type { GradientRenderer } from "@urcolor/shared";
   import type { ChildSnippetArgs } from "../../../shared/child.js";
 
   export interface ColorTriangleGradientProps extends HTMLAttributes<HTMLSpanElement> {
@@ -10,6 +11,12 @@
      * - `false` — no overrides
      */
     channelOverrides?: Record<string, number> | false;
+    /**
+     * Which painter to use. A barycentric sweep has no CSS equivalent, so this
+     * component always paints into a canvas — the prop exists for symmetry with
+     * the other gradients, and `"css"` warns and falls back.
+     */
+    renderer?: GradientRenderer;
     /**
      * Replaces the default `<canvas>`; receives its props, including the paint
      * attachment. The checkerboard wrapper is always rendered by this part.
@@ -22,6 +29,7 @@
   import { createAttachmentKey } from "svelte/attachments";
   import { Color } from "@urcolor/core";
   import { CHECKERBOARD_BACKGROUND, DATA_DISABLED, getChannelConfig, renderToCanvas, sampleTriangleGrid } from "@urcolor/shared";
+  import { warnNoCssRecipe } from "../../../shared/cssGradient.svelte.js";
   import type { ChildProps } from "../../../shared/child.js";
   import { gradientAttachment } from "../../../shared/gradient.svelte.js";
   import { colorTriangleContext } from "../root/context.svelte.js";
@@ -33,6 +41,7 @@
     channelOverrides = { alpha: 1 },
     class: className,
     style,
+    renderer = "auto",
     children,
     child,
     ...rest
@@ -132,6 +141,12 @@
       node.getContext("webgl")?.getExtension("WEBGL_lose_context")?.loseContext();
     };
   }
+
+  // A barycentric sweep has no CSS equivalent, so there is nothing to resolve —
+  // only the same warning the other gradients emit when asked for the impossible.
+  $effect(() => {
+    if (renderer === "css") warnNoCssRecipe("ColorTriangleGradient");
+  });
 
   const canvasProps = $derived<ChildProps>({
     style: `position:absolute;inset:0;width:100%;height:100%;pointer-events:none;opacity:${canvasOpacity};`,
