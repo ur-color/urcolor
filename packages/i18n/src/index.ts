@@ -12,10 +12,13 @@ import { wikidataSource } from "./sources/wikidata/source";
 import { wikidataChunks } from "./sources/wikidata/chunks";
 import { ralSource } from "./sources/ral/source";
 import { ralChunks } from "./sources/ral/chunks";
+import { pantoneSource } from "./sources/pantone/source";
+import { pantoneChunks } from "./sources/pantone/chunks";
 
 registerSource(uwdataSource, uwdataChunks);
 registerSource(wikidataSource, wikidataChunks);
 registerSource(ralSource, ralChunks);
+registerSource(pantoneSource, pantoneChunks);
 
 // uwdata answers the locales it covers; wikidata answers the rest. Order
 // matters and lives here rather than in the lookup layer, which never names a
