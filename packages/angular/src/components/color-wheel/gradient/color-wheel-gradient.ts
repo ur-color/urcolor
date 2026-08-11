@@ -10,7 +10,7 @@ import {
   input,
 } from "@angular/core";
 import { Color } from "@urcolor/core";
-import { CHECKERBOARD_BACKGROUND, cssWheelPolar, DATA_DISABLED, getChannelConfig, renderToCanvas, samplePolarGrid } from "@urcolor/shared";
+import { CHECKERBOARD_BACKGROUND, CHECKERBOARD_REF, cssWheelPolar, DATA_DISABLED, getChannelConfig, renderToCanvas, samplePolarGrid } from "@urcolor/shared";
 import { cssGradientBackground, type GradientRenderer } from "../../../shared/css-gradient";
 import { ColorWheelRoot } from "../root/color-wheel-root";
 
@@ -44,6 +44,7 @@ export type ColorWheelChannelOverrides = Record<string, number> | false;
     "[style.pointer-events]": "'none'",
     "[style.border-radius]": "'50%'",
     "[style.clip-path]": "'circle(50%)'",
+    "[style.--urcolor-checkerboard]": "checkerboardRecipe",
     "[style.background]": "background()",
   },
 })
@@ -63,7 +64,13 @@ export class ColorWheelGradient {
   /** Locked channels. Defaults to `{ alpha: 1 }`; pass `false` to disable. */
   readonly channelOverrides = input<ColorWheelChannelOverrides>({ alpha: 1 });
 
-  protected readonly checkerboard = CHECKERBOARD_BACKGROUND;
+  protected readonly checkerboardRecipe = CHECKERBOARD_BACKGROUND;
+
+  /**
+   * The grid is referenced through its custom property rather than inlined,
+   * so an author stylesheet can retile or recolour it; see `CHECKERBOARD_STYLE`.
+   */
+  protected readonly checkerboard = CHECKERBOARD_REF;
   protected readonly root = inject(ColorWheelRoot);
 
   private readonly host = inject<ElementRef<HTMLCanvasElement>>(ElementRef);

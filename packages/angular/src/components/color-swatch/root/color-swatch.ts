@@ -16,19 +16,15 @@ import {
 } from "@angular/core";
 import type { Color } from "@urcolor/core";
 import {
+  CHECKERBOARD_BACKGROUND,
   DATA_DISABLED,
   DATA_PRESSED,
   isToggleActivationKey,
-  parseColor,
+  SWATCH_BACKGROUND,
+  SWATCH_BACKGROUND_REF,
+  swatchPaint,
   toggleAria,
 } from "@urcolor/shared";
-
-/**
- * The transparency grid the swatch paints under its colour. The tile size is
- * appended per instance, so the pattern itself carries no `background-size`.
- */
-const CHECKER_PATTERN
-  = "repeating-conic-gradient(rgb(230, 230, 230) 0%, rgb(230, 230, 230) 25%, white 0%, white 50%) 0% 50%";
 
 /**
  * A single colour sample. Standalone it is a static `role="img"` element; as a
@@ -39,10 +35,11 @@ const CHECKER_PATTERN
  * <button urcColorSwatch [value]="'#f43f5e'" [(pressed)]="selected"></button>
  * ```
  *
- * The swatch always emits the same four custom properties — `--swatch-color`,
- * `--swatch-color-opaque`, `--swatch-alpha` and `--swatch-checkerboard` — even
- * for an absent or unparseable value, so consumer styling never has to guard
- * for a missing variable.
+ * The swatch always emits the same four custom properties —
+ * `--urcolor-swatch-color`, `--urcolor-swatch-color-opaque`,
+ * `--urcolor-swatch-alpha` and `--urcolor-swatch-checkerboard` — even for an
+ * absent or unparseable value, so consumer styling never has to guard for a
+ * missing variable. Their unprefixed predecessors are emitted as aliases.
  *
  * Inside a `ColorSwatchGroup` the group owns roving focus: it listens for
  * `keydown` and `focusin` bubbling from its items, so the swatch needs no
@@ -59,11 +56,17 @@ const CHECKER_PATTERN
     "[attr.tabindex]": "tabIndex()",
     [`[attr.${DATA_PRESSED}]`]: "dataPressed()",
     [`[attr.${DATA_DISABLED}]`]: "dataDisabled()",
+    "[style.--urcolor-checkerboard-size]": "checkerSizeVar()",
+    "[style.--urcolor-swatch-color]": "swatchColor()",
+    "[style.--urcolor-swatch-color-opaque]": "swatchColorOpaque()",
+    "[style.--urcolor-swatch-alpha]": "swatchAlpha()",
+    "[style.--urcolor-swatch-checkerboard]": "checkerboard",
+    "[style.--urcolor-swatch-background]": "swatchBackground",
     "[style.--swatch-color]": "swatchColor()",
     "[style.--swatch-color-opaque]": "swatchColorOpaque()",
     "[style.--swatch-alpha]": "swatchAlpha()",
-    "[style.--swatch-checkerboard]": "checkerboard()",
-    "[style.background]": "background()",
+    "[style.--swatch-checkerboard]": "checkerboard",
+    "[style.background]": "background",
     "(click)": "onClick()",
     "(keydown)": "onKeyDown($event)",
   },
@@ -71,8 +74,15 @@ const CHECKER_PATTERN
 export class ColorSwatch implements OnInit {
   /** The colour to display. Accepts a `Color` or any CSS colour string. */
   readonly value = input<Color | string | null>();
-  /** The transparency grid's tile size, in pixels. */
-  readonly checkerSize = input(16, { transform: numberAttribute });
+  /**
+   * The transparency grid's tile size, in pixels. Left unset, the grid reads
+   * `--urcolor-checkerboard-size` and falls back to `16px`.
+   */
+  readonly checkerSize = input(undefined, {
+    transform: (value: number | string | undefined) =>
+      value === undefined || value === null || value === "" ? undefined : numberAttribute(value),
+  });
+
   /** When true, reflects the colour's alpha; otherwise it paints fully opaque. */
   readonly alpha = input(false, { transform: booleanAttribute });
   /**
@@ -117,34 +127,32 @@ export class ColorSwatch implements OnInit {
   /** The pressed state, defaulting to unpressed while `pressed` is unbound. */
   readonly isPressed = computed(() => this.pressed() ?? false);
 
-  private readonly color = computed(() => parseColor(this.value()));
+  private readonly paint = computed(() => swatchPaint(this.value(), this.alpha()));
 
-  private readonly opaqueString = computed(
-    () => this.color()?.withAlpha(1).to("srgb").toString() ?? "transparent",
-  );
-
-  private readonly colorString = computed(() => {
-    const color = this.color();
-    if (!color) return "transparent";
-    return this.alpha() ? color.to("srgb").toString() : this.opaqueString();
+  /**
+   * Written only when `checkerSize` asks for it, so an author stylesheet keeps
+   * ownership of `--urcolor-checkerboard-size` by default.
+   */
+  protected readonly checkerSizeVar = computed(() => {
+    const size = this.checkerSize();
+    return size === undefined ? null : `${size}px`;
   });
 
-  protected readonly checkerboard = computed(
-    () => `${CHECKER_PATTERN} / ${this.checkerSize()}px ${this.checkerSize()}px`,
-  );
+  protected readonly checkerboard = CHECKERBOARD_BACKGROUND;
 
-  protected readonly swatchColor = this.colorString;
-  protected readonly swatchColorOpaque = this.opaqueString;
-  protected readonly swatchAlpha = computed(() => this.color()?.alpha ?? 1);
+  protected readonly swatchColor = computed(() => this.paint().color);
+  protected readonly swatchColorOpaque = computed(() => this.paint().colorOpaque);
+  protected readonly swatchAlpha = computed(() => this.paint().alpha);
 
   /**
    * The colour is painted as a flat gradient rather than a `background-color`
-   * so that it composites over the checkerboard in a single declaration.
+   * so that it composites over the checkerboard in a single declaration. It
+   * reads the custom properties rather than the resolved strings, so overriding
+   * one repaints the swatch.
    */
-  protected readonly background = computed(() => {
-    const colorStr = this.colorString();
-    return `linear-gradient(${colorStr}, ${colorStr}), ${this.checkerboard()}`;
-  });
+  protected readonly swatchBackground = SWATCH_BACKGROUND;
+
+  protected readonly background = SWATCH_BACKGROUND_REF;
 
   private readonly aria = computed(() => toggleAria(this.isPressed(), this.isDisabled()));
 

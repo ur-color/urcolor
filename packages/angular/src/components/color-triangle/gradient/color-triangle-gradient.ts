@@ -10,7 +10,7 @@ import {
   input,
 } from "@angular/core";
 import { Color } from "@urcolor/core";
-import { CHECKERBOARD_BACKGROUND, DATA_DISABLED, getChannelConfig, renderToCanvas, sampleTriangleGrid } from "@urcolor/shared";
+import { CHECKERBOARD_BACKGROUND, CHECKERBOARD_REF, DATA_DISABLED, getChannelConfig, renderToCanvas, sampleTriangleGrid } from "@urcolor/shared";
 import { warnNoCssRecipe, type GradientRenderer } from "../../../shared/css-gradient";
 import { ColorTriangleRoot } from "../root/color-triangle-root";
 
@@ -43,6 +43,7 @@ export type ColorTriangleChannelOverrides = Record<string, number> | false;
     "[style.width]": "'100%'",
     "[style.height]": "'100%'",
     "[style.pointer-events]": "'none'",
+    "[style.--urcolor-checkerboard]": "checkerboardRecipe",
     "[style.background]": "checkerboard",
     "[style.clip-path]": "clipPath()",
     "[style.opacity]": "canvasOpacity()",
@@ -59,7 +60,13 @@ export class ColorTriangleGradient {
   /** Locked channels. Defaults to `{ alpha: 1 }`; pass `false` to disable. */
   readonly channelOverrides = input<ColorTriangleChannelOverrides>({ alpha: 1 });
 
-  protected readonly checkerboard = CHECKERBOARD_BACKGROUND;
+  protected readonly checkerboardRecipe = CHECKERBOARD_BACKGROUND;
+
+  /**
+   * The grid is referenced through its custom property rather than inlined,
+   * so an author stylesheet can retile or recolour it; see `CHECKERBOARD_STYLE`.
+   */
+  protected readonly checkerboard = CHECKERBOARD_REF;
 
   protected readonly root = inject(ColorTriangleRoot);
   private readonly host = inject<ElementRef<HTMLCanvasElement>>(ElementRef);

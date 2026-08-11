@@ -12,6 +12,7 @@ import {
 import { Color, type SpaceId } from "@urcolor/core";
 import {
   CHECKERBOARD_BACKGROUND,
+  CHECKERBOARD_REF,
   cssAreaChannels,
   drawGradient,
   getChannelConfig,
@@ -47,6 +48,7 @@ export type ColorAreaChannelOverrides = Record<string, number> | false;
     "[style.width]": "'100%'",
     "[style.height]": "'100%'",
     "[style.pointer-events]": "'none'",
+    "[style.--urcolor-checkerboard]": "checkerboardRecipe",
     "[style.background]": "background()",
     "[style.opacity]": "canvasOpacity()",
   },
@@ -77,7 +79,13 @@ export class ColorAreaGradient {
   /** Locked channels. Defaults to `{ alpha: 1 }`; pass `false` to disable. */
   readonly channelOverrides = input<ColorAreaChannelOverrides>({ alpha: 1 });
 
-  protected readonly checkerboard = CHECKERBOARD_BACKGROUND;
+  protected readonly checkerboardRecipe = CHECKERBOARD_BACKGROUND;
+
+  /**
+   * The grid is referenced through its custom property rather than inlined,
+   * so an author stylesheet can retile or recolour it; see `CHECKERBOARD_STYLE`.
+   */
+  protected readonly checkerboard = CHECKERBOARD_REF;
 
   private readonly root = inject(ColorAreaRoot);
   private readonly host = inject<ElementRef<HTMLCanvasElement>>(ElementRef);

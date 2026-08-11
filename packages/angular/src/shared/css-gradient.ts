@@ -1,5 +1,5 @@
 import type { CssGradientLayer, GradientRenderer } from "@urcolor/shared";
-import { CHECKERBOARD_BACKGROUND, collapseLayers } from "@urcolor/shared";
+import { CHECKERBOARD_REF, collapseLayers } from "@urcolor/shared";
 
 /**
  * Which painter a gradient should use. Re-exported so consumers can type an
@@ -60,5 +60,5 @@ export function cssGradientBackground(
     return null;
   }
 
-  return `${collapsed[0]!.image}, ${CHECKERBOARD_BACKGROUND}`;
+  return `${collapsed[0]!.image}, ${CHECKERBOARD_REF}`;
 }

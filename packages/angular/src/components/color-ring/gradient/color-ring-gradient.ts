@@ -10,7 +10,7 @@ import {
   input,
 } from "@angular/core";
 import type { Color } from "@urcolor/core";
-import { channelStops, CHECKERBOARD_BACKGROUND, cssConicStops, DATA_DISABLED, getChannelConfig, renderToCanvas, sampleConicRing } from "@urcolor/shared";
+import { channelStops, CHECKERBOARD_BACKGROUND, CHECKERBOARD_REF, cssConicStops, DATA_DISABLED, getChannelConfig, renderToCanvas, sampleConicRing } from "@urcolor/shared";
 import { cssGradientBackground, type GradientRenderer } from "../../../shared/css-gradient";
 import { ColorRingRoot } from "../root/color-ring-root";
 
@@ -45,6 +45,7 @@ export type ColorRingChannelOverrides = Record<string, number> | false;
     "[style.width]": "'100%'",
     "[style.height]": "'100%'",
     "[style.pointer-events]": "'none'",
+    "[style.--urcolor-checkerboard]": "checkerboardRecipe",
     "[style.background]": "background()",
     "[style.mask-image]": "mask()",
     "[style.-webkit-mask-image]": "mask()",
@@ -66,7 +67,13 @@ export class ColorRingGradient {
   /** Locked channels. Defaults to `{ alpha: 1 }`; pass `false` to disable. */
   readonly channelOverrides = input<ColorRingChannelOverrides>({ alpha: 1 });
 
-  protected readonly checkerboard = CHECKERBOARD_BACKGROUND;
+  protected readonly checkerboardRecipe = CHECKERBOARD_BACKGROUND;
+
+  /**
+   * The grid is referenced through its custom property rather than inlined,
+   * so an author stylesheet can retile or recolour it; see `CHECKERBOARD_STYLE`.
+   */
+  protected readonly checkerboard = CHECKERBOARD_REF;
 
   protected readonly root = inject(ColorRingRoot);
   private readonly host = inject<ElementRef<HTMLCanvasElement>>(ElementRef);
