@@ -7,7 +7,10 @@
   export interface ColorSwatchProps extends HTMLAttributes<HTMLElement> {
     /** The colour to display. Accepts a `Color` or any CSS colour string. */
     value?: Color | string | null;
-    /** The checkerboard tile size, in pixels. */
+    /**
+     * The checkerboard tile size, in pixels. Left unset, the grid reads
+     * `--urcolor-checkerboard-size` and falls back to `16px`.
+     */
     checkerSize?: number;
     /** When true, reflects the colour's alpha channel; otherwise it paints fully opaque. */
     alpha?: boolean;
@@ -34,17 +37,16 @@
       DATA_DISABLED,
       DATA_PRESSED,
       isToggleActivationKey,
-      parseColor,
+      styleToString,
+      swatchPaint,
+      swatchStyle,
       toggleAria,
     } from "@urcolor/shared";
   import type { ChildProps } from "../../shared/child.js";
 
-  const CHECKER_PATTERN
-    = "repeating-conic-gradient(rgb(230, 230, 230) 0%, rgb(230, 230, 230) 25%, white 0%, white 50%) 0% 50%";
-
   let {
     value,
-    checkerSize = 16,
+    checkerSize,
     alpha: showAlpha = false,
     disabled = false,
     toggle,
@@ -68,26 +70,14 @@
   let internalPressed = $state<boolean>(untrack(() => pressed ?? false));
   const isPressed = $derived(pressed ?? internalPressed);
 
-  const color = $derived(parseColor(value));
-  const checkerboard = $derived(`${CHECKER_PATTERN} / ${checkerSize}px ${checkerSize}px`);
+  const paint = $derived(swatchPaint(value, showAlpha));
 
   /**
-   * The four CSS custom properties React's swatch emits, plus the painted
-   * background. They are always all present, including for an unparseable or
-   * absent value, so consumer styling never has to guard for a missing var.
+   * The custom properties the swatch publishes, plus the painted background.
+   * They are always all present, including for an unparseable or absent value,
+   * so consumer styling never has to guard for a missing var.
    */
-  const swatchStyle = $derived.by(() => {
-    const vars = (opaque: string, alphaValue: number, current: string) =>
-      `--swatch-color-opaque:${opaque};--swatch-alpha:${alphaValue};--swatch-checkerboard:${checkerboard};--swatch-color:${current};`;
-
-    if (!color) {
-      return `${vars("transparent", 1, "transparent")}background:linear-gradient(transparent, transparent), ${checkerboard};`;
-    }
-
-    const opaqueStr = color.withAlpha(1).to("srgb").toString();
-    const colorStr = showAlpha ? color.to("srgb").toString() : opaqueStr;
-    return `${vars(opaqueStr, color.alpha, colorStr)}background:linear-gradient(${colorStr}, ${colorStr}), ${checkerboard};`;
-  });
+  const layout = $derived(styleToString(swatchStyle({ ...paint, checkerSize })));
 
   function togglePressed(): void {
     if (disabled) return;
@@ -132,7 +122,7 @@
       : { role: "img" }),
     class: className,
     // The caller's declarations come last so they win the cascade.
-    style: style ? `${swatchStyle}${style}` : swatchStyle,
+    style: style ? `${layout}${style}` : layout,
     [DATA_PRESSED]: interactive && isPressed ? "" : undefined,
     [DATA_DISABLED]: disabled ? "" : undefined,
     ...(interactive ? { [attachmentKey]: interaction } : {}),

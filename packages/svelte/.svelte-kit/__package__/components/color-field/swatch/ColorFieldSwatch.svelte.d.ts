@@ -5,7 +5,10 @@ import type { ChildSnippetArgs } from "../../../shared/child.js";
 export interface ColorFieldSwatchProps extends Omit<HTMLAttributes<HTMLSpanElement>, "value"> {
     /** The colour to display. */
     value?: Color | string | null;
-    /** The checkerboard square size, in pixels. */
+    /**
+     * The checkerboard square size, in pixels. Left unset, the grid reads
+     * `--urcolor-checkerboard-size` and falls back to `16px`.
+     */
     checkerSize?: number;
     /** When true, reflects the colour's alpha; when false, paints it opaque. */
     alpha?: boolean;

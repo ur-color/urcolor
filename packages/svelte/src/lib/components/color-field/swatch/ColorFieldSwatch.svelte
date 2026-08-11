@@ -7,7 +7,10 @@
   export interface ColorFieldSwatchProps extends Omit<HTMLAttributes<HTMLSpanElement>, "value"> {
     /** The colour to display. */
     value?: Color | string | null;
-    /** The checkerboard square size, in pixels. */
+    /**
+     * The checkerboard square size, in pixels. Left unset, the grid reads
+     * `--urcolor-checkerboard-size` and falls back to `16px`.
+     */
     checkerSize?: number;
     /** When true, reflects the colour's alpha; when false, paints it opaque. */
     alpha?: boolean;
@@ -19,15 +22,12 @@
 </script>
 
 <script lang="ts">
-  import { CHECKERBOARD_BACKGROUND, DATA_DISABLED, parseColor } from "@urcolor/shared";
+  import { DATA_DISABLED, styleToString, swatchPaint, swatchStyle } from "@urcolor/shared";
   import type { ChildProps } from "../../../shared/child.js";
-
-  /** The size `CHECKERBOARD_BACKGROUND` is already tiled at. */
-  const DEFAULT_CHECKER_SIZE = 16;
 
   let {
     value,
-    checkerSize = DEFAULT_CHECKER_SIZE,
+    checkerSize,
     alpha = false,
     disabled = false,
     class: className,
@@ -37,30 +37,12 @@
     ...rest
   }: ColorFieldSwatchProps = $props();
 
-  const swatchColor = $derived(parseColor(value));
-  const checkerboard = $derived(
-    checkerSize === DEFAULT_CHECKER_SIZE
-      ? CHECKERBOARD_BACKGROUND
-      : `repeating-conic-gradient(rgb(230, 230, 230) 0% 25%, white 0% 50%) 0% 50% / ${checkerSize}px ${checkerSize}px`,
-  );
-
   /**
    * The colour is painted as a flat `linear-gradient` layered over the
    * checkerboard, so a translucent value shows the checks through it. The custom
    * properties are published for callers styling their own overlays.
    */
-  const layout = $derived.by(() => {
-    const current = swatchColor;
-    if (!current) {
-      return `--swatch-color:transparent;--swatch-checkerboard:${checkerboard};`
-        + `background:linear-gradient(transparent, transparent), ${checkerboard};`;
-    }
-    const opaque = current.withAlpha(1).to("srgb").toString();
-    const colorStr = alpha ? current.to("srgb").toString() : opaque;
-    return `--swatch-color-opaque:${opaque};--swatch-alpha:${current.alpha};`
-      + `--swatch-checkerboard:${checkerboard};--swatch-color:${colorStr};`
-      + `background:linear-gradient(${colorStr}, ${colorStr}), ${checkerboard};`;
-  });
+  const layout = $derived(styleToString(swatchStyle({ ...swatchPaint(value, alpha), checkerSize })));
 
   const elementProps = $derived<ChildProps>({
     ...rest,

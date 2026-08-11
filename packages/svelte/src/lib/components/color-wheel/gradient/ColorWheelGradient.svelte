@@ -29,7 +29,7 @@
 <script lang="ts">
   import { createAttachmentKey } from "svelte/attachments";
   import { Color } from "@urcolor/core";
-  import { CHECKERBOARD_BACKGROUND, cssWheelPolar, DATA_DISABLED, getChannelConfig, renderToCanvas, samplePolarGrid } from "@urcolor/shared";
+  import { CHECKERBOARD_CSS, cssWheelPolar, DATA_DISABLED, getChannelConfig, renderToCanvas, samplePolarGrid } from "@urcolor/shared";
   import { CSS_GRADIENT_ROOT_STYLE, cssLayerStyle, resolveCssGradient } from "../../../shared/cssGradient.svelte.js";
   import type { ChildProps } from "../../../shared/child.js";
   import { gradientAttachment } from "../../../shared/gradient.svelte.js";
@@ -127,7 +127,7 @@
     ...rest,
     class: className,
     // The caller's declarations come last so they win the cascade.
-    style: `background:${CHECKERBOARD_BACKGROUND};border-radius:50%;${style ?? ""}`,
+    style: `${CHECKERBOARD_CSS}border-radius:50%;${style ?? ""}`,
     [DATA_DISABLED]: context.disabled ? "" : undefined,
   });
 </script>

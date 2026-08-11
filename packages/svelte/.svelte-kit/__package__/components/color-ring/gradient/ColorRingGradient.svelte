@@ -29,7 +29,7 @@
 <script lang="ts">
   import { createAttachmentKey } from "svelte/attachments";
   import type { Color } from "@urcolor/core";
-  import { channelStops, CHECKERBOARD_BACKGROUND, cssConicStops, DATA_DISABLED, getChannelConfig, renderToCanvas, sampleConicRing } from "@urcolor/shared";
+  import { channelStops, CHECKERBOARD_CSS, cssConicStops, DATA_DISABLED, getChannelConfig, renderToCanvas, sampleConicRing } from "@urcolor/shared";
   import { CSS_GRADIENT_ROOT_STYLE, cssLayerStyle, resolveCssGradient } from "../../../shared/cssGradient.svelte.js";
   import type { ChildProps } from "../../../shared/child.js";
   import { gradientAttachment } from "../../../shared/gradient.svelte.js";
@@ -133,7 +133,7 @@
     ...rest,
     class: className,
     // The caller's declarations come last so they win the cascade.
-    style: `background:${CHECKERBOARD_BACKGROUND};mask-image:${mask};-webkit-mask-image:${mask};${style ?? ""}`,
+    style: `${CHECKERBOARD_CSS}mask-image:${mask};-webkit-mask-image:${mask};${style ?? ""}`,
     [DATA_DISABLED]: context.disabled ? "" : undefined,
   });
 </script>

@@ -41,7 +41,7 @@
   import { createAttachmentKey } from "svelte/attachments";
   import { Color } from "@urcolor/core";
   import {
-    CHECKERBOARD_BACKGROUND,
+    CHECKERBOARD_CSS,
     cssAreaBilinear,
     cssAreaChannels,
     DATA_DISABLED,
@@ -273,7 +273,7 @@
     ...rest,
     class: className,
     // The caller's declarations come last so they win the cascade.
-    style: `background:${CHECKERBOARD_BACKGROUND};${style ?? ""}`,
+    style: `${CHECKERBOARD_CSS}${style ?? ""}`,
     [DATA_DISABLED]: context.disabled ? "" : undefined,
   });
 </script>

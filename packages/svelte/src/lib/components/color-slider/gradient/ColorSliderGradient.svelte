@@ -36,7 +36,7 @@
 <script lang="ts">
   import { createAttachmentKey } from "svelte/attachments";
   import { Color } from "@urcolor/core";
-  import { CHECKERBOARD_BACKGROUND, cssLinearStops, defaultStepsFor, drawLinearGradient, getChannelConfig, interpolateStops } from "@urcolor/shared";
+  import { CHECKERBOARD_CSS, cssLinearStops, defaultStepsFor, drawLinearGradient, getChannelConfig, interpolateStops } from "@urcolor/shared";
   import { CSS_GRADIENT_ROOT_STYLE, cssLayerStyle, resolveCssGradient } from "../../../shared/cssGradient.svelte.js";
   import type { ChildProps } from "../../../shared/child.js";
   import { gradientAttachment } from "../../../shared/gradient.svelte.js";
@@ -173,7 +173,7 @@
     ...rest,
     class: className,
     // The caller's declarations come last so they win the cascade.
-    style: `background:${CHECKERBOARD_BACKGROUND};${style ?? ""}`,
+    style: `${CHECKERBOARD_CSS}${style ?? ""}`,
   });
 </script>
 
