@@ -1,5 +1,5 @@
 import { forwardRef, type ComponentPropsWithoutRef } from "react";
-import { Slider } from "@base-ui-components/react/slider";
+import { Slider } from "../../../primitives/slider";
 
 export interface ColorSliderThumbProps extends ComponentPropsWithoutRef<"div"> {}
 

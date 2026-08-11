@@ -1,5 +1,5 @@
 import { forwardRef, useCallback, useMemo, useRef, useState } from "react";
-import { Slider } from "@base-ui-components/react/slider";
+import { Slider } from "../../../primitives/slider";
 import { Color, type SpaceId } from "@urcolor/core";
 import { getChannelConfig, displayToNative, nativeToDisplay } from "@urcolor/shared";
 import { ColorSliderContext, type ColorSliderContextValue } from "./ColorSliderRootContext";
@@ -131,6 +131,8 @@ export const ColorSliderRoot = forwardRef<HTMLDivElement, ColorSliderRootProps>(
           step={channelConfig?.step ?? 1}
           disabled={disabled}
           orientation={orientation}
+          dir={dir}
+          inverted={inverted}
           className={className}
           style={style}
         >
