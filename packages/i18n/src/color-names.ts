@@ -214,7 +214,14 @@ export class ColorNames {
     locales: string | readonly string[],
     options: { source?: string | readonly string[] } = {},
   ): string[] {
-    return filterSupportedLocales(locales, chainLocales(normalizeChain(options.source)));
+    const chain = normalizeChain(options.source);
+    // A language-neutral source answers any tag at all, so every requested tag
+    // is supported once one is in the chain. Filtering against `chainLocales`
+    // would compare ordinary tags against "und" and report none supported.
+    if (chain.some(id => getSource(id).languageNeutral === true)) {
+      return typeof locales === "string" ? [locales] : [...locales];
+    }
+    return filterSupportedLocales(locales, chainLocales(chain));
   }
 
   /**

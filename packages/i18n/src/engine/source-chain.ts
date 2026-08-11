@@ -1,6 +1,9 @@
 import { localeLadder } from "./locale";
 import { getDefaultSources, getSource } from "./registry";
 
+/** The tag a language-neutral source ships its single chunk under. */
+export const NEUTRAL_LOCALE = "und";
+
 /** Which source answered, and the locale tag it answered under. */
 export interface SourceChainMatch {
   source: string;
@@ -69,12 +72,20 @@ export function resolveSourceChain(
   chain: readonly string[],
 ): SourceChainMatch | undefined {
   const tags = typeof locales === "string" ? [locales] : locales;
-  const available = chain.map(id => [id, localesOf(id)] as const);
+  const available = chain.map(
+    id => [id, localesOf(id), getSource(id).languageNeutral === true] as const,
+  );
 
   for (const tag of tags) {
     for (const rung of localeLadder(tag)) {
       const key = rung.toLowerCase();
-      for (const [source, locales_] of available) {
+      for (const [source, locales_, neutral] of available) {
+        // A neutral source answers at the first rung it is offered: its one
+        // chunk is as correct for "zh-Hant" as for "ka", because its names are
+        // codes rather than words in a language. It still only gets that offer
+        // after every earlier source in the chain has missed the same rung, so
+        // an ordinary source that genuinely has the locale always wins.
+        if (neutral) return { source, locale: NEUTRAL_LOCALE };
         const registered = locales_.get(key);
         if (registered !== undefined) return { source, locale: registered };
       }

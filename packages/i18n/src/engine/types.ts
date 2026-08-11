@@ -25,6 +25,17 @@ export interface NameSource {
    * revision (a live query endpoint rather than a git repo).
    */
   retrievedAt?: string;
+  /**
+   * True when this source's names are the same string in every language, as
+   * industrial catalogue codes are: `RAL 1005` is `RAL 1005` everywhere. Such
+   * a source ships one chunk under the `und` tag, and locale negotiation
+   * returns it for any requested locale rather than matching subtags.
+   *
+   * Declared here rather than inferred from a one-locale chunk map, so a
+   * genuinely linguistic source that happens to cover a single locale never
+   * acquires the behaviour by accident.
+   */
+  languageNeutral?: boolean;
   /** SPDX identifier, or a plain-language note when the upstream has none. */
   license: string;
   /** Attribution text consumers should display. */

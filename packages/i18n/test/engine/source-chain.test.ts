@@ -8,13 +8,14 @@ import {
 import type { NameSource } from "../../src/engine/types";
 
 /** A registered source is all this module needs; the chunks are never loaded. */
-function fakeSource(id: string, locales: string[]): NameSource {
+function fakeSource(id: string, locales: string[], languageNeutral = false): NameSource {
   return {
     id,
     title: id,
     url: "https://example.invalid/",
     license: "CC0-1.0",
     citation: id,
+    ...(languageNeutral ? { languageNeutral } : {}),
     languages: Object.fromEntries(
       locales.map(locale => [locale, { model: "palette" as const, terms: 1, coverage: 1 }]),
     ),
@@ -30,6 +31,8 @@ beforeAll(() => {
   // Loaders are never invoked here — this module only reads `languages`.
   registerSource(fakeSource("narrow", ["en", "zh", "pt"]), {});
   registerSource(fakeSource("broad", ["en", "zh", "zh-Hant", "pt", "ka"]), {});
+  // A catalogue source: one chunk under `und`, answering any locale asked of it.
+  registerSource(fakeSource("catalogue", ["und"], true), {});
   // The default chain is shared module state. Save it before installing
   // this file's fake chain, and restore it in afterAll below, so this
   // suite doesn't leak "narrow"/"broad" into whatever runs next and
@@ -130,5 +133,31 @@ describe("chainLocales", () => {
 
   it("returns a single source's locales unchanged", () => {
     expect(chainLocales(["narrow"]).sort()).toEqual(["en", "pt", "zh"]);
+  });
+});
+
+describe("language-neutral sources", () => {
+  it("answers any requested locale with the und chunk", () => {
+    expect(resolveSourceChain("ka", ["catalogue"]))
+      .toEqual({ source: "catalogue", locale: "und" });
+    expect(resolveSourceChain("zh-Hant", ["catalogue"]))
+      .toEqual({ source: "catalogue", locale: "und" });
+    // Not a tag any source could otherwise answer. A catalogue code is as
+    // correct for it as for any other locale, because it is not a name in a
+    // language at all.
+    expect(resolveSourceChain(["xx-YY"], ["catalogue"]))
+      .toEqual({ source: "catalogue", locale: "und" });
+  });
+
+  it("does not pre-empt an earlier source that has the locale", () => {
+    expect(resolveSourceChain("ka", ["broad", "catalogue"]))
+      .toEqual({ source: "broad", locale: "ka" });
+    expect(resolveSourceChain("fr", ["broad", "catalogue"]))
+      .toEqual({ source: "catalogue", locale: "und" });
+  });
+
+  it("treats an ordinary one-locale source as ordinary", () => {
+    // The flag is what grants the behaviour, never the shape of the chunk map.
+    expect(resolveSourceChain("fr", ["narrow"])).toBeUndefined();
   });
 });
