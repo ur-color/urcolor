@@ -2,23 +2,32 @@ import { mkdir, rm, writeFile } from "node:fs/promises";
 import type { LanguageCoverage, PaletteChunk } from "../../src/engine/types";
 import {
   ALIASES_QUERY,
+  CATALOGUE_QUERY,
   ITEMS_QUERY,
   LABELS_QUERY,
   parseAliases,
+  parseCatalogue,
   parseItems,
   parseLabels,
   runQuery,
+  type Catalogue,
   type RawAliasRow,
+  type RawCatalogueRow,
   type RawItemRow,
   type RawLabelRow,
 } from "./fetch";
 import {
   buildItems,
   buildPaletteChunk,
+  catalogueMembership,
   groupAliases,
   groupLabels,
   paletteCoverage,
+  pruneCatalogueItems,
+  stripCatalogueCodes,
+  supportsLocaleCase,
 } from "./transform";
+import { unlistedScriptLetters } from "./scripts";
 
 const DATA_DIR = new URL("../../src/data/wikidata/", import.meta.url);
 const MANIFEST_PATH = new URL("../../src/sources/wikidata/chunks.ts", import.meta.url);
@@ -48,6 +57,16 @@ export interface SyncOutput {
   multiHexItems: string[];
   /** Count of (locale, name) pairs claimed by more than one item. */
   collisions: number;
+  /** Code-shaped labels removed, per catalogue. */
+  catalogueDropped: Record<Catalogue, number>;
+  /** Descriptive labels on catalogue items that were kept, e.g. `Verkehrsrot`. */
+  catalogueSpared: number;
+  /** Locale -> names the alphabet check removed, in upstream spelling. */
+  droppedByScript: Record<string, string[]>;
+  /** Letters in no listed script: the script table's blind spot, as a number. */
+  unlistedLetters: number;
+  /** Locales whose tag `Intl` rejects, folded by the invariant rule instead. */
+  invariantCaseLocales: string[];
 }
 
 /**
@@ -60,11 +79,32 @@ export function buildOutput(
   itemRows: readonly RawItemRow[],
   labelRows: readonly RawLabelRow[],
   aliasRows: readonly RawAliasRow[],
+  catalogueRows: readonly RawCatalogueRow[],
   retrievedAt: string,
 ): SyncOutput {
-  const items = buildItems(itemRows);
-  const labels = groupLabels(labelRows);
-  const aliases = groupAliases(aliasRows);
+  const membership = catalogueMembership(catalogueRows);
+
+  const splitLabels = stripCatalogueCodes(labelRows, membership);
+  const splitAliases = stripCatalogueCodes(aliasRows, membership);
+
+  const catalogueDropped: Record<Catalogue, number> = { pantone: 0, ral: 0, ncs: 0 };
+  for (const row of [...splitLabels.dropped, ...splitAliases.dropped]) {
+    const catalogue = membership.get(row.qid);
+    if (catalogue !== undefined) catalogueDropped[catalogue]++;
+  }
+
+  // A catalogue item that kept a descriptive label in some language is still a
+  // colour this source names, so it stays in the denominator. One that lost
+  // every label would otherwise inflate every coverage figure.
+  const survivingQids = new Set(splitLabels.kept.map(row => row.qid));
+  const catalogueSpared = [...survivingQids].filter(qid => membership.has(qid)).length;
+
+  const items = buildItems(pruneCatalogueItems(itemRows, membership, survivingQids));
+  const labels = groupLabels(splitLabels.kept);
+  const aliases = groupAliases(splitAliases.kept);
+
+  let unlistedLetters = 0;
+  for (const row of splitLabels.kept) unlistedLetters += unlistedScriptLetters(row.value);
 
   const hexesByQid = new Map<string, Set<string>>();
   for (const row of itemRows) {
@@ -79,10 +119,16 @@ export function buildOutput(
 
   const chunks = new Map<string, PaletteChunk>();
   const languages: Record<string, LanguageCoverage> = {};
+  const droppedByScript: Record<string, string[]> = {};
+  const invariantCaseLocales: string[] = [];
   let collisions = 0;
 
   for (const [lang, labelMap] of labels) {
-    const { chunk } = buildPaletteChunk(lang, items, labelMap, aliases.get(lang) ?? []);
+    const built = buildPaletteChunk(lang, items, labelMap, aliases.get(lang) ?? []);
+    const chunk = built.chunk;
+    if (built.droppedByScript.length > 0) droppedByScript[lang] = built.droppedByScript;
+    if (!supportsLocaleCase(lang)) invariantCaseLocales.push(lang);
+
     // A locale whose every labelled item fell outside the catalogue would
     // produce a chunk that can answer nothing; don't ship one.
     if (chunk.terms.length === 0) continue;
@@ -113,6 +159,14 @@ export function buildOutput(
     meta: { source: "wikidata", retrievedAt, itemCount: items.length, languages: sortedLanguages },
     multiHexItems,
     collisions,
+    catalogueDropped,
+    catalogueSpared,
+    droppedByScript,
+    unlistedLetters,
+    // Sorted for the same reason `sortedLanguages` is: `labels` iterates in
+    // raw SPARQL row order, so an unsorted list would reshuffle between
+    // otherwise-identical syncs.
+    invariantCaseLocales: invariantCaseLocales.sort(),
   };
 }
 
@@ -145,18 +199,23 @@ export function renderManifest(locales: string[]): string {
 
 export async function main(): Promise<void> {
   console.log("Querying Wikidata Query Service…");
-  const [itemsJson, labelsJson, aliasesJson] = await Promise.all([
+  const [itemsJson, labelsJson, aliasesJson, catalogueJson] = await Promise.all([
     runQuery(ITEMS_QUERY),
     runQuery(LABELS_QUERY),
     runQuery(ALIASES_QUERY),
+    runQuery(CATALOGUE_QUERY),
   ]);
 
   const itemRows = parseItems(itemsJson);
   const labelRows = parseLabels(labelsJson);
   const aliasRows = parseAliases(aliasesJson);
-  console.log(`  ${itemRows.length} item rows, ${labelRows.length} labels, ${aliasRows.length} aliases`);
+  const catalogueRows = parseCatalogue(catalogueJson);
+  console.log(
+    `  ${itemRows.length} item rows, ${labelRows.length} labels, `
+    + `${aliasRows.length} aliases, ${catalogueRows.length} catalogue members`,
+  );
 
-  const output = buildOutput(itemRows, labelRows, aliasRows, new Date().toISOString());
+  const output = buildOutput(itemRows, labelRows, aliasRows, catalogueRows, new Date().toISOString());
 
   // Render everything into memory before touching disk, so a rendering failure
   // cannot leave DATA_DIR half-deleted while the manifest still references it.
@@ -188,6 +247,22 @@ export async function main(): Promise<void> {
   console.log(`\nCatalogue: ${output.meta.itemCount} items`);
   console.log(`Items with multiple hex values (lowest sorted value kept): ${output.multiHexItems.length}`);
   console.log(`Name collisions resolved by sitelink ranking: ${output.collisions}`);
+
+  const { pantone, ral, ncs } = output.catalogueDropped;
+  console.log(`\nCatalogue codes removed: ${pantone + ral + ncs} (pantone ${pantone}, ral ${ral}, ncs ${ncs})`);
+  console.log(`Descriptive names kept on catalogue items: ${output.catalogueSpared}`);
+
+  const scriptDrops = Object.entries(output.droppedByScript);
+  const scriptTotal = scriptDrops.reduce((sum, [, names]) => sum + names.length, 0);
+  console.log(`\nDropped by the alphabet check: ${scriptTotal}`);
+  for (const [lang, names] of scriptDrops.sort((a, b) => b[1].length - a[1].length)) {
+    console.log(`  ${lang.padEnd(9)} ${names.join(" · ")}`);
+  }
+
+  console.log(`\nLetters in no listed script: ${output.unlistedLetters}`);
+  if (output.invariantCaseLocales.length > 0) {
+    console.log(`Locales folded by the invariant rule: ${output.invariantCaseLocales.join(", ")}`);
+  }
   console.log(`Retrieved at: ${output.meta.retrievedAt}`);
 }
 
