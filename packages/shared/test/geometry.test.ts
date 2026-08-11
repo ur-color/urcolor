@@ -10,6 +10,7 @@ import {
   pointInTriangle,
   clampToTriangle,
   insetTriangle,
+  barycentricFromChannels,
 } from "../src/geometry";
 
 const EPSILON = 1e-9;
@@ -234,5 +235,63 @@ describe("insetTriangle", () => {
     // Very large inset should not produce degenerate triangle
     const result = insetTriangle(v0, v1, v2, 9999);
     expect(result).toHaveLength(3);
+  });
+});
+
+describe("barycentricFromChannels", () => {
+  const axis = (value: number) => ({ value, min: 0, max: 100 });
+
+  it("sums to one for a reachable pair", () => {
+    const { u, v, w } = barycentricFromChannels(axis(30), axis(80));
+    near(u, 0.3);
+    near(w, 0.2);
+    near(u + v + w, 1);
+  });
+
+  it("sums to one past the hypotenuse, where s exceeds v", () => {
+    // The triangle can only show s <= v. Clamping v alone would leave
+    // u + v + w === 2 here and push the point toward the white vertex.
+    const { u, v, w } = barycentricFromChannels(axis(100), axis(0));
+    near(u + v + w, 1);
+  });
+
+  it("gives way on saturation, not on value, past the hypotenuse", () => {
+    // Every saturation at value 0 is the same black and belongs at w === 1.
+    for (const s of [0, 25, 50, 100]) {
+      const { u, v, w } = barycentricFromChannels(axis(s), axis(0));
+      near(w, 1);
+      near(u, 0);
+      near(v, 0);
+    }
+  });
+
+  it("holds the value axis while saturation gives way", () => {
+    // Value 40 with saturation 100: w stays at 0.6, u takes what is left.
+    const { u, v, w } = barycentricFromChannels(axis(100), axis(40));
+    near(w, 0.6);
+    near(u, 0.4);
+    near(v, 0);
+  });
+
+  it("renormalises all three axes in three-channel mode", () => {
+    const { u, v, w } = barycentricFromChannels(axis(50), axis(50), axis(100));
+    near(u + v + w, 1);
+    near(u, 0.25);
+    near(v, 0.25);
+    near(w, 0.5);
+  });
+
+  it("splits evenly when three-channel input is all zero", () => {
+    const { u, v, w } = barycentricFromChannels(axis(0), axis(0), axis(0));
+    near(u, 1 / 3);
+    near(v, 1 / 3);
+    near(w, 1 / 3);
+  });
+
+  it("treats a zero-width axis as zero rather than dividing by it", () => {
+    const { u, v, w } = barycentricFromChannels({ value: 5, min: 5, max: 5 }, axis(100));
+    near(u, 0);
+    near(v, 1);
+    near(w, 0);
   });
 });

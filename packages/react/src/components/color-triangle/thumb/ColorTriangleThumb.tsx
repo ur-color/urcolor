@@ -1,5 +1,5 @@
 import { forwardRef, useMemo, useEffect, type ComponentPropsWithoutRef } from "react";
-import { barycentricToCartesian, channelLabel, formatChannelValue } from "@urcolor/shared";
+import { barycentricFromChannels, barycentricToCartesian, channelLabel, formatChannelValue } from "@urcolor/shared";
 import { useColorTriangleContext } from "../root/ColorTriangleRootContext";
 
 export interface ColorTriangleThumbProps extends ComponentPropsWithoutRef<"span"> {}
@@ -16,28 +16,11 @@ export const ColorTriangleThumb = forwardRef<HTMLSpanElement, ColorTriangleThumb
     });
 
     const thumbPosition = useMemo(() => {
-      const xVal = ctx.currentXValue;
-      const yVal = ctx.currentYValue;
-      const xRange = ctx.xMax - ctx.xMin;
-      const yRange = ctx.yMax - ctx.yMin;
-
-      let u: number, v: number, w: number;
-
-      if (ctx.isThreeChannel) {
-        const zVal = ctx.currentZValue;
-        const zRange = ctx.zMax - ctx.zMin;
-        const rawU = xRange === 0 ? 0 : (xVal - ctx.xMin) / xRange;
-        const rawV = yRange === 0 ? 0 : (yVal - ctx.yMin) / yRange;
-        const rawW = zRange === 0 ? 0 : (zVal - ctx.zMin) / zRange;
-        const sum = rawU + rawV + rawW || 1;
-        u = rawU / sum;
-        v = rawV / sum;
-        w = rawW / sum;
-      } else {
-        u = xRange === 0 ? 0 : (xVal - ctx.xMin) / xRange;
-        w = yRange === 0 ? 0 : 1 - (yVal - ctx.yMin) / yRange;
-        v = Math.max(0, 1 - u - w);
-      }
+      const { u, v, w } = barycentricFromChannels(
+        { value: ctx.currentXValue, min: ctx.xMin, max: ctx.xMax },
+        { value: ctx.currentYValue, min: ctx.yMin, max: ctx.yMax },
+        ctx.isThreeChannel ? { value: ctx.currentZValue, min: ctx.zMin, max: ctx.zMax } : undefined,
+      );
 
       const [v0, v1, v2] = ctx.vertices;
       const pos = barycentricToCartesian(u, v, w, v0, v1, v2);

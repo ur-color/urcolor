@@ -3,6 +3,7 @@ import { mount } from "@vue/test-utils";
 import { beforeEach, describe, expect, it, vi } from "bun:test";
 import { defineComponent, h } from "vue";
 import { Color } from "@urcolor/core";
+import { triangleVertices } from "@urcolor/shared";
 import { ColorTriangleRoot, ColorTriangleThumb } from "../src/components/ColorTriangle";
 
 function makeTriangle(extra: Record<string, unknown> = {}) {
@@ -50,6 +51,11 @@ function lastXY(wrapper: VueWrapper): [number, number] {
   const color = events[events.length - 1]![0] as Color;
   const hsv = color.to("hsv");
   return [Math.round(hsv.get("s") * 100), Math.round(hsv.get("v") * 100)];
+}
+
+/** The `left:` percentage out of a thumb's inline style. */
+function leftPercent(style: string): number {
+  return Number(/left:\s*([\d.]+)%/.exec(style)![1]);
 }
 
 function lastZ(wrapper: VueWrapper): number {
@@ -174,6 +180,23 @@ describe("given a two-channel ColorTriangle", () => {
     expect(wrapper.emitted("changeEnd")).toBeUndefined();
   });
 
+  it("should park the thumb on the black vertex for every saturation at value 0", async () => {
+    // The triangle's reachable region is s <= v, so every one of these is the
+    // same unrepresentable-saturation black and belongs at the same corner.
+    const positions = new Set<string>();
+    for (const s of [0, 0.25, 0.5, 1]) {
+      const solo = mount(makeTriangle({ modelValue: new Color("hsv", [180, s, 0]) }), { attachTo: document.body });
+      positions.add(solo.find("[role=\"slider\"]").attributes("style")!);
+      solo.unmount();
+    }
+    expect(positions.size).toBe(1);
+    // v2, the black vertex of the unit triangle. Before the fix, saturation
+    // 1 landed at 56.7% — over halfway to the white vertex at 93.3%.
+    const [, v1, v2] = triangleVertices(1, 1);
+    expect(leftPercent([...positions][0]!)).toBeCloseTo(v2.x * 100, 6);
+    expect(leftPercent([...positions][0]!)).toBeLessThan(v1.x * 100);
+  });
+
   it("should keep the thumb inside the triangle when driven at a corner", async () => {
     const thumb = wrapper.find("[role=\"slider\"]");
     // Ten shifted steps is 100 display units of X — far past the point where
@@ -223,6 +246,40 @@ describe("given a two-channel ColorTriangle", () => {
       await root.trigger("pointerdown", { pointerId: 1, clientX: 50, clientY: 40 });
       await root.trigger("pointerup", { pointerId: 1, clientX: 50, clientY: 40 });
       expect(wrapper.emitted("changeEnd")).toHaveLength(1);
+    });
+  });
+
+  describe("a gesture the browser takes over", () => {
+    it("ends the drag on pointercancel", async () => {
+      const root = wrapper.find<HTMLElement>("[data-color-triangle-root]");
+      stubRootRect(root);
+
+      await root.trigger("pointerdown", { pointerId: 1, clientX: 50, clientY: 40 });
+      const changesAtPress = wrapper.emitted("change")!.length;
+
+      await root.trigger("pointercancel", { pointerId: 1, clientX: 50, clientY: 40 });
+      expect(wrapper.emitted("changeEnd")).toHaveLength(1);
+
+      // The gesture is over, so a move the browser still delivers is ignored.
+      await root.trigger("pointermove", { pointerId: 1, clientX: 60, clientY: 45 });
+      expect(wrapper.emitted("change")!).toHaveLength(changesAtPress);
+    });
+
+    it("ends the drag when the release arrives without pointer capture", async () => {
+      const root = wrapper.find<HTMLElement>("[data-color-triangle-root]");
+      stubRootRect(root);
+
+      await root.trigger("pointerdown", { pointerId: 1, clientX: 50, clientY: 40 });
+      const changesAtPress = wrapper.emitted("change")!.length;
+
+      // A browser that takes a gesture over drops the capture before the
+      // release; a release that insisted on it used to leave the drag running.
+      root.element.hasPointerCapture = () => false;
+      await root.trigger("pointerup", { pointerId: 1, clientX: 50, clientY: 40 });
+      expect(wrapper.emitted("changeEnd")).toHaveLength(1);
+
+      await root.trigger("pointermove", { pointerId: 1, clientX: 60, clientY: 45 });
+      expect(wrapper.emitted("change")!).toHaveLength(changesAtPress);
     });
   });
 

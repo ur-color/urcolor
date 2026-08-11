@@ -8,6 +8,7 @@ import {
   inject,
 } from "@angular/core";
 import {
+  barycentricFromChannels,
   barycentricToCartesian,
   channelLabel,
   DATA_DISABLED,
@@ -62,30 +63,14 @@ export class ColorTriangleThumb {
     });
   }
 
-  /**
-   * Channel values back to barycentric weights.
-   *
-   * In three-channel mode all three axes are read and renormalised — only their
-   * ratio is meaningful. In two-channel mode the first channel is `u`, the
-   * second runs backwards along `w`, and `v` is whatever is left over.
-   */
-  private readonly bary = computed(() => {
-    const xRange = this.root.maxX() - this.root.minX();
-    const yRange = this.root.maxY() - this.root.minY();
-
-    if (this.root.isThreeChannel()) {
-      const zRange = this.root.maxZ() - this.root.minZ();
-      const rawU = xRange === 0 ? 0 : (this.root.valueX() - this.root.minX()) / xRange;
-      const rawV = yRange === 0 ? 0 : (this.root.valueY() - this.root.minY()) / yRange;
-      const rawW = zRange === 0 ? 0 : (this.root.valueZ() - this.root.minZ()) / zRange;
-      const sum = rawU + rawV + rawW || 1;
-      return { u: rawU / sum, v: rawV / sum, w: rawW / sum };
-    }
-
-    const u = xRange === 0 ? 0 : (this.root.valueX() - this.root.minX()) / xRange;
-    const w = yRange === 0 ? 0 : 1 - (this.root.valueY() - this.root.minY()) / yRange;
-    return { u, v: Math.max(0, 1 - u - w), w };
-  });
+  /** Channel values back to barycentric weights. See `barycentricFromChannels`. */
+  private readonly bary = computed(() => barycentricFromChannels(
+    { value: this.root.valueX(), min: this.root.minX(), max: this.root.maxX() },
+    { value: this.root.valueY(), min: this.root.minY(), max: this.root.maxY() },
+    this.root.isThreeChannel()
+      ? { value: this.root.valueZ(), min: this.root.minZ(), max: this.root.maxZ() }
+      : undefined,
+  ));
 
   private readonly position = computed(() => {
     const { u, v, w } = this.bary();

@@ -33,8 +33,12 @@ describe("ColorNames.load", () => {
 });
 
 describe("ColorNames constructor", () => {
+  // The loaded-chunk registry is module-global, so this assertion is really
+  // "nothing anywhere has loaded this chunk". `da` is the locale no other
+  // suite in the repo touches; a popular one like `ru` makes the test pass or
+  // fail on the order `bun test` happens to walk the files in.
   it("throws when the chunk has not been loaded", () => {
-    expect(() => new ColorNames("ru", { source: "uwdata" })).toThrow(/ColorNames\.load/);
+    expect(() => new ColorNames("da", { source: "uwdata" })).toThrow(/ColorNames\.load/);
   });
 
   it("works synchronously once loaded", async () => {

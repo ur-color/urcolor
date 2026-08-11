@@ -10,7 +10,7 @@ export interface ColorTriangleThumbProps extends /* @vue-ignore */ PrimitiveProp
 <script setup lang="ts">
 import { computed, onMounted } from "vue";
 import { Primitive, useForwardExpose } from "reka-ui";
-import { barycentricToCartesian, insetTriangle } from "@urcolor/shared";
+import { barycentricFromChannels, barycentricToCartesian, insetTriangle } from "@urcolor/shared";
 import { channelLabel, formatChannelValue } from "../../shared/channel-labels";
 import { injectColorTriangleRootContext } from "./ColorTriangleRoot.vue";
 
@@ -25,34 +25,13 @@ onMounted(() => {
 });
 
 const thumbPosition = computed(() => {
-  const xVal = rootContext.currentXValue.value;
-  const yVal = rootContext.currentYValue.value;
-  const xMin = rootContext.xMin.value;
-  const xMax = rootContext.xMax.value;
-  const yMin = rootContext.yMin.value;
-  const yMax = rootContext.yMax.value;
-  const xRange = xMax - xMin;
-  const yRange = yMax - yMin;
-
-  let u: number, v: number, w: number;
-
-  if (rootContext.isThreeChannel.value) {
-    const zVal = rootContext.currentZValue.value;
-    const zMin = rootContext.zMin.value;
-    const zMax = rootContext.zMax.value;
-    const zRange = zMax - zMin;
-    const rawU = xRange === 0 ? 0 : (xVal - xMin) / xRange;
-    const rawV = yRange === 0 ? 0 : (yVal - yMin) / yRange;
-    const rawW = zRange === 0 ? 0 : (zVal - zMin) / zRange;
-    const sum = rawU + rawV + rawW || 1;
-    u = rawU / sum;
-    v = rawV / sum;
-    w = rawW / sum;
-  } else {
-    u = xRange === 0 ? 0 : (xVal - xMin) / xRange;
-    w = yRange === 0 ? 0 : 1 - (yVal - yMin) / yRange;
-    v = Math.max(0, 1 - u - w);
-  }
+  const { u, v, w } = barycentricFromChannels(
+    { value: rootContext.currentXValue.value, min: rootContext.xMin.value, max: rootContext.xMax.value },
+    { value: rootContext.currentYValue.value, min: rootContext.yMin.value, max: rootContext.yMax.value },
+    rootContext.isThreeChannel.value
+      ? { value: rootContext.currentZValue.value, min: rootContext.zMin.value, max: rootContext.zMax.value }
+      : undefined,
+  );
 
   const [v0, v1, v2] = rootContext.vertices.value;
 

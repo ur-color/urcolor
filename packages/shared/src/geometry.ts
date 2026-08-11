@@ -1,3 +1,5 @@
+import { clamp } from "./math";
+
 export interface Point {
   x: number;
   y: number;
@@ -74,6 +76,57 @@ export function barycentricToCartesian(u: number, v: number, w: number, v0: Poin
     x: u * v0.x + v * v1.x + w * v2.x,
     y: u * v0.y + v * v1.y + w * v2.y,
   };
+}
+
+/** One axis of a triangle picker: the value it currently shows, and its bounds. */
+export interface ChannelAxis {
+  value: number;
+  min: number;
+  max: number;
+}
+
+/** Fraction of the axis its value sits at; 0 for a zero-width axis. */
+function axisFraction(axis: ChannelAxis): number {
+  const range = axis.max - axis.min;
+  return range === 0 ? 0 : clamp((axis.value - axis.min) / range, 0, 1);
+}
+
+/**
+ * Barycentric coordinates for a triangle picker's thumb, from the channel
+ * values it displays. The inverse of the pointer map a triangle root applies,
+ * and the reason it lives here is that the result must be a genuine
+ * barycentric triple: `barycentricToCartesian` reads any excess over 1 as
+ * displacement toward a vertex, so a triple summing past 1 lands the thumb
+ * somewhere the values never meant.
+ *
+ * With `z`, all three axes are read and renormalised, since only their ratio
+ * carries meaning. An all-zero input has no ratio to preserve and splits
+ * evenly across the three vertices.
+ *
+ * Without `z`, the first axis is `u`, the second runs backwards along `w`, and
+ * `v` is the remainder. Only the half-simplex `u + w <= 1` is reachable — in
+ * HSV terms the triangle can only show `s <= v` — and a value from outside it
+ * has to give way on one axis. It gives way on the first: a black that still
+ * carries a saturation belongs on the black vertex, at the value it has,
+ * rather than partway along the edge toward white.
+ */
+export function barycentricFromChannels(
+  x: ChannelAxis,
+  y: ChannelAxis,
+  z?: ChannelAxis,
+): { u: number; v: number; w: number } {
+  if (z !== undefined) {
+    const rawU = axisFraction(x);
+    const rawV = axisFraction(y);
+    const rawW = axisFraction(z);
+    const sum = rawU + rawV + rawW;
+    if (sum === 0) return { u: 1 / 3, v: 1 / 3, w: 1 / 3 };
+    return { u: rawU / sum, v: rawV / sum, w: rawW / sum };
+  }
+
+  const w = 1 - axisFraction(y);
+  const u = Math.min(axisFraction(x), 1 - w);
+  return { u, v: 1 - u - w, w };
 }
 
 /** Check if a point is inside a triangle using barycentric coordinates. */
