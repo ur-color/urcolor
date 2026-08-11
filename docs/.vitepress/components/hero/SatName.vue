@@ -9,27 +9,32 @@ const color = useHeroColor();
 const lang = useDocsLang();
 const strings = computed(() => heroStrings(lang.value));
 
-const names = shallowRef<ColorNames | null>(null);
+const names = shallowRef<ColorNames[]>([]);
 
 /**
- * uwdata first: it models how speakers spontaneously name a *region* of colour
- * space, which is the right answer for an arbitrary picked colour. wikidata is
- * the fallback for languages uwdata never sampled (`ja` among the site's), and
- * answers a different question — the established name of a catalogued colour —
- * which is why the readout says which source spoke.
+ * Every source that covers the language, not the first one that does. The two
+ * answer different questions — uwdata models how speakers spontaneously name a
+ * *region* of colour space, wikidata catalogues named colours at exact values —
+ * and neither is the better answer everywhere, so the choice is made per colour
+ * below rather than per language here. `ja` yields one instance; the other six
+ * locales yield two.
+ *
+ * Order is the package's own default chain, and it survives into `resolution`
+ * as the tie-break.
  */
-async function pickNames(l: string): Promise<ColorNames | null> {
+async function loadNames(l: string): Promise<ColorNames[]> {
   const { ColorNames: Names, getSource } = await import("@urcolor/i18n");
-  for (const source of ["uwdata", "wikidata"] as const) {
-    if (getSource(source).languages[l]) return Names.load(l, { source });
-  }
-  return null;
+  const covering = (["uwdata", "wikidata"] as const).filter(s => getSource(s).languages[l]);
+  return Promise.all(covering.map(source => Names.load(l, { source })));
 }
 
 /**
  * A language chunk is real data, not a lookup table — uwdata's English one is
  * ~136 kB gzipped — so it waits for idle rather than competing with the hero's
  * first paint. The 1.5s ceiling covers Safari, which has no `requestIdleCallback`.
+ * The second chunk is the small one of the pair (wikidata ships 27 kB for `zh`
+ * against uwdata's 633 kB for `en`, uncompressed), and both load together so the
+ * displayed name never changes on its own after the panel first fills.
  */
 function whenIdle(run: () => void): void {
   const ric = (window as { requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => void })
@@ -42,22 +47,41 @@ let token = 0;
 
 watch(lang, (l) => {
   // Keeping the load client-side keeps the data out of the SSR bundle too. The
-  // panel renders its placeholder until the chunk lands.
+  // panel renders its placeholder until the chunks land.
   if (typeof window === "undefined") return;
   const mine = ++token;
   whenIdle(() => {
     if (mine !== token) return;
-    void pickNames(l).then((loaded) => {
+    void loadNames(l).then((loaded) => {
       if (mine === token) names.value = loaded;
     }).catch(() => {
-      if (mine === token) names.value = null;
+      if (mine === token) names.value = [];
     });
   });
 }, { immediate: true });
 
-const resolution = computed<ColorNameResolution | undefined>(() =>
-  names.value ? names.value.resolve(color.value) : undefined,
-);
+/**
+ * The closer of the two answers wins. `binDistance` is the only number
+ * comparable across the models — `probability` is a sampled naming frequency
+ * for uwdata and a proximity confidence for wikidata, so a 40% naming frequency
+ * is not "worse" than a 0.9 proximity score.
+ *
+ * Two properties of the lookups make this need no special cases: the full model
+ * reports distance 0 on an exact bin hit, so uwdata wins wherever it has real
+ * data for the queried bin, and both models report `Infinity` when nothing
+ * matches, so a source with nothing to say loses by arithmetic. `reduce` keeps
+ * the incumbent on a tie, which leaves the package's own source order as the
+ * tie-break.
+ */
+const resolution = computed<ColorNameResolution | undefined>(() => {
+  const answered = names.value
+    .map(n => n.resolve(color.value))
+    .filter(r => r.coverage !== "none" && r.name);
+  return answered.reduce<ColorNameResolution | undefined>(
+    (best, r) => (best === undefined || r.binDistance < best.binDistance ? r : best),
+    undefined,
+  );
+});
 
 const name = computed(() => {
   const r = resolution.value;
