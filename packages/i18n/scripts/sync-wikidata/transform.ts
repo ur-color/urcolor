@@ -1,6 +1,6 @@
 import { Color } from "@urcolor/core";
 import type { LanguageCoverage, PaletteChunk, TermEntry } from "../../src/engine/types";
-import type { RawAliasRow, RawItemRow, RawLabelRow } from "./fetch";
+import type { Catalogue, RawAliasRow, RawCatalogueRow, RawItemRow, RawLabelRow } from "./fetch";
 
 /**
  * Wikidata pseudo-languages. `mul` ("multiple languages") is present in the
@@ -48,6 +48,75 @@ export function normalizeLanguage(tag: string): string | undefined {
   const lower = tag.toLowerCase();
   if (EXCLUDED_LANGUAGES.has(lower)) return undefined;
   return LANGUAGE_MERGE[lower] ?? lower;
+}
+
+/**
+ * Catalogue names as they are actually spelled in the shipped labels. The list
+ * exists only for the fifteen digit-free codes in the data: `Pantone Reflex
+ * Blue` in three locales, and `NCS red/green/yellow/blue` in English, Venetian
+ * (`NCS roso`) and Frisian (`NCS-read`). Everything else a catalogue label can
+ * be is caught by the digit test below.
+ */
+const CATALOGUE_MARKERS = ["pantone", "ral", "ncs", "彩通", "פנטון", "แพนโทน", "پنتون", "بانتون"];
+
+/**
+ * Anchored to whitespace, hyphen or string edge, so "coral" and "general" are
+ * not read as RAL codes. Frisian writes `NCS-read`, hence the hyphen.
+ */
+const MARKER_PATTERN = new RegExp(`(^|[\\s\\-])(${CATALOGUE_MARKERS.join("|")})([\\s\\-]|$)`, "iu");
+
+/**
+ * Whether a label on a catalogue item is the code rather than a name.
+ *
+ * Identifying the item is not the same as condemning all of its labels. Some
+ * languages label a RAL item with its descriptive name: German `Verkehrsrot`
+ * for RAL 3020, Italian `rosso traffico`, Japanese `シグナルレッド`, plus ten
+ * Estonian, eight Indonesian and five Czech names. Those are ordinary colour
+ * words and stay in this source.
+ *
+ * The digit test carries almost all of the work and is script-neutral:
+ * `\p{Nd}` matches Persian `۴۴۸` as readily as `448`. The rule fails in the
+ * safe direction, since an unrecognised marker leaves a code-shaped label
+ * visible in the data rather than destroying a real name.
+ */
+export function isCatalogueCode(label: string): boolean {
+  return /\p{Nd}/u.test(label) || MARKER_PATTERN.test(label);
+}
+
+export function catalogueMembership(rows: readonly RawCatalogueRow[]): Map<string, Catalogue> {
+  return new Map(rows.map(row => [row.qid, row.catalogue]));
+}
+
+/** Splits label or alias rows into the ones that stay and the codes that go. */
+export function stripCatalogueCodes<T extends RawLabelRow>(
+  rows: readonly T[],
+  membership: ReadonlyMap<string, Catalogue>,
+): { kept: T[]; dropped: T[] } {
+  const kept: T[] = [];
+  const dropped: T[] = [];
+  for (const row of rows) {
+    if (membership.has(row.qid) && isCatalogueCode(row.value)) dropped.push(row);
+    else kept.push(row);
+  }
+  return { kept, dropped };
+}
+
+/**
+ * Drops catalogue items that lost every label, so they stop inflating
+ * `itemCount` — the denominator every coverage figure divides by. A catalogue
+ * item that kept a descriptive label in some language is still a colour this
+ * source names, so it stays.
+ *
+ * Items outside any catalogue are never pruned, even when unlabelled: their
+ * presence in the denominator is what makes coverage mean "the fraction of the
+ * catalogue this language names".
+ */
+export function pruneCatalogueItems(
+  itemRows: readonly RawItemRow[],
+  membership: ReadonlyMap<string, Catalogue>,
+  survivingQids: ReadonlySet<string>,
+): RawItemRow[] {
+  return itemRows.filter(row => !membership.has(row.qid) || survivingQids.has(row.qid));
 }
 
 /**

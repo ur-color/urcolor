@@ -1,25 +1,41 @@
 import { describe, expect, it } from "bun:test";
 import { Color } from "@urcolor/core";
-import { parseAliases, parseItems, parseLabels } from "../../../scripts/sync-wikidata/fetch";
+import { parseAliases, parseCatalogue, parseItems, parseLabels } from "../../../scripts/sync-wikidata/fetch";
+import type { Catalogue } from "../../../scripts/sync-wikidata/fetch";
 import {
   EXCLUDED_LANGUAGES,
   LANGUAGE_MERGE,
   buildItems,
   buildPaletteChunk,
+  catalogueMembership,
   groupAliases,
   groupLabels,
+  isCatalogueCode,
   normalizeLanguage,
   paletteCoverage,
   pickHex,
+  pruneCatalogueItems,
+  stripCatalogueCodes,
 } from "../../../scripts/sync-wikidata/transform";
 
 const fixture = (name: string) => Bun.file(`${import.meta.dir}/../../fixtures/wikidata/${name}`).text();
 
+/**
+ * Mirrors the pipeline `main.ts` runs, split included. The fixtures carry two
+ * catalogue items on purpose — Q2516404 (RAL 3020, which also has the German
+ * name `Verkehrsrot`) and Q24885519 (Pantone 448 C, which has only codes) — so
+ * skipping the split here would test a shape the sync never produces.
+ */
 async function load() {
+  const membership = catalogueMembership(parseCatalogue(await fixture("catalogue.json")));
+  const labelRows = stripCatalogueCodes(parseLabels(await fixture("labels.json")), membership);
+  const aliasRows = stripCatalogueCodes(parseAliases(await fixture("aliases.json")), membership);
+  const surviving = new Set(labelRows.kept.map(row => row.qid));
+
   return {
-    items: buildItems(parseItems(await fixture("items.json"))),
-    labels: groupLabels(parseLabels(await fixture("labels.json"))),
-    aliases: groupAliases(parseAliases(await fixture("aliases.json"))),
+    items: buildItems(pruneCatalogueItems(parseItems(await fixture("items.json")), membership, surviving)),
+    labels: groupLabels(labelRows.kept),
+    aliases: groupAliases(aliasRows.kept),
   };
 }
 
@@ -91,14 +107,17 @@ describe("pickHex", () => {
 describe("buildItems", () => {
   it("collapses multi-hex rows into one item", async () => {
     const { items } = await load();
-    expect(items).toHaveLength(4);
+    // Five, not six: Q24885519 (Pantone 448 C) had only code labels and was
+    // pruned, while Q2516404 kept German "Verkehrsrot" and so survives.
+    expect(items).toHaveLength(5);
     const lilac = items.find(i => i.qid === "Q12894641");
     expect(lilac?.hex).toBe("BF00FF");
   });
 
   it("orders by sitelinks descending so collisions resolve to the central sense", async () => {
     const { items } = await load();
-    expect(items.map(i => i.qid)).toEqual(["Q943", "Q23444", "Q12894641", "Q62391724"]);
+    expect(items.map(i => i.qid))
+      .toEqual(["Q943", "Q23444", "Q12894641", "Q2516404", "Q62391724"]);
   });
 
   it("computes an Oklab centroid matching a direct conversion", async () => {
@@ -291,5 +310,93 @@ describe("paletteCoverage", () => {
   it("reports zero coverage rather than NaN for an empty catalogue", () => {
     const chunk = { lang: "xx", model: "palette" as const, terms: [], provenance: [], aliases: {} };
     expect(paletteCoverage(chunk, 0).coverage).toBe(0);
+  });
+});
+
+describe("isCatalogueCode", () => {
+  it("treats any label containing a decimal digit as a code", () => {
+    expect(isCatalogueCode("RAL 5010")).toBe(true);
+    expect(isCatalogueCode("Pantone 448 C")).toBe(true);
+    expect(isCatalogueCode("彩通448C")).toBe(true);
+    // Persian digits. The digit test is script-neutral by design.
+    expect(isCatalogueCode("پنتون ۴۴۸ سی")).toBe(true);
+  });
+
+  it("treats a catalogue marker word as a code even without digits", () => {
+    expect(isCatalogueCode("Pantone Reflex Blue")).toBe(true);
+    expect(isCatalogueCode("NCS red")).toBe(true);
+    expect(isCatalogueCode("NCS roso")).toBe(true);
+    expect(isCatalogueCode("NCS-read")).toBe(true);
+  });
+
+  it("spares descriptive names that happen to sit on catalogue items", () => {
+    expect(isCatalogueCode("Verkehrsrot")).toBe(false);
+    expect(isCatalogueCode("traffic red")).toBe(false);
+    expect(isCatalogueCode("rosso traffico")).toBe(false);
+    expect(isCatalogueCode("交通紅")).toBe(false);
+    expect(isCatalogueCode("シグナルレッド")).toBe(false);
+    expect(isCatalogueCode("Mesikollane")).toBe(false);
+  });
+
+  it("does not fire on a marker embedded in a longer word", () => {
+    expect(isCatalogueCode("coral")).toBe(false);
+    expect(isCatalogueCode("general grey")).toBe(false);
+  });
+});
+
+describe("catalogue split", () => {
+  const membership: ReadonlyMap<string, Catalogue> = new Map<string, Catalogue>([
+    ["Q1", "ral"],
+    ["Q2", "pantone"],
+  ]);
+
+  const labels = [
+    { qid: "Q1", lang: "de", value: "Verkehrsrot" },
+    { qid: "Q1", lang: "en", value: "RAL 3020" },
+    { qid: "Q2", lang: "en", value: "Pantone 448 C" },
+    { qid: "Q2", lang: "he", value: "פנטון 448c" },
+    { qid: "Q3", lang: "en", value: "yellow" },
+  ];
+
+  it("maps each QID to its catalogue", () => {
+    const map = catalogueMembership([
+      { qid: "Q1", catalogue: "ral" },
+      { qid: "Q2", catalogue: "pantone" },
+    ]);
+    expect(map.get("Q1")).toBe("ral");
+    expect(map.get("Q2")).toBe("pantone");
+    expect(map.has("Q3")).toBe(false);
+  });
+
+  it("drops code-shaped labels on catalogue items and keeps descriptive ones", () => {
+    const { kept, dropped } = stripCatalogueCodes(labels, membership);
+    expect(kept.map(row => row.value)).toEqual(["Verkehrsrot", "yellow"]);
+    expect(dropped.map(row => row.value)).toEqual(["RAL 3020", "Pantone 448 C", "פנטון 448c"]);
+  });
+
+  it("never touches labels on items outside a catalogue", () => {
+    // The item is what makes a label a code, not the label's own shape.
+    const { kept } = stripCatalogueCodes(
+      [{ qid: "Q3", lang: "en", value: "Pantone 448 C" }],
+      membership,
+    );
+    expect(kept).toHaveLength(1);
+  });
+
+  it("keeps a catalogue item only when a label survived", () => {
+    const items = [
+      { qid: "Q1", hex: "CC0605", sitelinks: 3 },
+      { qid: "Q2", hex: "4A412A", sitelinks: 1 },
+      { qid: "Q3", hex: "FFFF00", sitelinks: 9 },
+    ];
+    expect(pruneCatalogueItems(items, membership, new Set(["Q1", "Q3"])).map(row => row.qid))
+      .toEqual(["Q1", "Q3"]);
+  });
+
+  it("never prunes an item outside a catalogue, even unlabelled", () => {
+    // Their presence in the denominator is what makes coverage mean "the
+    // fraction of the catalogue this language names".
+    const items = [{ qid: "Q9", hex: "FFFFFF", sitelinks: 0 }];
+    expect(pruneCatalogueItems(items, membership, new Set())).toHaveLength(1);
   });
 });
