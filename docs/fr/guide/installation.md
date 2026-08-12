@@ -2,7 +2,7 @@
 
 ## Prérequis
 
-- L'un de [Vue 3](https://vuejs.org/) (v3.4+), [React](https://react.dev/) (v18+), [Svelte](https://svelte.dev/) (v5.29+) ou [Angular](https://angular.dev/) (v21.2+)
+- L'un de [Vue 3](https://vuejs.org/) (v3.4+), [React](https://react.dev/) (v18+), [Preact](https://preactjs.com/) (v10.19+), [Svelte](https://svelte.dev/) (v5.29+) ou [Angular](https://angular.dev/) (v21.2+)
 - [Node.js](https://nodejs.org/) (v18+) ou [Bun](https://bun.sh/)
 
 ## Paquets
@@ -14,6 +14,7 @@
 | `@urcolor/shared` | Comportement indépendant du framework, rendu WebGL et échantillonneurs de grille, partagés par toutes les liaisons |
 | `@urcolor/vue` | Composants et composables Vue 3 |
 | `@urcolor/react` | Composants et hooks React |
+| `@urcolor/preact` | Les composants et hooks React, compilés avec `preact/compat` |
 | `@urcolor/svelte` | Composants Svelte 5 et hooks à base de runes |
 | `@urcolor/angular` | Directives Angular et stores à signaux |
 | `@urcolor/relative` | Syntaxe optionnelle des couleurs relatives CSS Color 5 |
@@ -61,6 +62,28 @@ pnpm add @urcolor/react
 
 ```sh [yarn]
 yarn add @urcolor/react
+```
+
+:::
+
+### Preact
+
+::: code-group
+
+```sh [bun]
+bun add @urcolor/preact
+```
+
+```sh [npm]
+npm install @urcolor/preact
+```
+
+```sh [pnpm]
+pnpm add @urcolor/preact
+```
+
+```sh [yarn]
+yarn add @urcolor/preact
 ```
 
 :::

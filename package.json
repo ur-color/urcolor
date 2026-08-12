@@ -7,7 +7,7 @@
     "docs"
   ],
   "scripts": {
-    "build": "bun run --cwd packages/core build && bun run --cwd packages/urcolor build && bun run --cwd packages/shared build && bun run --cwd packages/relative build && bun run --cwd packages/i18n build && bun run --cwd packages/vue build && bun run --cwd packages/react build && bun run --cwd packages/svelte build && bun run --cwd packages/angular build",
+    "build": "bun run --cwd packages/core build && bun run --cwd packages/urcolor build && bun run --cwd packages/shared build && bun run --cwd packages/relative build && bun run --cwd packages/i18n build && bun run --cwd packages/vue build && bun run --cwd packages/react build && bun run --cwd packages/preact build && bun run --cwd packages/svelte build && bun run --cwd packages/angular build",
     "docs:dev": "bun run --cwd docs dev",
     "docs:build": "bun run build && bun run --cwd docs build && bun run --cwd packages/vue build-storybook && mkdir -p docs/.vitepress/dist/storybook/vue && cp -r packages/vue/storybook-static/* docs/.vitepress/dist/storybook/vue/",
     "docs:preview": "bun run --cwd docs preview",
@@ -32,6 +32,7 @@
     "eslint-plugin-vue": "^10.8.0",
     "happy-dom": "^20.6.1",
     "jsdom": "^28.0.0",
+    "preact": "^10.19",
     "reka-ui": "^2.8.0",
     "sharp": "^0.34.5",
     "svelte-eslint-parser": "^1.8.0",
