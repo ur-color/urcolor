@@ -4,6 +4,10 @@ import {
   alphaAxisPixels,
   areaCssLayers,
   paintAreaSurface,
+  paintRingSurface,
+  paintTriangleSurface,
+  paintWheelSurface,
+  POLAR_GRID,
   SURFACE_GRID,
   surfaceOpacity,
 } from "./surface-gradients";
@@ -188,5 +192,69 @@ describe("areaCssLayers", () => {
 describe("SURFACE_GRID", () => {
   test("is the sample resolution the surfaces share", () => {
     expect(SURFACE_GRID).toBe(64);
+  });
+});
+
+describe("the polar and triangle surfaces", () => {
+  test("sample the polar families at a higher resolution than the rectangles", () => {
+    expect(POLAR_GRID).toBe(128);
+    expect(POLAR_GRID).toBeGreaterThan(SURFACE_GRID);
+  });
+
+  test("paintWheelSurface survives a full sweep", () => {
+    const { canvas } = fakeCanvas();
+    expect(() => paintWheelSurface({
+      canvas,
+      color: BASE,
+      colorSpace: "hsv",
+      angleChannel: "h",
+      radiusChannel: "s",
+      startAngle: 0,
+      overrides: { alpha: 1 },
+    })).not.toThrow();
+  });
+
+  test("paintWheelSurface ignores a channel the space does not have", () => {
+    const { canvas, blits } = fakeCanvas();
+    paintWheelSurface({
+      canvas,
+      color: BASE,
+      colorSpace: "hsv",
+      angleChannel: "nonsense",
+      radiusChannel: "s",
+      startAngle: 0,
+      overrides: false,
+    });
+    expect(blits.length).toBe(0);
+  });
+
+  test("paintRingSurface survives a full sweep", () => {
+    const { canvas } = fakeCanvas();
+    expect(() => paintRingSurface({
+      canvas,
+      color: BASE,
+      colorSpace: "hsl",
+      channel: "h",
+      startAngle: 0,
+      overrides: { alpha: 1 },
+    })).not.toThrow();
+  });
+
+  test("paintTriangleSurface survives two and three channel triangles", () => {
+    const { canvas } = fakeCanvas();
+    const vertices = [{ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 0.5, y: 1 }] as const;
+    expect(() => paintTriangleSurface({
+      canvas, color: BASE, colorSpace: "hsv", xChannel: "s", yChannel: "v", vertices, overrides: false,
+    })).not.toThrow();
+    expect(() => paintTriangleSurface({
+      canvas,
+      color: BASE,
+      colorSpace: "hsv",
+      xChannel: "s",
+      yChannel: "v",
+      zChannel: "h",
+      vertices,
+      overrides: false,
+    })).not.toThrow();
   });
 });

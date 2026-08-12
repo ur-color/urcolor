@@ -3,7 +3,15 @@ import { renderToCanvas } from "./canvas";
 import { getChannelConfig } from "./color-spaces";
 import { cssAreaBilinear, cssAreaChannels, type CssGradientLayer } from "./css-gradient";
 import { applyChannelOverrides, type ChannelOverrides } from "./gradient-stops";
-import { drawGradient, sampleBilinearGrid, sampleChannelGrid } from "./gradient";
+import {
+  drawGradient,
+  sampleBilinearGrid,
+  sampleChannelGrid,
+  sampleConicRing,
+  samplePolarGrid,
+  sampleTriangleGrid,
+} from "./gradient";
+import type { Point } from "./geometry";
 
 /**
  * Sample resolution of every two-dimensional surface.
@@ -13,6 +21,14 @@ import { drawGradient, sampleBilinearGrid, sampleChannelGrid } from "./gradient"
  * interpolation.
  */
 export const SURFACE_GRID = 64;
+
+/**
+ * Sample resolution of the polar surfaces.
+ *
+ * The wheel and the ring sweep a full revolution, so a 64-wide grid shows
+ * visible stepping along the angular axis where a rectangle would not.
+ */
+export const POLAR_GRID = 128;
 
 /** The four explicit corner colors, as `[topLeft, topRight, bottomLeft, bottomRight]`. */
 export type SurfaceCorners = readonly [string, string, string, string];
@@ -238,4 +254,121 @@ export function areaCssLayers(options: AreaSurfaceOptions): CssGradientLayer[] |
     options.slidingFromLeft,
     options.slidingFromTop,
   );
+}
+
+export interface WheelSurfaceOptions {
+  canvas: HTMLCanvasElement;
+  color: Color;
+  colorSpace: SpaceId;
+  angleChannel: string;
+  radiusChannel: string;
+  startAngle: number;
+  overrides: ChannelOverrides;
+}
+
+/** Paints the wheel's disc. */
+export function paintWheelSurface(options: WheelSurfaceOptions): void {
+  const angleConfig = getChannelConfig(options.colorSpace, options.angleChannel);
+  const radiusConfig = getChannelConfig(options.colorSpace, options.radiusChannel);
+  if (!angleConfig || !radiusConfig) return;
+
+  const pixels = samplePolarGrid(
+    applyChannelOverrides(options.color, options.colorSpace, options.overrides),
+    options.colorSpace,
+    options.angleChannel,
+    options.radiusChannel,
+    angleConfig.nativeMin ?? angleConfig.min,
+    angleConfig.nativeMax ?? angleConfig.max,
+    radiusConfig.nativeMin ?? radiusConfig.min,
+    radiusConfig.nativeMax ?? radiusConfig.max,
+    POLAR_GRID,
+    POLAR_GRID,
+    options.startAngle,
+  );
+  renderToCanvas({ canvas: options.canvas, pixels, sampleWidth: POLAR_GRID, sampleHeight: POLAR_GRID });
+}
+
+export interface RingSurfaceOptions {
+  canvas: HTMLCanvasElement;
+  color: Color;
+  colorSpace: SpaceId;
+  channel: string;
+  startAngle: number;
+  overrides: ChannelOverrides;
+}
+
+/**
+ * Paints the ring's conic band.
+ *
+ * `innerRadius` is deliberately not a parameter: it only moves the mask, and
+ * the pixels the canvas paints are the same at every radius.
+ */
+export function paintRingSurface(options: RingSurfaceOptions): void {
+  const config = getChannelConfig(options.colorSpace, options.channel);
+  if (!config) return;
+
+  const pixels = sampleConicRing(
+    applyChannelOverrides(options.color, options.colorSpace, options.overrides),
+    options.colorSpace,
+    options.channel,
+    config.nativeMin ?? config.min,
+    config.nativeMax ?? config.max,
+    POLAR_GRID,
+    POLAR_GRID,
+    options.startAngle,
+  );
+  renderToCanvas({ canvas: options.canvas, pixels, sampleWidth: POLAR_GRID, sampleHeight: POLAR_GRID });
+}
+
+export interface TriangleSurfaceOptions {
+  canvas: HTMLCanvasElement;
+  color: Color;
+  colorSpace: SpaceId;
+  xChannel: string;
+  yChannel: string;
+  /** The third channel, when the triangle spans three rather than two. */
+  zChannel?: string;
+  vertices: readonly [Point, Point, Point];
+  overrides: ChannelOverrides;
+}
+
+/** Paints the triangle's surface, in two or three channels. */
+export function paintTriangleSurface(options: TriangleSurfaceOptions): void {
+  const xConfig = getChannelConfig(options.colorSpace, options.xChannel);
+  const yConfig = getChannelConfig(options.colorSpace, options.yChannel);
+  if (!xConfig || !yConfig) return;
+
+  let zChannel: string | undefined;
+  let zMin: number | undefined;
+  let zMax: number | undefined;
+  if (options.zChannel !== undefined) {
+    const zConfig = getChannelConfig(options.colorSpace, options.zChannel);
+    if (zConfig) {
+      zChannel = options.zChannel;
+      zMin = zConfig.nativeMin ?? zConfig.min;
+      zMax = zConfig.nativeMax ?? zConfig.max;
+    }
+  }
+
+  const [v0, v1, v2] = options.vertices;
+  const pixels = sampleTriangleGrid(
+    applyChannelOverrides(options.color, options.colorSpace, options.overrides),
+    options.colorSpace,
+    options.xChannel,
+    options.yChannel,
+    xConfig.nativeMin ?? xConfig.min,
+    xConfig.nativeMax ?? xConfig.max,
+    yConfig.nativeMin ?? yConfig.min,
+    yConfig.nativeMax ?? yConfig.max,
+    v0,
+    v1,
+    v2,
+    SURFACE_GRID,
+    SURFACE_GRID,
+    false,
+    zChannel,
+    zMin,
+    zMax,
+  );
+  renderToCanvas({ canvas: options.canvas, pixels, sampleWidth: SURFACE_GRID, sampleHeight: SURFACE_GRID });
 }
