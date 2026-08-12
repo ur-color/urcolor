@@ -1,0 +1,62 @@
+{
+  "name": "@urcolor/lit",
+  "version": "2.0.0",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "bun run build:js && bun run build:types",
+    "build:js": "bun build ./src/index.ts --outdir ./dist --format esm --external lit --external @urcolor/core --external @urcolor/shared",
+    "build:types": "tsc --declaration --emitDeclarationOnly --outDir dist --project tsconfig.build.json",
+    "check": "tsc -p tsconfig.json --noEmit"
+  },
+  "keywords": [
+    "color",
+    "color-picker",
+    "lit",
+    "web-components",
+    "custom-elements",
+    "headless",
+    "accessible",
+    "oklch",
+    "color-slider",
+    "color-wheel"
+  ],
+  "author": {
+    "name": "GrandMagus",
+    "url": "https://github.com/GrandMagus02"
+  },
+  "homepage": "https://urcolor.vercel.app/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ur-color/urcolor",
+    "directory": "packages/lit"
+  },
+  "bugs": {
+    "url": "https://github.com/ur-color/urcolor/issues"
+  },
+  "dependencies": {
+    "@urcolor/core": "workspace:*",
+    "@urcolor/shared": "workspace:*"
+  },
+  "peerDependencies": {
+    "lit": "^3.1"
+  },
+  "devDependencies": {
+    "lit": "^3.1",
+    "typescript": "^5.9"
+  }
+}
