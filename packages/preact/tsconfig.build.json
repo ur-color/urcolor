@@ -1,0 +1,26 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    // Declarations are emitted against React's own types, not preact/compat's.
+    // The two disagree on JSX attribute typing by design: compat widens `style`
+    // so it cannot be spread, drops the default type argument on its event
+    // types, and spells `spellcheck` lowercase. Consumers alias react to
+    // preact/compat in their own tsconfig, which is what Preact's docs already
+    // instruct for compat, and these types then resolve correctly.
+    "jsx": "react-jsx",
+    "noEmit": false,
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    // The entry re-exports across a package boundary, so the common root is
+    // the packages directory: tsc emits dist-types/react/src/**, and the
+    // build:types:entry script writes the single path package.json advertises.
+    "rootDir": "..",
+    "outDir": "dist-types",
+    "paths": {
+      "@urcolor/core": ["../core/dist/index.d.ts"],
+      "@urcolor/shared": ["../shared/dist/index.d.ts"]
+    }
+  },
+  "include": ["src", "../react/src"],
+  "exclude": ["node_modules", "dist", "**/*.test.tsx", "**/*.test.ts", "**/*.stories.tsx"]
+}
