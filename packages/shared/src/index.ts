@@ -11,6 +11,7 @@ export * from "./slider";
 export * from "./toggle";
 export * from "./gradient";
 export * from "./gradient-stops";
+export * from "./surface-gradients";
 export * from "./css-gradient";
 export * from "./color-spaces";
 export * from "./geometry";
