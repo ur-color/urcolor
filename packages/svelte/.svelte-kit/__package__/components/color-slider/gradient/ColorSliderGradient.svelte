@@ -35,15 +35,11 @@
 
 <script lang="ts">
   import { createAttachmentKey } from "svelte/attachments";
-  import { Color } from "@urcolor/core";
-  import { CHECKERBOARD_CSS, cssLinearStops, defaultStepsFor, drawLinearGradient, getChannelConfig, interpolateStops } from "@urcolor/shared";
+  import { CHECKERBOARD_CSS, cssLinearStops, defaultStepsFor, drawLinearGradient, gradientOpacity, sliderStops, SLIDER_CANVAS_STEPS } from "@urcolor/shared";
   import { CSS_GRADIENT_ROOT_STYLE, cssLayerStyle, resolveCssGradient } from "../../../shared/cssGradient.svelte.js";
   import type { ChildProps } from "../../../shared/child.js";
   import { gradientAttachment } from "../../../shared/gradient.svelte.js";
   import { colorSliderContext } from "../root/context.svelte.js";
-
-  const AUTO_STEPS = 12;
-  const INTERPOLATION_STEPS = 32;
 
   let {
     colors: colorsProp,
@@ -65,75 +61,26 @@
   /** Horizontal and vertical both mirror along their own axis when inverted. */
   const mirrored = $derived(context.inverted);
 
-  const canvasOpacity = $derived.by(() => {
-    if (isAlphaChannel) return 1;
-    if (channelOverrides === false || channelOverrides.alpha === undefined) return context.color.alpha;
-    return 1;
-  });
+  const canvasOpacity = $derived(
+    gradientOpacity(context.color, context.channel, channelOverrides),
+  );
 
-  /** Applies the non-alpha overrides, then alpha, to a base colour. */
-  function withOverrides(base: Color): Color {
-    if (channelOverrides === false) return base;
-    const applicable: Record<string, number> = {};
-    for (const [key, value] of Object.entries(channelOverrides)) {
-      if (key !== "alpha" && getChannelConfig(context.colorSpace, key)) applicable[key] = value;
-    }
-    let result = base;
-    if (Object.keys(applicable).length > 0) {
-      result = result.with({ space: context.colorSpace, ...applicable });
-    }
-    if (channelOverrides.alpha !== undefined) result = result.withAlpha(channelOverrides.alpha);
-    return result;
-  }
-
-  function buildAutoColors(steps: number): Color[] | null {
-    if (colorsProp) return null;
-
-    if (isAlphaChannel) {
-      const base = withOverrides(context.color);
-      return [base.withAlpha(0), base.withAlpha(1)];
-    }
-
-    const config = getChannelConfig(context.colorSpace, context.channel);
-    if (!config) return null;
-
-    const base = withOverrides(context.color);
-    const min = config.nativeMin ?? config.min;
-    const max = config.nativeMax ?? config.max;
-    const stops: Color[] = [];
-    for (let i = 0; i < steps; i++) {
-      const t = i / (steps - 1);
-      stops.push(base.with({ space: context.colorSpace, [context.channel]: min + t * (max - min) }));
-    }
-    return stops;
-  }
-
-  /**
-   * The stop list both painters draw, differing only in how many stops they can
-   * hold: the shader has 16 uniform slots, CSS has no ceiling. Mirroring
-   * reverses the stops rather than flipping the gradient, as the WebGL path has
-   * always done.
-   */
-  function resolveStops(steps: number): Color[] | null {
-    let stops: Color[];
-    if (colorsProp) {
-      const parsed = colorsProp.map(entry => Color.parse(entry));
-      if (parsed.length < 2 || parsed.some(entry => !entry)) return null;
-      stops = parsed as Color[];
-    } else {
-      const auto = buildAutoColors(steps);
-      if (!auto || auto.length < 2) return null;
-      stops = auto;
-    }
-
-    if (mirrored) stops = [...stops].reverse();
-    return interpolationSpace
-      ? interpolateStops(stops, INTERPOLATION_STEPS, interpolationSpace)
-      : stops;
+  /** Stops for a given step count, in the slider's own axis direction. */
+  function resolveStops(steps: number) {
+    return sliderStops({
+      color: context.color,
+      colorSpace: context.colorSpace,
+      channel: context.channel,
+      colors: colorsProp,
+      channelOverrides,
+      interpolationSpace,
+      steps,
+      mirrored,
+    });
   }
 
   function paint(canvas: HTMLCanvasElement): void {
-    const stops = resolveStops(AUTO_STEPS);
+    const stops = resolveStops(SLIDER_CANVAS_STEPS);
     if (!stops) return;
     drawLinearGradient(canvas, stops, effectiveAngle, isAlphaChannel);
   }
@@ -160,7 +107,7 @@
    * computed in that space.
    */
   const cssLayers = $derived.by(() => resolveCssGradient(renderer, "ColorSliderGradient", !!child, () => {
-    const stops = resolveStops(colorsProp ? AUTO_STEPS : defaultStepsFor(context.colorSpace, context.channel));
+    const stops = resolveStops(colorsProp ? SLIDER_CANVAS_STEPS : defaultStepsFor(context.colorSpace, context.channel));
     return stops && cssLinearStops(stops, effectiveAngle);
   }));
 
