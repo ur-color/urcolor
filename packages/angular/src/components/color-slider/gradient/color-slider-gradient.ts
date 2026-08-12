@@ -16,14 +16,12 @@ import {
   cssLinearStops,
   defaultStepsFor,
   drawLinearGradient,
-  getChannelConfig,
-  interpolateStops,
+  gradientOpacity,
+  SLIDER_CANVAS_STEPS,
+  sliderStops,
 } from "@urcolor/shared";
 import { cssGradientBackground, type GradientRenderer } from "../../../shared/css-gradient";
 import { ColorSliderRoot } from "../root/color-slider-root";
-
-const AUTO_STEPS = 12;
-const INTERPOLATION_STEPS = 32;
 
 /**
  * Channels locked to fixed values while the gradient is drawn, or `false` for
@@ -92,81 +90,29 @@ export class ColorSliderGradient {
     () => this.angle() ?? (this.root.orientation() === "vertical" ? 90 : 0),
   );
 
-  protected readonly canvasOpacity = computed(() => {
-    if (this.isAlphaChannel()) return 1;
-    const overrides = this.channelOverrides();
-    if (overrides === false || overrides["alpha"] === undefined) return this.root.value().alpha;
-    return 1;
-  });
-
-  /** Applies the non-alpha overrides, then alpha, to a base colour. */
-  private withOverrides(base: Color): Color {
-    const overrides = this.channelOverrides();
-    if (overrides === false) return base;
-    const colorSpace = this.root.colorSpace();
-    const applicable: Record<string, number> = {};
-    for (const [key, value] of Object.entries(overrides)) {
-      if (key !== "alpha" && getChannelConfig(colorSpace, key)) applicable[key] = value;
-    }
-    let result = base;
-    if (Object.keys(applicable).length > 0) {
-      result = result.with({ space: colorSpace, ...applicable });
-    }
-    const alpha = overrides["alpha"];
-    if (alpha !== undefined) result = result.withAlpha(alpha);
-    return result;
-  }
-
-  private buildAutoColors(steps: number): Color[] | null {
-    if (this.colors()) return null;
-
-    const colorSpace = this.root.colorSpace();
-    const channel = this.root.channel();
-    const base = this.withOverrides(this.root.value());
-
-    if (this.isAlphaChannel()) return [base.withAlpha(0), base.withAlpha(1)];
-
-    const config = getChannelConfig(colorSpace, channel);
-    if (!config) return null;
-
-    const min = config.nativeMin ?? config.min;
-    const max = config.nativeMax ?? config.max;
-    const stops: Color[] = [];
-    for (let i = 0; i < steps; i++) {
-      const t = i / (steps - 1);
-      stops.push(base.with({ space: colorSpace, [channel]: min + t * (max - min) }));
-    }
-    return stops;
-  }
+  protected readonly canvasOpacity = computed(
+    () => gradientOpacity(this.root.value(), this.root.channel(), this.channelOverrides()),
+  );
 
   /**
    * The stop list both painters draw, differing only in how many stops they can
-   * hold: the shader has 16 uniform slots, CSS has no ceiling. Mirroring
-   * reverses the stops rather than flipping the gradient, as the WebGL path has
-   * always done.
+   * hold: the shader has 16 uniform slots, CSS has no ceiling.
    *
    * `interpolationSpace` does not force the canvas — a 1D sweep is fully
    * expressible as stops, and they are densified in that space here.
    */
   private resolveStops(steps: number): Color[] | null {
-    const explicit = this.colors();
-    let stops: Color[];
-
-    if (explicit) {
-      const parsed = explicit.map(entry => Color.parse(entry));
-      if (parsed.length < 2 || parsed.some(entry => !entry)) return null;
-      stops = parsed as Color[];
-    } else {
-      const auto = this.buildAutoColors(steps);
-      if (!auto || auto.length < 2) return null;
-      stops = auto;
-    }
-
-    // Horizontal and vertical both mirror along their own axis when inverted.
-    if (this.root.inverted()) stops = [...stops].reverse();
-
-    const space = this.interpolationSpace();
-    return space ? interpolateStops(stops, INTERPOLATION_STEPS, space) : stops;
+    return sliderStops({
+      color: this.root.value(),
+      colorSpace: this.root.colorSpace(),
+      channel: this.root.channel(),
+      colors: this.colors(),
+      channelOverrides: this.channelOverrides(),
+      interpolationSpace: this.interpolationSpace(),
+      steps,
+      // Horizontal and vertical both mirror along their own axis when inverted.
+      mirrored: this.root.inverted(),
+    });
   }
 
   /**
@@ -176,7 +122,7 @@ export class ColorSliderGradient {
   protected readonly background = computed(
     () => cssGradientBackground(this.renderer(), "ColorSliderGradient", () => {
       const stops = this.resolveStops(
-        this.colors() ? AUTO_STEPS : defaultStepsFor(this.root.colorSpace(), this.root.channel()),
+        this.colors() ? SLIDER_CANVAS_STEPS : defaultStepsFor(this.root.colorSpace(), this.root.channel()),
       );
       return stops && cssLinearStops(stops, this.effectiveAngle());
     }) ?? this.checkerboard,
@@ -213,7 +159,7 @@ export class ColorSliderGradient {
   }
 
   private paint(canvas: HTMLCanvasElement): void {
-    const stops = this.resolveStops(AUTO_STEPS);
+    const stops = this.resolveStops(SLIDER_CANVAS_STEPS);
     if (!stops) return;
     drawLinearGradient(canvas, stops, this.effectiveAngle(), this.isAlphaChannel());
   }

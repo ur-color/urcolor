@@ -319,8 +319,8 @@ export function HueSlider() {
 }
 ```
 
-The API is identical to [`@urcolor/react`](../react/README.md): this package is
-that source compiled against `preact/compat`.
+The API is identical to `@urcolor/react`: this package is that source compiled
+against `preact/compat`.
 
 Documentation: https://urcolor.vercel.app/components/preact/
 ```

@@ -543,7 +543,7 @@ The literal `data-orientation` attribute names are unavoidable in a template: Gl
 
 - [ ] **Step 4: Write the control**
 
-Create `packages/ember/src/components/color-slider/control.gts`. The listener block translates the `interaction` attachment from `ColorSliderRoot.svelte`; in Ember it is a modifier. Write it inline with `{{did-insert}}`-style semantics using a plain function modifier:
+Create `packages/ember/src/components/color-slider/control.gts`. The listener block translates the `interaction` attachment from `ColorSliderRoot.svelte`; in Ember it is a modifier. Write it as a plain function modifier:
 
 ```gts
 import Component from "@glimmer/component";
@@ -641,11 +641,11 @@ export default class ColorSliderControl extends Component<ColorSliderControlSign
 
 `track.gts` is the trivial one: a div carrying `data-orientation` and `data-disabled` from `@slider`, yielding its block.
 
-`range.gts` translates `range/ColorSliderRange.svelte`, computing the layout in a getter on the component class (Glimmer templates cannot compute), including the `fillsFromStart` reasoning, and applying it with `{{style}}`-free direct attribute binding: build the whole style string in the getter and bind `style={{this.layout}}` through `htmlSafe`.
+`range.gts` translates `range/ColorSliderRange.svelte`, computing the layout in a getter on the component class (Glimmer templates cannot compute), including the `fillsFromStart` reasoning, and applying it by building the whole style string in the getter and binding it to `style` through `htmlSafe`.
 
 `thumb.gts` translates `thumb/ColorSliderThumb.svelte`: a getter returning the `sliderAria` object, bound attribute by attribute in the template, plus `aria-label` from `channelLabel`, `aria-valuetext` from `formatChannelValue`, and the absolute position from `@slider.position`.
 
-`gradient.gts` translates `gradient/ColorSliderGradient.svelte`, which after the gradient-stops plan is mostly rendering: a getter for the CSS layers, an `{{#if}}` between the layer stack and a `<canvas>`, and a modifier painting the canvas with `drawLinearGradient` and releasing the WebGL context on teardown.
+`gradient.gts` translates `gradient/ColorSliderGradient.svelte`, which after the gradient-stops plan is mostly rendering: a getter for the CSS layers, an `if` block choosing between the layer stack and a `<canvas>`, and a modifier painting the canvas with `drawLinearGradient` and releasing the WebGL context on teardown.
 
 - [ ] **Step 6: Export and run the tests**
 
