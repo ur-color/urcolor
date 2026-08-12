@@ -1,0 +1,49 @@
+{
+  "name": "@urcolor/ncs",
+  "version": "2.0.0",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "bun": "./src/index.ts",
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "bun run build:js && bun run build:types",
+    "build:js": "bun build ./src/index.ts --outdir ./dist --format esm --external @urcolor/core",
+    "build:types": "tsc --declaration --emitDeclarationOnly --outDir dist --project tsconfig.build.json",
+    "fit": "bun run scripts/fit.ts"
+  },
+  "keywords": [
+    "color",
+    "css",
+    "ncs",
+    "natural-color-system"
+  ],
+  "author": {
+    "name": "GrandMagus",
+    "url": "https://github.com/GrandMagus02"
+  },
+  "homepage": "https://urcolor.vercel.app/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ur-color/urcolor",
+    "directory": "packages/ncs"
+  },
+  "bugs": {
+    "url": "https://github.com/ur-color/urcolor/issues"
+  },
+  "dependencies": {
+    "@urcolor/core": "workspace:*"
+  }
+}

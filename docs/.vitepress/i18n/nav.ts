@@ -19,6 +19,7 @@ export interface NavLabels {
   installation: string;
   colorClass: string;
   relativeColors: string;
+  ncsColors: string;
   colorNaming: string;
   benchmarks: string;
 
@@ -60,6 +61,7 @@ export const NAV_LABELS: Record<string, NavLabels> = {
     installation: "Installation",
     colorClass: "The Color Class",
     relativeColors: "Relative Colors",
+    ncsColors: "NCS Colors",
     colorNaming: "Color Naming",
     benchmarks: "Benchmarks",
     areaPicker: "Color Area Picker",
@@ -95,6 +97,7 @@ export const NAV_LABELS: Record<string, NavLabels> = {
     installation: "安装",
     colorClass: "Color 类",
     relativeColors: "相对颜色",
+    ncsColors: "NCS 颜色",
     colorNaming: "颜色命名",
     benchmarks: "性能基准",
     areaPicker: "颜色区域选择器",
@@ -130,6 +133,7 @@ export const NAV_LABELS: Record<string, NavLabels> = {
     installation: "インストール",
     colorClass: "Color クラス",
     relativeColors: "相対カラー",
+    ncsColors: "NCS カラー",
     colorNaming: "カラーネーミング",
     benchmarks: "ベンチマーク",
     areaPicker: "カラーエリアピッカー",
@@ -165,6 +169,7 @@ export const NAV_LABELS: Record<string, NavLabels> = {
     installation: "Instalación",
     colorClass: "La clase Color",
     relativeColors: "Colores relativos",
+    ncsColors: "Colores NCS",
     colorNaming: "Nombres de color",
     benchmarks: "Benchmarks",
     areaPicker: "Selector de área de color",
@@ -200,6 +205,7 @@ export const NAV_LABELS: Record<string, NavLabels> = {
     installation: "Installation",
     colorClass: "La classe Color",
     relativeColors: "Couleurs relatives",
+    ncsColors: "Couleurs NCS",
     colorNaming: "Noms de couleurs",
     benchmarks: "Benchmarks",
     areaPicker: "Sélecteur de zone de couleur",
@@ -235,6 +241,7 @@ export const NAV_LABELS: Record<string, NavLabels> = {
     installation: "Installation",
     colorClass: "Die Color-Klasse",
     relativeColors: "Relative Farben",
+    ncsColors: "NCS-Farben",
     colorNaming: "Farbbenennung",
     benchmarks: "Benchmarks",
     areaPicker: "Farbflächen-Picker",
@@ -270,6 +277,7 @@ export const NAV_LABELS: Record<string, NavLabels> = {
     installation: "Установка",
     colorClass: "Класс Color",
     relativeColors: "Относительные цвета",
+    ncsColors: "Цвета NCS",
     colorNaming: "Названия цветов",
     benchmarks: "Бенчмарки",
     areaPicker: "Пикер цветовой области",
@@ -397,6 +405,7 @@ export function sidebarFor(lang: string, exists: PageExists = () => true) {
     { text: t.installation, link: `${p}/guide/installation`, file: "guide/installation.md" },
     { text: t.colorClass, link: `${p}/guide/color-class`, file: "guide/color-class.md" },
     { text: t.relativeColors, link: `${p}/guide/relative-colors`, file: "guide/relative-colors.md" },
+    { text: t.ncsColors, link: `${p}/guide/ncs-colors`, file: "guide/ncs-colors.md" },
     { text: t.colorNaming, link: `${p}/guide/color-naming`, file: "guide/color-naming.md" },
     { text: t.benchmarks, link: `${p}/guide/benchmarks`, file: "guide/benchmarks.md" },
   ]);

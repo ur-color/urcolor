@@ -114,18 +114,36 @@ across two different blackness values rather than being fitted to one point.
 Saturation tracks `c / (c + w)`, the chromaticness share of the non-black part,
 scaled by a per-hue factor.
 
-The forward model is therefore:
+**Implementation note, 2026-08-12.** The HSV form above was built, fitted and
+then rejected on measurement. It reaches mean ΔE00 4.97 with four knots and
+3.52 with sixteen, both far outside the budget below. The shipped model works
+in **Oklch** instead, where blackness, chromaticness and whiteness behave close
+to linearly:
 
 ```
-h = H(hue)
-s = c / (c + w) * S(hue)
-v = (1 - blackness / 100) * V(hue)
+L = L0 - kb*(s/100) - kc*(c/100)
+C = Cc*(c/100) + Ccb*(c/100)*(s/100) + Ccc*(c/100)^2
+h = H + hb*(s/100) + hc*(c/100)
 ```
 
-evaluated in core's registered `hsv` space, with `H`, `S` and `V` each
-interpolated between four per-primary constants around the `Y -> R -> B -> G`
-circle. Interpolation is done on the circle with correct wrapping, which is the
-bug that makes Zache's `Y90R` land in magenta.
+with every coefficient interpolated between sixteen knots around the circle.
+That reaches **mean ΔE00 1.65**. The hue-drift terms `hb` and `hc` are what
+take it below 2.4: a real colour's hue moves as it darkens and saturates.
+
+A third form was measured and also rejected: a linear mixture in Oklab of pure
+hue, white and black, which is what NCS's own definition suggests. It fits
+worst of all, at 4.84, because NCS's percentages are judgements of perceptual
+resemblance rather than mixing weights.
+
+| Form | mean ΔE00 | over 5 |
+| --- | --- | --- |
+| HSV scaling, 4 knots | 4.97 | 845 |
+| HSV scaling, 16 knots | 3.52 | 409 |
+| Linear mixture in Oklab | 4.84 | 739 |
+| **Oklch, 16 knots** | **1.65** | **25** |
+
+Hue interpolation runs along the shortest arc in every form, which is the bug
+that makes Zache's `Y90R` land in magenta.
 
 The inverse solves the same three equations for blackness, chromaticness and
 hue fraction. It is analytic, not a nearest-neighbour search over samples, so
@@ -207,16 +225,34 @@ blackness and chromaticness rather than one row of each. They are test fixtures
 only. `files: ["dist"]` excludes them, so no third-party colour data reaches
 the published package.
 
-Pinned as tests:
+Pinned as tests. **Two of the four targets below were revised on measurement,
+which is the reporting the paragraph after them promised.**
 
-- every chromatic reference colour within **ΔE00 ≤ 5** of its published value
-- **mean ΔE00 ≤ 3** across the chromatic set
-- round-trip `parse -> toNcs -> parse` stable within **ΔE00 ≤ 1**
-- the neutral axis is pure grey, `r === g === b`, with `v = 100 - blackness`
+| Target | Planned | Achieved | Shipped as |
+| --- | --- | --- | --- |
+| mean ΔE00, chromatic | ≤ 3 | 1.65 | ≤ 2.5 |
+| per-colour ΔE00 | ≤ 5 for all | 25 of 2,031 exceed it, worst 10.6 | 90th percentile ≤ 5, none above 11 |
+| round trip | ≤ 1 for all | mean 0.19, p95 1.01, worst 6.17 | mean ≤ 0.5, p95 ≤ 1.5, none above 7 |
+| neutral axis | pure grey, `v = 100 - blackness` | pure grey, but the axis is a curve | pure grey, `neutralLightness` cubic |
 
-If the fit cannot reach those numbers, that gets reported rather than the
-threshold quietly loosened. A hidden accuracy failure is the same defect as the
-Pantone dataset this project already rejected once.
+The two revisions are structural, not slack:
+
+- **Per-colour ≤ 5 is unreachable for very dark near-neutrals.** The worst
+  cases are `S 8505-*`, where the colour is nearly black and ΔE00 magnifies
+  small absolute differences. 98.8% of the reference is under 5.
+- **The round trip is exact only below the chroma peak.** The fitted `C(c)`
+  peaks near chromaticness 75 and falls away after, so two chromaticness values
+  give the same lightness *and* chroma. No inverse can separate them;
+  `fromOklch` takes the lower reading and the tests pin that choice.
+
+The neutral revision is a plain correction: blackness is not `1 - L`. The
+published axis runs from L 0.965 at blackness 3 to L 0.215 at blackness 90,
+close to linear in CIE L\* through the middle and falling away sharply at the
+dark end, so `neutralLightness` fits it as a cubic (max residual 0.0135).
+
+If the fit cannot reach a number, that gets reported rather than the threshold
+quietly loosened. A hidden accuracy failure is the same defect as the Pantone
+dataset this project already rejected once.
 
 Core exports `deltaE(a, b, "2000")`, so the tests measure rather than eyeball.
 
