@@ -28,15 +28,13 @@
 
 <script lang="ts">
   import { createAttachmentKey } from "svelte/attachments";
-  import { Color } from "@urcolor/core";
-  import { CHECKERBOARD_CSS, cssWheelPolar, DATA_DISABLED, getChannelConfig, renderToCanvas, samplePolarGrid } from "@urcolor/shared";
+  import { applyChannelOverrides, CHECKERBOARD_CSS, cssWheelPolar, DATA_DISABLED, paintWheelSurface } from "@urcolor/shared";
   import { CSS_GRADIENT_ROOT_STYLE, cssLayerStyle, resolveCssGradient } from "../../../shared/cssGradient.svelte.js";
   import type { ChildProps } from "../../../shared/child.js";
   import { gradientAttachment } from "../../../shared/gradient.svelte.js";
   import { colorWheelContext } from "../root/context.svelte.js";
 
   /** Edge length of the sampled square the disc is cut from. */
-  const SAMPLE_SIZE = 128;
 
   let {
     channelOverrides = { alpha: 1 },
@@ -50,46 +48,21 @@
 
   const context = colorWheelContext.get();
 
-  /** Applies the non-alpha overrides, then alpha, to a base colour. */
-  function withOverrides(base: Color): Color {
-    if (channelOverrides === false) return base;
-    const applicable: Record<string, number> = {};
-    for (const [key, value] of Object.entries(channelOverrides)) {
-      if (key !== "alpha" && getChannelConfig(context.colorSpace, key)) applicable[key] = value;
-    }
-    let result = base;
-    if (Object.keys(applicable).length > 0) {
-      result = result.with({ space: context.colorSpace, ...applicable });
-    }
-    if (channelOverrides.alpha !== undefined) result = result.withAlpha(channelOverrides.alpha);
-    return result;
-  }
-
   function paint(canvas: HTMLCanvasElement): void {
     // Both axes sweep their full range, so nothing the disc shows depends on
     // the values a drag is changing. Reading `dragging` still subscribes this
     // attachment to it, so the disc repaints once the gesture ends.
     if (context.dragging) return;
 
-    const angleConfig = getChannelConfig(context.colorSpace, context.angleChannel);
-    const radiusConfig = getChannelConfig(context.colorSpace, context.radiusChannel);
-    if (!angleConfig || !radiusConfig) return;
-
-    const base = withOverrides(context.color);
-    const pixels = samplePolarGrid(
-      base,
-      context.colorSpace,
-      context.angleChannel,
-      context.radiusChannel,
-      angleConfig.nativeMin ?? angleConfig.min,
-      angleConfig.nativeMax ?? angleConfig.max,
-      radiusConfig.nativeMin ?? radiusConfig.min,
-      radiusConfig.nativeMax ?? radiusConfig.max,
-      SAMPLE_SIZE,
-      SAMPLE_SIZE,
-      context.startAngle,
-    );
-    renderToCanvas({ canvas, pixels, sampleWidth: SAMPLE_SIZE, sampleHeight: SAMPLE_SIZE });
+    paintWheelSurface({
+      canvas,
+      color: context.color,
+      colorSpace: context.colorSpace,
+      angleChannel: context.angleChannel,
+      radiusChannel: context.radiusChannel,
+      startAngle: context.startAngle,
+      overrides: channelOverrides,
+    });
   }
 
   const paintCanvas = gradientAttachment(paint);
@@ -113,7 +86,7 @@
   // leaves a seam along the boundary.
   const cssLayers = $derived.by(() => resolveCssGradient(renderer, "ColorWheelGradient", !!child, () =>
     cssWheelPolar(
-      withOverrides(context.color), context.colorSpace,
+      applyChannelOverrides(context.color, context.colorSpace, channelOverrides), context.colorSpace,
       context.angleChannel, context.radiusChannel, context.startAngle,
     )));
 

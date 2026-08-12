@@ -28,14 +28,11 @@
 
 <script lang="ts">
   import { createAttachmentKey } from "svelte/attachments";
-  import type { Color } from "@urcolor/core";
-  import { channelStops, CHECKERBOARD_CSS, cssConicStops, DATA_DISABLED, getChannelConfig, renderToCanvas, sampleConicRing } from "@urcolor/shared";
+  import { applyChannelOverrides, channelStops, CHECKERBOARD_CSS, cssConicStops, DATA_DISABLED, paintRingSurface } from "@urcolor/shared";
   import { CSS_GRADIENT_ROOT_STYLE, cssLayerStyle, resolveCssGradient } from "../../../shared/cssGradient.svelte.js";
   import type { ChildProps } from "../../../shared/child.js";
   import { gradientAttachment } from "../../../shared/gradient.svelte.js";
   import { colorRingContext } from "../root/context.svelte.js";
-
-  const SAMPLE_SIZE = 128;
 
   let {
     channelOverrides = { alpha: 1 },
@@ -66,39 +63,15 @@
   });
 
   /** Applies the alpha and non-alpha overrides to a base colour. */
-  function withOverrides(base: Color): Color {
-    if (channelOverrides === false) return base;
-    let result = base;
-    const applicable: Record<string, number> = {};
-    for (const [key, value] of Object.entries(channelOverrides)) {
-      if (key === "alpha") result = result.withAlpha(value);
-      else if (getChannelConfig(context.colorSpace, key)) applicable[key] = value;
-    }
-    if (Object.keys(applicable).length > 0) {
-      result = result.with({ space: context.colorSpace, ...applicable });
-    }
-    return result;
-  }
-
   function paint(canvas: HTMLCanvasElement): void {
-    const config = getChannelConfig(context.colorSpace, context.channel);
-    if (!config) return;
-    const base = withOverrides(context.color);
-    const channelMin = config.nativeMin ?? config.min;
-    const channelMax = config.nativeMax ?? config.max;
-    const pixels = sampleConicRing(
-      base,
-      context.colorSpace,
-      context.channel,
-      channelMin,
-      channelMax,
-      SAMPLE_SIZE,
-      SAMPLE_SIZE,
-      context.startAngle,
-    );
-    // `innerRadius` is deliberately not read: it only moves the mask, and the
-    // pixels the canvas paints are the same at every radius.
-    renderToCanvas({ canvas, pixels, sampleWidth: SAMPLE_SIZE, sampleHeight: SAMPLE_SIZE });
+    paintRingSurface({
+      canvas,
+      color: context.color,
+      colorSpace: context.colorSpace,
+      channel: context.channel,
+      startAngle: context.startAngle,
+      overrides: channelOverrides,
+    });
   }
 
   const paintCanvas = gradientAttachment(paint);
@@ -120,7 +93,11 @@
   // `sampleConicRing` writes an opaque alpha byte for every pixel, so the CSS
   // stops drop the base colour's alpha to match rather than tinting the ring.
   const cssLayers = $derived.by(() => resolveCssGradient(renderer, "ColorRingGradient", !!child, () => {
-    const stops = channelStops(withOverrides(context.color).withAlpha(1), context.colorSpace, context.channel);
+    const stops = channelStops(
+      applyChannelOverrides(context.color, context.colorSpace, channelOverrides).withAlpha(1),
+      context.colorSpace,
+      context.channel,
+    );
     return stops && cssConicStops(stops, context.startAngle);
   }));
 

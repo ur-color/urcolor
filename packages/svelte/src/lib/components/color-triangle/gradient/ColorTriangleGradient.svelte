@@ -27,15 +27,13 @@
 
 <script lang="ts">
   import { createAttachmentKey } from "svelte/attachments";
-  import { Color } from "@urcolor/core";
-  import { CHECKERBOARD_CSS, DATA_DISABLED, getChannelConfig, renderToCanvas, sampleTriangleGrid } from "@urcolor/shared";
+  import { CHECKERBOARD_CSS, DATA_DISABLED, paintTriangleSurface, surfaceOpacity } from "@urcolor/shared";
   import { warnNoCssRecipe } from "../../../shared/cssGradient.svelte.js";
   import type { ChildProps } from "../../../shared/child.js";
   import { gradientAttachment } from "../../../shared/gradient.svelte.js";
   import { colorTriangleContext } from "../root/context.svelte.js";
 
   /** Both axes are sampled at this resolution and then smoothly upscaled. */
-  const GRID = 64;
 
   let {
     channelOverrides = { alpha: 1 },
@@ -49,10 +47,9 @@
 
   const context = colorTriangleContext.get();
 
-  const canvasOpacity = $derived.by(() => {
-    if (channelOverrides === false || channelOverrides.alpha === undefined) return context.color.alpha;
-    return 1;
-  });
+  // The triangle has no alpha axis, so the surface never paints its own
+  // transparency and the flag is always false.
+  const canvasOpacity = $derived(surfaceOpacity(context.color, false, channelOverrides));
 
   /**
    * Cut once, on the wrapper — it clips the canvas with it. Clipping the canvas
@@ -67,63 +64,22 @@
   });
 
   /** Applies the caller's fixed channel values on top of a base colour. */
-  function withOverrides(base: Color): Color {
-    if (channelOverrides === false) return base;
-    let result = base;
-    const applicable: Record<string, number> = {};
-    for (const [key, value] of Object.entries(channelOverrides)) {
-      if (key === "alpha") result = result.withAlpha(value);
-      else if (getChannelConfig(context.colorSpace, key)) applicable[key] = value;
-    }
-    if (Object.keys(applicable).length > 0) {
-      result = result.with({ space: context.colorSpace, ...applicable });
-    }
-    return result;
-  }
-
   function paint(canvas: HTMLCanvasElement): void {
     // Sampling a triangle is the most expensive of the five grids, and a drag
     // only moves the channels the surface already spans, so the pixels cannot
     // change while one is in flight.
     if (context.dragging) return;
 
-    const xConfig = getChannelConfig(context.colorSpace, context.xChannelKey);
-    const yConfig = getChannelConfig(context.colorSpace, context.yChannelKey);
-    if (!xConfig || !yConfig) return;
-
-    let zChannel: string | undefined;
-    let zMin: number | undefined;
-    let zMax: number | undefined;
-    if (context.isThreeChannel && context.zChannelKey !== undefined) {
-      const zConfig = getChannelConfig(context.colorSpace, context.zChannelKey);
-      if (zConfig) {
-        zChannel = context.zChannelKey;
-        zMin = zConfig.nativeMin ?? zConfig.min;
-        zMax = zConfig.nativeMax ?? zConfig.max;
-      }
-    }
-
-    const [v0, v1, v2] = context.vertices;
-    const pixels = sampleTriangleGrid(
-      withOverrides(context.color),
-      context.colorSpace,
-      context.xChannelKey,
-      context.yChannelKey,
-      xConfig.nativeMin ?? xConfig.min,
-      xConfig.nativeMax ?? xConfig.max,
-      yConfig.nativeMin ?? yConfig.min,
-      yConfig.nativeMax ?? yConfig.max,
-      v0,
-      v1,
-      v2,
-      GRID,
-      GRID,
-      false,
-      zChannel,
-      zMin,
-      zMax,
-    );
-    renderToCanvas({ canvas, pixels, sampleWidth: GRID, sampleHeight: GRID });
+    paintTriangleSurface({
+      canvas,
+      color: context.color,
+      colorSpace: context.colorSpace,
+      xChannel: context.xChannelKey,
+      yChannel: context.yChannelKey,
+      zChannel: context.isThreeChannel ? context.zChannelKey : undefined,
+      vertices: context.vertices,
+      overrides: channelOverrides,
+    });
   }
 
   const paintCanvas = gradientAttachment(paint);
