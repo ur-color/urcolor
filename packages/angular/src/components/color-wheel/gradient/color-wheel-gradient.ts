@@ -9,13 +9,9 @@ import {
   Injector,
   input,
 } from "@angular/core";
-import { Color } from "@urcolor/core";
-import { CHECKERBOARD_BACKGROUND, CHECKERBOARD_REF, cssWheelPolar, DATA_DISABLED, getChannelConfig, renderToCanvas, samplePolarGrid } from "@urcolor/shared";
+import { applyChannelOverrides, CHECKERBOARD_BACKGROUND, CHECKERBOARD_REF, cssWheelPolar, DATA_DISABLED, paintWheelSurface } from "@urcolor/shared";
 import { cssGradientBackground, type GradientRenderer } from "../../../shared/css-gradient";
 import { ColorWheelRoot } from "../root/color-wheel-root";
-
-/** Edge length of the sampled square the disc is cut from. */
-const SAMPLE_SIZE = 128;
 
 /**
  * Channels locked to fixed values while the gradient is drawn, or `false` for
@@ -83,7 +79,8 @@ export class ColorWheelGradient {
    */
   protected readonly background = computed(
     () => cssGradientBackground(this.renderer(), "ColorWheelGradient", () => cssWheelPolar(
-      this.withOverrides(this.root.value()), this.root.colorSpace(),
+      applyChannelOverrides(this.root.value(), this.root.colorSpace(), this.channelOverrides()),
+      this.root.colorSpace(),
       this.root.angleChannelKey(), this.root.radiusChannelKey(), this.root.startAngle(),
     )) ?? this.checkerboard,
   );
@@ -119,50 +116,15 @@ export class ColorWheelGradient {
   }
 
   /** Applies the non-alpha overrides, then alpha, to a base colour. */
-  private withOverrides(base: Color): Color {
-    const overrides = this.channelOverrides();
-    if (overrides === false) return base;
-    const colorSpace = this.root.colorSpace();
-    const applicable: Record<string, number> = {};
-    for (const [key, value] of Object.entries(overrides)) {
-      if (key !== "alpha" && getChannelConfig(colorSpace, key)) applicable[key] = value;
-    }
-    let result = base;
-    if (Object.keys(applicable).length > 0) {
-      result = result.with({ space: colorSpace, ...applicable });
-    }
-    const alpha = overrides["alpha"];
-    if (alpha !== undefined) result = result.withAlpha(alpha);
-    return result;
-  }
-
   private paint(canvas: HTMLCanvasElement): void {
-    // Both axes sweep their full range, so nothing the disc shows depends on
-    // the values a drag is changing. Reading `dragging` still subscribes this
-    // effect to it, so the disc repaints once the gesture ends.
-    if (this.root.dragging()) return;
-
-    const colorSpace = this.root.colorSpace();
-    const angleChannel = this.root.angleChannelKey();
-    const radiusChannel = this.root.radiusChannelKey();
-    const angleConfig = getChannelConfig(colorSpace, angleChannel);
-    const radiusConfig = getChannelConfig(colorSpace, radiusChannel);
-    if (!angleConfig || !radiusConfig) return;
-
-    const base = this.withOverrides(this.root.value());
-    const pixels = samplePolarGrid(
-      base,
-      colorSpace,
-      angleChannel,
-      radiusChannel,
-      angleConfig.nativeMin ?? angleConfig.min,
-      angleConfig.nativeMax ?? angleConfig.max,
-      radiusConfig.nativeMin ?? radiusConfig.min,
-      radiusConfig.nativeMax ?? radiusConfig.max,
-      SAMPLE_SIZE,
-      SAMPLE_SIZE,
-      this.root.startAngle(),
-    );
-    renderToCanvas({ canvas, pixels, sampleWidth: SAMPLE_SIZE, sampleHeight: SAMPLE_SIZE });
+    paintWheelSurface({
+      canvas,
+      color: this.root.value(),
+      colorSpace: this.root.colorSpace(),
+      angleChannel: this.root.angleChannelKey(),
+      radiusChannel: this.root.radiusChannelKey(),
+      startAngle: this.root.startAngle(),
+      overrides: this.channelOverrides(),
+    });
   }
 }

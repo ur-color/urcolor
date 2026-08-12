@@ -9,12 +9,9 @@ import {
   Injector,
   input,
 } from "@angular/core";
-import type { Color } from "@urcolor/core";
-import { channelStops, CHECKERBOARD_BACKGROUND, CHECKERBOARD_REF, cssConicStops, DATA_DISABLED, getChannelConfig, renderToCanvas, sampleConicRing } from "@urcolor/shared";
+import { applyChannelOverrides, channelStops, CHECKERBOARD_BACKGROUND, CHECKERBOARD_REF, cssConicStops, DATA_DISABLED, paintRingSurface } from "@urcolor/shared";
 import { cssGradientBackground, type GradientRenderer } from "../../../shared/css-gradient";
 import { ColorRingRoot } from "../root/color-ring-root";
-
-const SAMPLE_SIZE = 128;
 
 /**
  * Channels locked to fixed values while the gradient is drawn, or `false` for
@@ -96,7 +93,11 @@ export class ColorRingGradient {
     () => cssGradientBackground(this.renderer(), "ColorRingGradient", () => {
       // `sampleConicRing` writes an opaque alpha byte for every pixel, so the
       // CSS stops drop the base colour's alpha to match rather than tinting it.
-      const base = this.withOverrides(this.root.value()).withAlpha(1);
+      const base = applyChannelOverrides(
+        this.root.value(),
+        this.root.colorSpace(),
+        this.channelOverrides(),
+      ).withAlpha(1);
       const stops = channelStops(base, this.root.colorSpace(), this.root.channelKey());
       return stops && cssConicStops(stops, this.root.startAngle());
     }) ?? this.checkerboard,
@@ -133,43 +134,14 @@ export class ColorRingGradient {
   }
 
   /** Applies the alpha and non-alpha overrides to a base colour. */
-  private withOverrides(base: Color): Color {
-    const overrides = this.channelOverrides();
-    if (overrides === false) return base;
-    const colorSpace = this.root.colorSpace();
-    let result = base;
-    const applicable: Record<string, number> = {};
-    for (const [key, value] of Object.entries(overrides)) {
-      if (key === "alpha") result = result.withAlpha(value);
-      else if (getChannelConfig(colorSpace, key)) applicable[key] = value;
-    }
-    if (Object.keys(applicable).length > 0) {
-      result = result.with({ space: colorSpace, ...applicable });
-    }
-    return result;
-  }
-
   private paint(canvas: HTMLCanvasElement): void {
-    const colorSpace = this.root.colorSpace();
-    const channel = this.root.channelKey();
-    const config = getChannelConfig(colorSpace, channel);
-    if (!config) return;
-
-    const base = this.withOverrides(this.root.value());
-    const channelMin = config.nativeMin ?? config.min;
-    const channelMax = config.nativeMax ?? config.max;
-    const pixels = sampleConicRing(
-      base,
-      colorSpace,
-      channel,
-      channelMin,
-      channelMax,
-      SAMPLE_SIZE,
-      SAMPLE_SIZE,
-      this.root.startAngle(),
-    );
-    // `innerRadius` is deliberately not read: it only moves the mask, and the
-    // pixels the canvas paints are the same at every radius.
-    renderToCanvas({ canvas, pixels, sampleWidth: SAMPLE_SIZE, sampleHeight: SAMPLE_SIZE });
+    paintRingSurface({
+      canvas,
+      color: this.root.value(),
+      colorSpace: this.root.colorSpace(),
+      channel: this.root.channelKey(),
+      startAngle: this.root.startAngle(),
+      overrides: this.channelOverrides(),
+    });
   }
 }
