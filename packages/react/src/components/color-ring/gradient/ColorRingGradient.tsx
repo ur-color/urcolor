@@ -1,6 +1,5 @@
 import { forwardRef, useCallback, useEffect, useRef, type ComponentPropsWithoutRef } from "react";
-import { Color, type SpaceId } from "@urcolor/core";
-import { channelStops, cssConicStops, getChannelConfig, renderToCanvas, sampleConicRing, type GradientRenderer } from "@urcolor/shared";
+import { applyChannelOverrides, channelStops, cssConicStops, paintRingSurface, type GradientRenderer } from "@urcolor/shared";
 import { useColorRingContext } from "../root/ColorRingRootContext";
 import { CHECKERBOARD_STYLE } from "../../../utils";
 import { CssGradientLayers, resolveCssGradient } from "../../../cssGradient";
@@ -33,44 +32,30 @@ export const ColorRingGradient = forwardRef<HTMLSpanElement, ColorRingGradientPr
     const maskP = rootCtx.innerRadius * 100;
     const checkerboardMask = `radial-gradient(circle closest-side at center, transparent calc(${maskP}% - 0.5px), #000 calc(${maskP}% + 0.5px), #000 calc(100% - 0.5px), transparent 100%)`;
 
-    function applyOverrides(baseColor: Color, cs: SpaceId): Color {
-      if (!channelOverrides) return baseColor;
-      let result = baseColor;
-      const updates: Record<string, number> = {};
-      for (const [k, v] of Object.entries(channelOverrides)) {
-        if (k === "alpha") result = result.withAlpha(v);
-        else if (getChannelConfig(cs, k)) updates[k] = v;
-      }
-      if (Object.keys(updates).length > 0) result = result.with({ space: cs, ...updates });
-      return result;
-    }
-
     // `sampleConicRing` writes an opaque alpha byte for every pixel, so the CSS
     // stops drop the base color's alpha to match rather than tinting the ring.
     const cssLayers = resolveCssGradient(renderer, "ColorRingGradient", () => {
       const baseColor = rootCtx.colorRef;
       if (!baseColor) return null;
-      const overridden = applyOverrides(baseColor, rootCtx.colorSpace).withAlpha(1);
+      const overridden = applyChannelOverrides(baseColor, rootCtx.colorSpace, channelOverrides).withAlpha(1);
       const stops = channelStops(overridden, rootCtx.colorSpace, rootCtx.channelKey);
       return stops && cssConicStops(stops, rootCtx.startAngle);
     });
 
     const render = useCallback(() => {
       const canvas = canvasRef.current;
-      if (!canvas) return;
-      const baseColor = rootCtx.colorRef;
-      if (!baseColor) return;
-      const overriddenBase = applyOverrides(baseColor, rootCtx.colorSpace);
-      const cfg = getChannelConfig(rootCtx.colorSpace, rootCtx.channelKey);
-      if (!cfg) return;
-      const cMin = cfg.nativeMin ?? cfg.min;
-      const cMax = cfg.nativeMax ?? cfg.max;
-      const sampleSize = 128;
-      const pixels = sampleConicRing(overriddenBase, rootCtx.colorSpace, rootCtx.channelKey, cMin, cMax, sampleSize, sampleSize, rootCtx.startAngle);
-      renderToCanvas({ canvas, pixels, sampleWidth: sampleSize, sampleHeight: sampleSize });
+      if (!canvas || !rootCtx.colorRef) return;
+      paintRingSurface({
+        canvas,
+        color: rootCtx.colorRef,
+        colorSpace: rootCtx.colorSpace,
+        channel: rootCtx.channelKey,
+        startAngle: rootCtx.startAngle,
+        overrides: channelOverrides,
+      });
       // `innerRadius` is not a dependency: it only moves the mask, and the
       // pixels the canvas paints are the same at every radius.
-    }, [rootCtx.colorRef, rootCtx.colorSpace, rootCtx.channelKey, rootCtx.startAngle, rootCtx.isDragging, channelOverrides]);
+    }, [rootCtx.colorRef, rootCtx.colorSpace, rootCtx.channelKey, rootCtx.startAngle, channelOverrides]);
 
     useEffect(() => {
       const canvas = canvasRef.current;

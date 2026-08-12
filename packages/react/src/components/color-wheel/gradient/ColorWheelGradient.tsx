@@ -1,6 +1,5 @@
 import { forwardRef, useCallback, useEffect, useRef, type ComponentPropsWithoutRef } from "react";
-import { Color } from "@urcolor/core";
-import { cssWheelPolar, getChannelConfig, renderToCanvas, samplePolarGrid, type GradientRenderer } from "@urcolor/shared";
+import { applyChannelOverrides, cssWheelPolar, paintWheelSurface, type GradientRenderer } from "@urcolor/shared";
 import { useColorWheelContext } from "../root/ColorWheelRootContext";
 import { CHECKERBOARD_STYLE } from "../../../utils";
 import { CssGradientLayers, resolveCssGradient } from "../../../cssGradient";
@@ -21,22 +20,10 @@ export const ColorWheelGradient = forwardRef<HTMLSpanElement, ColorWheelGradient
     const ctx = useColorWheelContext();
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
-    function applyOverrides(color: Color): Color {
-      if (!channelOverrides) return color;
-      let result = color;
-      const updates: Record<string, number> = {};
-      for (const [k, v] of Object.entries(channelOverrides)) {
-        if (k === "alpha") result = result.withAlpha(v);
-        else if (getChannelConfig(ctx.colorSpace, k)) updates[k] = v;
-      }
-      if (Object.keys(updates).length > 0) result = result.with({ space: ctx.colorSpace, ...updates });
-      return result;
-    }
-
     const cssLayers = resolveCssGradient(renderer, "ColorWheelGradient", () => {
       if (!ctx.colorRef) return null;
       return cssWheelPolar(
-        applyOverrides(ctx.colorRef), ctx.colorSpace,
+        applyChannelOverrides(ctx.colorRef, ctx.colorSpace, channelOverrides), ctx.colorSpace,
         ctx.angleChannelKey, ctx.radiusChannelKey, ctx.startAngle,
       );
     });
@@ -44,34 +31,16 @@ export const ColorWheelGradient = forwardRef<HTMLSpanElement, ColorWheelGradient
     const render = useCallback(() => {
       const canvas = canvasRef.current;
       if (!canvas || !ctx.colorRef) return;
-      let baseColor = ctx.colorRef;
-      if (channelOverrides) {
-        const updates: Record<string, number> = {};
-        for (const [k, v] of Object.entries(channelOverrides)) {
-          if (k === "alpha") baseColor = baseColor.withAlpha(v);
-          else if (getChannelConfig(ctx.colorSpace, k)) updates[k] = v;
-        }
-        if (Object.keys(updates).length > 0) baseColor = baseColor.with({ space: ctx.colorSpace, ...updates });
-      }
-
-      const angleCfg = getChannelConfig(ctx.colorSpace, ctx.angleChannelKey);
-      const radiusCfg = getChannelConfig(ctx.colorSpace, ctx.radiusChannelKey);
-      if (!angleCfg || !radiusCfg) return;
-
-      const aMin = angleCfg.nativeMin ?? angleCfg.min;
-      const aMax = angleCfg.nativeMax ?? angleCfg.max;
-      const rMin = radiusCfg.nativeMin ?? radiusCfg.min;
-      const rMax = radiusCfg.nativeMax ?? radiusCfg.max;
-
-      const size = 128;
-      const pixels = samplePolarGrid(
-        baseColor, ctx.colorSpace,
-        ctx.angleChannelKey, ctx.radiusChannelKey,
-        aMin, aMax, rMin, rMax,
-        size, size, ctx.startAngle,
-      );
-      renderToCanvas({ canvas, pixels, sampleWidth: size, sampleHeight: size });
-    }, [ctx.colorRef, ctx.colorSpace, ctx.angleChannelKey, ctx.radiusChannelKey, ctx.startAngle, ctx.isDragging, channelOverrides]);
+      paintWheelSurface({
+        canvas,
+        color: ctx.colorRef,
+        colorSpace: ctx.colorSpace,
+        angleChannel: ctx.angleChannelKey,
+        radiusChannel: ctx.radiusChannelKey,
+        startAngle: ctx.startAngle,
+        overrides: channelOverrides,
+      });
+    }, [ctx.colorRef, ctx.colorSpace, ctx.angleChannelKey, ctx.radiusChannelKey, ctx.startAngle, channelOverrides]);
 
     useEffect(() => {
       const canvas = canvasRef.current;
