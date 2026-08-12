@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from "react";
+import { useMemo } from "react";
 import type { SpaceId } from "@urcolor/core";
 import { colorSpaces, nativeToDisplay, displayToNative } from "@urcolor/shared";
 import { useColor, type ColorInput, type UseColorReturn } from "./useColor";

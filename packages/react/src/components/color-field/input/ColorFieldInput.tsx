@@ -1,4 +1,4 @@
-import { forwardRef, useCallback, type ComponentPropsWithoutRef } from "react";
+import { forwardRef, useCallback, type ComponentPropsWithoutRef, type ChangeEvent as ReactChangeEvent, type FocusEvent as ReactFocusEvent, type KeyboardEvent as ReactKeyboardEvent } from "react";
 import { useColorFieldContext } from "../root/ColorFieldRootContext";
 
 export interface ColorFieldInputProps extends ComponentPropsWithoutRef<"input"> {}
@@ -7,11 +7,11 @@ export const ColorFieldInput = forwardRef<HTMLInputElement, ColorFieldInputProps
   function ColorFieldInput(props, ref) {
     const ctx = useColorFieldContext();
 
-    const handleInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleInput = useCallback((e: ReactChangeEvent<HTMLInputElement>) => {
       ctx.onInputChange(e.target.value);
     }, [ctx]);
 
-    const handleFocus = useCallback((e: React.FocusEvent<HTMLInputElement>) => {
+    const handleFocus = useCallback((e: ReactFocusEvent<HTMLInputElement>) => {
       requestAnimationFrame(() => e.target.select());
     }, []);
 
@@ -19,7 +19,7 @@ export const ColorFieldInput = forwardRef<HTMLInputElement, ColorFieldInputProps
       ctx.commitValue(ctx.modelValue);
     }, [ctx]);
 
-    const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
+    const handleKeyDown = useCallback((e: ReactKeyboardEvent<HTMLInputElement>) => {
       if (ctx.disabled || ctx.readOnly) return;
       if (e.key === "Enter") { ctx.commitValue(ctx.modelValue); return; }
       switch (e.key) {
@@ -37,7 +37,7 @@ export const ColorFieldInput = forwardRef<HTMLInputElement, ColorFieldInputProps
         ref={(el) => {
           if (typeof ref === "function") ref(el);
           else if (ref) ref.current = el;
-          (ctx.inputRef as React.MutableRefObject<HTMLInputElement | null>).current = el;
+          ctx.inputRef.current = el;
         }}
         type="text"
         role="spinbutton"

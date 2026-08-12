@@ -1,4 +1,4 @@
-import { forwardRef, useCallback, useEffect, useRef, useState, type ComponentPropsWithoutRef } from "react";
+import { forwardRef, useCallback, useEffect, useRef, useState, type ComponentPropsWithoutRef, type PointerEvent as ReactPointerEvent } from "react";
 import { useColorFieldContext } from "../root/ColorFieldRootContext";
 
 export interface ColorFieldIncrementProps extends ComponentPropsWithoutRef<"button"> {}
@@ -19,7 +19,7 @@ export const ColorFieldIncrement = forwardRef<HTMLButtonElement, ColorFieldIncre
       timeoutRef.current = setTimeout(() => startPress(60), delay);
     }, [isDisabled, ctx]);
 
-    const handlePointerDown = useCallback((e: React.PointerEvent) => {
+    const handlePointerDown = useCallback((e: ReactPointerEvent) => {
       if (e.button !== 0 || isDisabled) return;
       e.preventDefault();
       setIsPressed(true);
@@ -44,7 +44,7 @@ export const ColorFieldIncrement = forwardRef<HTMLButtonElement, ColorFieldIncre
         data-pressed={isPressed ? "" : undefined}
         data-disabled={isDisabled ? "" : undefined}
         onPointerDown={handlePointerDown}
-        onContextMenu={(e) => e.preventDefault()}
+        onContextMenu={e => e.preventDefault()}
         {...props}
       />
     );

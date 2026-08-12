@@ -1,4 +1,4 @@
-import { createContext, useContext } from "react";
+import { createContext, useContext, type RefObject } from "react";
 
 export interface ColorFieldContextValue {
   modelValue: number | undefined;
@@ -12,7 +12,7 @@ export interface ColorFieldContextValue {
   handleMinMaxValue: (type: "min" | "max") => void;
   commitValue: (val: number | undefined) => void;
   onInputChange: (text: string) => void;
-  inputRef: React.RefObject<HTMLInputElement | null>;
+  inputRef: RefObject<HTMLInputElement | null>;
   format: "number" | "degree" | "percentage" | "hex";
 }
 

@@ -1,4 +1,4 @@
-import { createContext, useContext } from "react";
+import { createContext, useContext, type RefObject } from "react";
 import type { Color, SpaceId } from "@urcolor/core";
 
 export interface ColorWheelContextValue {
@@ -14,7 +14,7 @@ export interface ColorWheelContextValue {
   radiusMin: number;
   radiusMax: number;
   startAngle: number;
-  thumbElement: React.MutableRefObject<HTMLElement | undefined>;
+  thumbElement: RefObject<HTMLElement | undefined>;
   isDragging: boolean;
 }
 

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { act } from "react";
+import { act, type ReactElement } from "react";
 import { createRoot } from "react-dom/client";
 import { Color } from "@urcolor/core";
 import { ColorSwatchRoot } from "./ColorSwatchRoot";
@@ -7,7 +7,7 @@ import { ColorSwatchRoot } from "./ColorSwatchRoot";
 // React 19 requires this flag to acknowledge the test environment supports `act()`.
 (globalThis as Record<string, unknown>).IS_REACT_ACT_ENVIRONMENT = true;
 
-function renderInto(node: React.ReactElement) {
+function renderInto(node: ReactElement) {
   const container = document.createElement("div");
   document.body.appendChild(container);
   const root = createRoot(container);

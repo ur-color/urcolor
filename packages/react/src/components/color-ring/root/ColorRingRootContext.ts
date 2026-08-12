@@ -1,4 +1,4 @@
-import { createContext, useContext } from "react";
+import { createContext, useContext, type RefObject } from "react";
 import type { Color, SpaceId } from "@urcolor/core";
 
 export interface ColorRingContextValue {
@@ -13,7 +13,7 @@ export interface ColorRingContextValue {
   startAngle: number;
   innerRadius: number;
   isDragging: boolean;
-  thumbElement: React.MutableRefObject<HTMLElement | undefined>;
+  thumbElement: RefObject<HTMLElement | undefined>;
 }
 
 export const ColorRingContext = createContext<ColorRingContextValue | null>(null);

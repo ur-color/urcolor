@@ -1,4 +1,4 @@
-import { createContext, useContext } from "react";
+import { createContext, useContext, type RefObject } from "react";
 import type { Color, SpaceId } from "@urcolor/core";
 import type { Point } from "@urcolor/shared";
 
@@ -22,7 +22,7 @@ export interface ColorTriangleContextValue {
   vertices: [Point, Point, Point];
   isDragging: boolean;
   thumbAlignment: "contain" | "overflow";
-  thumbElement: React.MutableRefObject<HTMLElement | undefined>;
+  thumbElement: RefObject<HTMLElement | undefined>;
 }
 
 export const ColorTriangleContext = createContext<ColorTriangleContextValue | null>(null);

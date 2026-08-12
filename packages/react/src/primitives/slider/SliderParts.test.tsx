@@ -1,11 +1,11 @@
 import { describe, expect, it } from "bun:test";
-import { act } from "react";
+import { act, type ReactElement } from "react";
 import { createRoot } from "react-dom/client";
 import { Slider } from "./index";
 
 (globalThis as Record<string, unknown>).IS_REACT_ACT_ENVIRONMENT = true;
 
-function renderInto(node: React.ReactElement) {
+function renderInto(node: ReactElement) {
   const container = document.createElement("div");
   document.body.appendChild(container);
   const root = createRoot(container);

@@ -6,7 +6,7 @@ import { ColorWheelThumb } from "./ColorWheelThumb";
 
 function renderThumb(props: { disabled?: boolean } = {}) {
   return render(
-    <ColorWheelRoot value={Color.parse("hsl(210, 80%, 50%)")!} disabled={props.disabled}>
+    <ColorWheelRoot value={Color.parse("hsl(210, 80%, 50%)")} disabled={props.disabled}>
       <ColorWheelThumb data-testid="thumb" />
     </ColorWheelRoot>,
   );
@@ -65,7 +65,7 @@ describe("ColorWheelThumb", () => {
 
   it("lets an explicit aria-label win", () => {
     const { getByTestId } = render(
-      <ColorWheelRoot value={Color.parse("hsl(210, 80%, 50%)")!}>
+      <ColorWheelRoot value={Color.parse("hsl(210, 80%, 50%)")}>
         <ColorWheelThumb data-testid="thumb" aria-label="Pick a colour" />
       </ColorWheelRoot>,
     );

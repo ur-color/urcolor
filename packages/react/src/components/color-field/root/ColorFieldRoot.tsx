@@ -1,4 +1,4 @@
-import { forwardRef, useCallback, useMemo, useRef, useState } from "react";
+import { forwardRef, useCallback, useMemo, useRef, useState, type CSSProperties, type ElementType, type ReactNode } from "react";
 import { Color, type SpaceId } from "@urcolor/core";
 import { getChannelConfig, displayToNative, nativeToDisplay, type ChannelConfig } from "@urcolor/shared";
 import { clamp, snapToStep } from "../../../utils";
@@ -29,10 +29,10 @@ export interface ColorFieldRootProps {
   onValueChange?: (color: Color) => void;
   /** Callback fired when the value changes at the end of an interaction. */
   onValueCommit?: (color: Color) => void;
-  children?: React.ReactNode;
+  children?: ReactNode;
   className?: string;
-  style?: React.CSSProperties;
-  as?: React.ElementType;
+  style?: CSSProperties;
+  as?: ElementType;
 }
 
 function parseColor(v: Color | string | null | undefined): Color | undefined {

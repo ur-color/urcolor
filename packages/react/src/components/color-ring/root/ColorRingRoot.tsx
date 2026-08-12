@@ -1,4 +1,4 @@
-import { forwardRef, useCallback, useMemo, useRef, useState } from "react";
+import { forwardRef, useCallback, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent as ReactKeyboardEvent, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
 import { Color, type SpaceId } from "@urcolor/core";
 import { cartesianToPolar, colorSpaces, getChannelConfig, displayToNative, nativeToDisplay, normalizeAngle, type ChannelConfig } from "@urcolor/shared";
 import { ColorRingContext, type ColorRingContextValue } from "./ColorRingRootContext";
@@ -13,9 +13,9 @@ export interface ColorRingRootProps {
   innerRadius?: number;
   onValueChange?: (color: Color) => void;
   onValueCommit?: (color: Color) => void;
-  children?: React.ReactNode;
+  children?: ReactNode;
   className?: string;
-  style?: React.CSSProperties;
+  style?: CSSProperties;
 }
 
 function parseColor(v: Color | string | null | undefined): Color | undefined {
@@ -126,7 +126,7 @@ export const ColorRingRoot = forwardRef<HTMLDivElement, ColorRingRootProps>(
       }
     }
 
-    const handlePointerDown = useCallback((event: React.PointerEvent) => {
+    const handlePointerDown = useCallback((event: ReactPointerEvent) => {
       if (disabled) return;
       const target = event.target as HTMLElement;
       const el = elementRef.current;
@@ -150,7 +150,7 @@ export const ColorRingRoot = forwardRef<HTMLDivElement, ColorRingRootProps>(
     }, [disabled, innerRadius, currentValue, min, max, step, startAngle, colorRef, channelConfig, isAlpha, colorSpace, channelKey, isControlled, onValueChange]);
 
     const rafPending = useRef(false);
-    const handlePointerMove = useCallback((event: React.PointerEvent) => {
+    const handlePointerMove = useCallback((event: ReactPointerEvent) => {
       const target = event.target as HTMLElement;
       if (!target.hasPointerCapture(event.pointerId)) return;
       if (rafPending.current) return;
@@ -162,7 +162,7 @@ export const ColorRingRoot = forwardRef<HTMLDivElement, ColorRingRootProps>(
       });
     }, [min, max, step, startAngle, colorRef, channelConfig, isAlpha, colorSpace, channelKey, isControlled, onValueChange]);
 
-    const handlePointerUp = useCallback((event: React.PointerEvent) => {
+    const handlePointerUp = useCallback((event: ReactPointerEvent) => {
       // The capture is released when the element still holds it, but the
       // gesture ends either way. A browser that takes a drag over (a touch that
       // becomes a scroll, a context menu, a pointer leaving the window) drops
@@ -179,7 +179,7 @@ export const ColorRingRoot = forwardRef<HTMLDivElement, ColorRingRootProps>(
       if (valueBeforeSlide.current !== currentValue && colorRef) onValueCommit?.(colorRef);
     }, [currentValue, colorRef, onValueCommit]);
 
-    const handleKeyDown = useCallback((event: React.KeyboardEvent) => {
+    const handleKeyDown = useCallback((event: ReactKeyboardEvent) => {
       if (disabled) return;
       let offset = 0;
       const multiplier = event.shiftKey ? 10 : 1;
@@ -187,9 +187,7 @@ export const ColorRingRoot = forwardRef<HTMLDivElement, ColorRingRootProps>(
       else if (event.key === "ArrowLeft" || event.key === "ArrowDown") offset = -step * multiplier;
       else if (event.key === "PageUp") offset = step * 10;
       else if (event.key === "PageDown") offset = -step * 10;
-      else if (event.key === "Home") { updateValue(min, true); event.preventDefault(); return; }
-      else if (event.key === "End") { updateValue(max, true); event.preventDefault(); return; }
-      else return;
+      else if (event.key === "Home") { updateValue(min, true); event.preventDefault(); return; } else if (event.key === "End") { updateValue(max, true); event.preventDefault(); return; } else return;
 
       event.preventDefault();
       let newVal = currentValue + offset;
@@ -210,7 +208,7 @@ export const ColorRingRoot = forwardRef<HTMLDivElement, ColorRingRootProps>(
       <ColorRingContext.Provider value={ctxValue}>
         <div
           ref={(el) => {
-            (elementRef as React.MutableRefObject<HTMLDivElement | null>).current = el;
+            elementRef.current = el;
             if (typeof ref === "function") ref(el);
             else if (ref) ref.current = el;
           }}

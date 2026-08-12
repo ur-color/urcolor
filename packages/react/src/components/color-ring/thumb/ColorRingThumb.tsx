@@ -25,7 +25,7 @@ export const ColorRingThumb = forwardRef<HTMLSpanElement, ColorRingThumbProps>(
     return (
       <span
         ref={(el) => {
-          (elRef as React.MutableRefObject<HTMLSpanElement | null>).current = el;
+          elRef.current = el;
           if (typeof ref === "function") ref(el);
           else if (ref) ref.current = el;
         }}

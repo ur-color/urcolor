@@ -1,4 +1,4 @@
-import { createContext, useContext } from "react";
+import { createContext, useContext, type RefObject } from "react";
 import type { Color, SpaceId } from "@urcolor/core";
 
 export interface ColorAreaContextValue {
@@ -10,7 +10,7 @@ export interface ColorAreaContextValue {
   currentModelValue: number[][];
   valueIndexToChange: number;
   setValueIndexToChange: (index: number) => void;
-  thumbRef: React.MutableRefObject<HTMLElement | null>;
+  thumbRef: RefObject<HTMLElement | null>;
   isSlidingFromLeft: boolean;
   isSlidingFromTop: boolean;
   thumbAlignment: "contain" | "overflow";

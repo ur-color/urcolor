@@ -1,4 +1,4 @@
-import { forwardRef, useContext, useMemo, type ComponentPropsWithoutRef } from "react";
+import { forwardRef, useContext, useMemo, type ComponentPropsWithoutRef, type CSSProperties, type ElementType, type Ref } from "react";
 import type { Color } from "@urcolor/core";
 import { swatchPaint, swatchStyle } from "@urcolor/shared";
 import { Toggle } from "../../primitives/toggle/Toggle";
@@ -17,12 +17,12 @@ export interface ColorSwatchProps extends Omit<ComponentPropsWithoutRef<"div">, 
   /** When true, prevents interaction with this swatch (only relevant inside a group). */
   disabled?: boolean;
   /** Render as a different element. */
-  as?: React.ElementType;
+  as?: ElementType;
 }
 
 function useSwatchStyle(value: string | Color | null | undefined, checkerSize: number | undefined, showAlpha: boolean) {
   return useMemo(
-    () => swatchStyle({ ...swatchPaint(value, showAlpha), checkerSize }) as React.CSSProperties,
+    () => swatchStyle({ ...swatchPaint(value, showAlpha), checkerSize }) as CSSProperties,
     [value, checkerSize, showAlpha],
   );
 }
@@ -39,7 +39,7 @@ export const ColorSwatch = forwardRef<HTMLDivElement, ColorSwatchProps>(
 
       return (
         <Toggle
-          ref={ref as React.Ref<HTMLButtonElement>}
+          ref={ref as Ref<HTMLButtonElement>}
           value={value as string}
           disabled={isDisabled}
           role="img"

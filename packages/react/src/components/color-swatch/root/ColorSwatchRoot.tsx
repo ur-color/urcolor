@@ -1,4 +1,4 @@
-import { forwardRef, useMemo, type ComponentPropsWithoutRef } from "react";
+import { forwardRef, useMemo, type ComponentPropsWithoutRef, type CSSProperties, type ElementType } from "react";
 import type { Color } from "@urcolor/core";
 import { swatchPaint, swatchStyle } from "@urcolor/shared";
 
@@ -13,13 +13,13 @@ export interface ColorSwatchRootProps extends ComponentPropsWithoutRef<"div"> {
   /** When true, reflects the color's alpha channel. When false, displays the color as fully opaque. */
   alpha?: boolean;
   /** Render as a different element. */
-  as?: React.ElementType;
+  as?: ElementType;
 }
 
 export const ColorSwatchRoot = forwardRef<HTMLDivElement, ColorSwatchRootProps>(
   function ColorSwatchRoot({ value, checkerSize, alpha: showAlpha = false, as: Component = "div", style, ...props }, ref) {
     const paintStyle = useMemo(
-      () => swatchStyle({ ...swatchPaint(value, showAlpha), checkerSize }) as React.CSSProperties,
+      () => swatchStyle({ ...swatchPaint(value, showAlpha), checkerSize }) as CSSProperties,
       [value, checkerSize, showAlpha],
     );
 

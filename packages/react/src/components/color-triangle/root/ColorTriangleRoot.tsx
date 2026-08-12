@@ -1,4 +1,4 @@
-import { forwardRef, useCallback, useMemo, useRef, useState } from "react";
+import { forwardRef, useCallback, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent as ReactKeyboardEvent, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
 import { Color, type SpaceId } from "@urcolor/core";
 import { triangleVertices, clampToTriangle, barycentricCoords, pointInTriangle, measureBox, type BoxMeasure, type Point, colorSpaces, getChannelConfig, displayToNative, nativeToDisplay, type ChannelConfig } from "@urcolor/shared";
 import { ColorTriangleContext, type ColorTriangleContextValue } from "./ColorTriangleRootContext";
@@ -15,9 +15,9 @@ export interface ColorTriangleRootProps {
   thumbAlignment?: "contain" | "overflow";
   onValueChange?: (color: Color) => void;
   onValueCommit?: (color: Color) => void;
-  children?: React.ReactNode;
+  children?: ReactNode;
   className?: string;
-  style?: React.CSSProperties;
+  style?: CSSProperties;
 }
 
 function parseColor(v: Color | string | null | undefined): Color | undefined {
@@ -230,7 +230,7 @@ export const ColorTriangleRoot = forwardRef<HTMLDivElement, ColorTriangleRootPro
       };
     }
 
-    function handleKeyDown3Channel(event: React.KeyboardEvent) {
+    function handleKeyDown3Channel(event: ReactKeyboardEvent) {
       // The merged thumb is a single focus target, so keyboard nudges always drive
       // the x channel and redistribute the remainder across y and z.
       const step = 0.05;
@@ -285,7 +285,7 @@ export const ColorTriangleRoot = forwardRef<HTMLDivElement, ColorTriangleRootPro
       updateValues(vals.x, vals.y, true, vals.z);
     }
 
-    function handleKeyDown2Channel(event: React.KeyboardEvent) {
+    function handleKeyDown2Channel(event: ReactKeyboardEvent) {
       const multiplier = event.shiftKey ? 4 : 1;
       let newX = currentXValue;
       let newY = currentYValue;
@@ -316,7 +316,7 @@ export const ColorTriangleRoot = forwardRef<HTMLDivElement, ColorTriangleRootPro
       updateValues(newX, newY, true);
     }
 
-    const handlePointerDown = useCallback((event: React.PointerEvent) => {
+    const handlePointerDown = useCallback((event: ReactPointerEvent) => {
       if (disabled) return;
       const target = event.target as HTMLElement;
       const el = elementRef.current;
@@ -340,7 +340,7 @@ export const ColorTriangleRoot = forwardRef<HTMLDivElement, ColorTriangleRootPro
     }, [disabled, vertices, currentXValue, currentYValue, currentZValue, xMin, xMax, yMin, yMax, zMin, zMax, colorRef, xConfig, yConfig, zConfig, isThreeChannel, isControlled, onValueChange]);
 
     const rafPending = useRef(false);
-    const handlePointerMove = useCallback((event: React.PointerEvent) => {
+    const handlePointerMove = useCallback((event: ReactPointerEvent) => {
       const target = event.target as HTMLElement;
       if (!target.hasPointerCapture(event.pointerId)) return;
       if (rafPending.current) return;
@@ -353,7 +353,7 @@ export const ColorTriangleRoot = forwardRef<HTMLDivElement, ColorTriangleRootPro
       });
     }, [vertices, xMin, xMax, yMin, yMax, zMin, zMax, colorRef, xConfig, yConfig, zConfig, isThreeChannel, isControlled, onValueChange]);
 
-    const handlePointerUp = useCallback((event: React.PointerEvent) => {
+    const handlePointerUp = useCallback((event: ReactPointerEvent) => {
       // The capture is released when the element still holds it, but the
       // gesture ends either way. A browser that takes a drag over (a touch that
       // becomes a scroll, a context menu, a pointer leaving the window) drops
@@ -373,7 +373,7 @@ export const ColorTriangleRoot = forwardRef<HTMLDivElement, ColorTriangleRootPro
       }
     }, [currentXValue, currentYValue, currentZValue, colorRef, onValueCommit]);
 
-    const handleKeyDown = useCallback((event: React.KeyboardEvent) => {
+    const handleKeyDown = useCallback((event: ReactKeyboardEvent) => {
       if (disabled) return;
       if (isThreeChannel) handleKeyDown3Channel(event);
       else handleKeyDown2Channel(event);
@@ -391,7 +391,7 @@ export const ColorTriangleRoot = forwardRef<HTMLDivElement, ColorTriangleRootPro
       <ColorTriangleContext.Provider value={ctxValue}>
         <div
           ref={(el) => {
-            (elementRef as React.MutableRefObject<HTMLDivElement | null>).current = el;
+            elementRef.current = el;
             if (typeof ref === "function") ref(el);
             else if (ref) ref.current = el;
           }}

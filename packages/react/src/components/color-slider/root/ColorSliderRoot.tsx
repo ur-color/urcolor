@@ -1,7 +1,7 @@
-import { forwardRef, useCallback, useMemo, useRef, useState } from "react";
-import { Slider } from "../../../primitives/slider";
+import { forwardRef, useCallback, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { Color, type SpaceId } from "@urcolor/core";
 import { getChannelConfig, displayToNative, nativeToDisplay } from "@urcolor/shared";
+import { Slider } from "../../../primitives/slider";
 import { ColorSliderContext, type ColorSliderContextValue } from "./ColorSliderRootContext";
 
 export interface ColorSliderRootProps {
@@ -25,9 +25,9 @@ export interface ColorSliderRootProps {
   onValueChange?: (color: Color) => void;
   /** Callback fired when the value changes at the end of an interaction. */
   onValueCommit?: (color: Color) => void;
-  children?: React.ReactNode;
+  children?: ReactNode;
   className?: string;
-  style?: React.CSSProperties;
+  style?: CSSProperties;
 }
 
 function parseColor(v: Color | string | null | undefined): Color | undefined {

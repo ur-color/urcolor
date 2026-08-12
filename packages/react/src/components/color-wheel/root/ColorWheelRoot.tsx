@@ -1,4 +1,4 @@
-import { forwardRef, useCallback, useMemo, useRef, useState } from "react";
+import { forwardRef, useCallback, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent as ReactKeyboardEvent, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
 import { Color, type SpaceId } from "@urcolor/core";
 import { cartesianToPolar, normalizeAngle, clampToCircle, colorSpaces, getChannelConfig, displayToNative, nativeToDisplay, type ChannelConfig } from "@urcolor/shared";
 import { ColorWheelContext, type ColorWheelContextValue } from "./ColorWheelRootContext";
@@ -13,9 +13,9 @@ export interface ColorWheelRootProps {
   startAngle?: number;
   onValueChange?: (color: Color) => void;
   onValueCommit?: (color: Color) => void;
-  children?: React.ReactNode;
+  children?: ReactNode;
   className?: string;
-  style?: React.CSSProperties;
+  style?: CSSProperties;
 }
 
 function parseColor(v: Color | string | null | undefined): Color | undefined {
@@ -130,7 +130,7 @@ export const ColorWheelRoot = forwardRef<HTMLDivElement, ColorWheelRootProps>(
       };
     }
 
-    const handlePointerDown = useCallback((event: React.PointerEvent) => {
+    const handlePointerDown = useCallback((event: ReactPointerEvent) => {
       if (disabled) return;
       const target = event.target as HTMLElement;
       const el = elementRef.current;
@@ -151,7 +151,7 @@ export const ColorWheelRoot = forwardRef<HTMLDivElement, ColorWheelRootProps>(
     }, [disabled, currentAngleValue, currentRadiusValue, angleMin, angleMax, radiusMin, radiusMax, startAngle]);
 
     const rafPending = useRef(false);
-    const handlePointerMove = useCallback((event: React.PointerEvent) => {
+    const handlePointerMove = useCallback((event: ReactPointerEvent) => {
       const target = event.target as HTMLElement;
       if (!target.hasPointerCapture(event.pointerId)) return;
       if (rafPending.current) return;
@@ -164,7 +164,7 @@ export const ColorWheelRoot = forwardRef<HTMLDivElement, ColorWheelRootProps>(
       });
     }, [angleMin, angleMax, radiusMin, radiusMax, startAngle]);
 
-    const handlePointerUp = useCallback((event: React.PointerEvent) => {
+    const handlePointerUp = useCallback((event: ReactPointerEvent) => {
       // The capture is released when the element still holds it, but the
       // gesture ends either way. A browser that takes a drag over (a touch that
       // becomes a scroll, a context menu, a pointer leaving the window) drops
@@ -184,7 +184,7 @@ export const ColorWheelRoot = forwardRef<HTMLDivElement, ColorWheelRootProps>(
       }
     }, [currentAngleValue, currentRadiusValue, colorRef, onValueCommit]);
 
-    const handleKeyDown = useCallback((event: React.KeyboardEvent) => {
+    const handleKeyDown = useCallback((event: ReactKeyboardEvent) => {
       if (disabled) return;
       let angleOffset = 0, radiusOffset = 0;
       const multiplier = event.shiftKey ? 10 : 1;
@@ -194,14 +194,11 @@ export const ColorWheelRoot = forwardRef<HTMLDivElement, ColorWheelRootProps>(
       else if (event.key === "ArrowDown") radiusOffset = -radiusStep * multiplier;
       else if (event.key === "PageUp") radiusOffset = radiusStep * 10;
       else if (event.key === "PageDown") radiusOffset = -radiusStep * 10;
-      else if (event.key === "Home") { updateValues(angleMin, radiusMin, true); event.preventDefault(); return; }
-      else if (event.key === "End") { updateValues(angleMax, radiusMax, true); event.preventDefault(); return; }
-      else return;
+      else if (event.key === "Home") { updateValues(angleMin, radiusMin, true); event.preventDefault(); return; } else if (event.key === "End") { updateValues(angleMax, radiusMax, true); event.preventDefault(); return; } else return;
       event.preventDefault();
       let newAngle = currentAngleValue + angleOffset;
       const isCyclic = angleConfig?.format === "degree";
-      if (isCyclic) { const r = angleMax - angleMin; newAngle = ((newAngle - angleMin) % r + r) % r + angleMin; }
-      else newAngle = Math.max(angleMin, Math.min(angleMax, newAngle));
+      if (isCyclic) { const r = angleMax - angleMin; newAngle = ((newAngle - angleMin) % r + r) % r + angleMin; } else newAngle = Math.max(angleMin, Math.min(angleMax, newAngle));
       const newRadius = Math.max(radiusMin, Math.min(radiusMax, currentRadiusValue + radiusOffset));
       updateValues(newAngle, newRadius, true);
     }, [disabled, currentAngleValue, currentRadiusValue, angleStep, radiusStep, angleMin, angleMax, radiusMin, radiusMax]);
@@ -215,10 +212,16 @@ export const ColorWheelRoot = forwardRef<HTMLDivElement, ColorWheelRootProps>(
     return (
       <ColorWheelContext.Provider value={ctxValue}>
         <div
-          ref={(el) => { (elementRef as React.MutableRefObject<HTMLDivElement | null>).current = el; if (typeof ref === "function") ref(el); else if (ref) ref.current = el; }}
-          aria-disabled={disabled} data-disabled={disabled ? "" : undefined}
-          className={className} style={style}
-          onPointerDown={handlePointerDown} onPointerMove={handlePointerMove} onPointerUp={handlePointerUp} onPointerCancel={handlePointerUp} onKeyDown={handleKeyDown}
+          ref={(el) => { elementRef.current = el; if (typeof ref === "function") ref(el); else if (ref) ref.current = el; }}
+          aria-disabled={disabled}
+          data-disabled={disabled ? "" : undefined}
+          className={className}
+          style={style}
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerUp}
+          onPointerCancel={handlePointerUp}
+          onKeyDown={handleKeyDown}
         >
           {children}
         </div>

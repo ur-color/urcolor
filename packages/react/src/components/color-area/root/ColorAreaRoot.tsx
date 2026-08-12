@@ -1,7 +1,7 @@
-import { forwardRef, useCallback, useMemo, useRef, useState } from "react";
+import { forwardRef, useCallback, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent as ReactKeyboardEvent, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
 import { Color, type SpaceId } from "@urcolor/core";
 import { colorSpaces, getChannelConfig, displayToNative, nativeToDisplay, type ChannelConfig } from "@urcolor/shared";
-import { snapToStep, linearScale, getClosestThumbIndex, hasMinStepsBetweenValues, ARROW_KEYS } from "../../../utils";
+import { snapToStep, linearScale, getClosestThumbIndex, ARROW_KEYS } from "../../../utils";
 import { ColorAreaContext, type ColorAreaContextValue } from "./ColorAreaRootContext";
 
 export interface ColorAreaRootProps {
@@ -29,9 +29,9 @@ export interface ColorAreaRootProps {
   onValueChange?: (color: Color) => void;
   /** Callback fired when the value changes at the end of an interaction. */
   onValueCommit?: (color: Color) => void;
-  children?: React.ReactNode;
+  children?: ReactNode;
   className?: string;
-  style?: React.CSSProperties;
+  style?: CSSProperties;
 }
 
 function parseColor(v: Color | string | null | undefined): Color | undefined {
@@ -176,7 +176,7 @@ export const ColorAreaRoot = forwardRef<HTMLDivElement, ColorAreaRootProps>(
       return [scaleX(posX), scaleY(posY)];
     }
 
-    const handlePointerDown = useCallback((event: React.PointerEvent) => {
+    const handlePointerDown = useCallback((event: ReactPointerEvent) => {
       if (disabled) return;
       const target = event.target as HTMLElement;
       target.setPointerCapture(event.pointerId);
@@ -195,7 +195,7 @@ export const ColorAreaRoot = forwardRef<HTMLDivElement, ColorAreaRootProps>(
       if (closestIndex >= 0) updateValues(point, closestIndex);
     }, [disabled, internalValue, minX, maxX, minY, maxY, isSlidingFromLeft, isSlidingFromTop]);
 
-    const handlePointerMove = useCallback((event: React.PointerEvent) => {
+    const handlePointerMove = useCallback((event: ReactPointerEvent) => {
       const target = event.target as HTMLElement;
       if (!target.hasPointerCapture(event.pointerId)) return;
       lastPointerPosition.current = { x: event.clientX, y: event.clientY };
@@ -203,7 +203,7 @@ export const ColorAreaRoot = forwardRef<HTMLDivElement, ColorAreaRootProps>(
       updateValues(point, valueIndexToChange);
     }, [valueIndexToChange, internalValue, minX, maxX, minY, maxY, isSlidingFromLeft, isSlidingFromTop, stepX, stepY]);
 
-    const handlePointerUp = useCallback((event: React.PointerEvent) => {
+    const handlePointerUp = useCallback((event: ReactPointerEvent) => {
       // The capture is released when the element still holds it, but the
       // gesture ends either way. A browser that takes a drag over (a touch that
       // becomes a scroll, a context menu, a pointer leaving the window) drops
@@ -232,7 +232,7 @@ export const ColorAreaRoot = forwardRef<HTMLDivElement, ColorAreaRootProps>(
       ArrowUp: { axis: "y", sign: -1 },
     };
 
-    const handleKeyDown = useCallback((event: React.KeyboardEvent) => {
+    const handleKeyDown = useCallback((event: ReactKeyboardEvent) => {
       if (disabled) return;
       if (event.key === "Home") { event.preventDefault(); handleBoundaryKey("x", minX); return; }
       if (event.key === "End") { event.preventDefault(); handleBoundaryKey("x", maxX); return; }
@@ -290,7 +290,7 @@ export const ColorAreaRoot = forwardRef<HTMLDivElement, ColorAreaRootProps>(
       <ColorAreaContext.Provider value={ctxValue}>
         <div
           ref={(el) => {
-            (elementRef as React.MutableRefObject<HTMLDivElement | null>).current = el;
+            elementRef.current = el;
             if (typeof ref === "function") ref(el);
             else if (ref) ref.current = el;
           }}
@@ -301,7 +301,7 @@ export const ColorAreaRoot = forwardRef<HTMLDivElement, ColorAreaRootProps>(
           style={{
             ...style,
             "--reka-slider-area-thumb-transform": `translate(${!isSlidingFromLeft && thumbAlignment === "overflow" ? "50%" : "-50%"}, ${!isSlidingFromTop && thumbAlignment === "overflow" ? "50%" : "-50%"})`,
-          } as React.CSSProperties}
+          } as CSSProperties}
           onPointerDown={handlePointerDown}
           onPointerMove={handlePointerMove}
           onPointerUp={handlePointerUp}
