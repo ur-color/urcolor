@@ -133,10 +133,10 @@ yarn add @urcolor/angular
 :::
 
 Every framework package depends on `@urcolor/core` and `@urcolor/shared`, so
-both come along with whichever binding you install. The Vue package also pulls
-in [Reka UI](https://reka-ui.com/) and the React package
-[Base UI](https://base-ui.com/). The Svelte and Angular packages have no other
-runtime dependencies.
+both come along with whichever binding you install. Nothing else does: the Vue
+package builds on [Reka UI](https://reka-ui.com/) primitives, but bundles the
+parts it uses and ships no dependency on it, and the other bindings carry no
+third-party runtime dependency at all.
 
 ### Core only
 

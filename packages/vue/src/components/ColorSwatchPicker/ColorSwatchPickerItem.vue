@@ -1,6 +1,6 @@
 <script lang="ts">
 import type { Ref } from "vue";
-import type { ListboxItemProps } from "reka-ui";
+import type { ListboxItemProps } from "../../primitives/types";
 import { createContext, ListboxItem, useForwardExpose } from "reka-ui";
 
 export interface ColorSwatchPickerItemProps extends /* @vue-ignore */ ListboxItemProps {

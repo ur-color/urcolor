@@ -1,5 +1,5 @@
 <script lang="ts">
-import type { PrimitiveProps } from "reka-ui";
+import type { PrimitiveProps } from "../primitives/types";
 
 /**
  * @deprecated The standalone Checkerboard components are deprecated. The Gradient

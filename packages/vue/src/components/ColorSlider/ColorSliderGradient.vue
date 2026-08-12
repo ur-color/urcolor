@@ -1,5 +1,5 @@
 <script lang="ts">
-import type { PrimitiveProps } from "reka-ui";
+import type { PrimitiveProps } from "../../primitives/types";
 import type { SpaceId } from "@urcolor/core";
 import type { GradientRenderer } from "@urcolor/shared";
 

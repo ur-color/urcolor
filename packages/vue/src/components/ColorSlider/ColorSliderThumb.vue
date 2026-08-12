@@ -1,5 +1,5 @@
 <script lang="ts">
-import type { SliderThumbProps } from "reka-ui";
+import type { SliderThumbProps } from "../../primitives/types";
 
 export interface ColorSliderThumbProps extends /* @vue-ignore */ SliderThumbProps {
   as?: string;

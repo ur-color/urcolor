@@ -1,5 +1,5 @@
 <script lang="ts">
-import type { PrimitiveProps } from "reka-ui";
+import type { PrimitiveProps } from "../../primitives/types";
 
 export interface ColorWheelThumbProps extends /* @vue-ignore */ PrimitiveProps {
   as?: string;

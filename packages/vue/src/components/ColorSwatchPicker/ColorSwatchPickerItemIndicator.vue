@@ -1,5 +1,5 @@
 <script lang="ts">
-import type { ListboxItemIndicatorProps } from "reka-ui";
+import type { ListboxItemIndicatorProps } from "../../primitives/types";
 
 export interface ColorSwatchPickerItemIndicatorProps extends /* @vue-ignore */ ListboxItemIndicatorProps {
   as?: string;

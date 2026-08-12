@@ -1,6 +1,6 @@
 <script lang="ts">
 import type { Ref } from "vue";
-import type { PrimitiveProps } from "reka-ui";
+import type { PrimitiveProps } from "../../primitives/types";
 import { createContext, useDirection, useForwardExpose, VisuallyHidden, Primitive } from "reka-ui";
 import { computed, ref, toRef, toRefs } from "vue";
 import { Color, type SpaceId } from "@urcolor/core";

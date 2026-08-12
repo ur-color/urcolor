@@ -1,5 +1,5 @@
 <script lang="ts">
-import type { SliderRangeProps } from "reka-ui";
+import type { SliderRangeProps } from "../../primitives/types";
 
 export interface ColorSliderRangeProps extends /* @vue-ignore */ SliderRangeProps {}
 </script>

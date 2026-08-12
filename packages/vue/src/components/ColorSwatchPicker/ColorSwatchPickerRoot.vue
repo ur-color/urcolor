@@ -1,5 +1,5 @@
 <script lang="ts">
-import type { ListboxRootEmits, ListboxRootProps } from "reka-ui";
+import type { ListboxRootEmits, ListboxRootProps } from "../../primitives/types";
 
 export interface ColorSwatchPickerRootProps extends /* @vue-ignore */ Omit<ListboxRootProps, "by"> {
   as?: string;

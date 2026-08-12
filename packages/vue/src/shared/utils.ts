@@ -1,10 +1,19 @@
-import type { MaybeElementRef } from "@vueuse/core";
-import type { PropType, Ref } from "vue";
+import type { ComponentPublicInstance, MaybeRef, PropType, Ref } from "vue";
 import { unrefElement } from "@vueuse/core";
 import { computed, defineComponent, h, inject, markRaw, onMounted, provide, ref, toValue, watch, watchEffect } from "vue";
 import { Slot } from "reka-ui";
 
 export type ActiveDirection = "x" | "y";
+
+/**
+ * A local copy of `@vueuse/core`'s `MaybeElementRef`, for the same reason
+ * `src/primitives/types.ts` copies reka-ui's: @vueuse/core is bundled at build
+ * time, so importing the type here would leave an `import("@vueuse/core")` in
+ * the emitted `.d.ts` and make it a dependency again for anyone type-checking
+ * against this package.
+ */
+type MaybeElement = HTMLElement | SVGElement | ComponentPublicInstance | undefined | null;
+export type MaybeElementRef<T extends MaybeElement = MaybeElement> = MaybeRef<T>;
 
 // --- Math utilities ---
 //

@@ -334,11 +334,13 @@ Read the rest honestly, though:
   `ColorSlider`, `ColorField`, `ColorSwatch` and `ColorSwatchPicker`, with
   `aria-valuetext` on the interactive parts. `@urcolor/vue` is *built on* Reka
   UI, so on Vue the two now overlap. If you already depend on Reka and only need
-  an sRGB/HSL/HSB picker, its own primitives are one fewer dependency and follow
-  conventions you know. urcolor adds the perceptual and wide-gamut spaces, the
-  GPU renderer, the wheel, triangle and ring families, and the same API on
-  React, Svelte and Angular. Note this repo currently pins `reka-ui` at
-  `^2.8.0`, which predates them.
+  an sRGB/HSL/HSB picker, its own primitives follow conventions you know.
+  urcolor adds the perceptual and wide-gamut spaces, the GPU renderer, the
+  wheel, triangle and ring families, and the same API on React, Svelte and
+  Angular. Reka is a build-time dependency there rather than an install: the
+  primitives `@urcolor/vue` uses are bundled and tree-shaken into its own
+  `dist`, so it costs you no extra package either way. Note this repo builds
+  against `reka-ui` `^2.8.0`, which predates the color primitives.
 - **Ark UI covers four frameworks** as urcolor does, and adds an eyedropper
   trigger and format select that urcolor has no equivalent for. 66 of its 67
   dependencies are its own `@zag-js/*` packages rather than third-party weight

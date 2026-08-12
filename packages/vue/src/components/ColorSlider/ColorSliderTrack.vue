@@ -1,5 +1,5 @@
 <script lang="ts">
-import type { SliderTrackProps } from "reka-ui";
+import type { SliderTrackProps } from "../../primitives/types";
 
 export interface ColorSliderTrackProps extends /* @vue-ignore */ SliderTrackProps {}
 </script>

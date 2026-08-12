@@ -13,7 +13,12 @@ export default defineConfig({
       formats: ["es"],
     },
     rollupOptions: {
-      external: ["vue", "@urcolor/core", "@urcolor/shared", "reka-ui"],
+      // Only the runtime dependencies stay external. reka-ui and @vueuse/core
+      // are build-time only: they are inlined here so rollup can tree-shake
+      // them down to the handful of primitives `src/primitives/index.ts`
+      // touches, and consumers install neither. Adding either back to this list
+      // makes it a hard dependency again.
+      external: ["vue", "@urcolor/core", "@urcolor/shared"],
     },
   },
 });

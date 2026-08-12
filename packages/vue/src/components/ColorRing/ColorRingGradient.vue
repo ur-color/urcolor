@@ -1,5 +1,5 @@
 <script lang="ts">
-import type { PrimitiveProps } from "reka-ui";
+import type { PrimitiveProps } from "../../primitives/types";
 import type { GradientRenderer } from "@urcolor/shared";
 
 export interface ColorRingGradientProps extends /* @vue-ignore */ PrimitiveProps {

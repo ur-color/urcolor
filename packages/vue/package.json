@@ -59,13 +59,14 @@
   },
   "dependencies": {
     "@urcolor/core": "workspace:*",
-    "@urcolor/shared": "workspace:*",
-    "reka-ui": "^2.8.0"
+    "@urcolor/shared": "workspace:*"
   },
   "peerDependencies": {
     "vue": "^3"
   },
   "devDependencies": {
+    "@vueuse/core": "^14.2.1",
+    "reka-ui": "^2.8.0",
     "@storybook/addon-essentials": "^8",
     "@storybook/addon-interactions": "^8",
     "@storybook/builder-vite": "^8",
