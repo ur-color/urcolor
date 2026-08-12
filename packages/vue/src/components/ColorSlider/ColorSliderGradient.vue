@@ -32,9 +32,8 @@ export interface ColorSliderGradientProps extends /* @vue-ignore */ PrimitivePro
 <script setup lang="ts">
 import { ref, computed } from "vue";
 import { useForwardExpose, Primitive } from "reka-ui";
-import { Color } from "@urcolor/core";
-import { cssLinearStops, defaultStepsFor, drawLinearGradient, getChannelConfig, interpolateStops } from "@urcolor/shared";
-import { applyChannelOverrides, useGradientCanvas } from "../../shared/useGradientCanvas";
+import { cssLinearStops, defaultStepsFor, drawLinearGradient, gradientOpacity, sliderStops, SLIDER_CANVAS_STEPS } from "@urcolor/shared";
+import { useGradientCanvas } from "../../shared/useGradientCanvas";
 import { CSS_GRADIENT_ROOT_STYLE, cssLayerStyle, useCssGradient } from "../../shared/useCssGradient";
 import { CHECKERBOARD_STYLE } from "../../shared/checkerboard";
 import { injectColorSliderRootContext } from "./ColorSliderRoot.vue";
@@ -55,98 +54,35 @@ const effectiveAngle = computed(() => {
   return rootContext.orientation.value === "vertical" ? 90 : 0;
 });
 
-// Mirror the gradient when inverted: mirrorX for horizontal, mirrorY for vertical
-const effectiveMirrorX = computed(() => rootContext.orientation.value === "horizontal" && rootContext.inverted.value);
-const effectiveMirrorY = computed(() => rootContext.orientation.value === "vertical" && rootContext.inverted.value);
-
 const isAlphaChannel = computed(() => rootContext.channel.value === "alpha");
 
 const canvasOpacity = computed(() => {
-  const overrides = props.channelOverrides;
-  // If overrides is false or doesn't include alpha, reflect color's alpha (unless this IS the alpha channel)
-  if (isAlphaChannel.value) return 1;
-  if (overrides === false || (typeof overrides === "object" && overrides.alpha === undefined)) {
-    return rootContext.colorRef.value?.alpha ?? 1;
-  }
-  return 1;
+  const color = rootContext.colorRef.value;
+  if (!color) return 1;
+  return gradientOpacity(color, rootContext.channel.value, props.channelOverrides);
 });
 
 /**
- * The shader holds 16 uniform slots, so the WebGL path can never ask for more
- * than that. The CSS path has no such ceiling and asks for
+ * The stop list both painters draw, differing only in how many stops they can
+ * hold: the shader has 16 uniform slots, so the WebGL path asks for
+ * `SLIDER_CANVAS_STEPS`, while the CSS path has no such ceiling and asks for
  * `defaultStepsFor(…)` instead — 36 across a hue sweep, where banding between
  * sRGB-lerped stops is visible and 12 is not enough.
  */
-const WEBGL_STOPS = 12;
-
-// Auto-compute gradient colors from slider context when `colors` prop is not provided
-function buildAutoColors(steps: number): Color[] | null {
-  if (props.colors) return null; // User provided explicit colors
-
+function resolveColors(steps: number): ReturnType<typeof sliderStops> {
   const color = rootContext.colorRef.value;
-  const channel = rootContext.channel.value;
-  const colorSpace = rootContext.colorSpace.value;
   if (!color) return null;
 
-  const overrides = props.channelOverrides;
-
-  if (isAlphaChannel.value) {
-    // Alpha slider: gradient from transparent to opaque. Any `alpha` override
-    // in the map is irrelevant here — alpha is the axis, so both endpoints
-    // overwrite it.
-    const baseColor = applyChannelOverrides(color, colorSpace, overrides);
-    const transparent = baseColor.withAlpha(0);
-    const opaque = baseColor.withAlpha(1);
-    return [transparent, opaque];
-  }
-
-  const cfg = getChannelConfig(colorSpace, channel);
-  if (!cfg) return null;
-
-  const colors: Color[] = [];
-  const cMin = cfg.nativeMin ?? cfg.min;
-  const cMax = cfg.nativeMax ?? cfg.max;
-
-  // Apply overrides to the base color
-  const baseColor = applyChannelOverrides(color, colorSpace, overrides);
-
-  for (let i = 0; i < steps; i++) {
-    const t = i / (steps - 1);
-    const val = cMin + t * (cMax - cMin);
-    const c = baseColor.with({ space: colorSpace, [channel]: val });
-    colors.push(c);
-  }
-  return colors;
-}
-
-const autoColors = computed<Color[] | null>(() => buildAutoColors(WEBGL_STOPS));
-
-/**
- * The stop list both painters draw, differing only in how many stops they can
- * hold. Mirroring reverses the stops rather than flipping the gradient, which
- * is what the WebGL path has always done.
- */
-function resolveColors(steps: number): Color[] | null {
-  let colors: Color[];
-
-  if (props.colors) {
-    const parsed = props.colors.map((c: string) => Color.parse(c));
-    if (parsed.some((c: Color | null) => !c) || parsed.length < 2) return null;
-    colors = parsed as Color[];
-  } else {
-    const auto = buildAutoColors(steps);
-    if (!auto || auto.length < 2) return null;
-    colors = auto;
-  }
-
-  if (effectiveMirrorX.value || effectiveMirrorY.value) {
-    colors = [...colors].reverse();
-  }
-
-  if (props.interpolationSpace) {
-    return interpolateStops(colors, 32, props.interpolationSpace);
-  }
-  return colors;
+  return sliderStops({
+    color,
+    colorSpace: rootContext.colorSpace.value,
+    channel: rootContext.channel.value,
+    colors: props.colors,
+    channelOverrides: props.channelOverrides,
+    interpolationSpace: props.interpolationSpace,
+    steps,
+    mirrored: rootContext.inverted.value,
+  });
 }
 
 /**
@@ -159,7 +95,7 @@ const cssLayers = useCssGradient({
   name: "ColorSliderGradient",
   build: () => {
     const colors = resolveColors(
-      props.colors ? WEBGL_STOPS : defaultStepsFor(rootContext.colorSpace.value, rootContext.channel.value),
+      props.colors ? SLIDER_CANVAS_STEPS : defaultStepsFor(rootContext.colorSpace.value, rootContext.channel.value),
     );
     if (!colors) return null;
     return cssLinearStops(colors, effectiveAngle.value);
@@ -169,14 +105,26 @@ const cssLayers = useCssGradient({
 const canvasRef = ref<HTMLCanvasElement | null>(null);
 
 function paint(canvas: HTMLCanvasElement) {
-  const colors = resolveColors(WEBGL_STOPS);
+  const colors = resolveColors(SLIDER_CANVAS_STEPS);
   if (!colors) return;
   drawLinearGradient(canvas, colors, effectiveAngle.value, isAlphaChannel.value);
 }
 
 useGradientCanvas({
   canvas: canvasRef,
-  sources: () => [props.colors, effectiveAngle.value, effectiveMirrorX.value, effectiveMirrorY.value, props.interpolationSpace, props.channelOverrides, autoColors.value],
+  // Everything `resolveColors` and `paint` read. The colour, channel and space
+  // stand in for the stop list the old `autoColors` computed held: the stops
+  // are derived on demand now, so the sources are their inputs.
+  sources: () => [
+    props.colors,
+    effectiveAngle.value,
+    rootContext.inverted.value,
+    props.interpolationSpace,
+    props.channelOverrides,
+    rootContext.colorRef.value,
+    rootContext.channel.value,
+    rootContext.colorSpace.value,
+  ],
   paint,
   isDragging: rootContext.isDragging,
   // Carried over from the pre-refactor watch for fidelity, not because a

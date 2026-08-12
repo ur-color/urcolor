@@ -1,42 +1,13 @@
-import type { Color, SpaceId } from "@urcolor/core";
 import type { Ref } from "vue";
-import { getChannelConfig } from "@urcolor/shared";
 import { useResizeObserver } from "@vueuse/core";
 import { getCurrentInstance, onBeforeUnmount, watch } from "vue";
 
 /**
- * Apply a `channelOverrides` map to a base color, resolved against
- * `colorSpace`.
- *
- * `alpha` is handled separately from the coordinate channels because it is not
- * one — every space has it. Coordinate keys that the space does not define are
- * dropped rather than forwarded: `Color#with()` throws a `RangeError` for an
- * unknown channel, and the documented override example (`{ s: 1, v: 1 }`, which
- * is HSV-only) is routinely paired with a non-HSV `colorSpace`.
- *
- * Passing `false` — the documented "no overrides" value — returns the base
- * color untouched.
+ * Re-exported so the four other gradient components keep their import path.
+ * The implementation lives in `@urcolor/shared`, where every framework's
+ * gradients now read it from.
  */
-export function applyChannelOverrides(
-  color: Color,
-  colorSpace: SpaceId,
-  overrides: Record<string, number> | false,
-): Color {
-  if (!overrides) return color;
-
-  let result = color;
-  const channelUpdates: Record<string, number> = {};
-  for (const [k, v] of Object.entries(overrides)) {
-    if (k === "alpha") result = result.withAlpha(v);
-    else if (getChannelConfig(colorSpace, k)) channelUpdates[k] = v;
-  }
-  // One `with()` for all coordinate channels: each call converts into
-  // `colorSpace`, so doing it per channel would round-trip needlessly.
-  if (Object.keys(channelUpdates).length > 0) {
-    result = result.with({ space: colorSpace, ...channelUpdates });
-  }
-  return result;
-}
+export { applyChannelOverrides } from "@urcolor/shared";
 
 /**
  * Blit a sampled RGBA grid onto a canvas, scaled to the canvas' device-pixel

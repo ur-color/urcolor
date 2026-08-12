@@ -16,7 +16,19 @@ export type ChannelOverrides = Record<string, number> | false;
 /** The default: a gradient shows the channel, not the color's transparency. */
 const DEFAULT_OVERRIDES: ChannelOverrides = { alpha: 1 };
 
-/** Applies the non-alpha overrides, then alpha, to a base color. */
+/**
+ * Applies a `channelOverrides` map to a base color, resolved against
+ * `colorSpace`.
+ *
+ * `alpha` is handled separately from the coordinate channels because it is not
+ * one: every space has it. Coordinate keys the space does not define are
+ * dropped rather than forwarded, because `Color#with()` throws a `RangeError`
+ * for an unknown channel, and the documented override example (`{ s: 1, v: 1 }`,
+ * which is HSV-only) is routinely paired with a non-HSV `colorSpace`.
+ *
+ * Passing `false`, the documented "no overrides" value, returns the base color
+ * untouched.
+ */
 export function applyChannelOverrides(
   base: Color,
   colorSpace: SpaceId,
