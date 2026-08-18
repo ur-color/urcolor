@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## [1.0.1] - 2026-08-19
+
+### Fixed
+
+- The published tarball now carries `src`. The `bun` export condition points
+  at `./src/index.ts`, but `files` listed only `dist`, so `import ... from
+  "@urcolor/shared"` under Bun failed with `Cannot find module`. Node and
+  bundlers were unaffected: they resolve the `import` condition.
+
 ## [1.0.0] - 2026-08-03
 
 ### Changed
