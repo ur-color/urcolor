@@ -54,3 +54,6 @@ storybook-static
 # **/graphify-out/cache/
 # Claude Code personal overrides (project .claude/settings.json is shared)
 .claude/settings.local.json
+
+# SvelteKit / svelte-package build cache
+.svelte-kit
