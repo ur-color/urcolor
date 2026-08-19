@@ -1,6 +1,6 @@
 {
   "name": "urcolor",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Zero-dependency CSS Color 4 engine: parse, convert, mix, compare and serialize colors across 15 spaces. The unscoped alias for @urcolor/core.",
   "type": "module",
   "main": "./dist/index.js",
@@ -13,7 +13,9 @@
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "src",
+    "!src/**/*.test.ts"
   ],
   "publishConfig": {
     "access": "public"
